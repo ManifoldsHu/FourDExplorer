@@ -122,6 +122,14 @@ class LogUtil(object):
         self.logger.critical(message)
 
     def setCLevel(self, cLevel):
+        '''
+        Set the logging level of the console handler
+
+        arguments           type            description
+        ------------------------------------------------------------
+        cLevel              int             level of console handler
+        ------------------------------------------------------------
+        '''
         if cLevel not in (
             logging.DEBUG,
             logging.INFO,
@@ -135,6 +143,14 @@ class LogUtil(object):
             self.console_handler.setLevel(cLevel)
 
     def setFLevel(self, fLevel):
+        '''
+        Set the logging level of the file handler
+
+        arguments           type            description
+        ------------------------------------------------------------
+        fLevel              int             level of file handler
+        ------------------------------------------------------------
+        '''
         if fLevel not in (
             logging.DEBUG,
             logging.INFO,
