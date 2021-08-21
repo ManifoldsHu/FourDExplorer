@@ -124,17 +124,8 @@ All rights reserved.
 
 '''
 
-# global SOFTWAREPATH
+global SOFTWAREPATH
 SOFTWAREPATH = os.path.abspath('.')
-
-# logger = logging.getLogger()
-# logger.setLevel(logging.INFO)
-# rq = time.strftime('%Y%m%d', time.localtime(time.time()))
-# log_path = os.path.join(SOFTWAREPATH, 'logs')
-# log_file = os.path.join(log_path, rq + '.log')
-# file_handler = logging.FileHandler(log_file, mode = 'w')
-# file_handler.setLevel(logging.DEBUG)
-# formatter = logging.Formatter()
 
 app = QApplication(sys.argv)
 logger = LogUtil(__name__)

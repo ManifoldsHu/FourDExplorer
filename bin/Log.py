@@ -1,36 +1,44 @@
 # -*- coding: utf-8 -*-
 
 '''
-*------------------- Log.py ------------------------*
+*------------------------ Log.py ------------------------*
 
-具有可以打印日志的函数。
+具有可以打印日志的LogUtil类。
 
 作者：          胡一鸣
 创建时间：      2021年7月25日
 
-Print Log.
+Use LogUtil to print Log.
 
 author:             Hu Yiming
 date:               July 25, 2021
 
 All rights reserved.
 
-*------------------- Log.py ------------------------*
+
+代码示例
+Coding Example
+
+from bin.Log import LogUtil
+import traceback
+
+logger = LogUtil(__name__)
+logger.info('Write a log')
+try:
+    do something
+    do something
+    do something
+except BaseException as e:      # Or any other exception
+    logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+
+
+*------------------------ Log.py ------------------------*
 '''
 
 import logging
 import os.path
 import time
-# logging.basicConfig(
-#     level = logging.WARNING,
-#     format = '{0:s} - {1:s}[line:{2:d}] - {3:s}: {4:s}'.format(
-#         asctime,
-#         filename,
-#         lineno,
-#         levelname,
-#         message,
-#     )
-# )
+
 
 
 class LogUtil(object):
@@ -162,33 +170,3 @@ class LogUtil(object):
             logging.INFO, logging.WARNING, logging.ERROR and logging.CRITICAL')
         else:
             self.file_handler.setLevel(fLevel)
-
-
-
-
-# logging.basicConfig(
-#     level = logging.WARNING,
-#     format = '%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'
-# )
-
-
-# def LogToFile():
-#     '''
-    
-#     '''
-#     logger = logging.getLogger()
-#     logger.setLevel(logging.WARNING)
-#     rq = time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
-#     log_path = os.path.dirname(os.getcwd()) + '/logs/'
-#     log_name = log_path + rq + '.log'
-#     logfile = log_name
-#     fh = logging.FileHandler(logfile, mode = 'w')
-#     fh.setLevel(logging.DEBUG)
-#     formatter = logging.Formatter('%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
-
-# def test():
-#     return os.getcwd()
-
-# if __name__ == '__main__':
-#     logging.warning('this is a logging warning message')
-    
