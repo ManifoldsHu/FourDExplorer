@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>524</width>
+    <height>509</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="WidgetImageViewDP" name="widget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="label_scan_x">
+           <property name="text">
+            <string>X scanning coordinades(&amp;X)</string>
+           </property>
+           <property name="buddy">
+            <cstring>spinBox_scan_x</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBox_scan_x"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_scan_y">
+           <property name="text">
+            <string>Y scanning coordinates(&amp;Y)</string>
+           </property>
+           <property name="buddy">
+            <cstring>spinBox_scan_y</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="spinBox_scan_y"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>choose color map</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_cmap">
+           <item>
+            <property name="text">
+             <string>default</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>autumn</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>binary</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cividis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>gray</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>hsv</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>jet</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>plasma</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>spring</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>summer</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>twilight</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>viridis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>winter</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>choose color normalization</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_norm">
+           <item>
+            <property name="text">
+             <string>default</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>linear</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>logarithm</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_adjust_cmap">
+           <property name="text">
+            <string>adjust cmap</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>WidgetImageViewDP</class>
+   <extends>QWidget</extends>
+   <header>widgetImageViewDP.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

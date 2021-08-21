@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>494</width>
+    <height>409</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_12">
+     <item>
+      <widget class="QLabel" name="label_segment2_parameter">
+       <property name="text">
+        <string>Two-segmented ring parameters</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_19">
+       <item>
+        <widget class="QLabel" name="label_segment2_inner">
+         <property name="text">
+          <string>inner radius (pix)(&amp;I)</string>
+         </property>
+         <property name="buddy">
+          <cstring>doubleSpinBox_segment2_inner</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_segment2_inner"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_20">
+       <item>
+        <widget class="QLabel" name="label_segment2_outer">
+         <property name="text">
+          <string>outer radius (pix)(&amp;O)</string>
+         </property>
+         <property name="buddy">
+          <cstring>doubleSpinBox_segment2_outer</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_segment2_outer"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_21">
+       <item>
+        <widget class="QLabel" name="label_segment2_rotate_angle">
+         <property name="text">
+          <string>rotation angle (deg)(&amp;R)</string>
+         </property>
+         <property name="buddy">
+          <cstring>doubleSpinBox_segment2_rotate_angle</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_segment2_rotate_angle"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_22">
+       <item>
+        <widget class="QLabel" name="label_segment2_open_angle">
+         <property name="text">
+          <string>open angle (deg)(&amp;A)</string>
+         </property>
+         <property name="buddy">
+          <cstring>doubleSpinBox_segment2_open_angle</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_segment2_open_angle"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="Line" name="line_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBox_segment2_is_center">
+       <property name="text">
+        <string>centered</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_23">
+       <item>
+        <widget class="QLabel" name="label_segment2_center_j">
+         <property name="text">
+          <string>horizontal shift(&amp;J)</string>
+         </property>
+         <property name="buddy">
+          <cstring>doubleSpinBox_segment2_center_j</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_segment2_center_j"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_24">
+       <item>
+        <widget class="QLabel" name="label_segment2_center_i">
+         <property name="text">
+          <string>vertical shift(&amp;I)</string>
+         </property>
+         <property name="buddy">
+          <cstring>doubleSpinBox_segment2_center_i</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_segment2_center_i"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
