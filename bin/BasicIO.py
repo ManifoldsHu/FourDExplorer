@@ -60,7 +60,226 @@ All rights reserved.
 *--------------------------------- BasicIO.py ---------------------------------*
 '''
 
+import os
+import h5py
+import numpy as np
 
-class DataUtil(object):
-     pass
+class HDF5Handler(object):
+     '''
+          使用HDF5文件处理的封装类。其应当包含以下方法：
+                - 设置指向的h5文件的路径
+                - 创建h5文件并初始化
+                - 读取h5文件，对不合规的文件进行初始化
+                - 删除h5文件            # 安全性问题？
+                - 填充dataset
+                - 填充attributes
+                - 读取dataset
+                - 读取attributes
+          
+          初始化完成的h5文件应当有如下结构：
 
+          /Dataset                                四维数据集。
+
+          /Calibration                            作为Group，其Attribution内有各种
+                                                  校正操作类。
+
+          /Reconstruction                         作为Group，储存每一次的计算结果
+
+          /Reconstruction/1_iCoM/Matrix           某一次重构的计算结果，作为二维矩阵。
+                                                  其Attribute包含了数据类型、计算类
+                                                  型、计算参数、计算时所使用的Cali-
+                                                  bration配置。“1_iCoM”指的是计算任
+                                                  务名字，其为“数字-算法”的结构。
+
+          /Reconstruction/1_iCoM/1_imshow         作为Group，其Attribution保存的是
+                                                  封装的画图类，储存了对这次重构得到
+                                                  的结果进行画图所使用的参数。
+
+          /tmp                                    临时数据，用来保存当Calibration不
+                                                  变时，上一次计算得到的CoM矢量，及其
+                                                  他未来可能出现的中间结果。关闭时应
+                                                  当删除该Group下所有数据。
+
+          
+          This is the encapsulated classes that use HDF5 file processing. It s-
+          hould contain the following methods:    
+                - set the path of the h5 file,
+                - create the h5 file and initialize,
+                - read the h5 file, and initialize those invalid files,
+                - delete the h5 file (will be used to delete temp files),
+                - load dataset,
+                - load attributes,
+                - read dataset,
+                - and set the attributes of dataset
+
+          An initialized h5 file should have the following structure:
+
+          /Dataset                                Four-dimensional data set
+
+          /Calibration                            As a group, there are various 
+                                                  calibration classes inside its 
+                                                  attribution
+
+          /Reconstruction                         As a group, each calculation 
+                                                  are saved here
+
+          /Reconstruction/1_iCoM/Matrix           The result of a reconstructi-
+                                                  on, as a two-dimensional mat-
+                                                  rix. Attribute contains the 
+                                                  data type, calculation type, 
+                                                  calculation parameters, and 
+                                                  the Calibration configuration 
+                                                  used in the calculation.  
+                                                  "1_iCoM" is the name of the 
+                                                  calculation task, which is a 
+                                                  "number-algorithm" structure.  
+
+          /Reconstruction/1_iCoM/1_imshow         As a Group, its attribution 
+                                                  preserves the encapsulated d-
+                                                  rawing class that stores the 
+                                                  parameters to use to draw the 
+                                                  results of the matrix. 
+
+          /tmp                                    Temporary group, used to sto-
+                                                  re the CoM vector from the l-
+                                                  ast calculation when the Cal-
+                                                  ibration is unchanged, as we-
+                                                  ll as other intermediate res-
+                                                  ults that may occur in the f-
+                                                  uture. When closing, all data 
+                                                  in this Group should be dele-
+                                                  ted.
+     '''
+
+
+     def __init__(self, frontends = None):
+          '''
+          arguments           type                description
+          ---------------------------------------------------------------------
+          frontends           frontends class     a handle of frontend/ui
+          ---------------------------------------------------------------------
+          '''
+          self.frontends = frontends
+          self.has_file = False
+          self.path = ''
+
+     def setPath(self, path):
+          '''
+          Set the h5 file path.
+
+          arguments           type                description
+          ---------------------------------------------------------------------
+          path                str                 the absolute path of the new 
+                                                  h5 file
+          ---------------------------------------------------------------------
+          '''
+          self.path = path
+          self.has_file = os.path.isfile(path)
+          return self.has_file
+
+
+     def createFile(self):
+          '''
+          Create a new standard h5 file. Fail if there is a file.
+          '''
+          self.has_file = os.path.isfile(self.path)
+          if self.has_file:
+               return False
+          else:
+               with h5py.File(self.path, mode = 'w-'):    # Create file, fail if exists
+                    pass
+               self._initializeFile()
+               self.has_file = os.path.isfile(self.path)
+               return True
+
+
+
+     def _initializeFile(self):
+          '''
+          Initialize a h5 file. Some groups will be added.
+          '''
+          self.has_file = os.path.isfile(self.path)
+          if self.has_file:
+               with h5py.File(self.path, mode = 'r+') as file:   # Read/write, file must exist
+                    if 'Reconstruction' not in file:
+                         file.create_group('Reconstruction')
+                    if 'Calibration' not in file:
+                         file.create_group('Calibration')
+                    if 'tmp' not in file:
+                         file.create_group('tmp')
+          else:
+               raise RuntimeError('There is no file under HDF5Handler.path')
+
+
+     def readFile(self):
+          '''
+          Read a h5 file. Fail if there is no file.
+          '''
+          self.has_file = os.path.isfile(self.path)
+          if self.has_file:
+               self._initializeFile()
+               return True
+          else:
+               return False
+
+
+     def deleteFile(self):
+          '''
+          Delete the h5 file. Fail if there is no file.
+          '''
+          self.has_file = os.path.isfile(self.path)
+          if self.has_file:
+               os.remove(self.path)
+               self.has_file = os.path.isfile(self.path)
+               return True
+          else:
+               return False
+
+          
+     def createDataset(self, shape, dtype = 'float32', ischunked = False, ):
+          '''
+          Create a four-dimensional dataset. The dataset must be created before 
+          loaded.
+
+          
+          arguments           type                description
+          ---------------------------------------------------------------------
+          shape               tuple               Must be (scan_i, scan_j, dp_i, 
+                                                  dp_j)
+
+          dtype               str                 Data type of the dataset
+
+          ischunked           bool                Set the dataset if it is chu-
+                                                  nk stored.
+          ---------------------------------------------------------------------
+          
+          '''
+          if not isinstance(shape, tuple):
+               raise TypeError('shape must be a tuple with the lenth 4.')
+          elif len(shape) is not 4:
+               raise TypeError('shape must be a tuple with the lenth 4.')
+
+          scan_i, scan_j, dp_i, dp_j = shape
+
+          self.has_file = os.path.isfile(self.path)
+          if self.has_file:
+               self.readFile()
+          else:
+               self.createFile()
+          with h5py.File(self.path, mode = 'r+',) as file:       # Read/write, file must exist
+               if 'Dataset' in file:
+                    del file['Dataset']
+               file.create_dataset(
+                    'Dataset', 
+                    shape = shape, 
+                    dtype = dtype, 
+                    chunks = ischunked,
+               )
+
+
+     def writeDataset(self, pos, data):
+          '''
+          Write data into the four-dimensional dataset.
+
+
+          '''
