@@ -60,9 +60,14 @@ All rights reserved.
 *--------------------------------- BasicIO.py ---------------------------------*
 '''
 
+from genericpath import isfile
 import os
 import h5py
 import numpy as np
+
+from bin.Log import LogUtil
+import traceback
+logger = LogUtil(__name__)
 
 class HDF5Handler(object):
      '''
@@ -160,12 +165,13 @@ class HDF5Handler(object):
           ---------------------------------------------------------------------
           '''
           self.frontends = frontends
-          self.has_file = False
+          # self.has_file = False
           self.path = ''
+          self.file = None
 
      def setPath(self, path):
           '''
-          Set the h5 file path.
+          Set the h5 file path. Will close the current file.
 
           arguments           type                description
           ---------------------------------------------------------------------
@@ -173,70 +179,154 @@ class HDF5Handler(object):
                                                   h5 file
           ---------------------------------------------------------------------
           '''
+          if self.file:
+               self.file.close()
           self.path = path
-          self.has_file = os.path.isfile(path)
-          return self.has_file
+          # self.has_file = os.path.isfile(path)
+          # if os.path.isfile(path):
+               # self.has_file = self.isFileValid(self.path)
+          # return self.has_file
 
+     def isPathValid(self, path = ''):
+          '''
+          Return if the file is a valid h5 file.
 
-     def createFile(self):
+          arguments           type                description
+          ---------------------------------------------------------------------
+          path                str                 the absolute path of the new 
+                                                  h5 file
+          ---------------------------------------------------------------------
+          '''
+          if path == '':
+               path = self.path
+          try:
+               with h5py.File(path, mode = 'r') as file:
+                    is_valid = isinstance(file, h5py.File)
+               return is_valid
+          except OSError as e:
+               # logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+               return False
+          
+
+     def createFile(self, path = ''):
           '''
           Create a new standard h5 file. Fail if there is a file.
+
+          arguments           type                description
+          ---------------------------------------------------------------------
+          path                str                 the absolute path of the new 
+                                                  h5 file
+          ---------------------------------------------------------------------
           '''
-          self.has_file = os.path.isfile(self.path)
-          if self.has_file:
-               return False
-          else:
-               with h5py.File(self.path, mode = 'w-'):    # Create file, fail if exists
-                    pass
-               self._initializeFile()
-               self.has_file = os.path.isfile(self.path)
-               return True
+          # self.has_file = os.path.isfile(self.path)
+          # if self.has_file:
+          #      return False
+          # else:
+          if path == '':
+               path = self.path
+          try:
+               with h5py.File(path, mode = 'w-') as file:   # Create file, fail if exists
+                    self._initializeFile(file)
+          except OSError as e:
+               logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+               return ''
+
+          # self.has_file = os.path.isfile(self.path)
+          # self.file = file
+          return path
 
 
 
-     def _initializeFile(self):
+     def _initializeFile(self, file):
           '''
           Initialize a h5 file. Some groups will be added.
+
+          arguments           type                description
+          ---------------------------------------------------------------------
+          file                h5py.File           
+          ---------------------------------------------------------------------
           '''
-          self.has_file = os.path.isfile(self.path)
-          if self.has_file:
-               with h5py.File(self.path, mode = 'r+') as file:   # Read/write, file must exist
-                    if 'Reconstruction' not in file:
-                         file.create_group('Reconstruction')
-                    if 'Calibration' not in file:
-                         file.create_group('Calibration')
-                    if 'tmp' not in file:
-                         file.create_group('tmp')
-          else:
-               raise RuntimeError('There is no file under HDF5Handler.path')
+          # self.has_file = os.path.isfile(self.path)
+          # if self.has_file:
+               # with h5py.File(self.path, mode = 'r+') as file:   # Read/write, file must exist
+                    
+          if 'Reconstruction' not in file:
+               file.create_group('Reconstruction')
+          if 'Calibration' not in file:
+               file.create_group('Calibration')
+          if 'tmp' not in file:
+               file.create_group('tmp')
+          # else:
+               # raise RuntimeError('There is no file under HDF5Handler.path')
 
 
-     def readFile(self):
+     def openFile(self, path = ''):
           '''
-          Read a h5 file. Fail if there is no file.
+          Read a h5 file. Fail if there is no file corresponding to the path. 
+          The file must be read before it is handled by BasicIO modules.
+
+          arguments           type                description
+          ---------------------------------------------------------------------
+          path                str                 the absolute path of the new 
+                                                  h5 file
+          ---------------------------------------------------------------------
           '''
-          self.has_file = os.path.isfile(self.path)
-          if self.has_file:
-               self._initializeFile()
-               return True
-          else:
-               return False
+          if path == '':
+               path = self.path
+          try:
+               file = h5py.File(path, mode='r+')  # Read/write, file must exist
+               self.file = file
+          except OSError as e:
+               logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+               return None
+          return file
 
 
-     def deleteFile(self):
+          # self.has_file = os.path.isfile(self.path)
+          # if self.has_file:
+          #      self._initializeFile()
+          #      return True
+          # else:
+          #      return False
+          
+
+     def closeFile(self):
+          '''
+          Close the h5 file. The file must be closed before:
+               - the path is changed
+               - the file is deleted
+               - the application is exit
+          '''
+          if self.file:
+               self.file.close()
+          self.file = None
+          
+
+
+     def deleteFile(self, path = ''):
           '''
           Delete the h5 file. Fail if there is no file.
           '''
-          self.has_file = os.path.isfile(self.path)
-          if self.has_file:
-               os.remove(self.path)
-               self.has_file = os.path.isfile(self.path)
-               return True
-          else:
-               return False
+          if path == '':
+               path = self.path
+          if self.file:
+               self.file.close()
+          if self.isPathValid(path):
+               try:
+                    os.remove(path)
+               except OSError as e:
+                    logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+          # self.has_file = os.path.isfile(self.path)
+          # self.has_file = self.isFileValid(path)
+          # if self.has_file:
+          #      os.remove(self.path)
+          #      self.has_file = self.isFileValid(path)
+          #      return True
+          # else:
+          #      return False
 
           
-     def createDataset(self, shape, dtype = 'float32', ischunked = False, ):
+     def createDataset(self, shape, dtype = 'float32', ischunked = False,):
           '''
           Create a four-dimensional dataset. The dataset must be created before 
           loaded.
@@ -260,26 +350,78 @@ class HDF5Handler(object):
                raise TypeError('shape must be a tuple with the lenth 4.')
 
           scan_i, scan_j, dp_i, dp_j = shape
+          success = False
 
-          self.has_file = os.path.isfile(self.path)
-          if self.has_file:
-               self.readFile()
+          # self.has_file = os.path.isfile(self.path)
+          # self.has_file = self.isFileValid(self.path)
+          # if self.has_file:
+          #      self.readFile()
+          # else:
+          #      self.createFile()
+          # if self.has_file:
+               
+               # with h5py.File(self.path, mode = 'r+',) as file:       # Read/write, file must exist
+          if self.file:
+               if 'Dataset' in self.file:
+                    logger.warning('There has been dataset in the file. \
+                              No new dataset is created.')
+                         # return False
+                         # del file['Dataset']
+               else:
+                    self.file.create_dataset(
+                         'Dataset', 
+                         shape = shape, 
+                         dtype = dtype, 
+                         chunks = ischunked,
+                    )
+                    success = True
           else:
-               self.createFile()
-          with h5py.File(self.path, mode = 'r+',) as file:       # Read/write, file must exist
-               if 'Dataset' in file:
-                    del file['Dataset']
-               file.create_dataset(
-                    'Dataset', 
-                    shape = shape, 
-                    dtype = dtype, 
-                    chunks = ischunked,
-               )
+               logger.warning('File must be opened before creating Dataset')
+          return success
 
 
      def writeDataset(self, pos, data):
           '''
-          Write data into the four-dimensional dataset.
+          Write data into the four-dimensional dataset. Basically, the pos arg-
+          ument will be a tuple with two elements, (scan_i, scan_j). While the 
+          shape of loaded matrix will be (dp_i, dp_j). Only one diffraction pa-
+          ttern will be loaded at a time, in order to save memory.
+          
 
+          arguments           type                description
+          ---------------------------------------------------------------------
+          pos                 tuple               Must be (ii, jj) where 
+                                                  0 <= ii < scan_i and 
+                                                  0 <= jj < scan_j .
 
+          data                numpy.ndarray       The matrix that will be copi-
+                                                  ed into the dataset
+          ---------------------------------------------------------------------
           '''
+
+          # if not self.file:
+          #      logger.warning('File must be opened before writing data')
+          #      return False
+          # elif 'Dataset' not in self.file:
+          #      logger.warning('There is no dataset in the h5 file')
+          # elif not isinstance(data, np.ndarray):
+          #      logger.error('data must be numpy.adarray')
+          # 为了确保高性能加载，不做任何判断，出错了直接输出log并崩溃。
+
+          self.file['Dataset'][pos[1],pos[2],:,:] = data
+
+     
+     def deleteDataset(self):
+          '''
+          Delete the four-dimensional dataset in the file.
+          '''
+          if not self.file:
+               logger.warning('File must be opened before deleting dataset')
+               return False
+          if self.file['Dataset']:
+               del self.file['Dataset']
+          return True
+
+
+     def addAttribute(self, key, value):
+          pass
