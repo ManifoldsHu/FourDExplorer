@@ -64,6 +64,7 @@ from genericpath import isfile
 import os
 import h5py
 import numpy as np
+from numpy.lib.arraysetops import isin
 
 from bin.Log import LogUtil
 import traceback
@@ -176,7 +177,7 @@ class HDF5Handler(object):
           return self._path
 
      @path.setter
-     def path(self, value):
+     def path(self, value: str):
           '''
           Set the h5 file path. Will close the current file.
 
@@ -188,15 +189,10 @@ class HDF5Handler(object):
           '''
           if not isinstance(value, str):
                raise TypeError('Expected a string.')
-          if self.file:
+          if self.isFileOpened():
                self.file.close()
           self._path = value
 
-
-          # self.has_file = os.path.isfile(path)
-          # if os.path.isfile(path):
-               # self.has_file = self.isFileValid(self.path)
-          # return self.has_file
 
      def isPathValid(self, path = ''):
           '''
@@ -218,6 +214,18 @@ class HDF5Handler(object):
                # logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
                return False
           
+     
+     @property
+     def file(self):
+          return self._file
+
+     @file.setter
+     def file(self, file):
+          if file is None or isinstance(file, h5py.File):
+               self._file = file
+          else:
+               raise TypeError('file must be a h5py.File or None.')
+               
 
      def createFile(self, path = ''):
           '''
@@ -229,10 +237,7 @@ class HDF5Handler(object):
                                                   h5 file
           ---------------------------------------------------------------------
           '''
-          # self.has_file = os.path.isfile(self.path)
-          # if self.has_file:
-          #      return False
-          # else:
+
           if path == '':
                path = self.path
           try:
@@ -242,10 +247,7 @@ class HDF5Handler(object):
                logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
                return ''
 
-          # self.has_file = os.path.isfile(self.path)
-          # self.file = file
           return path
-
 
 
      def _initializeFile(self, file):
@@ -257,9 +259,6 @@ class HDF5Handler(object):
           file                h5py.File           
           ---------------------------------------------------------------------
           '''
-          # self.has_file = os.path.isfile(self.path)
-          # if self.has_file:
-               # with h5py.File(self.path, mode = 'r+') as file:   # Read/write, file must exist
                     
           if 'Reconstruction' not in file:
                file.create_group('Reconstruction')
@@ -267,8 +266,7 @@ class HDF5Handler(object):
                file.create_group('Calibration')
           if 'tmp' not in file:
                file.create_group('tmp')
-          # else:
-               # raise RuntimeError('There is no file under HDF5Handler.path')
+
 
 
      def openFile(self, path = ''):
@@ -284,6 +282,8 @@ class HDF5Handler(object):
           '''
           if path == '':
                path = self.path
+          if self.isFileOpened():
+               self.file.close()
           try:
                file = h5py.File(path, mode='r+')  # Read/write, file must exist
                self.file = file
@@ -293,14 +293,6 @@ class HDF5Handler(object):
           return file
 
 
-          # self.has_file = os.path.isfile(self.path)
-          # if self.has_file:
-          #      self._initializeFile()
-          #      return True
-          # else:
-          #      return False
-          
-
      def closeFile(self):
           '''
           Close the h5 file. The file must be closed before:
@@ -308,10 +300,21 @@ class HDF5Handler(object):
                - the file is deleted
                - the application is exit
           '''
-          if self.file:
+          if self.isFileOpened():
                self.file.close()
           self.file = None
           
+
+     def isFileOpened(self):
+          '''
+          Return if the hdf5 file is opened.
+          '''
+          if self.file is None:
+               return False
+          if self.file.id:
+               return True
+          else:
+               return False
 
 
      def deleteFile(self, path = ''):
@@ -320,21 +323,14 @@ class HDF5Handler(object):
           '''
           if path == '':
                path = self.path
-          if self.file:
+          if self.isFileOpened():
                self.file.close()
           if self.isPathValid(path):
                try:
                     os.remove(path)
                except OSError as e:
                     logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
-          # self.has_file = os.path.isfile(self.path)
-          # self.has_file = self.isFileValid(path)
-          # if self.has_file:
-          #      os.remove(self.path)
-          #      self.has_file = self.isFileValid(path)
-          #      return True
-          # else:
-          #      return False
+
 
           
      def createDataset(self, shape, dtype = 'float32', ischunked = False,):
@@ -363,35 +359,29 @@ class HDF5Handler(object):
           scan_i, scan_j, dp_i, dp_j = shape
           success = False
 
-          # self.has_file = os.path.isfile(self.path)
-          # self.has_file = self.isFileValid(self.path)
-          # if self.has_file:
-          #      self.readFile()
-          # else:
-          #      self.createFile()
-          # if self.has_file:
-               
-               # with h5py.File(self.path, mode = 'r+',) as file:       # Read/write, file must exist
-          if self.file:
+
+          if self.isFileOpened():
                if 'Dataset' in self.file:
                     logger.warning('There has been dataset in the file. \
                               No new dataset is created.')
-                         # return False
-                         # del file['Dataset']
                else:
-                    self.file.create_dataset(
+                    Dataset = self.file.create_dataset(
                          'Dataset', 
                          shape = shape, 
                          dtype = dtype, 
                          chunks = ischunked,
                     )
+                    self.setDatasetAttribute('scan_i', scan_i,)
+                    self.setDatasetAttribute('scan_j', scan_j,)
+                    self.setDatasetAttribute('dp_i', dp_i)
+                    self.setDatasetAttribute('dp_j', dp_j)
                     success = True
           else:
-               logger.warning('File must be opened before creating Dataset')
+               logger.warning('File must be opened before creating Dataset.')
           return success
 
 
-     def writeDataset(self, pos, data):
+     def writeDataset(self, pos: tuple, data: np.ndarray):
           '''
           Write data into the four-dimensional dataset. Basically, the pos arg-
           ument will be a tuple with two elements, (scan_i, scan_j). While the 
@@ -426,7 +416,7 @@ class HDF5Handler(object):
           '''
           Delete the four-dimensional dataset in the file.
           '''
-          if not self.file:
+          if not self.isFileOpened():
                logger.warning('File must be opened before deleting dataset.')
                return False
           if self.file['Dataset']:
@@ -437,5 +427,28 @@ class HDF5Handler(object):
                return False
 
 
-     def addAttribute(self, key, value):
-          pass
+     def setDatasetAttribute(self, key: str, value):
+          '''
+          Set the Dataset attribute. The Dataset must be created before setting
+          the attributes.
+
+          arguments           type                description
+          ---------------------------------------------------------------------
+          key                 str                 Dataset attribution
+
+          value                                   the value of the Dataset att-
+                                                  ribution. Most likely it sho-
+                                                  uld not be too large in size.
+          ---------------------------------------------------------------------
+          '''
+          if self.isFileOpened():
+               if 'Dataset' in self.file:
+                    Dataset = self.file['Dataset']
+                    if isinstance(key, str):
+                         Dataset.attrs[key] = value
+               else:
+                    logger.warning('There is no Dataset in the file.')
+          else:
+               logger.warning('File must be opened before setting Dataset \
+                    attributes.')
+     
