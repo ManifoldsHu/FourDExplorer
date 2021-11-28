@@ -169,7 +169,14 @@ class HDF5Handler(object):
           self.path = ''
           self.file = None
 
-     def setPath(self, path):
+
+
+     @property
+     def path(self):
+          return self._path
+
+     @path.setter
+     def path(self, value):
           '''
           Set the h5 file path. Will close the current file.
 
@@ -179,9 +186,13 @@ class HDF5Handler(object):
                                                   h5 file
           ---------------------------------------------------------------------
           '''
+          if not isinstance(value, str):
+               raise TypeError('Expected a string.')
           if self.file:
                self.file.close()
-          self.path = path
+          self._path = value
+
+
           # self.has_file = os.path.isfile(path)
           # if os.path.isfile(path):
                # self.has_file = self.isFileValid(self.path)
@@ -416,11 +427,14 @@ class HDF5Handler(object):
           Delete the four-dimensional dataset in the file.
           '''
           if not self.file:
-               logger.warning('File must be opened before deleting dataset')
+               logger.warning('File must be opened before deleting dataset.')
                return False
           if self.file['Dataset']:
                del self.file['Dataset']
-          return True
+               return True
+          else:
+               logger.warning('There is no Dataset in the file.')
+               return False
 
 
      def addAttribute(self, key, value):
