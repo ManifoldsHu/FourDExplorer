@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QApplication
-from bin.MainWindow import MainWindow
 
 import sys
 import os
+ROOTPATH = os.path.dirname(__file__)    # Root path of the software
+if not ROOTPATH in sys.path:
+    sys.path.append(ROOTPATH)
+
+from PyQt5.QtWidgets import QApplication
+from bin.MainWindow import MainWindow
+
+
 from bin.Log import LogUtil
 import traceback
 # import logging
@@ -124,8 +130,10 @@ All rights reserved.
 
 '''
 
-global SOFTWAREPATH
-SOFTWAREPATH = os.path.abspath('.')
+# global SOFTWAREPATH
+# SOFTWAREPATH = os.path.abspath('.')
+
+APPVERSION = '0.5.0'
 
 app = QApplication(sys.argv)
 logger = LogUtil(__name__)

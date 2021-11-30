@@ -60,11 +60,16 @@ All rights reserved.
 *--------------------------------- BasicIO.py ---------------------------------*
 '''
 
-# from genericpath import isfile
+
 import os
+import sys
+ROOTPATH = os.path.dirname(__file__)    # Root path of the software
+if not ROOTPATH in sys.path:
+    sys.path.append(ROOTPATH)
+
+
 import h5py
 import numpy as np
-from numpy.lib.arraysetops import isin
 
 from datetime import datetime
 
@@ -238,7 +243,7 @@ class HDF5Handler(object):
           exists a file.
           '''
           try:
-               with h5py.File(self.path, mode = 'a') as file:   # Read/write if exists, create otherwise
+               with h5py.File(self.path, mode = 'w-') as file:   # create, fail if exists
                     self._initializeFile(file)
           except OSError as e:
                logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
@@ -302,7 +307,8 @@ class HDF5Handler(object):
           '''
           if self.file is None:
                return False
-          if self.file.id:
+          if self.file.id: 
+               # It seems in h5py they use this to estimate if the file is closed.   
                return True
           else:
                return False
