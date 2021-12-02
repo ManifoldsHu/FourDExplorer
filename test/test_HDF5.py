@@ -291,6 +291,35 @@ class TestHDF5Handler(unittest.TestCase):
         -> display -> change path -> display -> create and initialize file
         -> load data -> close file -> delete file
         '''
+        self.handler = HDF5Handler()
+
+        '''Set Path'''
+        self.handler.path = 'simpleHDF5file.h5'
+        print('The path: {0}'.format(self.handler.path))
+
+        '''Create HDF5 File'''
+        self.handler.createFile()
+        self.assertTrue(self.handler.isPathValid())
+        print('The created file: {0}'.format(self.handler.path))
+
+        '''Open HDF5 File'''
+        self.handler.openFile()
+        print('The opened file: {0}'.format(self.handler.file))
+
+        '''Load Dataset'''
+        testdata = np.random.random((4,4,3,3))
+        self.assertTrue(self.handler.createDataset((4,4,3,3)))
+        for ii in range(3):
+            for jj in range(3):
+                self.handler.writeDataset((ii,jj), testdata[ii,jj,:,:])
+        self.assertEqual(self.handler.file['/Dataset'].attrs['scan_i'], 4)
+        self.assertEqual(self.handler.file['/Dataset'].attrs['dp_j'], 3)
+        keylist = []
+        for key in self.handler.file['/']:
+            keylist.append(key)
+        print('Before deleting dataset: {0}'.format(keylist))
+
+        
 
 
 
