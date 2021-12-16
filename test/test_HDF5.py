@@ -319,7 +319,18 @@ class TestHDF5Handler(unittest.TestCase):
             keylist.append(key)
         print('Before deleting dataset: {0}'.format(keylist))
 
-        
+        '''Change Path'''
+        self.handler.path = 'AnotherHDF5File.h5'
+        print('Change path to another file, handler.file: {0}'.format(
+            self.handler.file))
+        self.handler.createFile()
+        self.assertTrue(self.handler.isPathValid)
+        self.handler.openFile()
+        print('Opened the other file: {0}'.format(self.handler.file))
+        self.handler.deleteFile()
+        self.handler.path = 'simpleHDF5File.h5'
+        self.handler.deleteFile()
+
 
 
 

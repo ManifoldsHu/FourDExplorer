@@ -72,12 +72,18 @@ import h5py
 import numpy as np
 
 from datetime import datetime
+import threading
+import queue
+import time
+
 
 from bin.Log import LogUtil
 import traceback
 logger = LogUtil(__name__)
 
-class HDF5Handler(object):
+from bin import DataReaderEMPAD
+
+class HDF5Handler:
      '''
           使用HDF5文件处理的封装类。其应当包含以下方法：
                 - 设置指向的h5文件的路径
@@ -176,6 +182,8 @@ class HDF5Handler(object):
           # self.has_file = False
           self._file = None
           self._path = ''
+          self._lock = threading.Lock()
+          
           
 
 
@@ -236,6 +244,18 @@ class HDF5Handler(object):
           else:
                raise TypeError('file must be a h5py.File or None.')
                
+
+     @property
+     def shape(self):    # the shape of dataset, (scan_i, scan_j, dp_i, dp_j)
+          if self.isFileOpened():
+               if 'Dataset' in self.file:
+                    scan_i = self.file['Dataset'].attrs['scan_i']
+                    scan_j = self.file['Dataset'].attrs['scan_j']
+                    dp_i = self.file['Dataset'].attrs['dp_i']
+                    dp_j = self.file['Dataset'].attrs['dp_j']
+                    return (scan_i, scan_j, dp_i, dp_j)
+          return None
+
 
      def createFile(self) -> str:
           '''
@@ -395,7 +415,8 @@ class HDF5Handler(object):
           ---------------------------------------------------------------------
           '''
           # 为了确保高性能加载，不做任何判断，出错了直接输出log并崩溃。
-          self.file['Dataset'][pos[0],pos[1],:,:] = data
+          with self._lock:
+               self.file['Dataset'][pos[0],pos[1],:,:] = data
 
      
      def deleteDataset(self) -> bool:
@@ -475,4 +496,111 @@ class HDF5Handler(object):
           appendAllNodes(self.file['/'], nodelist = nodelist)
           return nodelist
 
+
+     
+
+
+
+class IOThreadHandler:
+     '''
+          使用生产者-消费者模型的线程管理器，用于管理写入 HDF5 四维数据的IO行为。一般而
+          言，写入四维数据的情形分为以下两种：
+               - 本地存储的四维数据集；
+               - 其他进程(例如由局域网连接的相机)不断生成的数据流。
+
+          在读取、填入四维数据之前，应当首先确保：
+               - 已经创建好了 HDF5 文件并打开
+               - 先行读取四维数据的元数据，并填入 HDF5 文件中。
+               - 根据元数据，创建好 HDF5 文件中的 Dataset
+          
+          在要读取其他进程生成的数据流时，要是中途改变元数据 (主要是数据尺寸)，则应当删除
+          已经创建了的 Dataset，然后重新创建 Dataset。或者，也可以保存修改之前的 HDF5 文
+          件，然后重新建立新的文件，并读取数据。
+     '''
+     def __init__(self, hdf5handler: HDF5Handler):
+          self._load_buffer = queue.Queue(maxsize=16384)
+          self._loading_event = threading.Event()
+          self._reading_event = threading.Event()
+
+          self.hdf5handler = hdf5handler
+     
+     def loadingData(self, data_reader: str, raw_path: str):
+          
+          # 写入 HDF5 数据的线程
+          self.loading_thread = threading.Thread(
+               target = self.loadFromBuffer,
+               args = (self._load_buffer, self._loading_event, None)
+          )
+
+          # 本地读取 EMPAD 数据的线程
+          shape = self.hdf5handler.shape
+
+          if data_reader == 'EMPAD':
+               self.reading_thread = threading.Thread(
+                    target = DataReaderEMPAD.readData,
+                    args = (
+                         self._load_buffer, 
+                         self._reading_event, 
+                         shape, 
+                         raw_path,
+                         None)
+               )
+          
+          self.reading_thread.start()
+          self.loading_thread.start()
+
+          self._loading_event.set()
+          self._reading_event.set()
+          
+
+          
+     def loadFromBuffer(
+          self, 
+          buffer: queue.Queue, 
+          event: threading.Event, 
+          timeout = None
+     ):
+          '''
+          传入一个队列作为缓冲区，从缓冲区中不断地读取数据，并且写入到 HDF5 文件中。
+          当 buffer 中传来终止符，停止写入，break 循环。
+
+          This function is passed a queue as a buffer, always reads data from 
+          the buffer, and writes them into the HDF5 file. When there is a flag
+          as a terminator from the buffer, the loop breaks. 
+
+          arguments           type                description
+          ---------------------------------------------------------------------
+          buffer              queue.Queue         A queue as a buffer. The data
+                                                  from this queue are tuples p-
+                                                  ickled as
+                                                  (int, int, np.ndarray)
+                                                  where in default mean
+                                                  (ii, jj, Dataset[ii,jj,:,:]).
+
+                                                  The end flag is -1.
+
+          event               threading.Event     A flag managed by the main t-
+                                                  hread.          
+          ---------------------------------------------------------------------
+          '''
+          logger.info('Start loading data into HDF5 file:\n{0}'\
+               .format(self.hdf5handler.path))
+          start_time = time.time()
+          if not isinstance(buffer, queue.Queue):
+               raise TypeError('buffer must be a queue.Queue object')
+
+          while True:
+               tmp = buffer.get(timeout = timeout)
+               if tmp == -1:
+                    end_time = time.time()
+                    logger.info('Loading completes. Time consumed: {0} s'\
+                         .format(start_time - end_time))
+                    break
+               elif not event.is_set():
+                    event.wait()
+               else:
+                    r_ii, r_jj, data = tmp
+                    if isinstance(data, np.ndarray):
+                         self.hdf5handler.writeDataset((r_ii, r_jj), data)
+                    
      

@@ -66,15 +66,34 @@ All rights reserved.
 
      - 变量名: 一般使用全部小写加下划线。私有属性应当以下划线'_'开头。
 
-     - 循环变量一般使用ii, jj, kk, ll等，不使用i, j, k, l等。
+     - 循环变量一般使用 ii, jj, kk, ll 等，不使用 i, j, k, l 等 (以与复数区分)。
 
      - 严禁使用单字母变量。
 
-     - 在代码部分中，使用i,j表示矩阵的第一、第二指标(行指标、列指标)。但在代码部分中与
-       Matplotlib交互的部分，且Matplotlib中指明了使用 (x,y) 表示坐标的地方，与Matp-
-       lotlib保持一致。
+     - 在代码部分中，使用 i, j 表示矩阵的第一、第二指标(行指标、列指标)。但在代码部分
+       中与 Matplotlib 交互的部分，且 Matplotlib 中指明了使用 (x,y) 表示坐标的地方，
+       与 Matplotlib保持一致。
 
-     - 在UI显示部分(比如控件的标签)中，则使用 y 表示 j ， x 表示 i 。 
+     - 一般约定对于 4D-STEM 数据集，使用 (scan_i, scan_j, dp_i, dp_j) 表示其尺寸：
+            o scan_i 表示扫描 i 方向的像素个数
+            o scan_j 表示扫描 j 方向的像素个数
+            o dp_i 表示衍射图样 i 方向的像素个数
+            o dp_j 表示衍射图样 j 方向的像素个数
+
+     - 在对图像或者四维数据进行循环时，应当在变量名中体现物理意义。例如：
+            o 实空间的 i 方向，使用 r_ii 作为循环变量
+            o 实空间的 j 方向，使用 r_jj 作为循环变量
+            o 倒空间/动量空间/频域的 i 方向，使用 q_ii 或者 k_ii 等作为循环变量
+            o 倒空间/动量空间/频域的 j 方向，使用 q_jj 或者 k_ii 等作为循环变量
+       因此，一种常见的对 4D-STEM 的数据进行遍历的方式为：
+            for r_ii in range(scan_i):
+                for r_jj in range(scan_j):
+                    for q_ii in range(dp_i):
+                        for q_jj in range(dp_j):
+                            dataset[r_ii, r_jj, q_ii, q_jj] = ...
+
+     - 在 UI 显示部分(比如控件的标签)中，如果一定要使用 (x, y) 坐标系，则使用 y 
+       表示 j ， x 表示 i。因此在这里，(x, y) 坐标系和 (i, j) 坐标系都是右手系。
 
      - 常见第三方库使用如下约定: 
              o import numpy as np
