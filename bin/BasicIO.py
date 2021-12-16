@@ -256,6 +256,18 @@ class HDF5Handler:
                     return (scan_i, scan_j, dp_i, dp_j)
           return None
 
+     
+     @property
+     def is_flipped(self):    
+          # Return if raw_data is flipped. When it is True, every diffraction 
+          # pattern should be transposed when reading.
+          if self.isFileOpened():
+               if 'Dataset' in self.file:
+                    if 'is_flipped' in self.file['Dataset'].attrs:
+                         is_flipped = self.file['Dataset'].attrs['is_flipped']
+                         return is_flipped
+          return False
+
 
      def createFile(self) -> str:
           '''
@@ -534,15 +546,17 @@ class IOThreadHandler:
 
           # 本地读取 EMPAD 数据的线程
           shape = self.hdf5handler.shape
+          is_flipped = self.hdf5handler.is_flipped
 
           if data_reader == 'EMPAD':
                self.reading_thread = threading.Thread(
                     target = DataReaderEMPAD.readData,
                     args = (
                          self._load_buffer, 
-                         self._reading_event, 
-                         shape, 
+                         self._reading_event,
                          raw_path,
+                         shape, 
+                         is_flipped,
                          None)
                )
           
