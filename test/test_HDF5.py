@@ -154,7 +154,7 @@ class TestHDF5Handler(unittest.TestCase):
         self.handler = HDF5Handler()
 
         '''Set Path'''
-        self.handler.path = 'simpleHDF5file.h5'
+        self.handler.path = os.path.join(os.getcwd(),'simpleHDF5file.h5')
         print('The path: {0}'.format(self.handler.path))
         
         '''Create HDF5 File'''
@@ -225,7 +225,7 @@ class TestHDF5Handler(unittest.TestCase):
         self.handler = HDF5Handler()
 
         '''Set Path'''
-        self.handler.path = 'simpleHDF5file.h5'
+        self.handler.path = os.path.join(os.getcwd(),'simpleHDF5file.h5')
         print('The path: {0}'.format(self.handler.path))
         
         '''Create HDF5 File'''
@@ -294,7 +294,7 @@ class TestHDF5Handler(unittest.TestCase):
         self.handler = HDF5Handler()
 
         '''Set Path'''
-        self.handler.path = 'simpleHDF5file.h5'
+        self.handler.path = os.path.join(os.getcwd(),'simpleHDF5file.h5')
         print('The path: {0}'.format(self.handler.path))
 
         '''Create HDF5 File'''

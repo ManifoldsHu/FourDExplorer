@@ -153,7 +153,7 @@ def readData(
         buffer.put(-1)
         end_time = time.time()
         logger.info('Complete reading. Time consumed: {0}'\
-            .format(start_time - end_time))
+            .format(end_time - start_time))
 
 
 def readMetaData(xml_path: str) -> dict:

@@ -557,7 +557,8 @@ class IOThreadHandler:
                          raw_path,
                          shape, 
                          is_flipped,
-                         None)
+                         None
+                    )
                )
           
           self.reading_thread.start()
@@ -607,8 +608,8 @@ class IOThreadHandler:
                tmp = buffer.get(timeout = timeout)
                if tmp == -1:
                     end_time = time.time()
-                    logger.info('Loading completes. Time consumed: {0} s'\
-                         .format(start_time - end_time))
+                    # logger.info('Loading completes. Time consumed: {0} s'\
+                         # .format(end_time - start_time))
                     break
                elif not event.is_set():
                     event.wait()
