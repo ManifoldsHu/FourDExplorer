@@ -70,10 +70,10 @@ def readData(
         In the end, a integer -1 will be put into the buffer to note the main 
         thread that reading data has been completed.
 
-        This function also accept a threading.Event object as an argument, whi-
-        ch is used to receive pause signal from the main thread. When the event 
-        is set to False (calling event.clear()) by the main thread, this funct-
-        ion will keep sleeping until it is set to True (calling event.set()).
+        This function also accepts a threading.Event object as an argument, wh-
+        ich is used to receive pause signal from the main thread. When the eve-
+        nt is set to False (calling event.clear()) by the main thread, this fu-
+        nction will keep sleeping until it is set to True (calling event.set()).
 
         This function is used in multithreading environment. If we want use mu-
         ltiprocessing io, simply use a pipe instead of event to communicate be-
@@ -131,7 +131,7 @@ def readData(
                         dtype = 'float32',
                         count = dp_i * dp_j,
                         sep = '',
-                        offset = np.bool(r_ii + r_jj) * 4 * 2 * dp_j
+                        offset = bool(r_ii + r_jj) * 4 * 2 * dp_j
                     )).reshape((dp_i, dp_j)).T
                     buffer.put((r_ii, r_jj, data), timeout = timeout)
 
@@ -145,7 +145,7 @@ def readData(
                         dtype = 'float32',
                         count = dp_i * dp_j,
                         sep = '',
-                        offset = np.bool(r_ii + r_jj) * 4 * 2 * dp_j
+                        offset = bool(r_ii + r_jj) * 4 * 2 * dp_j
                     )).reshape((dp_i, dp_j))
                     buffer.put((r_ii, r_jj, data), timeout = timeout)
 
@@ -178,7 +178,7 @@ def readMetaData(xml_path: str) -> dict:
     ^   dr_i                                        Unit: m
     ^   dr_j                                        Unit: m
     ^   scan_rotation                               Unit: rad
-    *   is_flipped                                  bool
+    *   is_flipped                                  bool, default: True
 
         其中标了 * 的，是读取 4D-STEM 数据必备的、也是最为基础的信息。如果这几个元数
         据读取失败或者有误，用户[必须]在读取数据前就手动正确填写、修改，而在数据读取完

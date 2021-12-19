@@ -123,7 +123,8 @@ if not ROOTPATH in sys.path:
     sys.path.append(ROOTPATH)
 
 import unittest
-from bin.BasicIO import HDF5Handler
+# from bin.BasicIO import HDF5Handler
+from bin.BackEnd import BackEnd
 
 import numpy as np
 
@@ -150,8 +151,8 @@ class TestHDF5Handler(unittest.TestCase):
         -> delete attribute -> display file architecture -> delete dataset
         -> close file -> delete file.
         '''
-
-        self.handler = HDF5Handler()
+        backend = BackEnd()
+        self.handler = backend.hdf5_handler
 
         '''Set Path'''
         self.handler.path = os.path.join(os.getcwd(),'simpleHDF5file.h5')
@@ -222,7 +223,9 @@ class TestHDF5Handler(unittest.TestCase):
         ose and delete file.
         '''
 
-        self.handler = HDF5Handler()
+        # self.handler = HDF5Handler()
+        self.backend = BackEnd()
+        self.handler = self.backend.hdf5_handler
 
         '''Set Path'''
         self.handler.path = os.path.join(os.getcwd(),'simpleHDF5file.h5')
@@ -291,7 +294,9 @@ class TestHDF5Handler(unittest.TestCase):
         -> display -> change path -> display -> create and initialize file
         -> load data -> close file -> delete file
         '''
-        self.handler = HDF5Handler()
+        # self.handler = HDF5Handler()
+        self.backend = BackEnd()
+        self.handler = self.backend.hdf5_handler
 
         '''Set Path'''
         self.handler.path = os.path.join(os.getcwd(),'simpleHDF5file.h5')

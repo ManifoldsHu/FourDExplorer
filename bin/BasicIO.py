@@ -82,6 +82,8 @@ import traceback
 logger = LogUtil(__name__)
 
 from bin import DataReaderEMPAD
+# from bin.BackEnd import BackEnd
+# from bin.Preview import PreviewHandler
 
 class HDF5Handler:
      '''
@@ -171,14 +173,14 @@ class HDF5Handler:
      '''
 
 
-     def __init__(self, frontends = None):
+     def __init__(self, backend):
           '''
           arguments           type                description
           ---------------------------------------------------------------------
-          frontends           frontends class     a handle of frontend/ui
+          backend             BackEnd             a handle of backend
           ---------------------------------------------------------------------
           '''
-          self.frontends = frontends
+          self._backend = backend
           # self.has_file = False
           self._file = None
           self._path = ''
@@ -446,6 +448,21 @@ class HDF5Handler:
                return False
 
 
+     def loopDataset(self, buffer: queue.Queue,):
+          '''
+          Loop the whole dataset, and put one diffraction pattern into the buf-
+          fer each time. Designed to run in another thread instead of the main 
+          thread.
+          '''
+          scan_i, scan_j, dp_i, dp_j = self.shape
+          dataset = self.file['Dataset']
+          for r_ii in range(scan_i):
+               for r_jj in range(scan_j):
+                    with self._lock:
+                         buffer.put(r_ii, r_jj, dataset[r_ii, r_jj])
+          buffer.put(-1)
+
+
      def setDatasetAttribute(self, key: str, value):
           '''
           Set the Dataset attribute. The Dataset must be created before setting
@@ -525,28 +542,42 @@ class IOThreadHandler:
                - 先行读取四维数据的元数据，并填入 HDF5 文件中。
                - 根据元数据，创建好 HDF5 文件中的 Dataset
           
-          在要读取其他进程生成的数据流时，要是中途改变元数据 (主要是数据尺寸)，则应当删除
-          已经创建了的 Dataset，然后重新创建 Dataset。或者，也可以保存修改之前的 HDF5 文
-          件，然后重新建立新的文件，并读取数据。
+          在要读取其他进程生成的数据流时，要是中途改变 shape 和 is_flipped，则应当删除
+          已经创建了的 Dataset，然后重新创建 Dataset。或者，也可以保存修改之前的 HDF5 
+          文件，然后重新建立新的文件，并读取数据。在 GUI 中，除非重新加载，否则用户不能
+          直接修改 shape 和 is_flipped。
+
+          此外，还要开一个线程用于计算预览的虚拟成像。其将根据主线程发送的信号 (比如虚拟
+          成像对应收集角的范围) 来实时地计算虚拟成像，并将其填入主线程的变量 preview 中。
+          注意，这个线程只能用来在本地读取数据的时候进行计算。如果想要使用监视器，请使用
+          Monitor 模块内的线程。
      '''
-     def __init__(self, hdf5handler: HDF5Handler):
+     def __init__(self, backend):
           self._load_buffer = queue.Queue(maxsize=16384)
           self._loading_event = threading.Event()
           self._reading_event = threading.Event()
-
-          self.hdf5handler = hdf5handler
+          self._backend = backend
+          # self._preview_buffer = queue.Queue(maxsize=1024)
+          # self.hdf5_handler = backend.hdf5_handler
+          # self.preview_handler = backend.preview_handler
+          
      
      def loadingData(self, data_reader: str, raw_path: str):
           
           # 写入 HDF5 数据的线程
           self.loading_thread = threading.Thread(
                target = self.loadFromBuffer,
-               args = (self._load_buffer, self._loading_event, None)
+               args = (
+                    self._load_buffer, 
+                    self._backend.preview_handler.preview_buffer,
+                    self._loading_event, 
+                    None,
+               )
           )
 
           # 本地读取 EMPAD 数据的线程
-          shape = self.hdf5handler.shape
-          is_flipped = self.hdf5handler.is_flipped
+          shape = self._backend.hdf5_handler.shape
+          is_flipped = self._backend.hdf5_handler.is_flipped
 
           if data_reader == 'EMPAD':
                self.reading_thread = threading.Thread(
@@ -557,12 +588,19 @@ class IOThreadHandler:
                          raw_path,
                          shape, 
                          is_flipped,
-                         None
+                         None,
                     )
                )
           
+          # 计算预览图的线程
+          self.previewing_thread = threading.Thread(
+               target = self._backend.preview_handler.calculatePreview,
+               args=(None,)
+          )
+
           self.reading_thread.start()
           self.loading_thread.start()
+          self.previewing_thread.start()
 
           self._loading_event.set()
           self._reading_event.set()
@@ -571,7 +609,8 @@ class IOThreadHandler:
           
      def loadFromBuffer(
           self, 
-          buffer: queue.Queue, 
+          buffer_read: queue.Queue, 
+          buffer_preview: queue.Queue,
           event: threading.Event, 
           timeout = None
      ):
@@ -598,14 +637,19 @@ class IOThreadHandler:
                                                   hread.          
           ---------------------------------------------------------------------
           '''
-          logger.info('Start loading data into HDF5 file:\n{0}'\
-               .format(self.hdf5handler.path))
+          
           start_time = time.time()
-          if not isinstance(buffer, queue.Queue):
+          if not isinstance(buffer_read, queue.Queue):
+               raise TypeError('buffer must be a queue.Queue object')
+          if not isinstance(buffer_preview, queue.Queue):
                raise TypeError('buffer must be a queue.Queue object')
 
+          logger.info('Start loading data into HDF5 file:\n{0}'\
+               .format(self._backend.hdf5_handler.path))
+
           while True:
-               tmp = buffer.get(timeout = timeout)
+               tmp = buffer_read.get(timeout = timeout)
+               buffer_preview.put_nowait(tmp)
                if tmp == -1:
                     end_time = time.time()
                     # logger.info('Loading completes. Time consumed: {0} s'\
@@ -616,6 +660,10 @@ class IOThreadHandler:
                else:
                     r_ii, r_jj, data = tmp
                     if isinstance(data, np.ndarray):
-                         self.hdf5handler.writeDataset((r_ii, r_jj), data)
+                         self._backend.hdf5_handler.writeDataset((r_ii, r_jj), data)
                     
      
+     
+
+
+          
