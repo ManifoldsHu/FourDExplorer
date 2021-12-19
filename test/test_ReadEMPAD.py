@@ -122,6 +122,9 @@ class TestReadEMPAD(unittest.TestCase):
         plt.imshow(haadf)
         plt.show()
 
+        self.thread_handler.loading_thread.join()
+        self.thread_handler.previewing_thread.join()
+
         '''Delete HDF5 File'''
         self.handler.deleteFile()
 
@@ -182,6 +185,11 @@ class TestReadEMPAD(unittest.TestCase):
             mpl.artist.setp(HAADF_image, norm=norm)
             blit_manager.update()
 
+        self.thread_handler.previewing_thread.join()
+        self.thread_handler.reading_thread.join()
+        # 必须等待这两个线程结束之后，再开启新的线程 (比如读取另一套数据集)
+        HAADF_image.set_data(self.preview_handler.preview)
+        blit_manager.update()
 
         '''Delete HDF5 File'''
         self.handler.deleteFile()

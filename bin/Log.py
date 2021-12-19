@@ -65,7 +65,9 @@ class LogUtil(object):
         self.logger.setLevel(logging.DEBUG)
         self.name = name
         
-        log_path = os.path.join(os.path.abspath('.'), 'logs')
+        # log_path = os.path.join(os.path.abspath('.'), 'logs')
+        ROOTPATH = os.path.split(os.path.dirname(__file__))[0]
+        log_path = os.path.join(ROOTPATH, 'logs')
         date = time.strftime('%Y%m%d', time.localtime(time.time()))
         log_file_name = os.path.join(log_path, date + '.log')
         self.file_handler = logging.FileHandler(log_file_name, 'a+', encoding='utf-8')

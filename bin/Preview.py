@@ -88,8 +88,8 @@ class PreviewHandler:
                 # self.preview_event.wait()
             else:
                 r_ii, r_jj, data = tmp
+                preview_pixel = np.sum(data*self.preview_mask)
                 with self._lock:
-                    preview_pixel = np.sum(data*self.preview_mask)
                     self.preview[r_ii, r_jj] = preview_pixel
                     if preview_pixel > self.preview_max:
                         self.preview_max = preview_pixel
