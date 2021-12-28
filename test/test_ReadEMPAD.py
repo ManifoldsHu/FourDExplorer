@@ -73,7 +73,8 @@ class TestReadEMPAD(unittest.TestCase):
         self.thread_handler = self.backend.io_thread_handler
 
         '''Set Path, Read XML, Create File, Open File, Create Dataset'''
-        self.handler.path = os.path.join(os.getcwd(), 'largeHDF5file.h5')
+        # self.handler.path = os.path.join(os.getcwd(), 'largeHDF5file.h5')
+        self.handler.path = 'D:\\largeHDF5file.h5'
         self.handler.createFile()
         self.handler.openFile()
         test_file_dir = 'F:\\Projects\\20211015_DNA\\06'
@@ -144,7 +145,8 @@ class TestReadEMPAD(unittest.TestCase):
         self.preview_handler = self.backend.preview_handler
 
         '''Set Path, Read XML, Create File, Open File, Create Dataset'''
-        self.handler.path = os.path.join(os.getcwd(), 'largeHDF5file.h5')
+        # self.handler.path = os.path.join(os.getcwd(), 'largeHDF5file.h5')
+        self.handler.path = 'D:\\largeHDF5file.h5'
         self.handler.createFile()
         self.handler.openFile()
         test_file_dir = 'F:\\Projects\\20211015_DNA\\06'

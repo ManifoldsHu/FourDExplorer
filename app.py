@@ -152,7 +152,7 @@ All rights reserved.
 # global SOFTWAREPATH
 # SOFTWAREPATH = os.path.abspath('.')
 
-APPVERSION = '0.5.0'
+APPVERSION = (0,5,0)
 
 app = QApplication(sys.argv)
 logger = LogUtil(__name__)

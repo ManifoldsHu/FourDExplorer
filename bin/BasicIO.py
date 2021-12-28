@@ -428,7 +428,6 @@ class HDF5Handler:
                                                   ed into the dataset
           ---------------------------------------------------------------------
           '''
-          # 为了确保高性能加载，不做任何判断，出错了直接输出log并崩溃。
           with self._lock:
                self.file['Dataset'][pos[0],pos[1],:,:] = data
 
@@ -572,7 +571,8 @@ class IOThreadHandler:
                     self._backend.preview_handler.preview_buffer,
                     self._loading_event, 
                     None,
-               )
+               ),
+               name = 'WriteHDF5Dataset',
           )
 
           # 本地读取 EMPAD 数据的线程
@@ -589,7 +589,8 @@ class IOThreadHandler:
                          shape, 
                          is_flipped,
                          None,
-                    )
+                    ),
+                    name = 'ReadEMPAD',
                )
           
           # 计算预览图的线程
