@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-*--------------------------- DataLoaderEMPAD.py ------------------------------*
+*--------------------------- DataReaderEMPAD.py ------------------------------*
 加载 FEI Electron Microscope Pixel Array Detector (EMPAD) 文件的数据。
 
 由于 4D-STEM 的数据集一般都很大，所以应当使用异步或并发的方式加载。在这里，我们使用生
@@ -34,7 +34,7 @@ author:             Hu Yiming
 date:               Dec 12, 2021
 
 All rights reserved.
-*--------------------------- DataLoaderEMPAD.py ------------------------------*
+*--------------------------- DataReaderEMPAD.py ------------------------------*
 '''
 
 import threading
@@ -48,72 +48,80 @@ logger = LogUtil(__name__)
 
 def readData(
     buffer: queue.Queue, 
-    event: threading.Event, 
     raw_path: str,
     shape: tuple,
     is_flipped: bool,
-    timeout = None,
+    timeout = 100,
 ):
     '''
-        Read data from .raw files produced by EMPAD. This function is designed 
-        according to producer-consumer model, and works asynchoronously. Every 
-        time it reads one diffraction pattern, and put it into the buffer (whi-
-        ch is a queue) immediately. To receive the data, we need another thread 
-        that get items from buffer and load them into a four-dimensional matrix 
-        (usually, the HDF5 dataset). 
+    从 EMPAD 产生的 .raw 文件中读取数据。这个函数是根据生产者-消费者模式编写的，可以并
+    发执行。每次它读取一张衍射图样，然后把图片放到缓冲区 (队列) 里。要接收数据，需要额外
+    一个线程，从缓冲区中取出图样，然后把它加载到四维数据的矩阵里 (一般是 HDF5 数据集)。
 
-        Everytime a tuple will be put into the buffer like this:
-        (r_ii, r_jj, data)
-        where r_ii and r_jj are the index of the diffraction pattern, which in-
-        dicate the location of the scanning point in the real space.
+    每次放到缓冲区里的东西长成这样：
+    (r_ii, r_jj, data)
+    其中 r_ii 和 r_jj 表示衍射图样的在四维数据中的指标。这其实也就是衍射图样对应的扫描
+    位置。
 
-        In the end, a integer -1 will be put into the buffer to note the main 
-        thread that reading data has been completed.
+    最后，可以往缓冲区中放入 -1 作为结束标志，通知消费者自己已经生产完毕。
 
-        This function also accepts a threading.Event object as an argument, wh-
-        ich is used to receive pause signal from the main thread. When the eve-
-        nt is set to False (calling event.clear()) by the main thread, this fu-
-        nction will keep sleeping until it is set to True (calling event.set()).
+    这个函数一般用于多线程中。不建议用于多进程中，因为这样反而会让速度降低。
 
-        This function is used in multithreading environment. If we want use mu-
-        ltiprocessing io, simply use a pipe instead of event to communicate be-
-        tween processes.
+    在 EMPAD 的数据集中，每两张DP之间有两行数据是要抛弃的。所以要把 offset 设置为
+    dp_j (pixels) x 2 (lines) x 4 (bytes) 。但是这个分隔符不会出现在文件头，所以我们
+    计算 bool(r_ii + r_jj) 来检测我们是不是要取第一张图。
 
-        Between every diffraction pattern, two lines need to be given up. So t-
-        he offset is dp_j (pixels) x 2 (lines) x 4 (bytes). But the offset does 
-        not exist at the beginning of the file, so we calculate 
-        np.bool(r_ii + r_jj) to evaluate if the pointer is at the first diffra-
-        ction pattern.
+    
+    Read data from .raw files produced by EMPAD. This function is designed acc-
+    ording to producer-consumer model, and works asynchoronously. Every time it 
+    reads one diffraction pattern, and put it into the buffer (which is a queue) 
+    immediately. To receive the data, we need another thread that get items fr-
+    om buffer and load them into a four-dimensional matrix (usually, the HDF5 
+    dataset). 
 
-        arguments       type            description
-        -----------------------------------------------------------------------
-        buffer          queue.Queue         A queue that puts a tuple like
-                                            (r_ii, r_jj, data)
-                                            every time. In the end, use -1 as 
-                                            the flag to inform the main thread.
+    Everytime a tuple will be put into the buffer like this:
+    (r_ii, r_jj, data)
+    where r_ii and r_jj are the index of the diffraction pattern, which indica-
+    te the location of the scanning point in the real space.
 
-        event           threading.Event     A flag controlled by the main thre-
-                                            ad. This function will wait if eve-
-                                            nt is set to False, until it is set
-                                            to True.
+    In the end, a integer -1 will be put into the buffer to note the main thre-
+    ad that reading data has been completed.
 
-        raw_path        str                 The file path of raw data.
+    This function is used in multithreading environment.
 
-        shape           tuple               The shape of 4D-STEM dataset, like
-                                            (scan_i, scan_j, dp_i, dp_j)
+    Between every diffraction pattern, two lines need to be given up. So the o-
+    ffset is dp_j (pixels) x 2 (lines) x 4 (bytes). But the offset does not ex-
+    ist at the beginning of the file, so we calculate bool(r_ii + r_jj) to eva-
+    luate if the pointer is at the first diffraction pattern.
 
-        is_flipped      bool                Indicating whether the diffraction
-                                            pattern need to be transposed befo-
-                                            re put into the buffer.
+    arguments       type            description
+    -----------------------------------------------------------------------
+    buffer          queue.Queue         A queue that puts a tuple like
+                                        (r_ii, r_jj, data)
+                                        every time. In the end, use -1 as 
+                                        the flag to inform the main thread.
 
-        time_out        float or None       [Optional] If the buffer is full f-
-                                            or a long time, longer than time_out, 
-                                            then it will raise Full exception.
-                                            If time_out = None, this function 
-                                            will always wait (be blocked) until
-                                            the buffer is not full.
-        -----------------------------------------------------------------------
-            
+    event           threading.Event     A flag controlled by the main thre-
+                                        ad. This function will wait if eve-
+                                        nt is set to False, until it is set
+                                        to True.
+
+    raw_path        str                 The file path of raw data.
+
+    shape           tuple               The shape of 4D-STEM dataset, like
+                                        (scan_i, scan_j, dp_i, dp_j)
+
+    is_flipped      bool                Indicating whether the diffraction
+                                        pattern need to be transposed befo-
+                                        re put into the buffer.
+
+    time_out        float or None       [Optional] If the buffer is full f-
+                                        or a long time, longer than time_out, 
+                                        then it will raise Full exception.
+                                        If time_out = None, this function 
+                                        will always wait (be blocked) until
+                                        the buffer is not full.
+    -----------------------------------------------------------------------
     '''
     
     logger.info('Start reading from the EMPAD raw file:\n{0}'.format(raw_path))
@@ -121,33 +129,22 @@ def readData(
     scan_i, scan_j, dp_i, dp_j = shape
     with open(raw_path, 'rb') as raw_file:
         raw_file.seek(0)
-        if is_flipped:
-            for r_ii in range(scan_i):
-                for r_jj in range(scan_j):
-                    if not event.is_set():
-                        event.wait()
-                    data = np.nan_to_num(np.fromfile(
-                        raw_file,
-                        dtype = 'float32',
-                        count = dp_i * dp_j,
-                        sep = '',
-                        offset = bool(r_ii + r_jj) * 4 * 2 * dp_j
-                    )).reshape((dp_i, dp_j)).T
-                    buffer.put((r_ii, r_jj, data), timeout = timeout)
+        # if is_flipped:
+        for r_ii in range(scan_i):
+            for r_jj in range(scan_j):
+                data = np.nan_to_num(np.fromfile(
+                    raw_file,
+                    dtype = 'float32',
+                    count = dp_i * dp_j,
+                    sep = '',
+                    offset = bool(r_ii + r_jj) * 4 * 2 * dp_j
+                ))
 
-        else:
-            for r_ii in range(scan_i):
-                for r_jj in range(scan_j):
-                    if not event.is_set():
-                        event.wait()
-                    data = np.nan_to_num(np.fromfile(
-                        raw_file,
-                        dtype = 'float32',
-                        count = dp_i * dp_j,
-                        sep = '',
-                        offset = bool(r_ii + r_jj) * 4 * 2 * dp_j
-                    )).reshape((dp_i, dp_j))
-                    buffer.put((r_ii, r_jj, data), timeout = timeout)
+                if is_flipped:
+                    data = data.reshape((dp_i, dp_j)).T
+                else:
+                    data = data.reshape((dp_i, dp_j))
+                buffer.put((r_ii, r_jj, data), timeout = timeout)
 
         # end flag
         buffer.put(-1)

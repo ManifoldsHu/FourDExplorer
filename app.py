@@ -1,20 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import os
-ROOTPATH = os.path.dirname(__file__)    # Root path of the software
-if not ROOTPATH in sys.path:
-    sys.path.append(ROOTPATH)
-
-from PyQt5.QtWidgets import QApplication
-from bin.MainWindow import MainWindow
-
-
-from bin.Log import LogUtil
-import traceback
-# import logging
-# import time
-
 '''
 *--------------------------------- app.py -----------------------------------*
 
@@ -149,22 +134,47 @@ All rights reserved.
 
 '''
 
-# global SOFTWAREPATH
-# SOFTWAREPATH = os.path.abspath('.')
+import sys
+import os
+ROOTPATH = os.path.dirname(__file__)    # Root path of the software
+if not ROOTPATH in sys.path:
+    sys.path.append(ROOTPATH)
 
+
+from PySide6.QtWidgets import QApplication
+from bin.MainWindow import MainWindow
+
+
+from bin.Log import LogUtil
+import traceback
+from qt_material import apply_stylesheet
+
+
+global APPVERSION
 APPVERSION = (0,5,0)
 
-app = QApplication(sys.argv)
-logger = LogUtil(__name__)
-logger.info('4dExplorer is launched.')
-try:
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec_())
-except SystemExit as e: 
-    logger.info('System Exit: 4dExplorer is closed')
-    sys.exit()
-except BaseException as e:
-    exc_type, exc_value, exc_obj = sys.exc_info()
-    logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
-    sys.exit()
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+
+
+    logger = LogUtil(__name__)
+    logger.info('4dExplorer is launched.')
+
+
+    apply_stylesheet(app, theme = 'light_blue.xml')
+    # apply_stylesheet(app, theme = 'dark_cyan.xml')
+
+
+
+    try:
+        window = MainWindow()
+        window.show()
+        app.exec()
+    except SystemExit as e: 
+        logger.info('System Exit: 4dExplorer is closed')
+    except BaseException as e:
+        # Any exceptions and their tracebacks will be recorded in logs.
+        exc_type, exc_value, exc_obj = sys.exc_info()
+        logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+    finally:
+        sys.exit()

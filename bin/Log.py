@@ -78,7 +78,7 @@ class LogUtil(object):
 
         formatter = logging.Formatter(
             '%(asctime)s - %(filename)s->%(funcName)s[line:%(lineno)d] - \
-            %(levelname)s: %(message)s'
+%(levelname)s: %(message)s'
         )
         self.file_handler.setFormatter(formatter)
         self.console_handler.setFormatter(formatter)
