@@ -16,7 +16,45 @@ class MainWindow(QMainWindow,):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        
+        self.setWindowTitle('4D-Explorer')
+
+        self._initFile()
+        self._initTask()
+        self._initCalibration()
+        self._initImage()
+        self._initHome()
+    
+
+
+    def _initFile(self):
+        pass
+
+
+    def _initTask(self):
+        pass
+
+
+
+    def _initCalibration(self):
+        pass
+
+
+
+    def _initImage(self):
+        pass
+
+
+    def _initHome(self):
+        pass
+
+
+
+
+
+
+
+
+
 
 # class MainWindow(QMainWindow, QtStyleTools):
 #     def __init__(self):

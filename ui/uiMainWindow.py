@@ -58,25 +58,40 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 324, 1160))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, -136, 324, 1050))
         self.verticalLayout_21 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_21.setObjectName(u"verticalLayout_21")
         self.groupBox = QGroupBox(self.scrollAreaWidgetContents)
         self.groupBox.setObjectName(u"groupBox")
         self.verticalLayout_16 = QVBoxLayout(self.groupBox)
         self.verticalLayout_16.setObjectName(u"verticalLayout_16")
-        self.verticalLayout_15 = QVBoxLayout()
-        self.verticalLayout_15.setObjectName(u"verticalLayout_15")
         self.treeView_hdf5_hierarchy = QTreeView(self.groupBox)
         self.treeView_hdf5_hierarchy.setObjectName(u"treeView_hdf5_hierarchy")
         self.treeView_hdf5_hierarchy.setMinimumSize(QSize(0, 300))
 
-        self.verticalLayout_15.addWidget(self.treeView_hdf5_hierarchy)
+        self.verticalLayout_16.addWidget(self.treeView_hdf5_hierarchy)
 
+        self.verticalLayout_15 = QVBoxLayout()
+        self.verticalLayout_15.setObjectName(u"verticalLayout_15")
         self.pushButton_open_file = QPushButton(self.groupBox)
         self.pushButton_open_file.setObjectName(u"pushButton_open_file")
 
         self.verticalLayout_15.addWidget(self.pushButton_open_file)
+
+        self.pushButton_load_dataset = QPushButton(self.groupBox)
+        self.pushButton_load_dataset.setObjectName(u"pushButton_load_dataset")
+
+        self.verticalLayout_15.addWidget(self.pushButton_load_dataset)
+
+        self.pushButton_import_image = QPushButton(self.groupBox)
+        self.pushButton_import_image.setObjectName(u"pushButton_import_image")
+
+        self.verticalLayout_15.addWidget(self.pushButton_import_image)
+
+        self.pushButton_export_image = QPushButton(self.groupBox)
+        self.pushButton_export_image.setObjectName(u"pushButton_export_image")
+
+        self.verticalLayout_15.addWidget(self.pushButton_export_image)
 
 
         self.verticalLayout_16.addLayout(self.verticalLayout_15)
@@ -92,7 +107,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_17.setObjectName(u"verticalLayout_17")
         self.tableView_attributes = QTableView(self.groupBox_2)
         self.tableView_attributes.setObjectName(u"tableView_attributes")
-        self.tableView_attributes.setMinimumSize(QSize(0, 300))
+        self.tableView_attributes.setMinimumSize(QSize(0, 200))
 
         self.verticalLayout_17.addWidget(self.tableView_attributes)
 
@@ -135,7 +150,7 @@ class Ui_MainWindow(object):
 
         self.listView_file_path = QListView(self.groupBox_3)
         self.listView_file_path.setObjectName(u"listView_file_path")
-        self.listView_file_path.setMinimumSize(QSize(0, 300))
+        self.listView_file_path.setMinimumSize(QSize(0, 200))
 
         self.verticalLayout_19.addWidget(self.listView_file_path)
 
@@ -439,11 +454,11 @@ class Ui_MainWindow(object):
         self.groupBox_4.setObjectName(u"groupBox_4")
         self.verticalLayout_22 = QVBoxLayout(self.groupBox_4)
         self.verticalLayout_22.setObjectName(u"verticalLayout_22")
-        self.tableView = QTableView(self.groupBox_4)
-        self.tableView.setObjectName(u"tableView")
-        self.tableView.setMinimumSize(QSize(0, 400))
+        self.tableView_parameters = QTableView(self.groupBox_4)
+        self.tableView_parameters.setObjectName(u"tableView_parameters")
+        self.tableView_parameters.setMinimumSize(QSize(0, 400))
 
-        self.verticalLayout_22.addWidget(self.tableView)
+        self.verticalLayout_22.addWidget(self.tableView_parameters)
 
         self.horizontalLayout_9 = QHBoxLayout()
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
@@ -639,7 +654,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -648,7 +663,10 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"HDF5 Hierarchy", None))
-        self.pushButton_open_file.setText(QCoreApplication.translate("MainWindow", u"Open An HDF5 File", None))
+        self.pushButton_open_file.setText(QCoreApplication.translate("MainWindow", u"Open HDF5 File", None))
+        self.pushButton_load_dataset.setText(QCoreApplication.translate("MainWindow", u"Load Dataset", None))
+        self.pushButton_import_image.setText(QCoreApplication.translate("MainWindow", u"Import Image", None))
+        self.pushButton_export_image.setText(QCoreApplication.translate("MainWindow", u"Export Image", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"Attributes", None))
         self.pushButton_new_attribute.setText(QCoreApplication.translate("MainWindow", u"New", None))
         self.pushButton_change_attribute.setText(QCoreApplication.translate("MainWindow", u"Change", None))

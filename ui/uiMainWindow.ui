@@ -38,7 +38,7 @@
          <enum>QTabWidget::West</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <property name="elideMode">
          <enum>Qt::ElideLeft</enum>
@@ -69,9 +69,9 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>-136</y>
                <width>324</width>
-               <height>1160</height>
+               <height>1050</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_21">
@@ -82,21 +82,42 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_16">
                  <item>
+                  <widget class="QTreeView" name="treeView_hdf5_hierarchy">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>300</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <layout class="QVBoxLayout" name="verticalLayout_15">
                    <item>
-                    <widget class="QTreeView" name="treeView_hdf5_hierarchy">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>300</height>
-                      </size>
+                    <widget class="QPushButton" name="pushButton_open_file">
+                     <property name="text">
+                      <string>Open HDF5 File</string>
                      </property>
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_open_file">
+                    <widget class="QPushButton" name="pushButton_load_dataset">
                      <property name="text">
-                      <string>Open An HDF5 File</string>
+                      <string>Load Dataset</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_import_image">
+                     <property name="text">
+                      <string>Import Image</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_export_image">
+                     <property name="text">
+                      <string>Export Image</string>
                      </property>
                     </widget>
                    </item>
@@ -118,7 +139,7 @@
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
-                       <height>300</height>
+                       <height>200</height>
                       </size>
                      </property>
                     </widget>
@@ -169,7 +190,7 @@
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
-                       <height>300</height>
+                       <height>200</height>
                       </size>
                      </property>
                     </widget>
@@ -590,7 +611,7 @@
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_22">
                  <item>
-                  <widget class="QTableView" name="tableView">
+                  <widget class="QTableView" name="tableView_parameters">
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
