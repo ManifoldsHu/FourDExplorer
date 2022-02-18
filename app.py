@@ -136,9 +136,11 @@ All rights reserved.
 
 import sys
 import os
-ROOTPATH = os.path.dirname(__file__)    # Root path of the software
-if not ROOTPATH in sys.path:
-    sys.path.append(ROOTPATH)
+
+global root_path
+root_path = os.path.dirname(__file__)    # Root path of the software
+if not root_path in sys.path:
+    sys.path.append(root_path)
 
 
 from PySide6.QtWidgets import QApplication
@@ -150,22 +152,18 @@ import traceback
 from qt_material import apply_stylesheet
 
 
-global APPVERSION
-APPVERSION = (0,5,0)
+global APP_VERSION
+APP_VERSION = (0,5,0)
+
+global ROOT_PATH
+ROOT_PATH = root_path
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-
-
     logger = LogUtil(__name__)
     logger.info('4dExplorer is launched.')
-
-
-    apply_stylesheet(app, theme = 'light_blue.xml')
+    # apply_stylesheet(app, theme = 'light_blue.xml')
     # apply_stylesheet(app, theme = 'dark_cyan.xml')
-
-
-
     try:
         window = MainWindow()
         window.show()
