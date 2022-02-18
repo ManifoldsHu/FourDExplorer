@@ -1,7 +1,7 @@
 # -*- coding utf-8 -*-
 
 '''
-*--------------------------------- BasicIO.py ---------------------------------*
+*------------------------------- HDFManager.py -------------------------------*
 对 HDF5 文件进行读取与写入的操作。
 
 4dExplorer 软件默认使用 HDF5 进行四维数据及其元数据的管理。对于其他格式的文件，例如由
@@ -19,7 +19,7 @@ EMPAD 所产生的数据，4dExplorer 将其转换为hdf5进行管理并生成�
 
 在这样的工作流程中，将四维数据复制一份的时间代价较大。为节约后续分析的时间，可以保存 HDF5 
 文件，后续重新打开该数据集时可直接建立内存映射，省下加载四维数据的时间开销。在后续打开时，
-就将直接调用 BasicIO.py 中的代码。
+就将直接调用 HDFManager.py 中的代码。
 
 
 作者：          胡一鸣
@@ -49,7 +49,7 @@ In such a workflow, the time cost of making a copy of the four-dimensional data
 is large. In order to save the time of subsequent analysis, the HDF5 file can 
 be saved, and the memory mapping can be directly established when the data set 
 is reopened, saving the time cost of loading the four-dimensional data. On sub-
-sequent opens, the code in basicio.py is called directly.
+sequent opens, the code in HDFManager.py is called directly.
 
 author:             Hu Yiming
 date:               Aug 21, 2021
@@ -57,7 +57,7 @@ date:               Aug 21, 2021
 All rights reserved.
                                                                                
 
-*--------------------------------- BasicIO.py ---------------------------------*
+*------------------------------- HDFManager.py -------------------------------*
 '''
 
 
@@ -85,7 +85,7 @@ from bin import DataReaderEMPAD
 # from bin.BackEnd import BackEnd
 # from bin.Preview import PreviewHandler
 
-class HDF5Handler:
+class HDFHandler:
      '''
           使用HDF5文件处理的封装类。其应当包含以下方法：
                 - 设置指向的h5文件的路径
@@ -311,7 +311,7 @@ class HDF5Handler:
      def openFile(self):
           '''
           Read a h5 file. Fail if there is no file corresponding to the path. 
-          The file must be read before it is handled by BasicIO modules.
+          The file must be read before it is handled by HDFManager modules.
           '''
           try:
                if not self.isFileOpened():
@@ -508,7 +508,7 @@ class HDF5Handler:
                logger.warning('File must be opened before setting attributes' \
                     ' of Dataset.')
 
-
+     
      def traverseAllNodes(self) -> list:
           '''
           将 HDF5 文件中的 groups 和 datasets 遍历地显示出来。

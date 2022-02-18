@@ -39,7 +39,8 @@ import logging
 import os.path
 import time
 
-
+import configparser
+from app import ROOT_PATH
 
 class LogUtil(object):
     '''
@@ -47,38 +48,36 @@ class LogUtil(object):
     '''
     def __init__(self, name, cLevel = logging.INFO, fLevel = logging.INFO):
         '''
-            arguments       type            description
-            ------------------------------------------------------------------
-            name            str             Filename of the object creater, 
-                                            i.e. __name__
+        arguments       type            description
+        ----------------------------------------------------------------------
+        name            str             Filename of the object creater, i.e. 
+                                        __name__
             
-            cLevel          int             Level of logging printed towards 
-                                            the console
+        cLevel          int             Level of logging printed towards the
+                                        console
 
-            fLevel          int             Level of logging written towards
-                                            the .log files
-            -------------------------------------------------------------------
-            
+        fLevel          int             Level of logging written towards the
+                                        .log files
+        -----------------------------------------------------------------------
         '''
 
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
         self.name = name
         
-        # log_path = os.path.join(os.path.abspath('.'), 'logs')
-        ROOTPATH = os.path.split(os.path.dirname(__file__))[0]
-        log_path = os.path.join(ROOTPATH, 'logs')
-        date = time.strftime('%Y%m%d', time.localtime(time.time()))
-        log_file_name = os.path.join(log_path, date + '.log')
-        self.file_handler = logging.FileHandler(log_file_name, 'a+', encoding='utf-8')
+        self.file_handler = logging.FileHandler(
+            self.getLogPath(), 
+            'a+', 
+            encoding='utf-8',
+        )
         self.file_handler.setLevel(fLevel)
 
         self.console_handler = logging.StreamHandler()
         self.console_handler.setLevel(cLevel)
 
         formatter = logging.Formatter(
-            '%(asctime)s - %(filename)s->%(funcName)s[line:%(lineno)d] - \
-%(levelname)s: %(message)s'
+            ('%(asctime)s - %(filename)s->%(funcName)s[line:%(lineno)d] - '\
+            '%(levelname)s: %(message)s')
         )
         self.file_handler.setFormatter(formatter)
         self.console_handler.setFormatter(formatter)
@@ -172,3 +171,12 @@ class LogUtil(object):
             logging.INFO, logging.WARNING, logging.ERROR and logging.CRITICAL')
         else:
             self.file_handler.setLevel(fLevel)
+
+    def getLogPath(self) -> str:
+        '''
+        Returns the path of logging file.
+        '''
+        log_path = os.path.join(ROOT_PATH, 'logs')
+        date = time.strftime('%Y%m%d', time.localtime(time.time()))
+        log_file_name = os.path.join(log_path, date + '.log')
+        return log_file_name
