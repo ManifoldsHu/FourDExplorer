@@ -87,7 +87,7 @@ class ThemeHandler(object):
 
     _instance = None    # existing instance
 
-    def __new__(cls, app):
+    def __new__(cls, app: QApplication):
         '''
         There is only one instance allowed to exist.
         '''
