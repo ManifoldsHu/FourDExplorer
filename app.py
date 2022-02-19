@@ -156,20 +156,23 @@ if __name__ == '__main__':
     ''' Initialize Log'''
     logger = LogUtil(__name__)
     logger.info('4D-Explorer is launched.')
-
+    app.logger = logger
+    
     ''' Initialize UI theme'''
     theme_handler = ThemeHandler(app)
     theme_handler.initializeTheme()
+    app.theme_handler = theme_handler
 
     ''' Initialize HDF Manager'''
     hdf_handler = HDFHandler(app)
+    app.hdf_handler = hdf_handler
 
     try:
         window = MainWindow(app)
         window.show()
-        app.exec()
-    except SystemExit as e: 
-        logger.info('System Exit: 4D-Explorer quits.')
+        quit = app.exec()
+        if quit == 0:
+            logger.info('System Exit: 4D-Explorer quits.')
     except BaseException as e:
         # Any exceptions and their tracebacks will be recorded in logs.
         exc_type, exc_value, exc_obj = sys.exc_info()

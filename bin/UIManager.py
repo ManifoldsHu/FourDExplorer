@@ -19,10 +19,12 @@ from PySide6.QtWidgets import QApplication
 
 from bin.Log import LogUtil
 import traceback
+import threading
 
 from configparser import ConfigParser
 from Constants import CONFIG_PATH, UITheme
 from qt_material import apply_stylesheet
+
 
 def UIThemeToFileName(theme: UITheme) -> str:
     '''
@@ -70,7 +72,7 @@ class ThemeHandler(object):
 
     Use ThemeHandler to manage the theme of 4D-Explorer. NOTE: there is only S-
     INGLE instance. If there has been one instance of this class, the existing 
-    instance will be returned.
+    instance will be returned. (Singleton class)
 
     attributes              type                description
     ---------------------------------------------------------------------------
@@ -86,15 +88,17 @@ class ThemeHandler(object):
     '''
 
     _instance = None    # existing instance
+    _instance_lock = threading.Lock()
 
     def __new__(cls, app: QApplication):
         '''
         There is only one instance allowed to exist.
         '''
-        if cls._instance is None:
-            cls._instance = object.__new__(cls)
-            cls._instance.__init__(app)
-        return cls._instance
+        with cls._instance_lock:
+            if cls._instance is None:
+                cls._instance = object.__new__(cls)
+                cls._instance.__init__(app)
+            return cls._instance
 
 
     def __init__(self, app: QApplication):

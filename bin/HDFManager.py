@@ -129,8 +129,8 @@ class HDFHandler(object):
         - read dataset,
         - and set the attributes of dataset
 
-    NOTE: there is only SINGLE instance. If there has been one instance of th-
-    is class, the existing instance will be returned.
+    NOTE: there is only SINGLE instance (Singleton). If there has been one ins-
+    tance of this class, the existing instance will be returned.
 
     An initialized h5 file should have the following structure:
 
@@ -167,15 +167,17 @@ class HDFHandler(object):
                                             Group should be deleted.
     '''
     _instance = None
+    _instance_lock = threading.Lock()
 
     def __new__(cls, app: QApplication):
         '''
-        There is only one instance allowed to exist.
+        There is only one instance allowed to exist. (This is a singleton class)
         '''
-        if cls._instance is None:
-            cls._instance = object.__new__(cls)
-            cls._instance.__init__(app)
-        return cls._instance
+        with cls._instance_lock:
+            if cls._instance is None:
+                cls._instance = object.__new__(cls)
+                cls._instance.__init__(app)
+            return cls._instance
 
     def __init__(self, app: QApplication):
         '''

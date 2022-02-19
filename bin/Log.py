@@ -65,11 +65,20 @@ class LogUtil(object):
         self.logger.setLevel(logging.DEBUG)
         self.name = name
         
-        self.file_handler = logging.FileHandler(
-            self.getLogPath(), 
-            'a+', 
-            encoding='utf-8',
-        )
+        try:
+            self.file_handler = logging.FileHandler(
+                self.getLogPath(), 
+                'a+', 
+                encoding='utf-8',
+            )
+        except FileNotFoundError as e:
+            self.initializeLogPath()
+            self.file_handler = logging.FileHandler(
+                self.getLogPath(),
+                'a+',
+                encoding = 'utf-8',
+            )
+
         self.file_handler.setLevel(fLevel)
 
         self.console_handler = logging.StreamHandler()
@@ -181,8 +190,30 @@ class LogUtil(object):
             config.read(CONFIG_PATH, encoding = 'UTF-8')
             log_path = config['Log']['path']
         except KeyError:
-            log_path = os.path.join(ROOT_PATH, 'logs')
-            
-        date = time.strftime('%Y%m%d', time.localtime(time.time()))
-        log_file_name = os.path.join(log_path, date + '.log')
-        return log_file_name
+            self.initializeLogPath()
+            config.read(CONFIG_PATH, encoding = 'UTF-8')
+            log_path = config['Log']['path']
+        finally:  
+            date = time.strftime('%Y%m%d', time.localtime(time.time()))
+            log_file_path = os.path.join(log_path, date + '.log')
+            return log_file_path
+
+    def setLogPath(self, path: str):
+        '''
+        Set the log path in the configuration file.
+        '''
+        config = ConfigParser()
+        config.read(CONFIG_PATH, encoding = 'UTF-8')
+        if not 'Log' in config:
+            config.add_section('Log')
+        config['Log']['path'] = path
+        with open(CONFIG_PATH, 'w', encoding = 'UTF-8') as f:
+            config.write(f)
+
+    def initializeLogPath(self):
+        '''
+        If there is no valid log path, use default path instead.
+        '''
+        default_path = os.path.join(ROOT_PATH, 'logs')
+        self.setLogPath(default_path)
+
