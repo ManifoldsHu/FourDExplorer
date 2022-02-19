@@ -6,12 +6,12 @@
 这是4dExplorer主程序。4dExplorer是一个用于4D-STEM的可视化四维数据加载、校正、计算、
 分析的软件。
 
+作者:           胡一鸣
+创建日期:       2021年8月3日
+
 This is 4dExplorer Main Application. 4dExplorer is a software that can be used 
 to load, calibrate, calculate and anaylize 4D-STEM dataset with an easy-to-use 
 graphic user interface. 
-
-作者:           胡一鸣
-创建日期:       2021年8月3日
 
 author:         Hu Yiming
 date:           Aug 3, 2021
@@ -136,40 +136,36 @@ All rights reserved.
 
 import sys
 import os
-
-global root_path
-root_path = os.path.dirname(__file__)    # Root path of the software
-if not root_path in sys.path:
-    sys.path.append(root_path)
-
+from Constants import ROOT_PATH, CONFIG_PATH
 
 from PySide6.QtWidgets import QApplication
 from bin.MainWindow import MainWindow
 
-
 from bin.Log import LogUtil
 import traceback
-from qt_material import apply_stylesheet
 
-
-global APP_VERSION
-APP_VERSION = (0,5,0)
-
-global ROOT_PATH
-ROOT_PATH = root_path
+from bin.UIManager import ThemeHandler
 
 if __name__ == '__main__':
+    if not ROOT_PATH in sys.path:
+        sys.path.append(ROOT_PATH)
+
     app = QApplication(sys.argv)
+
+    ''' Initialize Log'''
     logger = LogUtil(__name__)
-    logger.info('4dExplorer is launched.')
-    # apply_stylesheet(app, theme = 'light_blue.xml')
-    # apply_stylesheet(app, theme = 'dark_cyan.xml')
+    logger.info('4D-Explorer is launched.')
+
+    ''' Initialize UI theme'''
+    theme_handler = ThemeHandler(app)
+    theme_handler.initializeTheme()
+
     try:
-        window = MainWindow()
+        window = MainWindow(app)
         window.show()
         app.exec()
     except SystemExit as e: 
-        logger.info('System Exit: 4dExplorer is closed')
+        logger.info('System Exit: 4D-Explorer quits.')
     except BaseException as e:
         # Any exceptions and their tracebacks will be recorded in logs.
         exc_type, exc_value, exc_obj = sys.exc_info()

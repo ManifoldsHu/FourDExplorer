@@ -4,17 +4,18 @@
 
 import sys
 import os
-from PySide6.QtWidgets import QMainWindow
+from PySide6.QtWidgets import QMainWindow, QApplication
 from ui.uiMainWindow import Ui_MainWindow
 
 
 
 
 class MainWindow(QMainWindow,):
-    def __init__(self):
+    def __init__(self, app: QApplication):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self._app = app
 
         self.setWindowTitle('4D-Explorer')
 

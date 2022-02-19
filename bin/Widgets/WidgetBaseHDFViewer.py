@@ -27,7 +27,7 @@ from bin.HDFManager import HDFHandler
 from bin.Log import LogUtil
 
 import configparser
-from app import ROOTPATH
+# from app import ROOTPATH
 
 # import h5py
 # from collections.abc import Mapping

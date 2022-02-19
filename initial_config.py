@@ -1,26 +1,25 @@
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
+from Constants import CONFIG_PATH, ROOT_PATH, UITheme
 import os
+from bin.UIManager import ThemeHandler
 
 if __name__ == '__main__':
     config = ConfigParser()
-    ROOTPATH = os.path.dirname(os.path.abspath(__file__))
-    cfg_path = os.path.join(ROOTPATH, '.config')
-    config.read(cfg_path, encoding = 'UTF-8')
 
-    config.add_section('UI')
-    config.add_section('Log')
+    config.read(CONFIG_PATH, encoding = 'UTF-8')
 
-    config['UI']['mode'] = 'light'
+    if not 'UI' in config:
+        config.add_section('UI')
+    config['UI']['Theme'] = 'light_blue'
 
-    config['Log']['path_mode'] = 'Default'
-    config['Log']['path'] = '.'
+    if not 'Log' in config:
+        config.add_section('Log')
+    config['Log']['path'] = os.path.join(ROOT_PATH, 'logs')
 
-    # config.write(open(cfg_path, 'w'))
-    with open(cfg_path, 'w', encoding = 'UTF-8') as f:
+
+    with open(CONFIG_PATH, 'w', encoding = 'UTF-8') as f:
         config.write(f)
-    
 
-# config.add_section('')
 

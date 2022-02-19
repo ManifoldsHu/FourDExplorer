@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-*------------------------ Log.py ------------------------*
+*---------------------------------- Log.py -----------------------------------*
 
 具有可以打印日志的LogUtil类。
 
@@ -32,15 +32,15 @@ except BaseException as e:      # Or any other exception
     logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
 
 
-*------------------------ Log.py ------------------------*
+*---------------------------------- Log.py -----------------------------------*
 '''
 
 import logging
 import os.path
 import time
 
-import configparser
-from app import ROOT_PATH
+from configparser import ConfigParser
+from Constants import ROOT_PATH, CONFIG_PATH
 
 class LogUtil(object):
     '''
@@ -176,7 +176,13 @@ class LogUtil(object):
         '''
         Returns the path of logging file.
         '''
-        log_path = os.path.join(ROOT_PATH, 'logs')
+        config = ConfigParser()
+        try:
+            config.read(CONFIG_PATH, encoding = 'UTF-8')
+            log_path = config['Log']['path']
+        except KeyError:
+            log_path = os.path.join(ROOT_PATH, 'logs')
+            
         date = time.strftime('%Y%m%d', time.localtime(time.time()))
         log_file_name = os.path.join(log_path, date + '.log')
         return log_file_name
