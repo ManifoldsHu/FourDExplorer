@@ -139,6 +139,7 @@ import os
 from Constants import ROOT_PATH, CONFIG_PATH
 
 from PySide6.QtWidgets import QApplication
+from bin.HDFManager import HDFHandler
 from bin.MainWindow import MainWindow
 
 from bin.Log import LogUtil
@@ -160,6 +161,9 @@ if __name__ == '__main__':
     theme_handler = ThemeHandler(app)
     theme_handler.initializeTheme()
 
+    ''' Initialize HDF Manager'''
+    hdf_handler = HDFHandler(app)
+
     try:
         window = MainWindow(app)
         window.show()
@@ -171,4 +175,5 @@ if __name__ == '__main__':
         exc_type, exc_value, exc_obj = sys.exc_info()
         logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
     finally:
+        hdf_handler.closeFile()
         sys.exit()
