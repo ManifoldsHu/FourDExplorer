@@ -229,6 +229,7 @@ class HDFHandler(object):
         self._file = None
         self._file_path = ''
         self._lock = threading.Lock()
+        self._root_node = HDFGroupNode()
 
     @property
     def file_path(self):
@@ -413,9 +414,160 @@ class HDFHandler(object):
         """
         Create a FileStructureModel for 
         """
+        pass
 
+    @property
+    def root_node(self) -> 'HDFGroupNode':
+        return self._root_node
 
+    def buildHDFTree(self):
+        """
+        Build an HDFTree according to the current HDF5 file.
 
+        Will add child nodes recursively for the root_node and its childs.
+        """
+        if not self.file:
+            raise OSError('Must open a file before build HDFTree.')
+        
+        def _addChildDeepFirst(parent: 'HDFGroupNode'):
+            if isinstance(parent, HDFGroupNode):
+                for key in self.file[parent.path]:
+                    if isinstance(self.file[parent.path][key], h5py.Group):
+                        parent.addChild(HDFGroupNode(key, parent))
+                    elif isinstance(self.file[parent.path][key], h5py.Dataset):
+                        parent.addChild(HDFDataNode(key, parent))
+
+        _addChildDeepFirst(self.root_node)
+
+    def getNode(self, hdf_path: str) -> 'HDFTreeNode':
+        """
+        Get Node with the absolute path of the HDF5 items.
+
+        The path must start with '/', and end with the items' name.
+
+        arguments:
+            hdf_path: (str) absolute path of the HDF5 items.
+
+        returns:
+            (HDFTreeNode) 
+        """
+        if not isinstance(hdf_path, str):
+            raise TypeError(('hdf_path must be str, not '
+                '{0}'.format(type(hdf_path).__name__)))
+        elif hdf_path == '':
+            raise KeyError('hdf_path can not be null string')
+        elif hdf_path[0] != '/':
+            raise KeyError('hdf_path must start with slash /')
+        elif len(hdf_path) > 1 and hdf_path[-1] == '/':
+            raise KeyError('hdf_path cannot end with slash /')
+        elif hdf_path == '/':
+            return self.root_node
+        else:
+            keys_array = hdf_path.split('/')[1:]
+            node = self.root_node
+            for key in keys_array:
+                if key in node:
+                    node = node[key]
+                else:
+                    raise KeyError(('There is no key '
+                        '{0} in {1}'.format(key, node.name)))
+
+    def getRank(self, hdf_path: str = '') -> int:
+        """
+        Get the rank of the node among its mates.
+
+        In the hash table, the rank is not fixed. Here we will get the rank by 
+        the keysview of the dict. It is usually used to show items in a table.
+
+        arguments:
+            hdf_path: (str) absolute path of the HDF5 items
+
+        returns:
+            (int) rank of the node among its mates.
+        """
+        if hdf_path == '/':
+            return 0
+        else:
+            this = self.getNode(hdf_path)
+            key = hdf_path.split('/').pop()
+            rank = list(this.parent.keys()).index(key)
+            return rank
+
+    def addNewGroup(self, parent_path: str, name: str):
+        """
+        Add a group in the parent_path.
+
+        Will add a group in the HDF5 file and add a HDFGroupNode in HDFTree.
+
+        arguments:
+            parent_path: (str) absolute path of the HDF5 group.
+
+            name: (str) name of the new group
+        """
+        if not isinstance(parent_path, str):
+            raise TypeError(('parent_path must be str, not '
+                '{0}'.format(type(parent_path).__name__)))
+        elif not isinstance(name, str):
+            raise TypeError(('name must be str, not '
+                '{0}'.format(type(name).__name__)))
+        parent_node = self.getNode(parent_path)
+        if name in parent_node:
+            raise ValueError(('name {0} exists in {1}\n'
+                'path: {2}'.format(name, parent_node.name, parent_path)))
+        self.file[parent_path].create_group(name)
+        parent_node.addChild(HDFGroupNode(name))
+
+    def addNewData(self, 
+        parent_path: str, 
+        name: str, 
+        shape: tuple, 
+        dtype: str = 'float32',
+        compression: str = 'gzip',):
+        """
+        Create a dataset in the parent_path.
+
+        Will add a dataset in the HDF5 file and add a HDFDataNode in HDFTree.
+
+        arguments:
+            parent_path: (str) absolute path of the HDF5 group
+
+            name: (str) name of the new dataset
+        """
+        if not isinstance(parent_path, str):
+            raise TypeError(('parent_path must be str, not '
+                '{0}'.format(type(parent_path).__name__)))
+        elif not isinstance(name, str):
+            raise TypeError(('name must be str, not '
+                '{0}'.format(type(name).__name__)))
+        parent_node = self.getNode(parent_path)
+        if name in parent_node:
+            raise ValueError(('name {0} exists in {1}\n'
+                'path: {2}'.format(name, parent_node.name, parent_path)))
+        self.file[parent_path].create_dataset(
+            name, 
+            shape = shape, 
+            dtype = dtype, 
+            compression = compression)
+        parent_node.addChild(HDFDataNode(name, parent_node))
+
+    def deleteItem(self, hdf_path: str):
+        """
+        Delete the item with the hdf_path.
+
+        Will delete the item in the practical HDF5 file, and delete the node in 
+        HDFTree. If the item is a group, and there are subitems in the item, 
+        all of the subitems will be removed recursively.
+
+        arguments:
+            hdf_path: (str) absolute path of hdf5 item.
+        """
+        pass
+
+    def moveItem(self, item_path: str, dest_path: str):
+        pass
+
+    def renameItem(self, hdf_path: str, new_name: str):
+        pass
 
 class HDFTreeNode(Mapping):
     """
