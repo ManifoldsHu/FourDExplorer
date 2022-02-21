@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 *--------------------------------- app.py -----------------------------------*
 
 这是4dExplorer主程序。4dExplorer是一个用于4D-STEM的可视化四维数据加载、校正、计算、
@@ -31,9 +31,15 @@ All rights reserved.
             argument1,
             argument2,
             optional_argument3 = optional_argument3,
-        )
+        ):
 
-     - 当
+     - 根据 PEP-484，应当在定义函数时给出类型提示。如果要使用一个当前模块尚未定义的类
+       名，可以使用字符串。比如
+       class MyClass(object):
+           def __init__(self, parent: 'MyClass') -> None
+
+     - 所有公有函数或方法都应当编写文档字符串 (docstring)。文档字符串以三个双引号起头
+       及结尾。
 
 命名规范: 
      - 文件夹名: 全部小写。
@@ -53,7 +59,12 @@ All rights reserved.
 
      - 循环变量一般使用 ii, jj, kk, ll 等，不使用 i, j, k, l 等 (以与复数区分)。
 
-     - 严禁使用单字母变量。
+     - 严禁使用单字母变量，除以下两种情形：
+            o 使用 with 语句临时打开文件
+              with open(path, 'r') as f:
+                  ...
+            o 进行临时的异常处理时
+              except BaseException as e:
 
      - 在代码部分中，使用 i, j 表示矩阵的第一、第二指标(行指标、列指标)。但在代码部分
        中与 Matplotlib 交互的部分，且 Matplotlib 中指明了使用 (x,y) 表示坐标的地方，
@@ -104,23 +115,19 @@ All rights reserved.
             这是该函数或方法的描述
             This is the description of this function/method
 
-            arguments       type        description     #输入参数
-            ----------------------------------------------------------------
-            name1           type        This is the description of the input 
-                                        parameter
+            arguments:
+                name1: (type) This is the description of the input parameter
+                name2: (type) This is a loooooooonger description of the input
+                    parameter.
+            
+            returns:
+                (type) This is the description of the returns. For example:
+                    ...(examples)
 
-            name2           type        This is the description of the input 
-                                        parameter
-            ----------------------------------------------------------------
-
-            returns         type        description     #返回值
-            -----------------------------------------------------------------
-            name1           type        This is the description of the return 
-                                        value
-
-            name2           type        This is the description of the return 
-                                        value
-            -----------------------------------------------------------------
+            raises:
+                IOError: This is the description of the error raised by this
+                    function.
+                
      - 行内注释一般用 # 开头，可任意放置。长度不应当超过80列。
 
      - 废弃代码应当使用行内注释将其废弃，而不应当直接删除。直到长期不使用、使用Git更
@@ -132,7 +139,7 @@ All rights reserved.
 
 
 
-'''
+"""
 
 import sys
 import os

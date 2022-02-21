@@ -61,35 +61,46 @@ All rights reserved.
 
 
 import os
+from datetime import datetime
+import threading
+import queue
+import time
+import traceback
+
 import h5py
 import numpy as np
 
 from PySide6.QtWidgets import QApplication 
 
-from datetime import datetime
-import threading
-import queue
-import time
-
 from bin.Log import LogUtil
-import traceback
-logger = LogUtil(__name__)
+from Constants import APP_VERSION
 
-from bin import DataReaderEMPAD
+# from bin import DataReaderEMPAD
 # from bin.BackEnd import BackEnd
 # from bin.Preview import PreviewHandler
 
+logger = LogUtil(__name__)
+
 class HDFHandler(object):
-    '''
-    使用HDF5文件处理的封装类。其应当包含以下方法：
-        - 设置指向的h5文件的路径
-        - 创建h5文件并初始化
-        - 读取h5文件，对不合规的文件进行初始化
-        - 删除h5文件            # 安全性问题？
-        - 填充dataset
-        - 填充attributes
-        - 读取dataset
-        - 读取attributes
+    """
+    使用 HDF5 文件处理的封装类。其应当包含以下方法：
+
+        - 设置指向的 h5 文件的路径
+        - 创建 h5 文件并初始化
+        - 读取 h5 文件，对不合规的文件进行初始化
+        - 删除 h5 文件            # 安全性问题？
+
+        - 生成 HDFTree，用于对 HDF5 文件内部的路径进行管理
+        - 根据 HDFTree 生成用于 Qt 的 Model。
+        - 根据 hdf_path 取到对应的 HDFTree 中的 HDFTreeNode
+        - 根据 hdf_path 取到对应的 HDFTree 中的 HDFTreeNode 在同级 Node 中的序号
+        - 根据 hdf_path 增加 Group，同时修改对应的 HDFTree
+        - 根据 hdf_path 增加 Data，同时修改对应的 HDFTree
+        - 根据 hdf_path 删除 Group 或 Data，同时修改对应的 HDFTree
+        - 根据 hdf_path 移动 Group 或 Data，同时修改对应的 HDFTree
+        - 根据 hdf_path 重命名 Group 或 Data，同时修改对应的 HDFTree
+        - (不提供复制的功能，原因是这很耗时，应当作为一个任务提交给 TaskManager)
+
 
     注意，这个类使用单例模式，如果已经有一个这个类的实例，那么再次创建该类的实例的时
     候就直接返回已有的那个实例。
@@ -124,10 +135,21 @@ class HDFHandler(object):
         - create the h5 file and initialize,
         - read the h5 file, and initialize those invalid files,
         - delete the h5 file (will be used to delete temp files),
-        - load dataset,
-        - load attributes,
-        - read dataset,
-        - and set the attributes of dataset
+
+        - create HDFTree, in order to manage the hdf path,
+        - according to the HDFTree, create model for Qt (Model-View structure),
+        - according to the hdf_path, get Node in the HDFTree,
+        - according to the hdf_path, get row of the node in the HDFTree,
+        - according to the hdf_path, create group and fix HDFTree,
+        - according to the hdf_path, create data and fix HDFTree,
+        - according to the hdf_path, remove items and fix HDFTree,
+        - according to the hdf_path, move items and fix HDFTree,
+        - according to the hdf_path, rename items and fix HDFTree,
+        - (there is no copy api, because it is time-consumed and should be a t-
+        ask to be submitted to the TaskManager)
+    
+
+        
 
     NOTE: there is only SINGLE instance (Singleton). If there has been one ins-
     tance of this class, the existing instance will be returned.
@@ -165,14 +187,19 @@ class HDFHandler(object):
                                             results that may occur in the futu-
                                             re. When closing, all data in this 
                                             Group should be deleted.
-    '''
+    """
+
     _instance = None
     _instance_lock = threading.Lock()
 
     def __new__(cls, app: QApplication):
-        '''
-        There is only one instance allowed to exist. (This is a singleton class)
-        '''
+        """There is only one instance allowed to exist. 
+        
+        (This is a singleton class)
+
+        arguments:
+            app: (QApplication) the main QApplication.
+        """
         with cls._instance_lock:
             if cls._instance is None:
                 cls._instance = object.__new__(cls)
@@ -180,46 +207,52 @@ class HDFHandler(object):
             return cls._instance
 
     def __init__(self, app: QApplication):
-        '''
-        arguments           type                description
-        -----------------------------------------------------------------------
-        app                 QApplication        The main application instance.
-        -----------------------------------------------------------------------
-        '''
+        """
+        arguments:
+            app: (QApplication)
+        """
         self._app = app 
         self._file = None
-        self._path = ''
+        self._file_path = ''
         self._lock = threading.Lock()
 
     @property
-    def path(self):
-        return self._path
+    def file_path(self):
+        """
+        Get the current h5 file path.
 
-    @path.setter
-    def path(self, value: str):
-        '''
+        returns:
+            (str) the current h5 file path. If there is no file opened,
+                returns ''.
+        """
+        return self._file_path
+
+    @file_path.setter
+    def file_path(self, value: str):
+        """
         Set the h5 file path. Will close the current file.
 
-        arguments           type                description
-        -----------------------------------------------------------------------
-        value               str                 the absolute path of the new 
-                                                h5 file
-        -----------------------------------------------------------------------
-        '''
+        arguments:
+            value: (str) the absolute path of the new h5 file.
+
+        """
         if not isinstance(value, str):
             raise TypeError('Expected a string.')
-        if value != self.path and self.isFileOpened():
+        if value != self.file_path and self.isFileOpened():
             self.file.close()
 
-        self._path = value
+        self._file_path = value
 
 
-    def isPathValid(self) -> bool:
-        '''
-        Return if the file is a valid h5 file.
-        '''
+    def isFilePathValid(self) -> bool:
+        """
+        Return whether the file is a valid h5 file.
+
+        returns:
+            (bool)
+        """
         try:
-            with h5py.File(self.path, mode = 'r') as file:
+            with h5py.File(self.file_path, mode = 'r') as file:
                 is_valid = isinstance(file, h5py.File)
             return is_valid
         except OSError as e:
@@ -228,73 +261,58 @@ class HDFHandler(object):
           
      
     @property
-    def file(self):
-        return self._file
+    def file(self) -> h5py.File:
+        """
+        Returns opened file. if the file is not opened, returns NoneType.
+
+        Returns:
+            (h5py.File)
+        """
+        if self.isFileOpened():
+            return self._file
+        else:
+            return None
 
     @file.setter
-    def file(self, value):
-        '''
+    def file(self, h5_file: h5py.File):
+        """
         Set the h5 file.
 
-        arguments           type                description
-        -----------------------------------------------------------------------
-        value               h5py.File           Must be h5py.File object or 
-                                                None.
-        -----------------------------------------------------------------------
-        '''
-        if value == None or isinstance(value, h5py.File):
-            self._file = value
+        arguments:
+            h5_file: (h5py.File) Must be h5py.File or NoneType.
+        """
+        if h5_file == None or isinstance(h5_file, h5py.File):
+            self._file = h5_file
         else:
             raise TypeError('file must be a h5py.File or None.')
                
 
-    @property
-    def shape(self):    # the shape of dataset, (scan_i, scan_j, dp_i, dp_j)
-        if self.isFileOpened():
-            if 'Dataset' in self.file:
-                scan_i = self.file['Dataset'].attrs['scan_i']
-                scan_j = self.file['Dataset'].attrs['scan_j']
-                dp_i = self.file['Dataset'].attrs['dp_i']
-                dp_j = self.file['Dataset'].attrs['dp_j']
-                return (scan_i, scan_j, dp_i, dp_j)
-        return None
+    def createFile(self) -> bool:
+        """
+        Create a new standard h5 file according to the file_path attribute.
+        
+        Fail if there exists.
 
-     
-    @property
-    def is_flipped(self):    
-        # Return if raw_data is flipped. When it is True, every diffraction 
-        # pattern should be transposed when reading.
-        if self.isFileOpened():
-            if 'Dataset' in self.file:
-                if 'is_flipped' in self.file['Dataset'].attrs:
-                    is_flipped = self.file['Dataset'].attrs['is_flipped']
-                    return is_flipped
-        return False
-
-
-    def createFile(self) -> str:
-        '''
-        Create a new standard h5 file. Read/write the current file if there 
-        exists a file.
-        '''
+        returns:
+            (bool) whether the file is created.
+        """
         try:
-            with h5py.File(self.path, mode = 'w-') as file:   # create, fail if exists
+            with h5py.File(self.file_path, mode = 'w-') as file: # create, 
+                                                            # fail if exists
                 self._initializeFile(file)
         except OSError as e:
             logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
-            return ''
-        return self.path
+            return False
+        return True
 
 
-    def _initializeFile(self, file):
-        '''
+    def _initializeFile(self, file: h5py.File):
+        """
         Initialize a h5 file. Some groups and attributes will be added.
 
-        arguments           type                description
-        -----------------------------------------------------------------------
-        file                h5py.File           
-        -----------------------------------------------------------------------
-        '''
+        arguments:
+            file: (h5py.File) the file object being initialized.
+        """
                     
         if 'Reconstruction' not in file:
             file.create_group('Reconstruction')
@@ -304,20 +322,25 @@ class HDFHandler(object):
             file.create_group('tmp')
 
         root = file['/']
-        root.attrs['4dExplorer'] = True
+        root.attrs['4D-Explorer'] = True
         root.attrs['FileCreateTime'] = '{0}'.format(datetime.now)
-        root.attrs['Version'] = '0.5'
+        root.attrs['Version'] = str(APP_VERSION)
           
      
     def openFile(self):
-        '''
-        Read a h5 file. Fail if there is no file corresponding to the path. 
-        The file must be read before it is handled by HDFManager modules.
-        '''
+        """
+        Open a h5 file. 
+        
+        Fail if there is no file corresponding to the file_path attribute. 
+        The file must be opened before it is handled by HDFManager modules.
+
+        Returns:
+            (h5py.File) the opened file.
+        """
         try:
             if not self.isFileOpened():
                 # Read/write, file must exist
-                self.file = h5py.File(self.path, mode='r+')  
+                self.file = h5py.File(self.file_path, mode='r+')  
         except OSError as e:
             logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
             return None
@@ -325,21 +348,26 @@ class HDFHandler(object):
 
 
     def closeFile(self):
-        '''
-        Close the h5 file. The file must be closed before:
-            - the path is changed
+        """
+        Close the h5 file. 
+        
+        The file must be closed before:
+            - the file_path is changed
             - the file is deleted
             - the application is exit
-        '''
+        """
         if self.isFileOpened():
             self.file.close()
         self.file = None
           
 
-    def isFileOpened(self):
-        '''
-        Return if the hdf5 file is opened.
-        '''
+    def isFileOpened(self) -> bool:
+        """
+        Returns whether the hdf5 file is opened.
+
+        returns:
+            (bool) 
+        """
         if self.file is None:
             return False
         if self.file.id: 
@@ -349,178 +377,26 @@ class HDFHandler(object):
             return False
 
 
-    def deleteFile(self):
-        '''
+    def deleteFile(self) -> bool:
+        """
         Delete the h5 file. Fail if there is no file.
-        '''
+
+        returns:
+            (bool)
+        """
         if self.isFileOpened():
             self.file.close()
-        if self.isPathValid():
+        if self.isFilePathValid():
             try:
-                os.remove(self.path)
+                os.remove(self.file_path)
+                return True
             except OSError as e:
                 logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+                return False
 
 
-          
-    def createDataset(self, shape: tuple, dtype = 'float32', chunks = None,):
-        '''
-        Create a four-dimensional dataset. The dataset must be created before 
-        loaded.
+    def createModel(self):
+        """
+        Create a FileStructureModel for 
+        """
 
-          
-        arguments           type                description
-        -----------------------------------------------------------------------
-        shape               tuple               Must be (scan_i, scan_j, dp_i, 
-                                                dp_j)
-
-        dtype               str                 Data type of the dataset
-
-        ischunked           bool                Set the dataset if it is chu-
-                                                nk stored.
-        -----------------------------------------------------------------------
-          
-        '''
-        if not isinstance(shape, tuple):
-            raise TypeError('shape must be a tuple with the lenth 4.')
-        elif len(shape) != 4:
-            raise TypeError('shape must be a tuple with the lenth 4.')
-
-        scan_i, scan_j, dp_i, dp_j = shape
-        success = False
-
-
-        if self.isFileOpened():
-            if 'Dataset' in self.file:
-                logger.warning('There has been dataset in the file. '\
-                        'No new dataset is created.')
-            else:
-                Dataset = self.file.create_dataset(
-                    'Dataset', 
-                    shape = shape, 
-                    dtype = dtype, 
-                    chunks = chunks,
-                )
-                self.setDatasetAttribute('scan_i', scan_i,)
-                self.setDatasetAttribute('scan_j', scan_j,)
-                self.setDatasetAttribute('dp_i', dp_i)
-                self.setDatasetAttribute('dp_j', dp_j)
-                success = True
-        else:
-            logger.warning('File must be opened before creating Dataset.')
-        return success
-
-
-    def writeDataset(self, pos: tuple, data: np.ndarray):
-        '''
-        Write data into the four-dimensional dataset. Basically, the pos arg-
-        ument will be a tuple with two elements, (scan_i, scan_j). While the 
-        shape of loaded matrix will be (dp_i, dp_j). Only one diffraction pa-
-        ttern will be loaded at a time, in order to save memory.
-          
-
-        arguments           type                description
-        ---------------------------------------------------------------------
-        pos                 tuple               Must be (ii, jj) where 
-                                                0 <= ii < scan_i and 
-                                                0 <= jj < scan_j .
-
-        data                numpy.ndarray       The matrix that will be copi-
-                                                ed into the dataset
-        ---------------------------------------------------------------------
-        '''
-        with self._lock:
-            self.file['Dataset'][pos[0],pos[1],:,:] = data
-
-     
-    def deleteDataset(self) -> bool:
-        '''
-        Delete the four-dimensional dataset in the file.
-        '''
-        if not self.isFileOpened():
-            logger.warning('File must be opened before deleting dataset.')
-            return False
-        if self.file['Dataset']:
-            del self.file['Dataset']
-            return True
-        else:
-            logger.warning('There is no Dataset in the file.')
-            return False
-
-
-    def loopDataset(self, buffer: queue.Queue,):
-        '''
-        Loop the whole dataset, and put one diffraction pattern into the buf-
-        fer each time. Designed to run in another thread instead of the main 
-        thread.
-        '''
-        scan_i, scan_j, dp_i, dp_j = self.shape
-        dataset = self.file['Dataset']
-        for r_ii in range(scan_i):
-            for r_jj in range(scan_j):
-                with self._lock:
-                    buffer.put(r_ii, r_jj, dataset[r_ii, r_jj])
-        buffer.put(-1)
-
-
-    def setDatasetAttribute(self, key: str, value):
-        '''
-        Set the Dataset attribute. The Dataset must be created before setting
-        the attributes.
-
-        arguments           type                description
-        -----------------------------------------------------------------------
-        key                 str                 Dataset attribution
-
-        value                                   the value of the Dataset attri-
-                                                bution. Most likely it should 
-                                                not be too large in size.
-        -----------------------------------------------------------------------
-        '''
-        if self.isFileOpened():
-            if 'Dataset' in self.file:
-                Dataset = self.file['Dataset']
-                if isinstance(key, str):
-                    Dataset.attrs[key] = value
-            else:
-                logger.warning('There is no Dataset in the file.')
-        else:
-            logger.warning('File must be opened before setting attributes'\
-                ' of Datasets.')
-
-
-    def deleteDatasetAttribute(self, key: str):
-        '''
-        Delete the Dataset attribute. The Dataset must exist.
-
-        arguments           type                description
-        -----------------------------------------------------------------------
-        key                 str                 Dataset attribution
-        -----------------------------------------------------------------------
-        '''
-        if self.isFileOpened():
-            if 'Dataset' in self.file:
-                Dataset = self.file['Dataset']
-                if key in Dataset.attrs:
-                    del Dataset.attrs[key]
-            else:
-                logger.warning('There is no Dataset in the file')
-        else:
-            logger.warning('File must be opened before setting attributes' \
-                ' of Dataset.')
-
-     
-    # def traverseAllNodes(self) -> list:
-    #     '''
-    #     将 HDF5 文件中的 groups 和 datasets 遍历地显示出来。
-
-    #     Traverse the groups and datasets in the HDF5 file.
-    #     '''
-    #     nodelist = []
-    #     def appendAllNodes(node, nodelist):
-    #         nodelist.append(node)
-    #         if isinstance(node, h5py.Group):
-    #             for keys in node:
-    #                 appendAllNodes(node[keys], nodelist = nodelist)
-    #     appendAllNodes(self.file['/'], nodelist = nodelist)
-    #     return nodelist

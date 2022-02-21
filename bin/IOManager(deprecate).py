@@ -141,6 +141,179 @@ class IOThreadHandler:
                          self._backend.hdf5_handler.writeDataset((r_ii, r_jj), data)
                     
      
-     
+class DataCubeManager(object):
+    """
+    管理 4D-STEM DataCube 的 Manager。
+    """
+    @property
+    def shape(self):    # the shape of dataset, (scan_i, scan_j, dp_i, dp_j)
+        if self.isFileOpened():
+            if 'Dataset' in self.file:
+                scan_i = self.file['Dataset'].attrs['scan_i']
+                scan_j = self.file['Dataset'].attrs['scan_j']
+                dp_i = self.file['Dataset'].attrs['dp_i']
+                dp_j = self.file['Dataset'].attrs['dp_j']
+                return (scan_i, scan_j, dp_i, dp_j)
+        return None
 
+     
+    @property
+    def is_flipped(self):    
+        # Return if raw_data is flipped. When it is True, every diffraction 
+        # pattern should be transposed when reading.
+        if self.isFileOpened():
+            if 'Dataset' in self.file:
+                if 'is_flipped' in self.file['Dataset'].attrs:
+                    is_flipped = self.file['Dataset'].attrs['is_flipped']
+                    return is_flipped
+        return False
+
+          
+    def createDataset(self, shape: tuple, dtype = 'float32', chunks = None,):
+        '''
+        Create a four-dimensional dataset. The dataset must be created before 
+        loaded.
+
+          
+        arguments           type                description
+        -----------------------------------------------------------------------
+        shape               tuple               Must be (scan_i, scan_j, dp_i, 
+                                                dp_j)
+
+        dtype               str                 Data type of the dataset
+
+        ischunked           bool                Set the dataset if it is chu-
+                                                nk stored.
+        -----------------------------------------------------------------------
+          
+        '''
+        if not isinstance(shape, tuple):
+            raise TypeError('shape must be a tuple with the lenth 4.')
+        elif len(shape) != 4:
+            raise TypeError('shape must be a tuple with the lenth 4.')
+
+        scan_i, scan_j, dp_i, dp_j = shape
+        success = False
+
+
+        if self.isFileOpened():
+            if 'Dataset' in self.file:
+                logger.warning('There has been dataset in the file. '\
+                        'No new dataset is created.')
+            else:
+                Dataset = self.file.create_dataset(
+                    'Dataset', 
+                    shape = shape, 
+                    dtype = dtype, 
+                    chunks = chunks,
+                )
+                self.setDatasetAttribute('scan_i', scan_i,)
+                self.setDatasetAttribute('scan_j', scan_j,)
+                self.setDatasetAttribute('dp_i', dp_i)
+                self.setDatasetAttribute('dp_j', dp_j)
+                success = True
+        else:
+            logger.warning('File must be opened before creating Dataset.')
+        return success
+
+
+    def writeDataset(self, pos: tuple, data: np.ndarray):
+        '''
+        Write data into the four-dimensional dataset. Basically, the pos arg-
+        ument will be a tuple with two elements, (scan_i, scan_j). While the 
+        shape of loaded matrix will be (dp_i, dp_j). Only one diffraction pa-
+        ttern will be loaded at a time, in order to save memory.
+          
+
+        arguments           type                description
+        ---------------------------------------------------------------------
+        pos                 tuple               Must be (ii, jj) where 
+                                                0 <= ii < scan_i and 
+                                                0 <= jj < scan_j .
+
+        data                numpy.ndarray       The matrix that will be copi-
+                                                ed into the dataset
+        ---------------------------------------------------------------------
+        '''
+        with self._lock:
+            self.file['Dataset'][pos[0],pos[1],:,:] = data
+
+     
+    def deleteDataset(self) -> bool:
+        '''
+        Delete the four-dimensional dataset in the file.
+        '''
+        if not self.isFileOpened():
+            logger.warning('File must be opened before deleting dataset.')
+            return False
+        if self.file['Dataset']:
+            del self.file['Dataset']
+            return True
+        else:
+            logger.warning('There is no Dataset in the file.')
+            return False
+
+
+    def loopDataset(self, buffer: queue.Queue,):
+        '''
+        Loop the whole dataset, and put one diffraction pattern into the buf-
+        fer each time. Designed to run in another thread instead of the main 
+        thread.
+        '''
+        scan_i, scan_j, dp_i, dp_j = self.shape
+        dataset = self.file['Dataset']
+        for r_ii in range(scan_i):
+            for r_jj in range(scan_j):
+                with self._lock:
+                    buffer.put(r_ii, r_jj, dataset[r_ii, r_jj])
+        buffer.put(-1)
+
+
+    def setDatasetAttribute(self, key: str, value):
+        '''
+        Set the Dataset attribute. The Dataset must be created before setting
+        the attributes.
+
+        arguments           type                description
+        -----------------------------------------------------------------------
+        key                 str                 Dataset attribution
+
+        value                                   the value of the Dataset attri-
+                                                bution. Most likely it should 
+                                                not be too large in size.
+        -----------------------------------------------------------------------
+        '''
+        if self.isFileOpened():
+            if 'Dataset' in self.file:
+                Dataset = self.file['Dataset']
+                if isinstance(key, str):
+                    Dataset.attrs[key] = value
+            else:
+                logger.warning('There is no Dataset in the file.')
+        else:
+            logger.warning('File must be opened before setting attributes'\
+                ' of Datasets.')
+
+
+    def deleteDatasetAttribute(self, key: str):
+        '''
+        Delete the Dataset attribute. The Dataset must exist.
+
+        arguments           type                description
+        -----------------------------------------------------------------------
+        key                 str                 Dataset attribution
+        -----------------------------------------------------------------------
+        '''
+        if self.isFileOpened():
+            if 'Dataset' in self.file:
+                Dataset = self.file['Dataset']
+                if key in Dataset.attrs:
+                    del Dataset.attrs[key]
+            else:
+                logger.warning('There is no Dataset in the file')
+        else:
+            logger.warning('File must be opened before setting attributes' \
+                ' of Dataset.')
+
+        
 
