@@ -60,12 +60,16 @@ All rights reserved.
 '''
 
 
+from multiprocessing import parent_process
 import os
 from datetime import datetime
+import re
 import threading
 import queue
 import time
 import traceback
+from collections.abc import Mapping
+from typing import Iterator
 
 import h5py
 import numpy as np
@@ -75,11 +79,15 @@ from PySide6.QtWidgets import QApplication
 from bin.Log import LogUtil
 from Constants import APP_VERSION
 
+
 # from bin import DataReaderEMPAD
 # from bin.BackEnd import BackEnd
 # from bin.Preview import PreviewHandler
 
 logger = LogUtil(__name__)
+reValidHDFName = re.compile(
+    r'^[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
+)   # A valid hdf_name must be able to match this regular expression.
 
 class HDFHandler(object):
     """
@@ -187,6 +195,12 @@ class HDFHandler(object):
                                             results that may occur in the futu-
                                             re. When closing, all data in this 
                                             Group should be deleted.
+
+
+
+    Attributes:
+        file_path: (str) the HDF5 file path.
+        file: (h5py.File) the OPENED HDF5 file, or NoneType.
     """
 
     _instance = None
@@ -400,3 +414,362 @@ class HDFHandler(object):
         Create a FileStructureModel for 
         """
 
+
+
+
+class HDFTreeNode(Mapping):
+    """
+    HDFTree 路径树的节点。
+    
+    这是一个基类，要实例化的话，请使用 HDFGroupNode 和 HDFDataNode 这些子类。
+
+    根节点的名字强制为空字符串 ''。除此之外，其他节点的命名规则是：
+        - 不能为空字符串
+        - 只能包含数字、英文字母、下划线 '_'、短横杠 '-'、点号 '.' 以及空格
+        - 不能以空格开头。
+
+
+    The Node of HDFTree. 
+    
+    It is not recommended to instantiate HDFTreeNode, but to instantiate its 
+    subclass like HDFGroupNode and HDFDataNode. 
+    
+    
+    The name of the root node is forced to be null str '', while other nodes h-
+    ave their own names. Except the root node, others' name follow these rules:
+        - cannot be a null string
+        - can only include numbers, English characters, underline '_', dashline
+        '-', dot '.', and space ' '
+        - cannot start with space ' '.
+    
+
+    attributes:
+        name: (str) The name of the node. if the name is null string (''), it 
+            is the root node of the HDFTree.
+
+        parent: (HDFTreeNode) The parent node of this node.
+
+        path: (str) The hdf_path of this node. like '/foo/abc' 
+    """
+
+    def __init__(self, name: str, parent: 'HDFTreeNode'):
+        """
+        arguments:
+            name: (str) only root's name can and must be null string ''. Usual-
+                ly, to instantiate a root node, use HDFGroupNode rather than 
+                HDFTreeNode. 
+
+            parent: (HDFTreeNode or NoneType)
+        """
+        self.name = name
+        self.parent = parent
+
+    def __str__(self) -> str:
+        return '<HDFTreeNode> name: {0}'.format(self.name)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    @property 
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, new_name: str):
+        """
+        Give a new name to this node. The name here must be a string that:
+            - can only include numbers, characters, underline '_', dash '-', 
+                dot '.' and space ' '.
+            - cannot start as space ' '.
+        Otherwise a ValueError is raised.
+
+        arguments:
+            new_name: (str) give a new name to this node. User must change the
+                practical item's name in the HDF file at the same time. Otherw-
+                ise, after a flush the name change will be lost.
+        """
+        if new_name == '':
+            self._name = ''
+        else:
+            # valid_name_pattern = r'^[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
+            if not isinstance(new_name, str):
+                raise TypeError(('new_name must be a str, not '
+                    '{0}'.format(type(new_name))))
+            elif not reValidHDFName.match(new_name):
+                raise ValueError('Invalid name: {0}'.format(new_name))
+            else:
+                self._name = new_name
+                
+    
+    @property 
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, parent: 'HDFGroupNode'):
+        """
+        Set the parent node of this node.
+
+        arguments:
+            parent: (HDFTreeNode) either also an HDFTreeNode or NoneType. In 
+            most cases, if the parent is None, the node's name should be '', 
+            which indicates that this is a root node.
+        """
+        if parent is None:
+            self._parent = None
+        elif not isinstance(parent, HDFGroupNode):
+            raise TypeError(('parent must be HDFTreeNode or NoneType,'
+                ' not {0}'.format(type(parent))))
+        else:
+            self._parent = parent
+
+    @property 
+    def path(self) -> str:
+        """
+        Indicates the full hdf_path of this node inside the file. Like:
+        '/', (root)
+        '/foo/abc' (maybe a group or a data)
+
+        returns:
+            (str) the full hdf_path of this node.
+        """
+        if self._getPathInTree() == '':
+            return '/'
+        else:
+            return self._getPathInTree()
+
+    def _getPathInTree(self) -> str:
+        if self.parent == None:
+            return ''
+        else:
+            return self.parent._getPathInTree() + '/' + self.name
+
+    
+class HDFGroupNode(HDFTreeNode):
+    """
+    用来表示 Group 的节点。
+
+    可以为其添加、删除子节点。为了支持类似于 Mapping 风格 (类似于 dict) 的读取方式，
+    我们应当实现以下魔法方法：
+        - __contains__(self, key: str) -> bool
+        - __getitem__(self, key: str) -> obj
+        - __setitem__(self, key: str, child: HDFTreeNode)
+        - __iter__(self) -> iterator
+        - __len__(self) -> int
+        - keys(self) -> KeysView
+        - items(self) -> ItemsView
+        - values(self) -> ValuesView
+
+    注意，与 h5py 中表现得不同，不能通过 hdf_path 取到其子节点：
+        node['/foo/abc']            (No)
+        node['foo']                 (Yes)
+    此外，对 Node 的子节点进行修改时，不建议直接使用
+        node['foo'] = child_node
+    的方式，因为这样可能会有如下副作用：
+        - 将 child_node 从其 parent 的子节点中删除
+        - 将现有的 node['foo'] 的 parent 属性改成 None
+        - 将现有的 node['foo'] 从子节点中删除
+        - 将 child_node 的 parent 属性改成 node
+        - 将 child_node 的 name 属性改成 'foo'
+    因此，建议使用 addChild() 和 deleteChild() 方法，并且由用户手动控制这个过程。
+
+
+    This node is to indicate Groups in HDF5 files. 
+    
+    We can add or remove its child. In order to support mapping style (like 
+    dict in python), we need to reimplement the following methods:
+        - __contains__(self, key: str) -> bool
+        - __getitem__(self, key: str) -> obj
+        - __iter__(self) -> iterator
+        - __len__(self) -> int
+        - keys(self) -> KeysView
+        - items(self) -> ItemsView
+        - values(self) -> ValuesView
+
+    NOTE: Unlike mapping interface in h5py, we cannot get subitem from hdf_path
+    like this:
+        node['/foo/abc']            (No)
+        node['foo']                 (Yes)
+    Also, when we need to change subnodes, it is NOT recommended to use
+        node['foo'] = child_node
+    because it may has following side-effect:
+        - delete child_node from its parent's subitems
+        - change the 'parent' attribute of current node['foo'] to None
+        - delete the current node['foo'] from this subitems
+        - change the 'parent' attribute of child_node to this
+        - change the 'name' attribute of child_node to 'foo'
+    Hence, use addChild() and deleteChild() method instead.
+
+
+    attributes:
+        name: (str) only root's name can and must be null string ''. 
+
+        parent: (HDFTreeNode or NoneType)
+    """
+
+    def __init__(self, name: str = '', parent: 'HDFGroupNode' = None):
+        """
+        arguments:
+            name: [optional](str) only root's name can and must be a null stri-
+                ng 
+            
+        parent: [optional](HDFTreeNode or NoneType) only root's parent can and
+        must be NoneType.
+        """
+        super().__init__(name, parent)
+        self._mapping = {}
+    
+    def __getitem__(self, key: str) -> 'HDFTreeNode':
+        return self._mapping[key]
+
+    def __iter__(self) -> Iterator:
+        return iter(self._mapping)
+
+    def __len__(self) -> int:
+        return len(self._mapping)
+
+    def __setitem__(self, key: str, child: HDFTreeNode):
+        """
+        NOTE: this method may have following side-effect:
+            - delete the original child from this node, 
+            - change the original child's parent attribute to None
+            - delete new child from its original parent,
+            - change new child's parent attribute to this,
+            - change new child's name to the key
+
+        It is not recommended to use this method to set child. Use addChild()
+        and deleteChild() methods instead.
+        """
+        
+        if not isinstance(key, str):
+            raise TypeError(('Key must be a string, not '
+                '{0}'.format(type(key).__name__)))
+        if not isinstance(child, HDFTreeNode):
+            raise TypeError(('child must be a HDFTreeNode, not '
+                '{0}'.format(type(child).__name__)))
+
+        if key == '':
+            raise ValueError('Cannot set child name as a null string')
+        elif not reValidHDFName.match(key):
+            raise ValueError('Invalid child name: {0}'.format(key))
+
+        if key in self._mapping:    # delete original child from this
+            original_child = self._mapping[key]
+            original_child.parent = None
+            del self._mapping[key]
+
+        self._mapping[child.name] = child
+
+        if child.parent:            # delete child from its original parent
+            del child.parent[child.name]
+        child.name = key
+        child.parent = self
+
+    def __delitem__(self, key: str):
+        del self._mapping[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self._mapping
+    
+    def addChild(self, child: HDFTreeNode):
+        """
+        Add a child to this node. Will change child's parent attribute.
+
+        arguments:
+            child: (HDFTreeNode)
+        """
+        if not isinstance(child, HDFTreeNode):
+            raise TypeError(('child must be a HDFTreeNode, not '
+                '{0}'.format(type(child).__name__)))
+        if child.name == '':
+            raise ValueError('Cannot set child name as a null string')
+        if child.name in self:
+            raise ValueError(('Child name already exists: '
+                '{0}'.format(child.name)))
+        else:
+            self._mapping[child.name] = child
+            child.parent = self
+
+    def deleteChild(self, child: HDFTreeNode) -> HDFTreeNode:
+        """
+        Delete a child of this node. Will change child's parent attribute.
+
+        arguments:
+            child: (HDFTreeNode)
+
+        returns:
+            (HDFTreeNode) the deleted child
+        """
+        if not isinstance(child, HDFTreeNode):
+            raise TypeError(('child must be an HDFTreeNode, not '
+                '{0}'.format(type(child).__name__)))
+        elif not child.name in self:
+            raise KeyError(('child name not found in this node: '
+                '{0}'.format(child.name)))
+        elif child.parent != self:
+            raise ValueError('The parent of child is not this')
+        else:
+            del self[child.name]
+            child.parent = None
+            return child
+
+    def keys(self):
+        return self._mapping.keys()
+
+    def values(self):
+        return self._mapping.values()
+
+    def items(self):
+        return self._mapping.items()
+
+
+class HDFDataNode(HDFTreeNode):
+    """
+    用来表示 Dataset 的节点。它没有子节点。
+
+    Node used to indicate dataset in HDF5 file. It does not have subnodes.
+    """
+    def __init__(self, name: str, parent: HDFGroupNode):
+        """
+        arguments:
+            name: (str) the name cannot be null string
+            parent: (HDFGroupNode)
+        """
+        super().__init__(name, parent)
+        
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, new_name: str):
+        """
+        Give a new name to this node. The name here must be a string that:
+            - can only include numbers, characters, underline '_', dash '-', 
+                dot '.' and space ' '.
+            - cannot start as space ' '.
+        Otherwise a ValueError is raised.
+
+        As an HDFDataNode, its name cannot be a null string.
+
+        arguments:
+            new_name: (str) give a new name to this node. User must change the
+                practical item's name in the HDF file at the same time. Otherw-
+                ise, after a flush the name change will be lost.
+        """
+        
+        # valid_name_pattern = r'^[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
+        if not isinstance(new_name, str):
+            raise TypeError(('new_name must be a str, not '
+                '{0}'.format(type(new_name))))
+        elif new_name == '':
+            raise ValueError(
+                'HDFDataNode name attribute cannot set as null string'
+            )
+        elif not reValidHDFName.match(new_name):
+            raise ValueError('Invalid name: {0}'.format(new_name))
+        else:
+            self._name = new_name
+
+
+    
