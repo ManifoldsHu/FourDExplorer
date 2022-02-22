@@ -60,13 +60,10 @@ All rights reserved.
 '''
 
 
-from multiprocessing import parent_process
 import os
 from datetime import datetime
 import re
 import threading
-import queue
-import time
 import traceback
 from collections.abc import Mapping
 from typing import Iterator
@@ -74,10 +71,11 @@ from typing import Iterator
 import h5py
 import numpy as np
 
+from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt
 from PySide6.QtWidgets import QApplication 
 
 from bin.Log import LogUtil
-from Constants import APP_VERSION
+from Constants import APP_VERSION, ItemDataRole
 
 
 # from bin import DataReaderEMPAD
@@ -229,7 +227,7 @@ class HDFHandler(object):
         self._file = None
         self._file_path = ''
         self._lock = threading.Lock()
-        self._root_node = HDFGroupNode()
+        self._root_node = HDFRootNode()
 
     @property
     def file_path(self):
@@ -417,7 +415,7 @@ class HDFHandler(object):
         pass
 
     @property
-    def root_node(self) -> 'HDFGroupNode':
+    def root_node(self) -> 'HDFRootNode':
         return self._root_node
 
     def buildHDFTree(self):
@@ -437,6 +435,7 @@ class HDFHandler(object):
                     elif isinstance(self.file[parent.path][key], h5py.Dataset):
                         parent.addChild(HDFDataNode(key, parent))
 
+        self._root_node = HDFRootNode()
         _addChildDeepFirst(self.root_node)
 
     def getNode(self, hdf_path: str) -> 'HDFTreeNode':
@@ -514,8 +513,10 @@ class HDFHandler(object):
         if name in parent_node:
             raise ValueError(('name {0} exists in {1}\n'
                 'path: {2}'.format(name, parent_node.name, parent_path)))
-        self.file[parent_path].create_group(name)
+
         parent_node.addChild(HDFGroupNode(name))
+        self.file[parent_path].create_group(name)
+        
 
     def addNewData(self, 
         parent_path: str, 
@@ -543,30 +544,134 @@ class HDFHandler(object):
         if name in parent_node:
             raise ValueError(('name {0} exists in {1}\n'
                 'path: {2}'.format(name, parent_node.name, parent_path)))
+
+        parent_node.addChild(HDFDataNode(name, parent_node))
         self.file[parent_path].create_dataset(
             name, 
             shape = shape, 
             dtype = dtype, 
-            compression = compression)
-        parent_node.addChild(HDFDataNode(name, parent_node))
+            compression = compression,
+        )
+        
 
-    def deleteItem(self, hdf_path: str):
+    def deleteItem(self, item_path: str):
         """
-        Delete the item with the hdf_path.
+        Delete the item with the item_path.
 
         Will delete the item in the practical HDF5 file, and delete the node in 
         HDFTree. If the item is a group, and there are subitems in the item, 
         all of the subitems will be removed recursively.
 
         arguments:
-            hdf_path: (str) absolute path of hdf5 item.
+            item_path: (str) absolute path of hdf5 item.
         """
-        pass
+        if not isinstance(item_path, str):
+            raise TypeError(('hdf_path must be a str, not '
+                '{0}'.format(type(item_path).__name__)))
+        elif item_path == '/':
+            raise ValueError('Cannot delete root')
+        this_node = self.getNode(item_path)
+        parent_node = this_node.parent
+        
+        parent_node.deleteChild(this_node)
+        del self.file[parent_node.path]
 
-    def moveItem(self, item_path: str, dest_path: str):
-        pass
+    def moveItem(self, item_path: str, dest_parent_path: str):
+        """
+        Move item from item_path to dest_parent_path. 
+        
+        The destination parent path must indicate a group. The item's name will 
+        not change.
 
-    def renameItem(self, hdf_path: str, new_name: str):
+        There are some operation forbidden:
+            - Cannot move an item to its current parent group
+            - Cannot move a group to its subgroup
+            - Cannot move an item to a dataset's path
+            - Cannot move an item to a non-exist path.
+
+        arguments:
+            item_path: (str) the item's path to be moved
+
+            dest_parent_path: (str) the destination group's path
+        """
+        if not isinstance(item_path, str):
+            raise TypeError(('item_path must be a str, not '
+                '{0}'.format(type(item_path).__name__)))
+        elif not isinstance(dest_parent_path, str):
+            raise TypeError(('dest_parent_path must be a str, not '
+                '{0}'.format(type(dest_parent_path).__name__)))
+
+        this_node = self.getNode(item_path)
+        this_parent_node = this_node.parent
+        dest_parent_node = self.getNode(dest_parent_path)
+        if isinstance(this_node, HDFRootNode):
+            raise ValueError('Cannot move root')
+
+        elif not isinstance(dest_parent_node, HDFGroupNode):
+            raise ValueError(('Destination path must be a group: '
+                '{0}'.format(dest_parent_path)))
+
+        elif dest_parent_node == this_parent_node:
+            raise ValueError('The destination is the same as current path')
+
+        elif dest_parent_node.isSubNode(this_node):
+            raise ValueError(('The destination: {0}\n'
+                'cannot be subgroup of current group: '
+                '{1}'.format(dest_parent_path, this_node.path)))
+
+        elif this_node.name in dest_parent_node:
+            raise ValueError(('Name {0} exists in destination: '
+                '{1}'.format(this_node.name, dest_parent_path)))
+        
+        if isinstance(dest_parent_node, HDFRootNode):
+            dest_path = '/' + this_node.name
+        else:
+            dest_path = dest_parent_path + '/' + this_node.name
+        
+        this_parent_node.deleteChild(this_node)
+        dest_parent_node.addChild(this_node)
+        self.file.move(item_path, dest_path)
+        
+    def renameItem(self, item_path: str, new_name: str):
+        """
+        Rename item from the current name to a new name.
+        
+        arguments:
+            hdf_path: (str) the item's path to be renamed
+
+            new_name: (str) the new name
+        """
+        if item_path == '/':
+            raise ValueError('Cannot rename root')
+        item_node = self.getNode(item_path)
+        parent_node = item_node.parent
+        if new_name == item_node.name:
+            raise ValueError('The name is not changed')
+        elif new_name in parent_node:
+            raise ValueError('New name exists in current group')
+        if isinstance(parent_node, HDFRootNode):
+            new_path = '/' + new_name
+        else:
+            new_path = item_node.parent.path + '/' + new_name
+
+        parent_node.deleteChild(item_node)
+        item_node.name = new_name
+        parent_node.addChild(item_node)
+        self.file.move(item_path, new_path)
+
+    def copyItem(self, item_path: str, dest_parent_path: str):
+        """
+        TODO Copy item to destination.
+
+        The copied item's name will add '_replica' automatically. Copying large
+        dataset is time-consuming, so it should be encapsulated to a Task and 
+        submitted to TaskManager.
+
+        arguments:
+            item_path: (str) the item's path to be copied
+
+            dest_parent_path: (str) the destination group's path
+        """
         pass
 
 class HDFTreeNode(Mapping):
@@ -691,12 +796,38 @@ class HDFTreeNode(Mapping):
             return self._getPathInTree()
 
     def _getPathInTree(self) -> str:
-        if self.parent == None:
+        if self.parent == None and self.name == '':
             return ''
+        elif self.parent == None and self.name != '':
+            return self.name
         else:
             return self.parent._getPathInTree() + '/' + self.name
 
-    
+    def isSubNode(self, node: 'HDFTreeNode') -> bool:
+        """
+        Returns whether node is the ancestor of this node. 
+        
+        If node is just this node, returns True.
+        If node is root (does not have parent), returns True.
+
+        arguments:
+            node: (HDFTreeNode) potential ancestor node
+
+        returns:
+            (bool)
+        """
+        if not isinstance(node, HDFTreeNode):
+            raise TypeError(('node must be an HDFTreeNode, not '
+                '{0}'.format(type(node).__name__)))
+
+        ancestor = self
+        while ancestor:
+            if ancestor == node:
+                return True
+            ancestor = ancestor.parent
+        return False
+
+
 class HDFGroupNode(HDFTreeNode):
     """
     用来表示 Group 的节点。
@@ -924,4 +1055,389 @@ class HDFDataNode(HDFTreeNode):
             self._name = new_name
 
 
+class HDFRootNode(HDFGroupNode):
+    """
+    用来表示根目录的节点。
+
+    其可以添加、删除子节点，但不能设置名字，也不能设置父节点。
+
+    This node is used to indicate root group in HDF5 file.
+
+    It can add and remove subnode, but neither set name nor set parent.
+
+    attributes:
+        name: (str) the name of root is always null string ''
+        parent: (NoneType) the parent of root is always None
+    """
+    def __init__(self):
+        super().__init__(name = '', parent = None)
     
+    @property 
+    def name(self):
+        return ''
+
+    @property 
+    def parent(self):
+        return None
+
+
+class HDFTreeModel(QAbstractItemModel):
+    """
+    用来查看 HDF 文件的路径树结构的 model。
+
+    这是 Qt 中 Model/View 架构的一部分。要显示路径树结构，可以通过实例化 QTreeView，
+    然后调用其 setModel() 方法，将这个类的实例传递进去。
+
+    为了实现只读的、显示与数据分离的架构，这个 Model 类必须实现如下方法：
+        - columnCount(self, parent: QModelIndex) -> int
+            返回相应的 parent 之下有多少列
+
+        - rowCount(self, parent: QModelIndex) -> int
+            返回相应的 parent 之下有多少行
+
+        - data(self, index: QModelIndex, role: int)
+            根据 role 的不同，返回数据结构中内部存储的数据
+
+        - parent(self, child: QModelIndex) -> QModelIndex
+            返回 child 相应的 parent
+
+        - index(self, row: int, column: int, parent: QModelIndex) -> QModelIndex
+            根据 parent、行数、列数返回对应的 index。
+
+    注意到，与 HDFTree 不同，这里所有的 child、parent、index 指的并不是 node，而是所
+    谓 QModelIndex。这是一种专门用于 model 中的节点。每个节点都有父节点，然后有自己的
+    行和列。如果只是表示路径树的话，只需要关注行即可，每行表示一个路径。
+
+    在这些需要我们实现的方法中，有些是要返回正确的 QModelIndex 的。因此创建这些 index
+    的方式是调用 self.createIndex(row, column, ptr) 方法。所以，如果想要表示某一个路
+    径的 node，我们需要
+        - 找到这个 node，作为指针/数据结构的内部数据 ptr。
+        - 找到这个 node 在哪一行。由于哈希表是无序的，因此实际上要找的是 node 在某个可
+        迭代对象中的序号。
+        - 找到这个 node 在哪一列。在这里我们就直接设为第 0 列了。
+    然后把上面三个参数填进方法里即可。 
+
+    注意，实践证明，不能使用 HDF5 本身的对象作为 ptr，也不能使用路径字符串作为 ptr。前
+    者原因不明，可能与 HDF5 采用的锁机制有关；后者则是因为 python 的垃圾回收机制会将这
+    些字符串对象回收掉。所以，唯一方案便是使用 HDFHandler 的路径树。
+
+    进一步地，要实现可修改的 model，则要实现以下方法：
+        - insertRow(row: int, parent: QModelIndex) -> bool
+            插入一个 item
+
+        - moveRow(
+            sourceParent: QModelIndex, 
+            sourceRow: int, 
+            destinationParent: QModelIndex, 
+            destinationChild: int) -> bool
+            移动一个 item
+
+        - removeRow(row: int, parent: QModelIndex) -> bool
+            删除一个 item
+
+    这些方法本身是没有作用的，因此我们也可以编写自己的 api。但如果要将修改的内容呈现到相
+    应的 model 里并及时显示出来，就需要调用
+        beginInsertRows(parent: QModelIndex, first: int, last: int)
+        ... (insert nodes in data structure)
+        endInsertRows()
+    这类函数。这些以 begin 和 end 开头的函数会发射信号通知 model 及时根据内部数据结构的
+    变化而进行调整，并显示到屏幕上。
+
+    更多关于 Model-View 架构的知识，请见 PySide6 的官方文档：
+    https://doc.qt.io/qtforpython/overviews/model-view-programming.html
+
+
+    This is a model for viewing the hierarchical structure of HDF file.
+
+    This is a part of Model/View architecture of Qt. If we want to display the
+    path tree, we can instantiate QTreeView, and call its setModel() method.
+
+    In order to realize a read-only and data-display decoupled architecture, we
+    need to reimplement the following methods:
+        - columnCount(self, parent: QModelIndex) -> int
+            Get number of columns under the parent
+
+        - rowCount(self, parent: QModelIndex) -> int
+            Get number of rows under the parent
+
+        - data(self, index: QModelIndex, role: int)
+            Return the internal data according to the role
+
+        - parent(self, child: QModelIndex) -> QModelIndex
+            Return the parent of child
+
+        - index(self, row: int, column: int, parent: QModelIndex) -> QModelIndex
+            Return index according to row, column and parent.
+
+    We note that unlike HDFTree, the child, parent, index here is NOT node of 
+    HDFTree, but QModelIndex instance. Every index here has their parent index,
+    row and column. Now we only care about path tree, so only row number is ne-
+    eded.
+
+    Some of the above methods need to return correct index, so we must create 
+    index ourselves. To do this, call self.createIndex(row, column, ptr) method.
+    To get the arguments, we need to:
+        - find the correspondindg node, as the internal pointer ptr
+
+        - find the rank of the node among its mates. The HDFTree itself doesn't
+          has special order, so here we use an iterable of the keysview instead
+        
+        - find the column of the node. Here we set it to zero.
+    Then we put these three arguments into the method and get the index.
+
+    NOTE Practice shows that we can use neither h5py's object nor simple string
+    as the internal pointer of the index. The reason may be relate to the garb-
+    age collecting mechanic of python and Qt. Hence, that's why we have to make
+    HDFTree ourselves.
+
+    Further more, if we want a writable model, we need to reimplement the foll-
+    owing methods:
+        - insertRow(row: int, parent: QModelIndex) -> bool
+            insert an item
+
+        - moveRow(
+            sourceParent: QModelIndex, 
+            sourceRow: int, 
+            destinationParent: QModelIndex, 
+            destinationChild: int,
+        ) -> bool
+            move an item
+
+        - removeRow(row: int, parent: QModelIndex) -> bool
+            delete an item
+
+    However, these methods themselves do not work. So we can write our own APIs.
+    But if we want to modify the model by write internal data, we shall call
+
+        beginInsertRows(parent: QModelIndex, first: int, last: int)
+        ... (insert nodes in data structure)
+        endInsertRows()
+    
+    These functions that begin with 'begin' and 'end' will emit signals to note
+    the model and the related views change themselves in time. 
+
+    About Model/View architecture, see documents of PySide6:
+    https://doc.qt.io/qtforpython/overviews/model-view-programming.html
+    """
+
+    def __init__(self, hdf_handler: HDFHandler):
+        """
+        arguments
+            hdf_handler: (HDFHandler) to get the HDFTree and the practical file
+        """
+        super().__init__()
+        self._hdf_handler = hdf_handler
+    
+    @property 
+    def hdf_handler(self):
+        return self._hdf_handler
+
+    def index(self, 
+        row: int, 
+        column: int, 
+        parent: QModelIndex,
+    ) -> QModelIndex:
+        """
+        Get the index from row, column, and parent.
+
+        arguments:
+            row: (int)
+            column: (column)
+            parent: (QModelIndex)
+        
+        returns:
+            (QModelIndex)
+        """
+        if not parent.isValid():
+            return self.createIndex(0, column, self.hdf_handler.root_node)
+        else:
+            parent_node = parent.internalPointer()
+            key_list = list(parent_node.keys())
+            if row < len(parent_node):
+                node = parent_node[key_list[row]]
+                return self.createIndex(row, column, node)
+            else:
+                return QModelIndex()
+
+    def parent(self, child: QModelIndex) -> QModelIndex:
+        """
+        Get the parent index of child index.
+
+        arguments:
+            child: (QModelIndex)
+        
+        returns:
+            (QModelIndex)
+        """
+        if not child.isValid():
+            return QModelIndex()
+        elif child.internalPointer() == self.hdf_handler.root_node:
+            return QModelIndex()
+        else:
+            parent_node = child.internalPointer().parent
+            row = self.hdf_handler.getRank(parent_node.path)
+            return self.createIndex(row, 0, parent_node)
+
+    def rowCount(self, parent: QModelIndex) -> int:
+        """
+        Get the number of rows under the parent.
+
+        arguments:
+            parent: (QModelIndex)
+        """
+        if not parent.isValid():
+            return 1    # only one member: root
+        else:
+            parent_node = parent.internalPointer()
+            return len(parent_node)
+
+    def columnCount(self, parent: QModelIndex) -> int:
+        """
+        Get the number of columns under the parent.
+
+        arguments:
+            parent: (QModelIndex)
+        """
+        return 1
+
+    def data(self, index: QModelIndex, role: int):
+        """
+        Get the practical data from the internal data structure.
+
+        The argument role are defined in Qt module from PySide6.QtCore. Here we
+        use Constants.ItemDataRole instances.
+
+        arguments:
+            index: (QModelIndex)
+            role: (int)
+        """
+        if not index.isValid():
+            return None
+        node = index.internalPointer()
+        if role == ItemDataRole.NodeRole:
+            return node
+        elif role == ItemDataRole.PathRole:
+            return node.path
+        elif role == Qt.DisplayRole:    # same as ItemDataRole.DisplayRole
+            if isinstance(node, HDFRootNode):
+                return '(ROOT)'
+            else:
+                return node.name
+        elif role == Qt.ToolTipRole:    # same as ItemDataRole.ToolTipRole
+            if isinstance(node, HDFRootNode):
+                return '<Root> {0} members'.format(len(node))
+            elif isinstance(node, HDFGroupNode):
+                return '<Group> {0} members'.format(len(node))
+            elif isinstance(node, HDFDataNode):
+                return '<Data> shape: {0}, dtype: {1}'.format(
+                    self.hdf_handler.file[node.path].shape,
+                    self.hdf_handler.file[node.path].dtype,
+                )
+        else:
+            return None
+
+    def insertGroup(self, parent: QModelIndex, name: str):
+        """
+        Insert a group in the parent index.
+
+        arguments:
+            parent: (QModelIndex)
+            name: (str) the name of the new group
+        """
+        row = self.rowCount(parent)
+        self.beginInsertRows(parent, row, row)
+        self.hdf_handler.addNewGroup(
+            parent.data(role = ItemDataRole.PathRole),
+            name,
+        )
+        self.endInsertRows()
+        
+
+    def insertData(self, 
+        parent: QModelIndex, 
+        name: str,
+        shape: tuple,
+        dtype: str = 'float32',
+        compression: str|int = 'gzip'):
+        """
+        Insert a data in the parent index.
+
+        arguments:
+            parent: (QModelIndex)
+            name: (str) the name of the new dataset
+            shape: (tuple) must be tuple of integers
+            dtype: (str) 'float32' ...
+            compression: (str) default uses 'gzip', (int) default uses 4. See 
+                h5py documents for more information.
+        """
+        row = self.rowCount(parent)
+        self.beginInsertRows(parent, row, row)
+        self.hdf_handler.addNewData(
+            parent.data(role = ItemDataRole.PathRole),
+            name = name,
+            shape = shape,
+            dtype = dtype,
+            compression = compression,
+        )
+        self.endInsertRows()
+
+    def removeItem(self, child: QModelIndex):
+        """
+        Delete an item in the parent index.
+
+        arguments:
+            child: (QModelIndex) 
+        """
+        child_path = child.data(role = ItemDataRole.PathRole)
+        row = self._hdf_handler.getRank(child_path)
+        self.beginRemoveRows(child.parent, row, row)
+        self._hdf_handler.deleteItem(child_path)
+        self.endRemoveRows()
+
+    def moveItem(self, child: QModelIndex, dest_parent: QModelIndex):
+        """
+        Move the item from child to dest_parent.
+
+        arguments:
+            child: (QModelIndex) the index that to be moved
+
+            dest_parent: (QModelIndex) the destination parent index
+        """
+        child_path = child.data(role = ItemDataRole.PathRole)
+        row = self.hdf_handler.getRank(child_path)
+        self.beginMoveRows(
+            sourceParent = child.parent,
+            sourceFirst = row,
+            sourceLast = row,
+            destinationParent = dest_parent,
+            destinationRow = self.rowCount(dest_parent),
+        )
+        self.hdf_handler.moveItem(
+            child_path, 
+            dest_parent.data(role = ItemDataRole.PathRole)
+        )
+        self.endMoveRows()
+
+    def renameItem(self, child: QModelIndex, name: str):
+        """
+        Rename the item.
+
+        arguments:
+            child: (QModelIndex) the index that to be renamed
+
+            name: (str) the new name
+        """
+        child_path = child.data(role = ItemDataRole.PathRole)
+        self.hdf_handler.renameItem(child_path, name)
+        self.dataChanged().emit(child, child)
+
+
+    def copyItem(self, child: QModelIndex, dest_parent: QModelIndex):
+        """
+        Copy the item to destination.
+
+        arguments:
+            child: (QModelIndex) the index that to be copied
+
+            dest_parent: (QModelIndex) the destination parent index
+        """
