@@ -38,7 +38,7 @@ class WidgetBaseHDFViewer(QWidget):
     '''
         用于显示 HDF5 文件结构的基础组件，包含一个 QLineEdit 和一个 QTreeView。 
     '''
-    def __init__(self, parent: QWidget, hdf_handler: HDFHandler):
+    def __init__(self, parent: QWidget, hdf_handler: HDFHandler = None):
         '''
         arguments           type                description
         -----------------------------------------------------------------------
@@ -52,7 +52,7 @@ class WidgetBaseHDFViewer(QWidget):
         -----------------------------------------------------------------------
         '''
         super().__init__(parent)
-        self._hdf_handler = HDFHandler
+        # self._hdf_handler = HDFHandler
         self.ui = uiWidgetBaseHDFViewer.Ui_Form()
         self.ui.setupUi(self)
 

@@ -3,15 +3,15 @@
 """
 *--------------------------------- app.py -----------------------------------*
 
-这是4dExplorer主程序。4dExplorer是一个用于4D-STEM的可视化四维数据加载、校正、计算、
-分析的软件。
+这是4D-Explorer主程序。4D-Explorer是一个用于4D-STEM的可视化四维数据加载、校正、计算
+和分析的软件。
 
 作者:           胡一鸣
 创建日期:       2021年8月3日
 
-This is 4dExplorer Main Application. 4dExplorer is a software that can be used 
-to load, calibrate, calculate and anaylize 4D-STEM dataset with an easy-to-use 
-graphic user interface. 
+This is 4D-Explorer Main Application. 4D-Explorer is a software to load, calib-
+rate, calculate and anaylize 4D-STEM dataset with an easy-to-use graphic user 
+interface. 
 
 author:         Hu Yiming
 date:           Aug 3, 2021
@@ -147,7 +147,7 @@ from Constants import ROOT_PATH, CONFIG_PATH
 
 from PySide6.QtWidgets import QApplication
 from bin.HDFManager import HDFHandler
-from bin.MainWindow import MainWindow
+from bin.Widgets.MainWindow import MainWindow
 
 from bin.Log import LogUtil
 import traceback
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     app.theme_handler = theme_handler
 
     ''' Initialize HDF Manager'''
-    hdf_handler = HDFHandler(app)
+    hdf_handler = HDFHandler()
     app.hdf_handler = hdf_handler
 
     try:

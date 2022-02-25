@@ -1,6 +1,19 @@
 # -*- coding: utf-8 -*-
 
+"""
+*------------------------------ MainWindow.py --------------------------------*
 
+4D-Explorer 程序主界面。
+
+作者：          胡一鸣
+创建时间：      2021年8月21日
+
+The Main Window of the 4D-Explorer software.
+
+author:             Hu Yiming
+date:               Feb 24, 2022
+*------------------------------ MainWindow.py --------------------------------*
+"""
 
 import sys
 import os
@@ -10,8 +23,21 @@ from ui.uiMainWindow import Ui_MainWindow
 
 
 
-class MainWindow(QMainWindow,):
+class MainWindow(QMainWindow):
+    """
+    4D-Explorer 主界面类。
+
+    Ui 文件地址: ROOT_PATH/ui/uiMainWindow.ui
+
+    This is the class to control the main window of 4D-Explorer.
+
+    The path of Ui file: ROOT_PATH/ui/uiMainWindow.ui
+    """
     def __init__(self, app: QApplication):
+        """
+        arguments:
+            app: (QApplication)
+        """
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
