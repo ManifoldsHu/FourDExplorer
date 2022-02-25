@@ -23,7 +23,7 @@ from PySide6.QtGui import QRegularExpressionValidator
 
 
 from ui import uiWidgetBaseHDFViewer
-from bin.HDFManager import HDFHandler
+from bin.HDFManager import HDFHandler, HDFTreeModel
 from bin.Log import LogUtil
 
 import configparser
@@ -56,8 +56,50 @@ class WidgetBaseHDFViewer(QWidget):
         self.ui = uiWidgetBaseHDFViewer.Ui_Form()
         self.ui.setupUi(self)
 
+        global qApp 
+        self._hdf_handler = qApp.hdf_handler
 
-
+        self._hdf_handler.file_state_changed.connect(
+            self.changeStateByFileState)
+        
+        self.ui.treeView_HDF.setModel(self._hdf_handler.model)
+        self.ui.pushButton_check_attr.setEnabled(
+            self._hdf_handler.isFileOpened()
+        )
+        self.ui.pushButton_flush.setEnabled(
+            self._hdf_handler.isFileOpened()
+        )
+        self.ui.pushButton_search.setEnabled(
+            self._hdf_handler.isFileOpened()
+        )
+        
+        self.ui.pushButton_flush.clicked.connect(self.flush)
+        self.ui.treeView_HDF.setModel(self._hdf_handler.model)
     @property
     def hdf_handler(self):
         return self._hdf_handler
+
+    def changeStateByFileState(self):
+        """
+        Reactions (Slot) of file widgets if the file state is changed 
+        (opened or close).
+        """
+        self.ui.pushButton_check_attr.setEnabled(
+            self._hdf_handler.isFileOpened()
+        )
+        self.ui.pushButton_flush.setEnabled(
+            self._hdf_handler.isFileOpened()
+        )
+        self.ui.pushButton_search.setEnabled(
+            self._hdf_handler.isFileOpened()
+        )
+        self.flush()
+
+
+    def flush(self):
+        # self._hdf_handler.model.resetInternalData()
+        self._hdf_handler.buildHDFTree()
+        self._hdf_handler._createModel()
+        self.ui.treeView_HDF.setModel(self._hdf_handler.model)
+        
+        

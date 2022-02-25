@@ -34,11 +34,11 @@ date:               Feb 24, 2022
 
 import os 
 import sys 
+import traceback
 # from PySide6.QtCore import QDir 
 from PySide6.QtWidgets import QWidget, QFileSystemModel, QFileDialog
-from bin.HDFManager import HDFHandler 
 from ui import uiWidgetFile 
-# from bin.Log import LogUtil
+from bin.Log import LogUtil
 
 class WidgetFile(QWidget):
     """
@@ -58,15 +58,11 @@ class WidgetFile(QWidget):
         super().__init__(parent)
         self.ui = uiWidgetFile.Ui_Form()
         self.ui.setupUi(self)
-        
-        # self._hdf_handler = HDFHandler()    # Singleton
-        # global qApp
-        # self._hdf_handler = qApp.hdf_handler
-        # global hdf_handler
-        # self._hdf_handler = hdf_handler
+
+        self._logger = LogUtil(__name__)
         
         global qApp
-        self._hdf_handler = qApp.getHDFHandler()
+        self._hdf_handler = qApp.hdf_handler
         self._hdf_model = None
 
         self._initCWD()
@@ -93,41 +89,108 @@ class WidgetFile(QWidget):
         """
         Initialize HDF file views.
         """
-        # try:
-        #     self._hdf_model = self._hdf_handler.createModel()
-        # except OSError:
-        #     return None
-        # else:
-        #     self.ui.widget_HDFTreeView.ui.treeView_HDF.setModel(self._hdf_model)
 
-        # if not self._hdf_handler.isFileOpened():
-        #     self.ui.pushButton_new_file.setText('New H5 File')
-        #     self.ui.pushButton_new_file.clicked.connect(self.newFile)
-        # else:
-        #     self.ui.pushButton_new_file.setText('Close H5 File')
-        #     self.ui.pushButton_new_file.clicked.connect(self.closeFile)
-
-        
-        self._hdf_handler.file_opened.connect(self.openFile)
-        self._hdf_handler.file_closed.connect(self.closeFile)
-    
+        self._hdf_handler.file_state_changed.connect(
+            self.changeStateByFileState)
         self.ui.pushButton_new_or_close_file.clicked.connect(self.newFile)
-        
+        self.changeStateByFileState()
 
     def newFile(self):
         """
-        To create a new h5 file.
+        Open a dialog, choose a path and name, and create a new file.
         """
-        new_path = QFileDialog.getSaveFileName(self, 
-            caption='New H5 File', 
-            dir = os.path.join(os.getcwd(), 'untitiled.h5'), 
-            filter = 'HDF File (*.h5, *.hdf5, *.H5, *.HDF5);;All Files (*.*)',
-            selectedFilter = 'HDF File (*.h5, *.hdf5, *.H5, *.HDF5)'
+        save_return = QFileDialog.getSaveFileName(self, 
+            caption='Create an HDF5 File', 
+            dir = os.path.join(os.getcwd(), 'untitled'),
+            filter = 'HDF File (*.h5 *.hdf5 *.H5 *.HDF5);;All Files (*.*)',
+            selectedFilter = 'HDF File (*.h5 *.hdf5 *.H5 *.HDF5)',
         )
-        print(new_path)
+        if save_return[0] == '':
+            return False
+
+        file_path = os.path.abspath(save_return[0])
+        self._newFile(file_path)
+
+    def _newFile(self, file_path):
+        self._hdf_handler.file_path = file_path
+        self._hdf_handler.createFile()
+        self._openFile(file_path)
+
+    def changeStateByFileState(self):
+        """
+        Reactions (Slot) of file widgets if the file state is changed 
+        (opened or close).
+        """
+        if self._hdf_handler.isFileOpened():
+            self.ui.pushButton_import_data.setDisabled(False)
+            self.ui.pushButton_export_data.setDisabled(False)
+            self.ui.pushButton_new_or_close_file.setText('Close File')
+            self.ui.pushButton_new_or_close_file.clicked.connect(
+                self.closeFile)
+            try:
+                self.ui.pushButton_new_or_close_file.clicked.disconnect(
+                    self.newFile)
+            except:
+                pass
+        else:
+            self.ui.pushButton_import_data.setDisabled(True)
+            self.ui.pushButton_export_data.setDisabled(True)
+            self.ui.pushButton_new_or_close_file.setText('New File')
+            self.ui.pushButton_new_or_close_file.clicked.connect(
+                self.newFile)
+            try:
+                self.ui.pushButton_new_or_close_file.clicked.disconnect(
+                    self.closeFile)
+            except:
+                pass
+
 
     def openFile(self):
-        pass
+        """
+        Open a dialog, choose a file and open it.
+        """
+        open_return = QFileDialog.getOpenFileName(
+            parent = self,
+            caption = 'Open an HDF5 file',
+            dir = os.getcwd(),
+            filter = 'HDF File (*.h5 *.hdf5 *.H5 *.HDF5);;All Files (*.*)',
+            selectedFilter = 'HDF File (*.h5 *.hdf5 *.H5 *.HDF5)',
+        )
+        if open_return[0] == '':
+            return False
+        
+        file_path = os.path.abspath(open_return[0])
+        self._openFile(file_path)
 
+    def _openFile(self, file_path):
+        self._hdf_handler.file_path = file_path
+        self._hdf_handler.openFile()
+
+    # def closedFile(self):
+    #     """
+    #     Reactions (Slot) of file widgets if the current file is closed.
+    #     """
+    #     if not self._hdf_handler.isFileOpened():
+    #         self.ui.pushButton_import_data.setDisabled(True)
+    #         self.ui.pushButton_export_data.setDisabled(True)
+    #         self.ui.pushButton_new_or_close_file.setText('New File')
+    #         try:
+    #             self.ui.pushButton_new_or_close_file.clicked.disconnect(self.closeFile)
+    #             self.ui.pushButton_new_or_close_file.clicked.connect(self.newFile)
+    #         except:
+    #             pass
+    #     else:
+    #         self.ui.pushButton_import_data.setDisabled(False)
+    #         self.ui.pushButton_export_data.setDisabled(False)
+    #         self.ui.pushButton_new_or_close_file.setText('Close File')
+    #         try:
+    #             self.ui.pushButton_new_or_close_file.clicked.disconnect(self.newFile)
+    #             self.ui.pushButton_new_or_close_file.clicked.connect(self.closeFile)
+    #         except:
+    #             pass
+    
     def closeFile(self):
-        pass
+        """
+        Close the current HDF5 file.
+        """
+        self._hdf_handler.closeFile()

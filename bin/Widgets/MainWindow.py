@@ -17,7 +17,7 @@ date:               Feb 24, 2022
 
 import sys
 import os
-from PySide6.QtWidgets import QMainWindow, QApplication
+from PySide6.QtWidgets import QMainWindow
 from ui.uiMainWindow import Ui_MainWindow
 
 
@@ -33,15 +33,13 @@ class MainWindow(QMainWindow):
 
     The path of Ui file: ROOT_PATH/ui/uiMainWindow.ui
     """
-    def __init__(self, app: QApplication):
-        """
-        arguments:
-            app: (QApplication)
-        """
+    def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self._app = app
+
+        global qApp
+        self._app = qApp
 
         self.setWindowTitle('4D-Explorer')
 
@@ -54,7 +52,14 @@ class MainWindow(QMainWindow):
 
 
     def _initFile(self):
-        pass
+        self.ui.actionNew.triggered.connect(
+            self.ui.tab_File.newFile)
+        self.ui.actionOpen.triggered.connect(
+            self.ui.tab_File.openFile)
+        self.ui.actionClose.triggered.connect(
+            self.ui.tab_File.closeFile)
+        
+
 
 
     def _initTask(self):

@@ -59,7 +59,7 @@ All rights reserved.
 *------------------------------- HDFManager.py -------------------------------*
 """
 
-
+import sys
 import os
 from datetime import datetime
 import re
@@ -206,8 +206,7 @@ class HDFHandler(QObject):
         file_closed: emits when file is closed
     """
 
-    file_opened = Signal()
-    file_closed = Signal()
+    file_state_changed = Signal()
 
     def __init__(self):
         super().__init__()
@@ -215,6 +214,8 @@ class HDFHandler(QObject):
         self._file_path = ''
         self._lock = threading.Lock()   # read/write lock
         self._root_node = HDFRootNode()
+        self._createModel()
+        
 
     @property
     def file_path(self):
@@ -230,7 +231,10 @@ class HDFHandler(QObject):
     @file_path.setter
     def file_path(self, value: str):
         """
-        Set the h5 file path. Will close the current file.
+        Set the h5 file path. 
+        
+        NOTE: Will close the current file, and change the current working 
+        directory.
 
         arguments:
             value: (str) the absolute path of the new h5 file.
@@ -241,6 +245,7 @@ class HDFHandler(QObject):
         if value != self.file_path and self.isFileOpened():
             self.file.close()
 
+        os.chdir(os.path.dirname(value))
         self._file_path = value
 
 
@@ -285,7 +290,13 @@ class HDFHandler(QObject):
             self._file = h5_file
         else:
             raise TypeError('file must be a h5py.File or None.')
-               
+
+    @property
+    def model(self):
+        """
+        Get the Internal HDFTreeModel.
+        """
+        return self._model
 
     def createFile(self) -> bool:
         """
@@ -297,8 +308,8 @@ class HDFHandler(QObject):
             (bool) whether the file is created.
         """
         try:
-            with h5py.File(self.file_path, mode = 'w-') as file: # create, 
-                                                            # fail if exists
+            with h5py.File(self.file_path, mode = 'w') as file: 
+                # create, truncate if exists
                 self._initializeFile(file)
         except OSError as e:
             logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
@@ -341,7 +352,7 @@ class HDFHandler(QObject):
             if not self.isFileOpened():
                 # Read/write, file must exist
                 self.file = h5py.File(self.file_path, mode='r+')
-                self.file_opened.emit()
+                self.file_state_changed.emit()
         except OSError as e:
             logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
             return None
@@ -359,7 +370,7 @@ class HDFHandler(QObject):
         """
         if self.isFileOpened():
             self.file.close()
-            self.file_closed.emit()
+            self.file_state_changed.emit()
         self.file = None
           
 
@@ -397,7 +408,7 @@ class HDFHandler(QObject):
                 return False
 
 
-    def createModel(self):
+    def _createModel(self):
         """
         Create a HDFTreeModel for Qt Views.
 
@@ -405,9 +416,8 @@ class HDFHandler(QObject):
             (HDFTreeModel) the model of hierarchical structure of the current
                 HDF5 file. 
         """
-        self.buildHDFTree()
-        model = HDFTreeModel(self)
-        return model
+        self._model = HDFTreeModel(self)
+        
 
     @property
     def root_node(self) -> 'HDFRootNode':
@@ -419,19 +429,21 @@ class HDFHandler(QObject):
 
         Will add child nodes recursively for the root_node and its childs.
         """
-        if not self.file:
-            raise OSError('Must open a file before build HDFTree.')
+        # if not self.file:
+        #     raise OSError('Must open a file before build HDFTree.')
         
         def _addChildDeepFirst(parent: 'HDFGroupNode'):
             if isinstance(parent, HDFGroupNode):
-                for key in self.file[parent.path]:
-                    if isinstance(self.file[parent.path][key], h5py.Group):
-                        parent.addChild(HDFGroupNode(key, parent))
-                    elif isinstance(self.file[parent.path][key], h5py.Dataset):
-                        parent.addChild(HDFDataNode(key, parent))
+                for key in self._file[parent.path]:
+                    if isinstance(self._file[parent.path][key], h5py.Group):
+                        parent.addChild(HDFGroupNode(key))
+                        _addChildDeepFirst(parent[key])
+                    elif isinstance(self._file[parent.path][key], h5py.Dataset):
+                        parent.addChild(HDFDataNode(key))
 
         self._root_node = HDFRootNode()
-        _addChildDeepFirst(self.root_node)
+        if self.isFileOpened():
+            _addChildDeepFirst(self._root_node)
 
     def getNode(self, hdf_path: str) -> 'HDFTreeNode':
         """
@@ -465,6 +477,7 @@ class HDFHandler(QObject):
                 else:
                     raise KeyError(('There is no key '
                         '{0} in {1}'.format(key, node.name)))
+            return node
 
     def getRank(self, hdf_path: str = '') -> int:
         """
@@ -482,6 +495,7 @@ class HDFHandler(QObject):
         if hdf_path == '/':
             return 0
         else:
+            # print(hdf_path)
             this = self.getNode(hdf_path)
             key = hdf_path.split('/').pop()
             rank = list(this.parent.keys()).index(key)
@@ -706,7 +720,7 @@ class HDFTreeNode(Mapping):
         path: (str) The hdf_path of this node. like '/foo/abc' 
     """
 
-    def __init__(self, name: str, parent: 'HDFTreeNode'):
+    def __init__(self, name: str, parent: 'HDFTreeNode' = None):
         """
         arguments:
             name: (str) only root's name can and must be null string ''. Usual-
@@ -717,6 +731,16 @@ class HDFTreeNode(Mapping):
         """
         self._name = name
         self._parent = parent
+        self._mapping = {}
+    
+    def __getitem__(self, key: str) -> 'HDFTreeNode':
+        return self._mapping[key]
+
+    def __iter__(self) -> Iterator:
+        return iter(self._mapping)
+
+    def __len__(self) -> int:
+        return len(self._mapping)
 
     def __str__(self) -> str:
         return '<HDFTreeNode> name: {0}'.format(self.name)
@@ -787,18 +811,19 @@ class HDFTreeNode(Mapping):
         returns:
             (str) the full hdf_path of this node.
         """
-        if self._getPathInTree() == '':
+        if self._path_in_tree == '':
             return '/'
         else:
-            return self._getPathInTree()
+            return self._path_in_tree
 
-    def _getPathInTree(self) -> str:
-        if self.parent == None and self.name == '':
+    @property
+    def _path_in_tree(self) -> str:
+        if self.parent is None or self.name == '':
             return ''
         elif self.parent == None and self.name != '':
             return self.name
         else:
-            return self.parent._getPathInTree() + '/' + self.name
+            return self.parent._path_in_tree + '/' + self.name
 
     def isSubNode(self, node: 'HDFTreeNode') -> bool:
         """
@@ -897,16 +922,7 @@ class HDFGroupNode(HDFTreeNode):
         must be NoneType.
         """
         super().__init__(name, parent)
-        self._mapping = {}
-    
-    def __getitem__(self, key: str) -> 'HDFTreeNode':
-        return self._mapping[key]
 
-    def __iter__(self) -> Iterator:
-        return iter(self._mapping)
-
-    def __len__(self) -> int:
-        return len(self._mapping)
 
     def __setitem__(self, key: str, child: HDFTreeNode):
         """
@@ -1009,7 +1025,7 @@ class HDFDataNode(HDFTreeNode):
 
     Node used to indicate dataset in HDF5 file. It does not have subnodes.
     """
-    def __init__(self, name: str, parent: HDFGroupNode):
+    def __init__(self, name: str, parent: HDFGroupNode = None):
         """
         arguments:
             name: (str) the name cannot be null string
@@ -1317,7 +1333,10 @@ class HDFTreeModel(QAbstractItemModel):
             return node.path
         elif role == Qt.DisplayRole:    # same as ItemDataRole.DisplayRole
             if isinstance(node, HDFRootNode):
-                return '(ROOT)'
+                if self.hdf_handler.isFileOpened():
+                    return '(ROOT)'
+                else:
+                    return 'CREATE/OPEN A FILE'
             else:
                 return node.name
         elif role == Qt.ToolTipRole:    # same as ItemDataRole.ToolTipRole
@@ -1426,7 +1445,7 @@ class HDFTreeModel(QAbstractItemModel):
         """
         child_path = child.data(role = ItemDataRole.PathRole)
         self.hdf_handler.renameItem(child_path, name)
-        self.dataChanged().emit(child, child)
+        self.dataChanged.emit(child, child)
 
 
     def copyItem(self, child: QModelIndex, dest_parent: QModelIndex):
@@ -1440,3 +1459,14 @@ class HDFTreeModel(QAbstractItemModel):
         """
         pass
 
+    
+    # def resetInternalData(self) -> None:
+    #     """
+    #     Reset the internal hdf structure of the model.
+    #     """
+        # self.hdf_handler.buildHDFTree()
+        # root = self.createIndex(0, 0, self._hdf_handler.root_node)
+        # self.dataChanged.emit(root, root)
+        # self.beginResetModel()
+        # self.hdf_handler.buildHDFTree()
+        # self.endResetModel()

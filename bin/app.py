@@ -47,3 +47,4 @@ class App(QApplication):
     @property
     def theme_handler(self):
         return self._theme_handler
+
