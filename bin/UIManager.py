@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 *----------------------------- UIManager.py ----------------------------------*
 管理 4D-Explorer 的主题、夜间模式、以及色彩表现。在这里采用了开源库 qt_material.
 
@@ -12,33 +12,33 @@ Manage the theme of 4D-Explorer. Here we use an open source module qt_material.
 author:         Hu Yiming
 date:           Feb 19, 2022
 *----------------------------- UIManager.py ----------------------------------*
-'''
+"""
 
+import traceback
+from configparser import ConfigParser
 
-from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QObject
+
+from qt_material import apply_stylesheet
 
 from bin.Log import LogUtil
-import traceback
-import threading
-
-from configparser import ConfigParser
 from Constants import CONFIG_PATH, UITheme
-from qt_material import apply_stylesheet
+
 
 
 def UIThemeToFileName(theme: UITheme) -> str:
-    '''
+    """
     将 UITheme 枚举类转化为对应的皮肤的文件名。
 
     Converse UITheme type to file_name. file_name is a string like 
         'light_blue.xml'
 
-    attributes              type                description
-    ---------------------------------------------------------------------------
-    theme                   UITheme             The current theme applied to 
-                                                4D-Explorer
-    ---------------------------------------------------------------------------
-    '''
+    arguments:
+        theme: (UITheme) The current theme applied to 4D-Explorer
+
+    returns:
+        (str) 
+    """
     if not isinstance(theme, UITheme):
         raise TypeError('Argument theme must be of UITheme')
     file_name = theme.name + '.xml'
@@ -51,13 +51,11 @@ def NameToUITheme(name: str):
 
     Converse file_name to a UITheme.
 
-    attributes              type                description
-    ---------------------------------------------------------------------------
-    name                    str                 This is a string like
-                                                'light_blue.xml'
-                                                or
-                                                'light_blue'
-    ---------------------------------------------------------------------------
+    arguments:
+        name: (str) This is a string like 'light_blue.xml' or 'light_blue'
+
+    returns:
+        (UITheme)
     '''
     name = name.split('.')[0]
     return UITheme[name]
@@ -65,50 +63,35 @@ def NameToUITheme(name: str):
 
 
 
-class ThemeHandler(object):
-    '''
-    使用 ThemeHandler 管理 4D-Explorer 的皮肤。注意，这个类使用单例模式，如果已经有一
-    个这个类的实例，那么再次创建该类的实例的时候就直接返回已有的那个实例。
+class ThemeHandler(QObject):
+    """
+    使用 ThemeHandler 管理 4D-Explorer 的皮肤。
 
-    Use ThemeHandler to manage the theme of 4D-Explorer. NOTE: there is only S-
-    INGLE instance. If there has been one instance of this class, the existing 
-    instance will be returned. (Singleton class)
+    注意，这个类使用单例模式。在程序的任何地方要想取到这个实例，要先取到全局变量 qApp, 
+    然后得到 qApp.hdf_handler 即可。
 
-    attributes              type                description
-    ---------------------------------------------------------------------------
-    theme                   UITheme             The current theme applied to 
-                                                4D-Explorer
-    ---------------------------------------------------------------------------
+    调用 theme_handler.initializeTheme() 和 theme_handler.changeTheme() 来初始化
+    或改变皮肤。
 
-    一般而言，外部可以调用 theme_handler.initializeTheme() 和 
-    theme_handler.changeTheme() 来初始化或改变皮肤。
+
+    Use ThemeHandler to manage the theme of 4D-Explorer. 
+    
+    NOTE: there is only SINGLE instance. Anywhere we need to get the pointer of
+    this instance, use the global pointer qApp, and get qApp.hdf_handler. 
 
     We recommend to call theme_handler.innitializeTheme() and 
     theme_handler.changeTheme() to initialize or change themes.
-    '''
 
-    _instance = None    # existing instance
-    _instance_lock = threading.Lock()
+    attributes:
+        theme: (UITheme) The current theme applied to 4D-Explorer
+    """
 
-    def __new__(cls, app: QApplication):
-        '''
-        There is only one instance allowed to exist.
-        '''
-        with cls._instance_lock:
-            if cls._instance is None:
-                cls._instance = object.__new__(cls)
-                cls._instance.__init__(app)
-            return cls._instance
-
-
-    def __init__(self, app: QApplication):
-        '''
-        arguments           type                description
-        -----------------------------------------------------------------------
-        app                 QApplication        The main application instance.
-        -----------------------------------------------------------------------
-        '''
-        self._app = app
+    def __init__(self):
+        """
+        Initialize object.
+        """
+        global qApp 
+        self._app = qApp 
         self._config = ConfigParser()
         self._config.read(CONFIG_PATH, encoding = 'utf-8')
         self._logger = LogUtil(__name__)
@@ -116,14 +99,10 @@ class ThemeHandler(object):
 
 
     def _applyTheme(self, theme: UITheme) -> bool:
-        '''
-        应用主题。
-
-        arguments           type                description
-        -----------------------------------------------------------------------
-        theme               UITheme             The theme applied.
-        -----------------------------------------------------------------------
-        '''
+        """
+        arguments:
+            theme: (UITheme)
+        """
         try:
             if theme.name.split('_')[0] == 'light':
                 apply_stylesheet(
@@ -148,44 +127,33 @@ class ThemeHandler(object):
 
 
     def _applyCurrentTheme(self):
-        '''
-        应用当前主题。
-        '''
         self._applyTheme(self.theme)
 
 
     def initializeTheme(self):
-        '''
-        从配置文件中读取并设置为当前主题。
-
+        """
         Read theme from the configure file and then set it as the current theme.
-        '''
+        """
         self.theme = self._readTheme()
         self._applyCurrentTheme()
 
 
     def changeTheme(self, theme: UITheme):
-        '''
-        更改、应用并保存新皮肤。
-
+        """
         Change, apply and save the current theme.
 
-        arguments           type                description
-        -----------------------------------------------------------------------
-        theme               UITheme             The theme applied.
-        -----------------------------------------------------------------------
-        '''
+        arguments:
+            theme: (UITheme) the theme to be applied.
+        """
         self._saveTheme(theme)
         self._applyCurrentTheme(self)
 
 
     def _saveTheme(self, theme = UITheme):
-        '''
-        arguments           type                description
-        -----------------------------------------------------------------------
-        theme               UITheme             The theme applied.
-        -----------------------------------------------------------------------
-        '''
+        """
+        arguments:
+            theme: (UITheme) the theme to be saved.
+        """
         with open(CONFIG_PATH, 'w', encoding = 'UTF-8') as f:
             self._config['UI']['Theme'] = theme.name
             self._config.write(f)
@@ -193,11 +161,12 @@ class ThemeHandler(object):
 
 
     def _readTheme(self) -> UITheme:
-        '''
-        从配置文件中读取应当采用的皮肤。
-
+        """
         Read the theme from configuration file.
-        '''
+
+        returns:
+            (UITheme)
+        """
         try:
             theme_str = self._config['UI']['Theme']
         except BaseException as e:
@@ -213,13 +182,11 @@ class ThemeHandler(object):
 
 
     @theme.setter
-    def theme(self, theme):
-        '''
-        arguments           type                description
-        -----------------------------------------------------------------------
-        theme               UITheme             The theme applied.
-        -----------------------------------------------------------------------
-        '''
+    def theme(self, theme: UITheme|str):
+        """
+        arguments:
+            theme: (UITheme or str)
+        """
         if isinstance(theme, UITheme):
             self._theme = theme
         elif isinstance(theme, str):

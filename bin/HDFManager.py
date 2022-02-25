@@ -1,6 +1,6 @@
 # -*- coding utf-8 -*-
 
-'''
+"""
 *------------------------------- HDFManager.py -------------------------------*
 对 HDF5 文件进行读取与写入的操作。
 
@@ -57,7 +57,7 @@ date:               Aug 21, 2021
 All rights reserved.
 
 *------------------------------- HDFManager.py -------------------------------*
-'''
+"""
 
 
 import os
@@ -67,11 +67,12 @@ import threading
 import traceback
 from collections.abc import Mapping
 from typing import Iterator
+# from sip import wrappertype
 
 import h5py
 import numpy as np
 
-from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, SignalInstance
+from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, QObject
 from PySide6.QtWidgets import QApplication 
 
 from bin.Log import LogUtil
@@ -87,7 +88,7 @@ reValidHDFName = re.compile(
     r'^[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
 )   # A valid hdf_name must be able to match this regular expression.
 
-class HDFHandler(object):
+class HDFHandler(QObject):
     """
     使用 HDF5 文件处理的封装类。其应当包含以下方法：
 
@@ -108,8 +109,8 @@ class HDFHandler(object):
         - (不提供复制的功能，原因是这很耗时，应当作为一个任务提交给 TaskManager)
 
 
-    注意，这个类使用单例模式，如果已经有一个这个类的实例，那么再次创建该类的实例的时
-    候就直接返回已有的那个实例。
+    注意，这个类使用单例模式。在程序的任何地方要想取到这个实例，要先取到全局变量 qApp, 
+    然后得到 qApp.hdf_handler 即可。
 
     初始化完成的h5文件应当有如下结构：
         /Dataset                            四维数据集。
@@ -157,8 +158,8 @@ class HDFHandler(object):
 
         
 
-    NOTE: there is only SINGLE instance (Singleton). If there has been one ins-
-    tance of this class, the existing instance will be returned.
+    NOTE: there is only SINGLE instance. Anywhere we need to get the pointer of
+    this instance, use the global pointer qApp, and get qApp.hdf_handler. 
 
     An initialized h5 file should have the following structure:
 
@@ -205,28 +206,15 @@ class HDFHandler(object):
         file_closed: emits when file is closed
     """
 
-    _instance = None
-    _instance_lock = threading.Lock()
-
-    def __new__(cls):
-        """
-        There is only one instance allowed to exist. 
-        
-        (This is a singleton class)
-        """
-        with cls._instance_lock:
-            if cls._instance is None:
-                cls._instance = object.__new__(cls)
-                cls._instance.__init__()
-            return cls._instance
+    file_opened = Signal()
+    file_closed = Signal()
 
     def __init__(self):
+        super().__init__()
         self._file = None
         self._file_path = ''
-        self._lock = threading.Lock()
+        self._lock = threading.Lock()   # read/write lock
         self._root_node = HDFRootNode()
-        self.file_opened = SignalInstance()
-        self.file_closed = SignalInstance()
 
     @property
     def file_path(self):

@@ -35,10 +35,10 @@ date:               Feb 24, 2022
 import os 
 import sys 
 # from PySide6.QtCore import QDir 
-from PySide6.QtWidgets import QWidget, QFileSystemModel, QFileDialog 
+from PySide6.QtWidgets import QWidget, QFileSystemModel, QFileDialog
 from bin.HDFManager import HDFHandler 
 from ui import uiWidgetFile 
-
+# from bin.Log import LogUtil
 
 class WidgetFile(QWidget):
     """
@@ -59,7 +59,14 @@ class WidgetFile(QWidget):
         self.ui = uiWidgetFile.Ui_Form()
         self.ui.setupUi(self)
         
-        self._hdf_handler = HDFHandler()    # Singleton
+        # self._hdf_handler = HDFHandler()    # Singleton
+        # global qApp
+        # self._hdf_handler = qApp.hdf_handler
+        # global hdf_handler
+        # self._hdf_handler = hdf_handler
+        
+        global qApp
+        self._hdf_handler = qApp.getHDFHandler()
         self._hdf_model = None
 
         self._initCWD()
@@ -86,12 +93,12 @@ class WidgetFile(QWidget):
         """
         Initialize HDF file views.
         """
-        try:
-            self._hdf_model = self._hdf_handler.createModel()
-        except OSError:
-            return None
-        else:
-            self.ui.widget_HDFTreeView.ui.treeView_HDF.setModel(self._hdf_model)
+        # try:
+        #     self._hdf_model = self._hdf_handler.createModel()
+        # except OSError:
+        #     return None
+        # else:
+        #     self.ui.widget_HDFTreeView.ui.treeView_HDF.setModel(self._hdf_model)
 
         # if not self._hdf_handler.isFileOpened():
         #     self.ui.pushButton_new_file.setText('New H5 File')
@@ -111,11 +118,13 @@ class WidgetFile(QWidget):
         """
         To create a new h5 file.
         """
-        directory_path = QFileDialog.getExistingDirectory(self, 
-            caption='Choose Directory', 
-            dir = os.getcwd(), 
-            options = QFileDialog.ShowDirsOnly|QFileDialog.DontResolveSymlinks,
+        new_path = QFileDialog.getSaveFileName(self, 
+            caption='New H5 File', 
+            dir = os.path.join(os.getcwd(), 'untitiled.h5'), 
+            filter = 'HDF File (*.h5, *.hdf5, *.H5, *.HDF5);;All Files (*.*)',
+            selectedFilter = 'HDF File (*.h5, *.hdf5, *.H5, *.HDF5)'
         )
+        print(new_path)
 
     def openFile(self):
         pass
