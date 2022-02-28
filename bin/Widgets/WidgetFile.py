@@ -89,11 +89,11 @@ class WidgetFile(QWidget):
         """
         Initialize HDF file views.
         """
-
         self._hdf_handler.file_state_changed.connect(
             self.changeStateByFileState)
         self.ui.pushButton_new_or_close_file.clicked.connect(self.newFile)
         self.changeStateByFileState()
+
 
     def newFile(self):
         """
@@ -111,7 +111,13 @@ class WidgetFile(QWidget):
         file_path = os.path.abspath(save_return[0])
         self._newFile(file_path)
 
-    def _newFile(self, file_path):
+    def _newFile(self, file_path: str):
+        """
+        Create file, and open it.
+
+        arguments:
+            file_path: (str) the created file path.
+        """
         self._hdf_handler.file_path = file_path
         self._hdf_handler.createFile()
         self._openFile(file_path)
@@ -119,29 +125,40 @@ class WidgetFile(QWidget):
     def changeStateByFileState(self):
         """
         Reactions (Slot) of file widgets if the file state is changed 
-        (opened or close).
+        (opened or close). 
         """
         if self._hdf_handler.isFileOpened():
+            self.ui.lineEdit_working_directory.setText(
+                os.getcwd()
+            )
+            self.ui.listView_working_directory.setRootIndex(
+                self._file_model.index(os.getcwd())
+            )
+
             self.ui.pushButton_import_data.setDisabled(False)
             self.ui.pushButton_export_data.setDisabled(False)
             self.ui.pushButton_new_or_close_file.setText('Close File')
             self.ui.pushButton_new_or_close_file.clicked.connect(
-                self.closeFile)
+                self.closeFile
+            )
             try:
                 self.ui.pushButton_new_or_close_file.clicked.disconnect(
-                    self.newFile)
-            except:
+                    self.newFile
+                )
+            except RuntimeError:
                 pass
         else:
             self.ui.pushButton_import_data.setDisabled(True)
             self.ui.pushButton_export_data.setDisabled(True)
             self.ui.pushButton_new_or_close_file.setText('New File')
             self.ui.pushButton_new_or_close_file.clicked.connect(
-                self.newFile)
+                self.newFile
+            )
             try:
                 self.ui.pushButton_new_or_close_file.clicked.disconnect(
-                    self.closeFile)
-            except:
+                    self.closeFile
+                )
+            except RuntimeError:
                 pass
 
 
@@ -162,32 +179,15 @@ class WidgetFile(QWidget):
         file_path = os.path.abspath(open_return[0])
         self._openFile(file_path)
 
-    def _openFile(self, file_path):
+    def _openFile(self, file_path: str):
+        """
+        Open a file.
+
+        arguments:
+            file_path: (str) the path of the file to be opened.
+        """
         self._hdf_handler.file_path = file_path
         self._hdf_handler.openFile()
-
-    # def closedFile(self):
-    #     """
-    #     Reactions (Slot) of file widgets if the current file is closed.
-    #     """
-    #     if not self._hdf_handler.isFileOpened():
-    #         self.ui.pushButton_import_data.setDisabled(True)
-    #         self.ui.pushButton_export_data.setDisabled(True)
-    #         self.ui.pushButton_new_or_close_file.setText('New File')
-    #         try:
-    #             self.ui.pushButton_new_or_close_file.clicked.disconnect(self.closeFile)
-    #             self.ui.pushButton_new_or_close_file.clicked.connect(self.newFile)
-    #         except:
-    #             pass
-    #     else:
-    #         self.ui.pushButton_import_data.setDisabled(False)
-    #         self.ui.pushButton_export_data.setDisabled(False)
-    #         self.ui.pushButton_new_or_close_file.setText('Close File')
-    #         try:
-    #             self.ui.pushButton_new_or_close_file.clicked.disconnect(self.newFile)
-    #             self.ui.pushButton_new_or_close_file.clicked.connect(self.closeFile)
-    #         except:
-    #             pass
     
     def closeFile(self):
         """

@@ -26,7 +26,7 @@ APP_VERSION = (0, 5, 0)
 global CONFIG_PATH
 CONFIG_PATH = os.path.join(ROOT_PATH, '.config')
 
-class TypeHDF(Enum):
+class HDFType(Enum):
     '''
     HDF item's type, Will be used when building Path Tree in HDFHandler.
     
@@ -36,14 +36,19 @@ class TypeHDF(Enum):
     Although external links may be reference of groups, we see it as data, and 
     use special methods to handle them.
     '''
-    Group = 1
-    Data = 2
-    FourDSTEM_Data = 3  # Dataset (data cube) of 4D-STEM
-    String = 4
-    Reference = 5
+    Item = 1
+    Root = 10
+    Group = 11
+    Data = 20
+    FourDSTEM = 21      # Dataset (data cube) of 4D-STEM
+    Line = 22           # One dimension matrix
+    Image = 23          # Two dimension matrix
+    VectorField = 24    # Matrix with shape (2, m, n)
+    String = 30         # String
+    Reference = 40      # Reference
 
 
-class ItemDataRole(Enum):
+class ItemDataRoles(Enum):
     '''
     Optional choice for getting data from QModelIndex.
 
@@ -59,7 +64,7 @@ class ItemDataRole(Enum):
     SizeHintRole = Qt.SizeHintRole 
     NodeRole = Qt.UserRole          # Get the path node instance of the index
     PathRole = Qt.UserRole + 1      # Get the absolute path of the index
-    TypeHDFRole = Qt.UserRole + 2    # Get the insider data's type of the index
+    HDFTypeRole = Qt.UserRole + 2    # Get the insider data's type of the index
 
     # Roles describing appearance and meta data (with associated types)
     FontRole = Qt.FontRole 

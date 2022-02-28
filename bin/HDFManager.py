@@ -67,7 +67,6 @@ import threading
 import traceback
 from collections.abc import Mapping
 from typing import Iterator
-# from sip import wrappertype
 
 import h5py
 import numpy as np
@@ -76,7 +75,7 @@ from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, QObject
 from PySide6.QtWidgets import QApplication 
 
 from bin.Log import LogUtil
-from Constants import APP_VERSION, ItemDataRole
+from Constants import APP_VERSION, ItemDataRoles, HDFType
 
 
 # from bin import DataReaderEMPAD
@@ -683,7 +682,29 @@ class HDFHandler(QObject):
         """
         pass
 
-    
+    def changeDataType(self, item_path, new_type):
+        """
+        Change Data's type into lines, images, vector fields or 4D-STEM datacu-
+        bes. Can also change data's type to general data.
+
+        This function will not influence the practical data in H5 file, but to 
+        adjust the type of node and available actions of users.
+
+        attributes:
+            item_path: (str) the data's type to be changed.
+            new_type: (HDFType) new type of data.
+        """
+        if not isinstance(item_path, str):
+            raise TypeError(('item_path must be a str, not '
+                '{0}'.format(type(item_path).__name__)))
+        elif not isinstance(new_type, HDFType):
+            raise TypeError(('new_type must be a member of HDFType, not '
+                '{0}',format(type(new_type).__name__)))
+        node = self.getNode(item_path)
+        if not isinstance(node, HDFDataNode):
+            raise RuntimeError('Only hdf_type of Data can be changed.')
+        node.hdf_type = new_type
+
 
 class HDFTreeNode(Mapping):
     """
@@ -718,6 +739,8 @@ class HDFTreeNode(Mapping):
         parent: (HDFTreeNode) The parent node of this node.
 
         path: (str) The hdf_path of this node. like '/foo/abc' 
+
+        hdf_type: (HDFType) the hdf_type of this node.
     """
 
     def __init__(self, name: str, parent: 'HDFTreeNode' = None):
@@ -732,6 +755,7 @@ class HDFTreeNode(Mapping):
         self._name = name
         self._parent = parent
         self._mapping = {}
+        self._hdf_type = HDFType.Item 
     
     def __getitem__(self, key: str) -> 'HDFTreeNode':
         return self._mapping[key]
@@ -778,7 +802,6 @@ class HDFTreeNode(Mapping):
             else:
                 self._name = new_name
                 
-    
     @property 
     def parent(self):
         return self._parent
@@ -849,6 +872,15 @@ class HDFTreeNode(Mapping):
             ancestor = ancestor.parent
         return False
 
+    @property
+    def hdf_type(self) -> HDFType:
+        return self._hdf_type
+    
+    @hdf_type.setter
+    def hdf_type(self, new_type: HDFType):
+        if not isinstance(new_type, HDFType):
+            raise TypeError('New type must be a member of HDFType')
+        self._hdf_type = new_type 
 
 class HDFGroupNode(HDFTreeNode):
     """
@@ -910,6 +942,8 @@ class HDFGroupNode(HDFTreeNode):
         name: (str) only root's name can and must be null string ''. 
 
         parent: (HDFTreeNode or NoneType)
+
+        hdf_type: (HDFType) must be HDFType.Group
     """
 
     def __init__(self, name: str = '', parent: 'HDFGroupNode' = None):
@@ -922,6 +956,7 @@ class HDFGroupNode(HDFTreeNode):
         must be NoneType.
         """
         super().__init__(name, parent)
+        self._hdf_type = HDFType.Group 
 
 
     def __setitem__(self, key: str, child: HDFTreeNode):
@@ -1018,12 +1053,24 @@ class HDFGroupNode(HDFTreeNode):
     def items(self):
         return self._mapping.items()
 
+    def hdf_type(self) -> HDFType:
+        return HDFType.Group 
+
 
 class HDFDataNode(HDFTreeNode):
     """
     用来表示 Dataset 的节点。它没有子节点。
 
     Node used to indicate dataset in HDF5 file. It does not have subnodes.
+
+    attributes:
+        name: (str)
+        hdf_type: (HDFType) must be one of these:
+            HDFType.Data
+            HDFType.FourDSTEM
+            HDFType.Line
+            HDFType.Image
+            HDFType.VectorField
     """
     def __init__(self, name: str, parent: HDFGroupNode = None):
         """
@@ -1032,6 +1079,7 @@ class HDFDataNode(HDFTreeNode):
             parent: (HDFGroupNode)
         """
         super().__init__(name, parent)
+        self._hdf_type = HDFType.Data
         
     @property
     def name(self):
@@ -1067,6 +1115,26 @@ class HDFDataNode(HDFTreeNode):
         else:
             self._name = new_name
 
+    @property
+    def hdf_type(self):
+        return self._hdf_type
+
+    @hdf_type.setter
+    def hdf_type(self, new_type: HDFType):
+        if not isinstance(new_type, HDFType):
+            raise TypeError('new_type must be instance of HDFType')
+        Datatypes = [
+            HDFType.Data,
+            HDFType.FourDSTEM,
+            HDFType.Line,
+            HDFType.Image,
+            HDFType.VectorField,
+        ]
+        if not new_type in Datatypes:
+            raise TypeError(('new_type must be also a kind of data,'
+                ' i.e. one of these:\n {0}'.format(Datatypes)))
+        self._hdf_type = new_type 
+
 
 class HDFRootNode(HDFGroupNode):
     """
@@ -1080,10 +1148,14 @@ class HDFRootNode(HDFGroupNode):
 
     attributes:
         name: (str) the name of root is always null string ''
+
         parent: (NoneType) the parent of root is always None
+
+        hdf_type: (HDFType) must be HDFType.Root
     """
     def __init__(self):
         super().__init__(name = '', parent = None)
+        self._hdf_type = HDFType.Root
     
     @property 
     def name(self):
@@ -1092,6 +1164,10 @@ class HDFRootNode(HDFGroupNode):
     @property 
     def parent(self):
         return None
+
+    @property
+    def hdf_type(self) -> HDFType:
+        return HDFType.Root 
 
 
 class HDFTreeModel(QAbstractItemModel):
@@ -1233,6 +1309,8 @@ class HDFTreeModel(QAbstractItemModel):
     https://doc.qt.io/qtforpython/overviews/model-view-programming.html
     """
 
+    DataRoles = ItemDataRoles
+
     def __init__(self, hdf_handler: HDFHandler):
         """
         arguments
@@ -1240,6 +1318,7 @@ class HDFTreeModel(QAbstractItemModel):
         """
         super().__init__()
         self._hdf_handler = hdf_handler
+        
     
     @property 
     def hdf_handler(self):
@@ -1318,7 +1397,7 @@ class HDFTreeModel(QAbstractItemModel):
         Get the practical data from the internal data structure.
 
         The argument role are defined in Qt module from PySide6.QtCore. Here we
-        use Constants.ItemDataRole instances.
+        use Constants.ItemDataRoles instances.
 
         arguments:
             index: (QModelIndex)
@@ -1327,11 +1406,13 @@ class HDFTreeModel(QAbstractItemModel):
         if not index.isValid():
             return None
         node = index.internalPointer()
-        if role == ItemDataRole.NodeRole:
+        if role == self.DataRoles.NodeRole:
             return node
-        elif role == ItemDataRole.PathRole:
+
+        elif role == self.DataRoles.PathRole:
             return node.path
-        elif role == Qt.DisplayRole:    # same as ItemDataRole.DisplayRole
+
+        elif role == self.DataRoles.DisplayRole:    # same as Qt.DisplayRole
             if isinstance(node, HDFRootNode):
                 if self.hdf_handler.isFileOpened():
                     return '(ROOT)'
@@ -1339,7 +1420,8 @@ class HDFTreeModel(QAbstractItemModel):
                     return 'CREATE/OPEN A FILE'
             else:
                 return node.name
-        elif role == Qt.ToolTipRole:    # same as ItemDataRole.ToolTipRole
+
+        elif role == self.DataRoles.ToolTipRole:    # same as Qt.ToolTipRole
             if isinstance(node, HDFRootNode):
                 return '<Root> {0} members'.format(len(node))
             elif isinstance(node, HDFGroupNode):
@@ -1349,6 +1431,9 @@ class HDFTreeModel(QAbstractItemModel):
                     self.hdf_handler.file[node.path].shape,
                     self.hdf_handler.file[node.path].dtype,
                 )
+
+        elif role == self.DataRoles.HDFTypeRole:
+            return node.hdf_type
         else:
             return None
 
@@ -1363,7 +1448,7 @@ class HDFTreeModel(QAbstractItemModel):
         row = self.rowCount(parent)
         self.beginInsertRows(parent, row, row)
         self.hdf_handler.addNewGroup(
-            parent.data(role = ItemDataRole.PathRole),
+            parent.data(role = self.DataRoles.PathRole),
             name,
         )
         self.endInsertRows()
@@ -1389,7 +1474,7 @@ class HDFTreeModel(QAbstractItemModel):
         row = self.rowCount(parent)
         self.beginInsertRows(parent, row, row)
         self.hdf_handler.addNewData(
-            parent.data(role = ItemDataRole.PathRole),
+            parent.data(role = self.DataRoles.PathRole),
             name = name,
             shape = shape,
             dtype = dtype,
@@ -1404,7 +1489,7 @@ class HDFTreeModel(QAbstractItemModel):
         arguments:
             child: (QModelIndex) 
         """
-        child_path = child.data(role = ItemDataRole.PathRole)
+        child_path = child.data(role = self.DataRoles.PathRole)
         row = self._hdf_handler.getRank(child_path)
         self.beginRemoveRows(child.parent, row, row)
         self._hdf_handler.deleteItem(child_path)
@@ -1419,7 +1504,7 @@ class HDFTreeModel(QAbstractItemModel):
 
             dest_parent: (QModelIndex) the destination parent index
         """
-        child_path = child.data(role = ItemDataRole.PathRole)
+        child_path = child.data(role = self.DataRoles.PathRole)
         row = self.hdf_handler.getRank(child_path)
         self.beginMoveRows(
             sourceParent = child.parent,
@@ -1430,7 +1515,7 @@ class HDFTreeModel(QAbstractItemModel):
         )
         self.hdf_handler.moveItem(
             child_path, 
-            dest_parent.data(role = ItemDataRole.PathRole)
+            dest_parent.data(role = self.DataRoles.PathRole)
         )
         self.endMoveRows()
 
@@ -1443,7 +1528,7 @@ class HDFTreeModel(QAbstractItemModel):
 
             name: (str) the new name
         """
-        child_path = child.data(role = ItemDataRole.PathRole)
+        child_path = child.data(role = self.DataRoles.PathRole)
         self.hdf_handler.renameItem(child_path, name)
         self.dataChanged.emit(child, child)
 
@@ -1458,6 +1543,22 @@ class HDFTreeModel(QAbstractItemModel):
             dest_parent: (QModelIndex) the destination parent index
         """
         pass
+
+
+    def changeItemType(self, child: QModelIndex, new_type: HDFType):
+        """
+        Change the hdf_type of the internal node of the index.
+
+        arguments:
+            child: (QModelIndex) the index to be changed
+
+            new_type: (HDFType) 
+        """
+        child_path = child.data(role = self.DataRoles.PathRole)
+        self.hdf_handler.changeDataType(child_path, new_type)
+        self.dataChanged.emit(child, child)
+
+
 
     
     # def resetInternalData(self) -> None:

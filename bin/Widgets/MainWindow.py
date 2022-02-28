@@ -53,11 +53,14 @@ class MainWindow(QMainWindow):
 
     def _initFile(self):
         self.ui.actionNew.triggered.connect(
-            self.ui.tab_File.newFile)
+            self.ui.tab_File.newFile
+        )
         self.ui.actionOpen.triggered.connect(
-            self.ui.tab_File.openFile)
+            self.ui.tab_File.openFile
+        )
         self.ui.actionClose.triggered.connect(
-            self.ui.tab_File.closeFile)
+            self.ui.tab_File.closeFile
+        )
         
 
 
