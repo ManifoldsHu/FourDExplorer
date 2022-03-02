@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QApplication, QGroupBox, QLineEdit, QListView,
     QPushButton, QScrollArea, QSizePolicy, QVBoxLayout,
     QWidget)
 
-from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
+from bin.Widgets.WidgetHDFViewer import WidgetHDFViewer
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -34,7 +34,7 @@ class Ui_Form(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, -112, 309, 1384))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 309, 1384))
         self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.groupBox = QGroupBox(self.scrollAreaWidgetContents)
@@ -42,7 +42,7 @@ class Ui_Form(object):
         self.groupBox.setMinimumSize(QSize(0, 720))
         self.verticalLayout_2 = QVBoxLayout(self.groupBox)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.widget_HDFTreeView = WidgetBaseHDFViewer(self.groupBox)
+        self.widget_HDFTreeView = WidgetHDFViewer(self.groupBox)
         self.widget_HDFTreeView.setObjectName(u"widget_HDFTreeView")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)

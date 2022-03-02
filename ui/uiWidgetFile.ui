@@ -29,7 +29,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-112</y>
+        <y>0</y>
         <width>309</width>
         <height>1384</height>
        </rect>
@@ -48,7 +48,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="WidgetBaseHDFViewer" name="widget_HDFTreeView" native="true">
+           <widget class="WidgetHDFViewer" name="widget_HDFTreeView" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -122,9 +122,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>WidgetBaseHDFViewer</class>
+   <class>WidgetHDFViewer</class>
    <extends>QWidget</extends>
-   <header>bin.Widgets.WidgetBaseHDFViewer.h</header>
+   <header>bin.Widgets.WidgetHDFViewer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

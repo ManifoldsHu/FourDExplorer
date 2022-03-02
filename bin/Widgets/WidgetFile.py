@@ -59,7 +59,8 @@ class WidgetFile(QWidget):
         self.ui = uiWidgetFile.Ui_Form()
         self.ui.setupUi(self)
 
-        self._logger = LogUtil(__name__)
+        self._log_util = LogUtil(__name__)
+        self.logger = self._log_util.logger 
         
         global qApp
         self._hdf_handler = qApp.hdf_handler
@@ -93,7 +94,7 @@ class WidgetFile(QWidget):
             self.changeStateByFileState)
         self.ui.pushButton_new_or_close_file.clicked.connect(self.newFile)
         self.changeStateByFileState()
-
+        # self.ui.widget_HDFTreeView.setReadOnly(False)
 
     def newFile(self):
         """
@@ -194,3 +195,4 @@ class WidgetFile(QWidget):
         Close the current HDF5 file.
         """
         self._hdf_handler.closeFile()
+

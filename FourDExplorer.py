@@ -38,7 +38,8 @@ if __name__ == '__main__':
     app = App(sys.argv)
 
     ''' Initialize Log'''
-    logger = LogUtil(__name__)
+    log_util = LogUtil(__name__)
+    logger = log_util.logger 
     logger.info('4D-Explorer is launched.')
     
     ''' Initialize UI theme'''

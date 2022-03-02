@@ -11,7 +11,7 @@
 
 import os
 import sys
-from enum import Enum
+from enum import Enum, IntEnum
 from PySide6.QtCore import Qt 
 
 # Absolutely path of FourDExplorer directory
@@ -48,7 +48,7 @@ class HDFType(Enum):
     Reference = 40      # Reference
 
 
-class ItemDataRoles(Enum):
+class ItemDataRoles(IntEnum):
     '''
     Optional choice for getting data from QModelIndex.
 

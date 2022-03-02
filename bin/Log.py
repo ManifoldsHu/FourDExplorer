@@ -22,7 +22,8 @@ Coding Example
 from bin.Log import LogUtil
 import traceback
 
-logger = LogUtil(__name__)
+log_util = LogUtil(__name__)
+logger = log_util.logger
 logger.info('Write a log')
 try:
     do something
@@ -85,7 +86,7 @@ class LogUtil(object):
         self.console_handler.setLevel(cLevel)
 
         formatter = logging.Formatter(
-            ('%(asctime)s - %(filename)s->%(funcName)s[line:%(lineno)d] - '\
+            ('%(asctime)s - %(filename)s -> %(funcName)s[line:%(lineno)d] - '
             '%(levelname)s: %(message)s')
         )
         self.file_handler.setFormatter(formatter)
@@ -94,50 +95,6 @@ class LogUtil(object):
         self.logger.addHandler(self.file_handler)
         self.logger.addHandler(self.console_handler)
 
-    def debug(self, message):
-        '''
-        arguments           type            description
-        -----------------------------------------------------
-        message             str             log message
-        -----------------------------------------------------
-        '''
-        self.logger.debug(message)
-
-    def info(self, message):
-        '''
-        arguments           type            description
-        -----------------------------------------------------
-        message             str             log message
-        -----------------------------------------------------
-        '''
-        self.logger.info(message)
-
-    def warning(self, message):
-        '''
-        arguments           type            description
-        -----------------------------------------------------
-        message             str             log message
-        -----------------------------------------------------
-        '''
-        self.logger.warning(message)
-
-    def error(self, message):
-        '''
-        arguments           type            description
-        -----------------------------------------------------
-        message             str             log message
-        -----------------------------------------------------
-        '''
-        self.logger.error(message)
-    
-    def critical(self, message):
-        '''
-        arguments           type            description
-        -----------------------------------------------------
-        message             str             log message
-        -----------------------------------------------------
-        '''
-        self.logger.critical(message)
 
     def setCLevel(self, cLevel):
         '''

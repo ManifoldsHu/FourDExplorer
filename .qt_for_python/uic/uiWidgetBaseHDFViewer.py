@@ -58,11 +58,6 @@ class Ui_Form(object):
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.pushButton_check_attr = QPushButton(Form)
-        self.pushButton_check_attr.setObjectName(u"pushButton_check_attr")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_check_attr)
-
         self.pushButton_refresh = QPushButton(Form)
         self.pushButton_refresh.setObjectName(u"pushButton_refresh")
 
@@ -81,7 +76,6 @@ class Ui_Form(object):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label_HDF.setText(QCoreApplication.translate("Form", u"Hierarchical Data Format (HDF) Tree", None))
         self.pushButton_search.setText(QCoreApplication.translate("Form", u"Search Next", None))
-        self.pushButton_check_attr.setText(QCoreApplication.translate("Form", u"Check Attributes", None))
         self.pushButton_refresh.setText(QCoreApplication.translate("Form", u"Refresh", None))
     # retranslateUi
 

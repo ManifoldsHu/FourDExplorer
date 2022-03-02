@@ -82,9 +82,10 @@ from Constants import APP_VERSION, ItemDataRoles, HDFType
 # from bin.BackEnd import BackEnd
 # from bin.Preview import PreviewHandler
 
-logger = LogUtil(__name__)
+log_util = LogUtil(__name__)
+logger = log_util.logger 
 reValidHDFName = re.compile(
-    r'^[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
+    r'[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
 )   # A valid hdf_name must be able to match this regular expression.
 
 class HDFHandler(QObject):
@@ -554,12 +555,20 @@ class HDFHandler(QObject):
                 'path: {2}'.format(name, parent_node.name, parent_path)))
 
         parent_node.addChild(HDFDataNode(name, parent_node))
-        self.file[parent_path].create_dataset(
-            name, 
-            shape = shape, 
-            dtype = dtype, 
-            compression = compression,
-        )
+        if shape == ():
+            self.file[parent_path].create_dataset(
+                name,
+                shape = shape,
+                dtype = dtype,  
+                # scalar does not have compression property
+            )
+        else:
+            self.file[parent_path].create_dataset(
+                name, 
+                shape = shape, 
+                dtype = dtype, 
+                compression = compression,
+            )
         
 
     def deleteItem(self, item_path: str):
@@ -582,7 +591,7 @@ class HDFHandler(QObject):
         parent_node = this_node.parent
         
         parent_node.deleteChild(this_node)
-        del self.file[parent_node.path]
+        del self.file[item_path]
 
     def moveItem(self, item_path: str, dest_parent_path: str):
         """
@@ -612,6 +621,7 @@ class HDFHandler(QObject):
         this_node = self.getNode(item_path)
         this_parent_node = this_node.parent
         dest_parent_node = self.getNode(dest_parent_path)
+
         if isinstance(this_node, HDFRootNode):
             raise ValueError('Cannot move root')
 
@@ -797,7 +807,7 @@ class HDFTreeNode(Mapping):
             if not isinstance(new_name, str):
                 raise TypeError(('new_name must be a str, not '
                     '{0}'.format(type(new_name))))
-            elif not reValidHDFName.match(new_name):
+            elif reValidHDFName.fullmatch(new_name) is None:
                 raise ValueError('Invalid name: {0}'.format(new_name))
             else:
                 self._name = new_name
@@ -864,7 +874,8 @@ class HDFTreeNode(Mapping):
         if not isinstance(node, HDFTreeNode):
             raise TypeError(('node must be an HDFTreeNode, not '
                 '{0}'.format(type(node).__name__)))
-
+        if node == self:
+            return True
         ancestor = self
         while ancestor:
             if ancestor == node:
@@ -981,7 +992,7 @@ class HDFGroupNode(HDFTreeNode):
 
         if key == '':
             raise ValueError('Cannot set child name as a null string')
-        elif not reValidHDFName.match(key):
+        elif reValidHDFName.fullmatch(key) is None:
             raise ValueError('Invalid child name: {0}'.format(key))
 
         if key in self._mapping:    # delete original child from this
@@ -1002,6 +1013,10 @@ class HDFGroupNode(HDFTreeNode):
     def __contains__(self, key: str) -> bool:
         return key in self._mapping
     
+    @property
+    def hdf_type(self) -> HDFType:
+        return HDFType.Group 
+
     def addChild(self, child: HDFTreeNode):
         """
         Add a child to this node. Will change child's parent attribute.
@@ -1053,8 +1068,7 @@ class HDFGroupNode(HDFTreeNode):
     def items(self):
         return self._mapping.items()
 
-    def hdf_type(self) -> HDFType:
-        return HDFType.Group 
+
 
 
 class HDFDataNode(HDFTreeNode):
@@ -1110,7 +1124,7 @@ class HDFDataNode(HDFTreeNode):
             raise ValueError(
                 'HDFDataNode name attribute cannot set as null string'
             )
-        elif not reValidHDFName.match(new_name):
+        elif reValidHDFName.fullmatch(new_name) is None:
             raise ValueError('Invalid name: {0}'.format(new_name))
         else:
             self._name = new_name
@@ -1422,20 +1436,70 @@ class HDFTreeModel(QAbstractItemModel):
                 return node.name
 
         elif role == self.DataRoles.ToolTipRole:    # same as Qt.ToolTipRole
-            if isinstance(node, HDFRootNode):
+            if node.hdf_type == HDFType.Root:
                 return '<Root> {0} members'.format(len(node))
-            elif isinstance(node, HDFGroupNode):
+            elif node.hdf_type == HDFType.Group:
                 return '<Group> {0} members'.format(len(node))
-            elif isinstance(node, HDFDataNode):
+            elif node.hdf_type == HDFType.Line:
+                return '<Line> length: {0}, dtype: {1}'.format(
+                    self.hdf_handler.file[node.path].shape,
+                    self.hdf_handler.file[node.path].dtype,
+                )
+            elif node.hdf_type == HDFType.Image:
+                return '<Image> shape: {0}, dtype: {1}'.format(
+                    self.hdf_handler.file[node.path].shape,
+                    self.hdf_handler.file[node.path].dtype,
+                )
+            elif node.hdf_type == HDFType.VectorField:
+                return '<Vector Field> shape: {0}, dtype: {1}'.format(
+                    self.hdf_handler.file[node.path].shape,
+                    self.hdf_handler.file[node.path].dtype,
+                )
+            elif node.hdf_type == HDFType.FourDSTEM:
+                return '<4D-STEM Dataset> shape: {0}, dtype: {1}'.format(
+                    self.hdf_handler.file[node.path].shape,
+                    self.hdf_handler.file[node.path].dtype,
+                )
+            elif node.hdf_type == HDFType.Data:
                 return '<Data> shape: {0}, dtype: {1}'.format(
                     self.hdf_handler.file[node.path].shape,
                     self.hdf_handler.file[node.path].dtype,
                 )
+            
+            # if isinstance(node, HDFRootNode):
+            #     return '<Root> {0} members'.format(len(node))
+            # elif isinstance(node, HDFGroupNode):
+            #     return '<Group> {0} members'.format(len(node))
+            # elif isinstance(node, HDFDataNode):
+            #     return '<Data> shape: {0}, dtype: {1}'.format(
+            #         self.hdf_handler.file[node.path].shape,
+            #         self.hdf_handler.file[node.path].dtype,
+            #     )
 
         elif role == self.DataRoles.HDFTypeRole:
             return node.hdf_type
         else:
             return None
+
+    def indexFromPath(self, hdf_path: str) -> QModelIndex:
+        """
+        Get the model index from the path.
+
+        arguments:
+            hdf_path: (str) 
+
+        returns:
+            (QModelIndex) If the path is not valid, this function will return 
+                QModelIndex()
+        """
+        try:
+            node = self.hdf_handler.getNode(hdf_path)
+            row = self.hdf_handler.getRank(hdf_path)
+            return self.createIndex(row, 0, node)
+        except KeyError:
+            return QModelIndex()
+        
+
 
     def insertGroup(self, parent: QModelIndex, name: str):
         """
@@ -1445,6 +1509,8 @@ class HDFTreeModel(QAbstractItemModel):
             parent: (QModelIndex)
             name: (str) the name of the new group
         """
+        if not parent.isValid():
+            raise ValueError('Cannot insert group in invalid parent index.')
         row = self.rowCount(parent)
         self.beginInsertRows(parent, row, row)
         self.hdf_handler.addNewGroup(
@@ -1471,6 +1537,8 @@ class HDFTreeModel(QAbstractItemModel):
             compression: (str) default uses 'gzip', (int) default uses 4. See 
                 h5py documents for more information.
         """
+        if not parent.isValid():
+            raise ValueError('Cannot insert data in invalid parent index.')
         row = self.rowCount(parent)
         self.beginInsertRows(parent, row, row)
         self.hdf_handler.addNewData(
@@ -1489,10 +1557,12 @@ class HDFTreeModel(QAbstractItemModel):
         arguments:
             child: (QModelIndex) 
         """
+        if not child.isValid():
+            raise ValueError('Cannot remove invalid index')
         child_path = child.data(role = self.DataRoles.PathRole)
-        row = self._hdf_handler.getRank(child_path)
-        self.beginRemoveRows(child.parent, row, row)
-        self._hdf_handler.deleteItem(child_path)
+        row = self.hdf_handler.getRank(child_path)
+        self.beginRemoveRows(child.parent(), row, row)
+        self.hdf_handler.deleteItem(child_path)
         self.endRemoveRows()
 
     def moveItem(self, child: QModelIndex, dest_parent: QModelIndex):
@@ -1504,14 +1574,18 @@ class HDFTreeModel(QAbstractItemModel):
 
             dest_parent: (QModelIndex) the destination parent index
         """
+        if not child.isValid():
+            raise ValueError('Cannot move invalid child')
+        if not dest_parent.isValid():
+            raise ValueError('Cannot move items to invalid destination')
         child_path = child.data(role = self.DataRoles.PathRole)
         row = self.hdf_handler.getRank(child_path)
         self.beginMoveRows(
-            sourceParent = child.parent,
-            sourceFirst = row,
-            sourceLast = row,
-            destinationParent = dest_parent,
-            destinationRow = self.rowCount(dest_parent),
+            child.parent(),
+            row,
+            row,
+            dest_parent,
+            self.rowCount(dest_parent),
         )
         self.hdf_handler.moveItem(
             child_path, 
@@ -1528,6 +1602,9 @@ class HDFTreeModel(QAbstractItemModel):
 
             name: (str) the new name
         """
+        if not child.isValid():
+            raise ValueError('Cannot rename invalid item')
+
         child_path = child.data(role = self.DataRoles.PathRole)
         self.hdf_handler.renameItem(child_path, name)
         self.dataChanged.emit(child, child)
@@ -1554,6 +1631,8 @@ class HDFTreeModel(QAbstractItemModel):
 
             new_type: (HDFType) 
         """
+        if not child.isValid():
+            raise ValueError('Cannot change the type of invalid item')
         child_path = child.data(role = self.DataRoles.PathRole)
         self.hdf_handler.changeDataType(child_path, new_type)
         self.dataChanged.emit(child, child)
