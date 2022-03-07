@@ -715,6 +715,29 @@ class HDFHandler(QObject):
             raise RuntimeError('Only hdf_type of Data can be changed.')
         node.hdf_type = new_type
 
+    def matchNodeGenerator(self, kw: str):
+        """
+        A generator that yields nodes matching the key word.
+
+        arguments:
+            kw: (str) the key word to be matched
+
+        returns:
+            (generator) generate HDFTreeNode instance
+        """
+        if not isinstance(kw, str):
+            raise TypeError(('kw must be a str, not '
+                '{0}'.format(type(kw).__name__)))
+        def _matchSubNode(node:'HDFTreeNode'):
+            for key in node:
+                if kw in key:
+                    yield node[key]
+                if isinstance(node[key], HDFGroupNode):
+                    for subnode in _matchSubNode(node[key]):
+                        yield subnode
+        return _matchSubNode(self.root_node)
+
+
 
 class HDFTreeNode(Mapping):
     """
@@ -1637,7 +1660,26 @@ class HDFTreeModel(QAbstractItemModel):
         self.hdf_handler.changeDataType(child_path, new_type)
         self.dataChanged.emit(child, child)
 
+    def matchIndexGenerator(self, kw: str):
+        """
+        A generator that yields the indexes matching the keywords.
 
+        arguments:
+            kw: (str)
+
+        returns:
+            (generator) generates QModelIndex
+        """
+        for node in self.hdf_handler.matchNodeGenerator(kw):
+            yield self.indexFromPath(node.path)
+        # def _matchSubIndex(index: QModelIndex):
+        #     node = index.internalPointer()
+        #     for key in node:
+                
+        #         if kw in key:
+        #             yield self.indexFromPath(node[key].path)
+        #         if isinstance(node[key], HDFGroupNode):
+        #             for subindex in _matchSubIndex()
 
     
     # def resetInternalData(self) -> None:

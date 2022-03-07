@@ -12,7 +12,7 @@ Unix 目录。为此，我们使用 Qt 的 QTreeView 对这些四维数据进行
 *--------------------------- WidgetHDFViewer.py ------------------------------*
 """
 
-from PySide6.QtWidgets import QWidget 
+from PySide6.QtWidgets import QWidget, QMessageBox
 from ui import uiWidgetBaseHDFViewer
 
 class WidgetBaseHDFViewer(QWidget):
@@ -38,6 +38,10 @@ class WidgetBaseHDFViewer(QWidget):
             self.changeStateByFileState)
 
         self.ui.treeView_HDF.setModel(self._hdf_handler.model)
+
+        self._last_kw = ''  # last key word of the user, for searching
+        self.ui.pushButton_search.clicked.connect(self.search)
+        self._result_generator = None 
     
     def changeStateByFileState(self):
         """
@@ -65,5 +69,40 @@ class WidgetBaseHDFViewer(QWidget):
         self._hdf_handler._createModel()
         self.ui.treeView_HDF.setModel(self._hdf_handler.model)
 
-    def search(self):
-        pass
+    def search(self) -> bool:
+        """
+        When the pushbutton 'search' is clicked, this function will be called.
+
+        This function will build a generator, which generates matched nodes. 
+        Then everytime this function is called, the generator returns the next 
+        matched node. This function will at last show the corresponding index 
+        in the treeview of the HDF5 file.
+
+        returns:
+            (bool) whether there is a matched item.
+        """
+        kw = self.ui.lineEdit_search.text()
+        if kw == '':
+            return False
+        else:
+            if kw != self._last_kw:
+                # The user changes the key word, so we need rebuild the genera-
+                # tor and search from the beginning of the tree.
+                self._last_kw = kw
+                model = self.ui.treeView_HDF.model()
+                self._result_generator = model.matchIndexGenerator(kw)
+            if self._result_generator is None:
+                return False
+            try:
+                index = next(self._result_generator)
+                self.ui.treeView_HDF.setCurrentIndex(index)
+                return True
+            except StopIteration:
+                msg = QMessageBox(parent = self)
+                msg.setWindowTitle('Search Next')
+                msg.setIcon(QMessageBox.Information)
+                msg.setText('No more results.')
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec()
+                self._last_kw = '' # reset the search widget
+                return False
