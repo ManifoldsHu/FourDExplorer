@@ -106,3 +106,5 @@ class WidgetBaseHDFViewer(QWidget):
                 msg.exec()
                 self._last_kw = '' # reset the search widget
                 return False
+
+    

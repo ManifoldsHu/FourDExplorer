@@ -206,7 +206,8 @@ class HDFHandler(QObject):
         file_closed: emits when file is closed
     """
 
-    file_state_changed = Signal()
+    file_state_changed = Signal()   # When file is opened or closed, 
+                                    # this signal is emitted.
 
     def __init__(self):
         super().__init__()

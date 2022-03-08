@@ -26,8 +26,8 @@ APP_VERSION = (0, 5, 0)
 global CONFIG_PATH
 CONFIG_PATH = os.path.join(ROOT_PATH, '.config')
 
-class HDFType(Enum):
-    '''
+class HDFType(IntEnum):
+    """
     HDF item's type, Will be used when building Path Tree in HDFHandler.
     
     For practical Path Tree Nodes, only those groups will have childs, while o-
@@ -35,7 +35,7 @@ class HDFType(Enum):
     
     Although external links may be reference of groups, we see it as data, and 
     use special methods to handle them.
-    '''
+    """
     Item = 1
     Root = 10
     Group = 11
@@ -49,11 +49,11 @@ class HDFType(Enum):
 
 
 class ItemDataRoles(IntEnum):
-    '''
+    """
     Optional choice for getting data from QModelIndex.
 
     For more information of those roles in Qt, read the official document.
-    '''
+    """
     # General purpose roles
     DisplayRole = Qt.DisplayRole
     DecorationRole = Qt.DecorationRole
@@ -79,32 +79,47 @@ class ItemDataRoles(IntEnum):
     AccessibleDescriptionRole = Qt.AccessibleDescriptionRole
 
 
-class UITheme(Enum):
-    '''
+class UITheme(IntEnum):
+    """
     The theme of ui. Default is light_blue
-    '''
-    dark_amber = 1
-    dark_blue = 2
-    dark_cyan = 3
-    dark_lightgreen = 4
-    dark_pink = 5
-    dark_purple = 6
-    dark_red = 7
-    dark_teal = 8
-    dark_yellow = 9
-    light_amber = 10
-    light_blue = 11
-    light_cyan = 12
-    light_cyan_500 = 13
-    light_lightgreen = 14
-    light_pink = 15
-    light_purple = 16
-    light_red = 17
-    light_teal = 18
-    light_yellow = 19
+    """
+    dark_amber = 110
+    dark_blue = 120
+    dark_cyan = 130
+    dark_lightgreen = 140
+    dark_pink = 150
+    dark_purple = 160
+    dark_red = 170
+    dark_teal = 180
+    dark_yellow = 190
 
-    default = 11
-    custom_color = 12
+    light_amber = 210
+    light_blue = 220
+    light_cyan = 230
+    light_cyan_500 = 231
+    light_lightgreen = 240
+    light_pink = 250
+    light_purple = 260
+    light_red = 270
+    light_teal = 280
+    light_yellow = 290
+
+    default = 220
+    default_dark = 130
+
+
+class TaskState(IntEnum):
+    """
+    The state of Task object.
+    """
+    Initialized = 1     # The task is initialized
+    Waiting = 2         # The task is added to waiting queue.
+    Cancelled = 3       # The task in the waiting queue is cancelled
+    Submitted = 4       # The task in the waiting queue is about to execute
+    Completed = 5       # The task has executed and already completed.
+    Aborted = 6         # The task is aborted when executing, forced by user.
+    Excepted = 7        # The task is aborted when executing, due to exceptions.
+
 
 
 
