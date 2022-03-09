@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 *------------------------------ TaskManager.py -------------------------------*
-用于异步并发任务的调度器，使用 concurrent.futures 提供的线程池和进程池，并且通过
- pyqtSignal 与主线程进行异步通信。初步只提供多线程功能，而不提供多进程功能。
+用于异步并发任务的调度器。
+
+使用 concurrent.futures 中的 ThreadExecutor 作为线程池，并且通过 Signal 与主线程
+进行异步通信。这个管理器只用于多线程，用于 IO 密集型任务的并发，且避免主界面卡死。多
+进程的并行任务后续由单独的管理器给出。
 
 当主线程想执行由某几个函数构成的并发任务时，就将这几个函数打包成 Subtask 对象，然后将
 其组合成 Task 对象。接下来，主线程会给每个 Subtask 指定回调函数，它会向主线程发送信号
@@ -14,15 +17,18 @@
 完成时，就切换到下一个任务。
 
 当 Task 在任务队列中时可以取消，但当 Task 正在运行时则无法取消，只能等待其运行完毕。
-(后续会添加一个通用 flag，用来取消正在运行的 Task )
 
 作者：          胡一鸣
 创建时间：      2021年12月28日
 
-These are asynchronous dispatchers of concurrent tasks using threading or mult-
-iprocessing pool from concurrent.futures . The task managers communicate with 
-the main event loop by pyqtSignals. As for now, only threading pool is availab-
-le.
+
+This is a Scheduler for asynchronous concurrent tasks.
+
+We use ThreadExecutor from concurrent.futures as the pool, and use signal to 
+communicate between the main thread and the child threads. This manager is 
+only used in multithread, for those long duration IO tasks, and for avoiding
+the main window is blocked. Due to GIL, this manager cannot do parallel calcu-
+ations.
 
 When the main thread wants to submit a concurrent task made up by several func-
 tions, it packs these functions into Subtask objects, and then combine them as 
@@ -37,37 +43,33 @@ completed, TaskManager will check whether the current Task has completed. If so,
 the next Task will start.
 
 We will be able to cancel a Task in waiting queue, but if it has started, we can 
-only wait until it is completed. (Later a flag will be added to cancel running 
-task.)
+only wait until it is completed.
 
 author:             Hu Yiming
 date:               Jan 9, 2022
-
 *------------------------------ TaskManager.py -------------------------------*
-'''
+"""
 
 
-import threading
-import queue
-from collections import deque
-import time
-import concurrent.futures
-from typing import Callable
-import numpy as np
-from functools import partial
-from PySide6.QtCore import Signal
+from concurrent import futures
+from typing import Iterator, Callable
+
+from PySide6.QtCore import (
+    Signal, 
+    QObject, 
+    QAbstractListModel, 
+    QModelIndex, 
+    Qt,
+)
+
+from Constants import TaskState
 
 
-
-def _packingFunc(func: Callable, *args, **kwargs) -> Callable:         
-    '''
-    这个函数用来将函数进行打包，类似于偏函数，把参数都打包进一个新的函数，这样新的函数
-    调用的时候就可以不用带参数。
-
+def _packing(func: Callable, *arg, **kw) -> Callable:
+    """
     This function is to pack the function with its arguments, just like partial
     functions or lambda functions.
 
-    类似于:
     Example:
 
     def test_func(pos, opt = 2, *args, **kw):
@@ -79,217 +81,22 @@ def _packingFunc(func: Callable, *args, **kwargs) -> Callable:
         packed_func = _packingFunc(test_func, 1, 2, 3, 4, other = 5)
         packed_func()
 
-    其结果为:
     The results are:
 
     Positional Aruguments: 1
     Optional Arguments: 2
     Arguments: (3, 4)
     Keyword Arguments: {'other': 5}
-    '''
+    """
     def _wrapper():
-        return func(*args, **kwargs)
-    return _wrapper
-
-class Subtask:
-    '''
-    并发执行的子任务，通常由一个函数组成，在一个子线程中运行。多个子任务会组成一个任
-    务 Task。子任务对应的函数返回后，在子线程中会调用 doneCallBack() 方法作为回调函
-    数。
-
-    The Subtask that executes concurrently in a thread, consisting one function.
-    Usually there are several Subtask objects in one task object. After the fu-
-    nction returns, the doneCallBack() method will be called.
-    '''
-    def __init__(self, func, *args, **kwargs):
-        '''
-        arguments           type                description
-        ----------------------------------------------------------------------
-        func                Callable            The function that will execute 
-                                                in the child thread.
-
-        *args               any                 Non-keyword arguments
-
-        **kwargs            any                 Keyword arguments
-        -----------------------------------------------------------------------
-        '''
-        self._func = _packingFunc(func, args, kwargs)
-        self._name = 'Subtask Ojbect: {0}({1}, {2})'.format(
-            func.__name__,
-            args,
-            kwargs,
-        )
-
-        # self._args = args
-        # self._kwargs = kwargs
-
-        # self.future is either a concurrent.futures.Future object or None.
-        self.future = None
-        
-        # Usually the Slot are called in the main thread, though this signal 
-        # emits in the child thread.
-        self.signal_complete = Signal()     
-
-    def __str__(self):
-        return self._name
-
-    def getFunc(self):
-        return self._func
-        
-
-    def getName(self):
-        return self._name
-
-    def isCompleted(self):
-        if self.future:
-            return self.future.done()
-        else:
-            return False
-
-    def doneCallBack(self):
-        self.signal_complete.emit()
+        return func(*arg, **kw)
+    return _wrapper 
 
 
-class Task:
-    '''
-    应当顺次执行的独立任务，内部包含一个或多个可并发执行的子任务，例如遍历四维数据计
-    算虚拟成像。
+class TaskManager(QObject):
+    """
+    并发任务调度器。
 
-    在该任务执行前，主线程会调用 prepare()，做一些任务的初始化工作；在该任务执行后，
-    也就是所有子任务都返回后，主线程会调用 follow()，做一些任务的后续工作。
-
-    任务在执行开始前，也就是在队列等待的时候，可以被取消；一旦其提交到了 Executor 后
-    就无法取消了。
-
-    注意，同一个任务对象只能提交、执行一次。如果要再次执行该任务，需要重新实例化一个
-    Task 对象。
-
-
-    A independent task that should execute in order, in which there is one or 
-    several concurrent subtasks, e.g. loop the 4D-STEM dataset and calculate a 
-    virtual image.
-
-    Before the task is executed, prepare() is called in the main thread, which 
-    is used to do some preparation work. After all of the subtasks return, the
-    main thread will call follow() and do some following work.
-
-    Before a task is submitted to the executor, it can be cancelled. Once it is
-    submitted, it cannot be cancelled.
-
-    Note: A task object can be submitted and executed only ONCE. If we want to
-    execute this task again, we need to instantiate a task again.
-    '''
-    def __init__(self, name: str, *subtasks: Subtask):
-        '''
-        arguments           type                description
-        -----------------------------------------------------------------------
-        name                str                 The name of task
-
-        subtasks            Subtask             The subtask object that execut-
-                                                es concurrently.
-        -----------------------------------------------------------------------
-        '''
-        self._name = name
-        self._subtasks = subtasks
-        self._is_cancelled = False
-        self._is_submitted = False
-        self._follow_func = None
-        self._prepare_func = None
-
-    def getSubtask(self) -> tuple:
-        '''
-        列出该任务下属的各个子任务对象。
-
-        Returns a tuple that includes Subtask objects of this task.
-        '''
-        return self._subtasks
-
-    def setSubmitted(self):
-        '''
-        提交任务给 executor 时，设置其状态为 True.
-
-        When this task is submitted to the executor, the state is set to True.
-        '''
-        self._is_submitted = True
-
-    def cancel(self) -> bool:
-        '''
-        取消任务。取消了的任务不会提交给 executor. 一个任务只有在被提交给 executor 
-        之前才能被取消。
-
-        Cancel this task. A cancelled task will not be submitted to the execut-
-        or. The task can be cancelled only before it is submitted.
-        '''
-        if self._is_submitted:
-            return False
-        else:
-            self._is_cancelled = True
-            return True
-
-    def isCancelled(self) -> bool:
-        return self._is_cancelled
-
-    def setFollowing(self, func, *args, **kwargs):
-        '''
-        设置该任务在执行完所有子任务后需要调用的函数。用来做一些后续工作。
-
-        Set the function that will be called after the task has been done.
-
-        arguments           type                description
-        -----------------------------------------------------------------------
-        func                Callable            The function that will be call-
-                                                ed after the whole task is done.
-                                                It is called in the main thread.
-
-        *args               any                 Non-keyword arguments
-
-        **kwargs            any                 Keyword arguments
-        -----------------------------------------------------------------------
-        '''
-        self._follow_func = _packingFunc(func, *args, **kwargs)
-
-    def setPreparing(self, func, *args, **kwargs):
-        '''
-        设置该任务在提交给 executor 之前需要调用的函数。用来做一些准备工作。
-
-        Set the function that will be called before the task is submitted.
-
-        arguments           type                description
-        -----------------------------------------------------------------------
-        func                Callable            The function that will be call-
-                                                ed before the whole task is su-
-                                                bmitted. It is called in the m-
-                                                ain thread.
-
-        *args               any                 Non-keyword arguments
-
-        **kwargs            any                 Keyword arguments
-        -----------------------------------------------------------------------
-        '''
-        self._prepare_func = _packingFunc(func, *args, **kwargs)
-
-    def following(self):
-        '''
-        执行任务完成的后续工作。
-
-        Call the following function.
-        '''
-        if self._follow_func:
-            self._follow_func()
-
-    def preparing(self):
-        '''
-        执行任务之前的准备工作。
-
-        Call the preparing function.
-        '''
-        if self._prepare_func:
-            self._prepare_func()
-
-    
-
-class TaskManager:
-    '''
     异步任务调度器，对 Executor 的进一步封装，保证一次只能执行一个 Task。绝大部分
     4D-STEM 任务都有先后顺序要求，所以我们用事件循环来协调这些任务的顺序，而单个的本
     地任务往往涉及到 IO 与计算，因此可以用并发处理。
@@ -297,6 +104,12 @@ class TaskManager:
     该任务调度器的各种操作都是依托于主线程事件循环的，因此可以使用 Qt 的信号-槽机制来
     调用其函数。具体来讲，就是把任务加入队列、取消任务、提交任务、任务执行完毕通知等
     等各种操作都是需要通过信号进行调度的。
+
+    如果想向线程池提交任务，则要先实例化 Task，然后调用 Task.addSubtask 方法，将需要
+    并发执行的各个函数都作为子任务加到 Task 中。然后调用管理器的 addTask 方法即可将任
+    务加入等待队列，稍后便会自动执行。
+
+    A concurrent task manager.
 
     This is an asynchronous task manager, which encapsulates executors to ensu-
     re that only one task executes once. Most of the 4D-STEM task should be ex-
@@ -309,115 +122,880 @@ class TaskManager:
     be more specific, we can use signals to call the slot functions like add t-
     ask into the task queue, cancel tasks, submit a task, and notify users the 
     current task has been done. 
-    '''
-    def __init__(self, executor_name = 'threading'):
-        # 使用 popleft() 方法来从队列里取出；使用 append() 方法来加入队列
-        self._task_queue = deque(maxlen=20)
 
-        # 当前任务，要么是 None, 要么是 Task 对象。
+    If we want to submit a task to the tread pool, we need to instantiate an 
+    Task object, and then use Task.addSubtask() method to add those functions 
+    that need to execute concurrently. After that, we call addTask() method of
+    the TaskManager, which will enqueue the task. At last, after a moment the
+    task will execute automatically.
+
+    signals:
+        progress_updated: (int) emits whenever the current task's progress is
+            updated. The progress will show in the progress bar on the screen.
+
+        task_info_refresh: emits whenever the current task is changed, e.g. a
+            new task is submitted.
+
+    attributes:
+        task_queue: (TaskQueue)
+
+        model_waiting: (TaskQueueModel)
+
+        current_task: (Task or None)
+    """
+
+    progress_updated = Signal(int)      
+    # emits whenever the current task's progress update
+
+    task_info_refresh = Signal()
+    # emits whenever the current task is changed, e.g. a new task is submitted.
+
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self._task_queue = TaskQueue()
         self._current_task = None
+        self._executor = futures.ThreadPoolExecutor()
+        self._model_waiting = TaskQueueModel(self)
 
-        # 该 TaskManager 对应的 executor 的类型。
-        self.executor_name = executor_name
-        if executor_name == 'threading':
-            self._executor = concurrent.futures.ThreadPoolExecutor()
-        elif executor_name == 'multiprocessing':
-            self._executor = concurrent.futures.ProcessPoolExecutor()
-        else:
-            raise TypeError('executor must be \'threading\' or \'multiprocessing\'')
-        
-        
-    def _submit(self, task: Task):
-        '''
-        提交每个子任务。每个子任务都会绑定一个回调函数，发送自己完成任务的信号。
-
-        Submit every subtask. A callback function is bounded to each subtask, 
-        in order to send a Signal that this subtask has been completed.
-        '''
-        for subtask in task.getSubtask():
-            subtask.signal_complete.connect(self._submitNext,)
-            subtask.future = self._executor.submit(subtask.getFunc())
-            subtask.future.add_done_callback(subtask.doneCallBack)
-            # subtask.future.add_done_callback(self._submitNext)
-            
-
-    def _submitNext(self,):
-        '''
-        提交下一个任务。在以下情况下，会调用这个函数：
-            - 现有任务中的某个子任务完成
-            - 用户添加了一个新任务
-
-        这个函数不是原子操作，因此很可能发生并发问题。比如说，可能会有倒数第二个子任务
-        完成时发送了信号，调用了这个函数。当这个函数检查的时候，最后一个子任务却也恰好
-        完成了。那么，这个函数就会直接从队列中取出一个任务提交。问题在于，最后一个子任
-        务也会进行检查、调用这个函数。
-        
-        但是，这不会产生什么影响，因为只要我们能保证各个任务之间是互斥地、顺次地执行，
-        然后又不漏掉任何任务，就可以了。由于我们确保了一般只有主线程(事件循环)能调用这
-        个函数，所以这个函数对于主线程而言是不可以并发执行的。
-
-        Submit the next task. This function is called in the following case:
-            - some subtask of the current task is completed,
-            - or a user enqueues a new task.
-
-        This function is not an atomic operation, so there may exist some conc-
-        urrent problems. For example, there may be the second last subtask emit
-        a signal that itself has been completed, and call this function. When 
-        this function is checking, the last subtask is completed at the same t-
-        ime. Then, this function will pop a task and submit it. The problem is,
-        the last subtask will also emit a signal and try to call this function.
-
-        I personally suppose this will not cause any critical problems, because
-        the only goal is to ensure that each task is executed mutual exclusive-
-        ly, and in order. This function, as a slot, can only be called in the 
-        main thread event, and hence we can safely call this function multiple 
-        times and do not need to worry about it.
-        '''
-        if threading.current_thread().name != 'MainThread':
-            raise RuntimeError('TaskManager._submitNext() must be called in MainThread!')
-        done = True
-        if self._current_task:
-            for subtask in self._current_task.getSubtask():
-                if not subtask.isCompleted():
-                    done = False
-        if done:
-            if self._current_task:
-                self._current_task.following()
-            try:
-                # next_task = self._task_queue.get_nowait()
-                next_task = self._task_queue.popleft()
-                while next_task.isCancelled():
-                    next_task = self._task_queue.popleft()
-            except IndexError:
-                self._current_task = None
-            else:
-                self._current_task = next_task
-                next_task.setSubmitted()
-                next_task.preparing()
-                self._submit(next_task)
-                
-                # 通知 GUI 及时更改显示任务队列以及正在进行的任务的界面
-                self._flush_task_queue()
+    @property
+    def task_queue(self) -> 'TaskQueue':
+        return self._task_queue
     
-    def addTask(self, task: Task):
-        '''
-        往任务队列里添加任务。
-        '''
+    @property
+    def model_waiting(self) -> 'TaskQueueModel':
+        return self._model_waiting
+
+    @property
+    def current_task(self) -> 'Task':
+        return self._current_task
+
+    @current_task.setter
+    def current_task(self, task: 'Task'):
+        if task == None:
+            self._current_task = None
+        elif isinstance(task, Task):
+            self._current_task = task
+        else:
+            raise TypeError('current task must be a Task or None, not '
+                '{0}'.format(type(task).__name__))
+
+
+    def addTask(self, task: 'Task'):
+        """
+        Add a task to the waiting queue.
+
+        arguments:
+            task: (Task)
+        """
         if not isinstance(task, Task):
-            raise TypeError('task must be a Task object.')
-        self._task_queue.append(task)
-        self._submitNext()
-        self._flush_task_queue()
+            raise TypeError('task must be a Task, not '
+                '{0}'.format(type(task).__name__))
+        task.state = TaskState.Waiting
+        self.model_waiting.addTask(task)
+        self._startNextTask()
 
-    def shutdown(self):
-        '''
-        关闭 executor 并释放资源。这个操作会等待所有子任务都执行完毕之后才执行。
-        '''
-        self._executor.shutdown(wait=True)
+    def cancelTask(self, index: int|QModelIndex):
+        """
+        Cancel the task in the waiting queue.
 
-    def _flush_task_queue(self):
+        arguments:
+            index: (int or QModelIndex) 
+        """
+        if isinstance(index, int):
+            _index = self.model_waiting.createIndex(index, 0)
+        elif isinstance(index, QModelIndex):
+            _index = index
+        else:
+            raise TypeError('index must be int or QModelIndex, not '
+                '{0}'.format(type(index).__name__))
+        if not _index.isValid():
+            return None
+        
+        task = self.model_waiting.cancelTask(_index)
+        task.state = TaskState.Cancelled
+
+    def _startNextTask(self):
+        """
+        if a task is completed, it will send task_completed signal. Then this 
+        slot will be called. 
+        """
+        self._clearLastTask()
+        self._refresh()
+        self._submitNextTask()
+        self._refresh()
+
+
+    def _clearLastTask(self):
+        """
+        Set the _current_task to None.
+        """
+        print('_clearLastTask is called')
+        if self.current_task is None:
+            return True
+        elif self.current_task.state in (TaskState.Completed,):
+            self.current_task.follow()
+            self.current_task = None
+            print('current task is cleared: {0}'.format(self.current_task))
+            return True
+        else:
+            print('but the current task is not cleared')
+            return False
+
+    def _submitNextTask(self):
+        """
+        Get a new task from the waiting queue.
+        """
+        print('_submitNextTask is called')
+        if self.current_task:
+            print('but there is a task executing')
+            return False
+
+        task = self.model_waiting.popTask()
+        if task is None:
+            print('but there is no waiting task')
+            return False
+
+        task.state = TaskState.Submitted
+        task.task_completed.connect(self._startNextTask)
+        task.task_progress.connect(self._sendProgress)
+        task.prepare()
+
+        for subtask in task:
+            subtask.future = self._executor.submit(subtask.getFunction())
+            subtask.future.add_done_callback(subtask.complete)
+
+        self.current_task = task
+        return True
+
+    def _refresh(self):
+        self.task_info_refresh.emit()
+
+    def _sendProgress(self):
+        self.progress_updated.emit(self.current_task.progress)
+
+    def _abortForce(self):
+        """
+        Force terminating the current task. 
+        
+        It seems we cannot do this for now.
+        """
         pass
 
+    def shutDown(self):
+        """
+        Shut down the executor. 
+        
+        The python process will end until the last task completes. Use this
+        function before close 4D-Explorer software to clear resources. 
+
+        And also the waiting queue will be cleared.
+        """
+        self.task_queue.clearWaiting()
+        self._executor.shutdown(wait = False, cancel_futures = True)
     
-                
-            
+class TaskQueue(QObject):
+    """
+    任务的等待队列。
+
+    任务初始化以后，就加入到等待队列中。只要当前任务完成了，就从等待队列中拿出一个
+    任务，提交给 TaskManager，交由线程池处理。
+
+    当一个任务加入到等待队列中时，就也同时会加入到任务历史中。使用 clearHistory 可以
+    清空任务历史。
+
+    Waiting task queue.
+
+    After a task is initialized, it is enqueued to this task queue. Any time
+    a task is completed, one task should be poped, and sumbitted to the pool.
+    
+    Whenever a task is added to waiting list, it is also added to history list.
+    Use clearHistory() to clear the history list.
+
+    attributes:
+        maxlen: (int) the maximum length of waiting queue
+
+        maxhistory: (int) the maximum length of history queue
+    """
+    def __init__(self):
+        self._maxlen = 10
+        self._maxhistory = 100
+        self._tq = []       # waiting list of tasks (task queue)
+        self._history = []  # history list of tasks
+        
+    @property 
+    def maxlen(self) -> int:
+        """
+        returns:
+            (int) the maximum length of waiting queue.
+        """
+        return self._maxlen
+
+    @maxlen.setter
+    def maxlen(self, mlen: int):
+        """
+        Set the maximum length of waiting queue.
+
+        arguments:
+            mlen: (int)
+        """
+        if not isinstance(mlen, int):
+            raise TypeError(('maxlen must be int, not '
+                '{0}'.format(type(mlen).__name__)))
+        self._maxlen = mlen 
+
+    @property
+    def maxhistory(self) -> int:
+        """
+        returns:
+            (int) the maximum length of history list.
+        """
+        return self._maxhistory
+
+    @maxhistory.setter
+    def maxhistory(self, mlen: int):
+        """
+        Set the maximum length of history list.
+
+        arguments:
+            mlen: (int)
+        """
+        if not isinstance(mlen, int):
+            raise TypeError(('maxhistory must be int, not '
+                '{0}'.format(type(mlen).__name__)))
+        self._maxhistory = mlen 
+
+    def addTask(self, task: 'Task'):
+        """
+        Add a task into waiting queue.
+
+        arguments:
+            task: (Task)
+        """
+        if not isinstance(task, Task):
+            raise TypeError('task must be a Task, not '
+                '{0}'.format(type(task).__name__))
+        if len(self) >= self.maxlen:
+            raise ValueError('Cannot add task: too many task waiting')
+        self._tq.append(task)
+
+        if len(self._history) >= self.maxhistory:
+            self._history.pop(0)
+        self._history.append(task)
+    
+    def popTask(self) -> 'Task':
+        """
+        Get the task from the front of the waiting queue.
+
+        returns:
+            (Task)
+        """
+        if len(self._tq) > 0:
+            return self._tq.pop(0)
+        else:
+            return None
+
+    def cancelTask(self, index: int) -> 'Task':
+        """
+        Delete a task from the waiting queue.
+
+        arguments:
+            index: (int) 
+        
+        returns:
+            (Task)
+        """
+        return self._tq.pop(index)
+
+    def __str__(self) -> str:
+        return '<TaskQueue>: {0} members.'.format(len(self._tq))
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __getitem__(self, index: int) -> 'Task':
+        return self._tq[index]
+
+    def __setitem__(self, index: int, task: 'Task'):
+        if not isinstance(task, Task):
+            raise TypeError(('task must be Task object, not '
+                '{0}'.format(type(task).__name__)))
+        self._tq[index] = task
+
+    def __len__(self):
+        return len(self._tq)
+
+    def __iter__(self) -> Iterator:
+        return iter(self._tq)
+
+    def __contains__(self, task: 'Task') -> bool:
+        return task in self._tq 
+
+    def clearHistory(self):
+        """
+        Clear the history lists.
+        """
+        self._history = []
+
+    def clearWaiting(self):
+        """
+        Clear all of the waiting tasks.
+        """
+        self._tq = []
+
+
+
+class Task(QObject):
+    """
+    应当顺次执行的独立任务。
+    
+    内部包含一个或多个可并发执行的子任务，可以使用 for 循环遍历地取到这些子任务。
+
+    在该任务执行前，主线程会调用 prepare()，做一些任务的初始化工作；在该任务执行后，
+    也就是所有子任务都返回后，主线程会调用 follow()，做一些任务的后续工作。
+
+    任务在执行开始前，也就是在队列等待的时候，可以被取消；一旦其提交到了 Executor 后
+    就无法取消了。
+
+    注意，同一个任务对象只能提交、执行一次。如果要再次执行该任务，需要重新实例化一个
+    Task 对象。
+
+    要使用 Task 对象，可以直接实例化 Task，然后使用 addSubtask() 方法，即可组装成
+    完整的并发任务。也可以使用继承对象。每个任务最好能为其指定名字和注释，它们会显示
+    在主界面里。
+
+    一个任务具有多种状态，TaskManager 会自动调整其状态：
+        Initialized             初始化
+        Waiting                 已经加入到等待队列
+        Cancelled               在等待时被取消
+        Submitted               已提交到 executor 并正在执行
+        Completed               任务已经完成(所有子任务均已完成)
+        Aborted                 在执行时被用户强制终止
+        Excepted                在执行时因为异常而终止
+    其中 Aborted 状态目前无法达到。
+
+    An independent task that should execute in order. 
+    
+    In a task there is one or several concurrent subtasks, and we can use for
+    loop to get all of these subtasks.
+
+    Before the task is executed, prepare() is called in the main thread, which 
+    is used to do some preparation work. After all of the subtasks return, the
+    main thread will call follow() and do some following work.
+
+    Before a task is submitted to the executor, it can be cancelled. Once it is
+    submitted, it cannot be cancelled.
+
+    NOTE: A task object can be submitted and executed only ONCE. If we want to
+    execute this task again, we need to instantiate a task again.
+
+    If we want to use Task object, we can instantiate Task, and use addSubtask()
+    method. We can also use inheritance objects. It would be better to give the
+    task a name and comments, because they will be shown on the screen.
+
+    A Task has multiple kinds of states:
+        Initialized     The task is initialized.
+        Waiting         The task is added to waiting queue.
+        Cancelled       The task in the waiting queue is cancelled.
+        Submitted       The task in the waiting queue is about to execute.
+        Completed       The task has executed and already completed.
+        Aborted         The task is aborted when executing, forced by user.
+        Excepted        The task is aborted when executing, due to exceptions.
+    Among them Aborted cannot be a valid state for now.
+
+    signals:
+        task_completed: emits when this task is completed.
+
+        task_progress:  emits when the progress of this task is updated.
+
+    attributes:
+        name: (str) name of this task
+        
+        state: (TaskState) the state of the task
+
+        comment: (str) comment of this task
+    """
+
+    task_completed = Signal()   # emits when this task is completed.
+    task_progress = Signal()    # emits when progress is updated
+
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self._name = 'untitled'
+        self._subtasks = []
+        self._follow = None
+        self._prepare = None
+        self._comment = ''
+        self._progress = None
+        self._state = TaskState.Initialized
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, _name: str):
+        if not isinstance(_name, str):
+            raise TypeError('name must be a str, not '
+                '{0}'.format(type(_name).__name__))
+        self._name = _name
+
+    @property
+    def subtasks(self):
+        """
+        returns:
+            (list) all of the subtasks
+        """
+        return self._subtasks
+
+    @property
+    def state(self) -> TaskState:
+        """
+        returns:
+            (TaskState) the state of this task.
+        """
+        return self._state
+
+    @state.setter
+    def state(self, _tstate: TaskState):
+        """
+        arguments:
+            _tstate: (TaskState)
+        """
+        if not isinstance(_tstate, TaskState):
+            raise TypeError('state must be one of TaskState, not'
+                '{0}'.format(type(_tstate).__name__))
+        self._state = _tstate
+
+    def __iter__(self):
+        return iter(self._subtasks)
+
+    def __len__(self):
+        return len(self._subtasks)
+
+    def __contains__(self, subtask: 'Subtask') -> bool:
+        return subtask in self._subtasks
+
+    def setFollow(self, func: Callable, *arg, **kw):
+        """
+        Set the following function.
+        
+        The function will be called after the task is completed.
+
+        arguments:
+            func: (Callable) the following function
+
+            *args: those positional arguments of the function
+
+            **kw: those key word arguments of the function
+        """
+        if not isinstance(func, Callable):
+            raise TypeError(('func must be a Callable, not '
+                '{0}'.format(type(func).__name__)))
+        self._follow = _packing(func, *arg, **kw)
+
+    def setPrepare(self, func: Callable, *arg, **kw):
+        """
+        Set the preparing function.
+
+        The function will be called before the task is submitted.
+
+        arguments:
+            func: (Callable) the preparing function
+
+            *args: those positional arguments of the function
+
+            **kw: those key word arguments of the function
+        """
+        if not isinstance(func, Callable):
+            raise TypeError(('func must be a Callable, not '
+                '{0}'.format(type(func).__name__)))
+        self._prepare = _packing(func, *arg, **kw)
+
+    def follow(self):
+        """
+        Call the following function.
+        """
+        if self._follow:
+            self._follow()
+
+    def prepare(self):
+        """
+        Call the preparing function.
+        """
+        if self._prepare:
+            self._prepare()
+
+    @property
+    def comment(self) -> str:
+        """
+        returns:
+            (str) the comment of this task.
+        """
+        return self._comment
+
+    @comment.setter
+    def comment(self, _comm: str):
+        """
+        Set the comment of this task. 
+        
+        Describing what the task to do and how.
+
+        arguments:
+            _comm: (str)
+        """
+        if not isinstance(_comm, str):
+            raise TypeError(('comment must be a str, not '
+                '{0}'.format(type(_comm).__name__)))
+        self._comment = _comm
+        
+    def addSubtask(self, name: str, func: Callable, *arg, **kw):
+        """
+        Add a subtask to this task.
+
+        All of the subtask will be submitted to the threading pool, and they
+        will execute concurrently.
+
+        arguments:
+            name: (str) the name of subtask
+
+            func: (Callable) the function to be executed concurrently
+
+            *arg: positional arguments of the function
+
+            **kw: keyword arguments of the function
+        """
+        subtask = Subtask(self)
+        packed_func = _packing(func, *arg, **kw)
+        subtask.setFunction(packed_func)
+        subtask.name = name
+        subtask.subtask_completed.connect(self.checkCompleted)
+        self._subtasks.append(subtask)
+
+    def addSubtaskWithProgress(self, name: str, func: Callable, *arg, **kw):
+        """
+        Add a subtask with progress to this task.
+
+        All of the subtask will be submitted to the threading pool, and they
+        will execute concurrently. Usually, only one subtask is with progress,
+        whose progress will show in the screen.
+
+        arguments:
+            name: (str)
+
+            func: (Callable) this function must accept the first argument as 
+                the progress signal, while the other arguments are accepted as
+                usual. Inside the function, the progress signal needs to emit
+                periodically (which is controlled by the function).
+
+            *arg: other positional arguments except the progress signal
+
+            **kw: other keyword arguments
+        """
+        self.progress = 0
+        subtask = SubtaskWithProgress(self)
+        packed_func = _packing(func, subtask.subtask_progress, *arg, **kw)
+        subtask.setFunction(packed_func)
+        subtask.name = name
+        subtask.subtask_progress.connect(self.setProgress)
+        subtask.subtask_completed.connect(self.checkCompleted)
+        self._subtasks.append(subtask)
+
+
+    @property
+    def progress(self) -> int|None:
+        """
+        The progress of the task.
+
+        Usually we need to use a subtask to send signals about progressing.
+
+        returns:
+            (int or None)
+        """
+        return self._progress
+
+    @progress.setter
+    def progress(self, _pg: int|None):
+        """
+        Set progress of the task.
+
+        Usually we need to use a subtask to send signals about progressing.
+
+        arguments:
+            _pg: (int or None)
+        """
+        if not isinstance(_pg, int):
+            self._progress = None
+            raise TypeError('progress must be int, not '
+                '{0}'.format(type(_pg).__name__))
+        if _pg < 0 or _pg > 100:
+            self._progress = None
+            raise ValueError('progress must larger than 0 '
+                'and smaller than 100')
+        self._progress = _pg 
+
+    def checkCompleted(self) -> bool:
+        """
+        Check wheter this taks is completed.
+
+        If true, a task_completed signal will be emitted.
+        """
+        print('checkCompleted is called')
+        if self.state == TaskState.Completed:
+            print('It shows the task has been completed')
+            return True
+        elif self.state == TaskState.Submitted:
+            print('checking whether all subtask completed')
+            for subtask in self:
+                if not subtask.completed:
+                    print('subtask is not completed')
+                    return False
+            self.state = TaskState.Completed
+            print('task_completed signal is emitted')
+            self.task_completed.emit()
+            return True
+        else:
+            print(self.state)
+            return False
+        
+    def setProgress(self, progress: int):
+        """
+        Set the progress of the task.
+        
+        This acts like a slot. Use a signal from a subtask to set progress. 
+        Progress must be a integer between 0 and 100
+
+        arguments:
+            progress: (int)
+        """
+        self.progress = progress
+        self.task_progress.emit()
+    
+    
+class Subtask(QObject):
+    """
+    并发执行的子任务。
+    
+    通常由一个函数组成，在一个子线程中运行。多个子任务会组成一个任务 Task。子任务对应
+    的函数返回后，在子线程中会调用 complete() 方法作为回调函数，从而发射信号表示该子
+    任务已经完成。
+
+    The Subtask that executes concurrently in a thread.
+    
+    A subtask consists one function. Usually there are several Subtask objects 
+    in one Task object. After the function returns, the complete() method will 
+    be called as the callback function, and emit a signal showing the subtask
+    has been completed.
+
+    signals:
+        subtask_completed: emits when the function returns
+
+    attributes:
+        name: (str) the name of this subtask
+
+        future: (futures.Future) the future object of the function. After the
+            function returns, we can call future.result() method to get the 
+            return values. However, if the function is still being executed,
+            calling future.result() will block the main thread.
+
+        completed: (bool) whether this subtask is completed.
+    """
+    subtask_completed = Signal()
+
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+
+        self._func = None
+        self._name = 'anonymous'
+        self._future = None
+    
+    def __str__(self):
+        return '<Subtask> name: {0}'.format(self.name)
+
+    def __repr__(self):
+        return self.__str__()
+
+    @property
+    def completed(self) -> bool:
+        if self.future:
+            return self.future.done()
+        else:
+            return False
+
+    @property
+    def future(self):
+        return self._future
+
+    @future.setter
+    def future(self, _ft: futures.Future):
+        if not isinstance(_ft, futures.Future):
+            raise TypeError('future must be Future object, not '
+                '{0}'.format(type(_ft).__name__))
+        self._future = _ft
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, _name: str):
+        if not isinstance(_name, str):
+            raise TypeError('name must be str, not '
+                '{0}'.format(type(_name).__name__))
+
+    def getFunction(self):
+        return self._func
+
+    def complete(self, future: futures.Future):
+        print('subtask complete: {0}'.format(future.result()))
+        self.subtask_completed.emit()
+
+    def setFunction(self, func: Callable):
+        if not isinstance(func, Callable):
+            raise TypeError('func must be Callable, not '
+                '{0}'.format(type(func).__name__))
+        self._func = func
+
+class SubtaskWithProgress(Subtask):
+    """
+    带有 Progress 的子任务。
+        
+    该子任务需要将信号作为参数传递到函数中，并且在函数中定期发射信号说明进度。
+    因此，所对应的函数也需要特殊定制，一般是在第一个参数设置为信号对象。
+
+    This is a subtask with progress. 
+        
+    This subtask need to transfer a progress signal as an argument to the 
+    function, and emit the signal periodically. So, the function need to be
+    custom-made: the function must accept the signal as the first argument.
+    """
+
+    subtask_progress = Signal(int)
+
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        
+
+
+class TaskQueueModel(QAbstractListModel):
+    """
+    用来查看等待队列中任务的 Model。
+
+    这是 Qt 中 Model/View 架构的一部分。要显示等待队列，通过实例化 QListView，
+    然后调用其 setModel() 方法，把这个类的实例传递进去。
+
+    为了实现只读的、显示与数据分离的架构，这个 Model 类必须实现如下方法：
+        - rowCount(self, parent: QModelIndex) -> int
+            返回相应的 parent 之下有多少行
+
+        - data(self, index: QModelIndex, role: int)
+            根据 role 的不同，返回数据结构中内部存储的数据
+
+    This is a model for viewing the hierarchical structure of HDF file.
+
+    This is a part of Model/View architecture of Qt. If we want to display the
+    path tree, we can instantiate QTreeView, and call its setModel() method.
+
+    In order to realize a read-only and data-display decoupled architecture, we
+    need to reimplement the following methods:
+        - rowCount(self, parent: QModelIndex) -> int
+            Get number of rows under the parent
+
+        - data(self, index: QModelIndex, role: int)
+            Return the internal data according to the role
+    """
+    def __init__(self, task_manager: TaskManager):
+        """
+        arguments
+            task_manager: (TaskManager) to get the waiting queue.
+        """
+        super().__init__()
+        self._task_manager = task_manager
+
+    @property
+    def task_manager(self) -> TaskManager:
+        return self._task_manager
+
+    @property
+    def task_queue(self) -> TaskQueue:
+        return self.task_manager.task_queue
+
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """
+        arguments:
+            parent: (QModelIndex) usually must be QModelIndex()
+
+        returns:
+            (int) length of task queue.
+        """
+        if not parent.isValid():
+            return len(self.task_queue)
+        else:
+            return 0
+
+    def data(self, index: QModelIndex, role: int):
+        """
+        arguments:
+            index: (QModelIndex)
+
+            role: (Qt.ItemDataRole)
+
+        returns:
+            If role is Qt.DisplayRole, returns str.
+        """
+        if not index.isValid():
+            return None
+        if role == Qt.DisplayRole:
+            _task = self.task_queue[index.row()]
+            return _task.name
+        elif role == Qt.ToolTipRole:
+            _task = self.task_queue[index.row()]
+            return '<Waiting Task>\n{0}'.format(
+                _task.comment
+            )
+        else:
+            return None
+
+    def addTask(self, task: Task):
+        """
+        Add a task to the task queue.
+
+        arguments:
+            task: (Task)
+        """
+        self.beginInsertRows(
+            QModelIndex(), 
+            self.rowCount(), 
+            self.rowCount()
+        )
+        self.task_queue.addTask(task)
+        self.endInsertRows()
+        
+    def popTask(self) -> Task:
+        """
+        Get a task from the task queue to submit.
+
+        arguments:
+            task: (Task)
+        """
+        self.beginRemoveRows(QModelIndex(), 0, 0)
+        task = self.task_queue.popTask()
+        self.endRemoveRows()
+        return task
+
+    def cancelTask(self, index: QModelIndex) -> Task:
+        """
+        Remove a task from the task queue.
+
+        arguments:
+            index: (QModelIndex) 
+        """
+        self.beginRemoveRows(
+            QModelIndex(),
+            index.row(),
+            index.row(),
+        )
+        task = self.task_queue.cancelTask(index.row())
+        self.endRemoveRows()
+        return task
+
+    
