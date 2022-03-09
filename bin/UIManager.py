@@ -86,10 +86,11 @@ class ThemeHandler(QObject):
         theme: (UITheme) The current theme applied to 4D-Explorer
     """
 
-    def __init__(self):
+    def __init__(self, parent: QObject = None):
         """
         Initialize object.
         """
+        super().__init__(parent)
         global qApp 
         self._app = qApp 
         self._config = ConfigParser()

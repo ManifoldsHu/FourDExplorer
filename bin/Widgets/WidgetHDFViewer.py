@@ -7,8 +7,20 @@
 4D-Explorer 软件默认使用 HDF5 进行四维数据及其元数据的管理。其数据的组织方式类似于
 Unix 目录。为此，我们使用 Qt 的 QTreeView 对这些四维数据进行管理。
 
+这个 Widget 是用在主界面的，具有增删查改的功能。
+
 作者：          胡一鸣
 创建时间：      2022年2月18日
+
+The Module to show HDF5 file structure.
+
+4D-Explorer software use HDF5 to manage 4D-STEM data and its metadata. It looks
+like Unix file system, so we use QTreeView to show the structures.
+
+This widget is used in the main window, and hence have CRUD methods.
+
+author:         Hu Yiming
+date:           Feb 18, 2022
 *------------------------- WidgetBaseHDFViewer.py ----------------------------*
 
 '''

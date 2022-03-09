@@ -209,8 +209,8 @@ class HDFHandler(QObject):
     file_state_changed = Signal()   # When file is opened or closed, 
                                     # this signal is emitted.
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
         self._file = None
         self._file_path = ''
         self._lock = threading.Lock()   # read/write lock

@@ -6,6 +6,11 @@
 
 作者:           胡一鸣
 创建日期:       2022年2月19日
+
+Constants and Enumerates.
+
+author:         Hu Yiming
+date:           Feb 19, 2022
 *------------------------------ Constants.py ---------------------------------*
 '''
 

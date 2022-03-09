@@ -19,7 +19,7 @@
 当 Task 在任务队列中时可以取消，但当 Task 正在运行时则无法取消，只能等待其运行完毕。
 
 作者：          胡一鸣
-创建时间：      2021年12月28日
+创建时间：      2022年1月9日
 
 
 This is a Scheduler for asynchronous concurrent tasks.
@@ -53,6 +53,7 @@ date:               Jan 9, 2022
 
 from concurrent import futures
 from typing import Iterator, Callable
+import time
 
 from PySide6.QtCore import (
     Signal, 
@@ -61,6 +62,8 @@ from PySide6.QtCore import (
     QModelIndex, 
     Qt,
 )
+
+from PySide6.QtWidgets import QMessageBox
 
 from Constants import TaskState
 
@@ -999,3 +1002,63 @@ class TaskQueueModel(QAbstractListModel):
         return task
 
     
+class ExampleTask(Task):
+    """
+    一个子例化 Task 的例子。
+    
+    里面包含三个子任务，每个会睡眠不等时间。它们会并发地运行，因此当最长的子
+    任务运行完成后该任务就完成了。
+
+    An example of Task.
+
+    There are 2 subtasks. They will sleep arbitrary seconds. They will execute
+    concurrently.
+    """
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.name = 'Sleep'
+        self.comment = 'I am sleeping'
+
+        self.addSubtaskWithProgress(        # Add a subtask that lasts longest. 
+            'sleep 1',                      # The function should be custom-made 
+            self.test_func_with_progress,   # to show the progress correctly.
+            10
+        )
+
+
+        self.addSubtask('sleep 2', time.sleep, 5)
+
+        # Do some preparation work.
+        self.setPrepare(
+            QMessageBox.information, 
+            None, 
+            'prepare', 
+            'Will sleep 10 seconds.', 
+            QMessageBox.Ok,
+        )
+
+        # Do some following work. The result of the subtasks can be gotten from
+        # subtask.future.result()
+        self.setFollow(
+            QMessageBox.information,
+            None,
+            'prepare',
+            'I wake up',
+            QMessageBox.Ok
+        )
+
+    def test_func_with_progress(self, signal: Signal, nums: int):
+        """
+        Sleep nums seconds.
+
+        The first argument of this function must be the progress signal.
+
+        arguments:
+            signal: (Signal) when calling addSubtaskWithProgress, this 
+                arguments is transferred automatically.
+
+            nums: (int)
+        """
+        for second in range(nums):
+            time.sleep(1)
+            signal.emit(int((second + 1) / nums * 100))

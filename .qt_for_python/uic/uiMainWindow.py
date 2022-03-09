@@ -17,12 +17,13 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
 from PySide6.QtWidgets import (QApplication, QGroupBox, QHBoxLayout, QHeaderView,
-    QLabel, QLineEdit, QListView, QMainWindow,
-    QMenu, QMenuBar, QProgressBar, QPushButton,
-    QScrollArea, QSizePolicy, QSpacerItem, QStatusBar,
-    QTabWidget, QTableView, QVBoxLayout, QWidget)
+    QLabel, QLineEdit, QMainWindow, QMenu,
+    QMenuBar, QPushButton, QScrollArea, QSizePolicy,
+    QSpacerItem, QStatusBar, QTabWidget, QTableView,
+    QVBoxLayout, QWidget)
 
 from bin.Widgets.WidgetFile import WidgetFile
+from bin.Widgets.WidgetTask import WidgetTask
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -65,273 +66,8 @@ class Ui_MainWindow(object):
         self.tab_File = WidgetFile()
         self.tab_File.setObjectName(u"tab_File")
         self.tabWidget.addTab(self.tab_File, "")
-        self.tab_Task = QWidget()
+        self.tab_Task = WidgetTask()
         self.tab_Task.setObjectName(u"tab_Task")
-        self.verticalLayout_13 = QVBoxLayout(self.tab_Task)
-        self.verticalLayout_13.setObjectName(u"verticalLayout_13")
-        self.scrollArea_2 = QScrollArea(self.tab_Task)
-        self.scrollArea_2.setObjectName(u"scrollArea_2")
-        self.scrollArea_2.setWidgetResizable(True)
-        self.scrollAreaWidgetContents_2 = QWidget()
-        self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 341, 767))
-        self.verticalLayout_14 = QVBoxLayout(self.scrollAreaWidgetContents_2)
-        self.verticalLayout_14.setObjectName(u"verticalLayout_14")
-        self.groupBox_current_task = QGroupBox(self.scrollAreaWidgetContents_2)
-        self.groupBox_current_task.setObjectName(u"groupBox_current_task")
-        self.verticalLayout_3 = QVBoxLayout(self.groupBox_current_task)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_2 = QVBoxLayout()
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.label_2 = QLabel(self.groupBox_current_task)
-        self.label_2.setObjectName(u"label_2")
-
-        self.horizontalLayout_2.addWidget(self.label_2)
-
-        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_2.addItem(self.horizontalSpacer_6)
-
-        self.label_task_name = QLabel(self.groupBox_current_task)
-        self.label_task_name.setObjectName(u"label_task_name")
-
-        self.horizontalLayout_2.addWidget(self.label_task_name)
-
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
-
-        self.label_task_executing = QLabel(self.groupBox_current_task)
-        self.label_task_executing.setObjectName(u"label_task_executing")
-
-        self.verticalLayout_2.addWidget(self.label_task_executing)
-
-        self.progressBar = QProgressBar(self.groupBox_current_task)
-        self.progressBar.setObjectName(u"progressBar")
-        self.progressBar.setValue(24)
-
-        self.verticalLayout_2.addWidget(self.progressBar)
-
-        self.listView_task_queue = QListView(self.groupBox_current_task)
-        self.listView_task_queue.setObjectName(u"listView_task_queue")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.listView_task_queue.sizePolicy().hasHeightForWidth())
-        self.listView_task_queue.setSizePolicy(sizePolicy1)
-        self.listView_task_queue.setMinimumSize(QSize(0, 0))
-
-        self.verticalLayout_2.addWidget(self.listView_task_queue)
-
-        self.pushButton_next_task = QPushButton(self.groupBox_current_task)
-        self.pushButton_next_task.setObjectName(u"pushButton_next_task")
-
-        self.verticalLayout_2.addWidget(self.pushButton_next_task)
-
-
-        self.verticalLayout_3.addLayout(self.verticalLayout_2)
-
-
-        self.verticalLayout_14.addWidget(self.groupBox_current_task)
-
-        self.groupBox_system_info = QGroupBox(self.scrollAreaWidgetContents_2)
-        self.groupBox_system_info.setObjectName(u"groupBox_system_info")
-        self.verticalLayout_12 = QVBoxLayout(self.groupBox_system_info)
-        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
-        self.verticalLayout_11 = QVBoxLayout()
-        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.verticalLayout_8 = QVBoxLayout()
-        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
-        self.label = QLabel(self.groupBox_system_info)
-        self.label.setObjectName(u"label")
-
-        self.verticalLayout_8.addWidget(self.label)
-
-        self.label_3 = QLabel(self.groupBox_system_info)
-        self.label_3.setObjectName(u"label_3")
-
-        self.verticalLayout_8.addWidget(self.label_3)
-
-
-        self.horizontalLayout_3.addLayout(self.verticalLayout_8)
-
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
-
-        self.verticalLayout_5 = QVBoxLayout()
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.label_cpu_count = QLabel(self.groupBox_system_info)
-        self.label_cpu_count.setObjectName(u"label_cpu_count")
-
-        self.verticalLayout_5.addWidget(self.label_cpu_count)
-
-        self.label_cpu_percent = QLabel(self.groupBox_system_info)
-        self.label_cpu_percent.setObjectName(u"label_cpu_percent")
-
-        self.verticalLayout_5.addWidget(self.label_cpu_percent)
-
-
-        self.horizontalLayout_3.addLayout(self.verticalLayout_5)
-
-
-        self.verticalLayout_11.addLayout(self.horizontalLayout_3)
-
-        self.progressBar_cpu_percent = QProgressBar(self.groupBox_system_info)
-        self.progressBar_cpu_percent.setObjectName(u"progressBar_cpu_percent")
-        self.progressBar_cpu_percent.setValue(24)
-
-        self.verticalLayout_11.addWidget(self.progressBar_cpu_percent)
-
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.verticalLayout_11.addItem(self.verticalSpacer)
-
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.verticalLayout_9 = QVBoxLayout()
-        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
-        self.label_4 = QLabel(self.groupBox_system_info)
-        self.label_4.setObjectName(u"label_4")
-
-        self.verticalLayout_9.addWidget(self.label_4)
-
-        self.label_5 = QLabel(self.groupBox_system_info)
-        self.label_5.setObjectName(u"label_5")
-
-        self.verticalLayout_9.addWidget(self.label_5)
-
-
-        self.horizontalLayout_4.addLayout(self.verticalLayout_9)
-
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_3)
-
-        self.verticalLayout_6 = QVBoxLayout()
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.label_memory_total = QLabel(self.groupBox_system_info)
-        self.label_memory_total.setObjectName(u"label_memory_total")
-
-        self.verticalLayout_6.addWidget(self.label_memory_total)
-
-        self.label_memory_available = QLabel(self.groupBox_system_info)
-        self.label_memory_available.setObjectName(u"label_memory_available")
-
-        self.verticalLayout_6.addWidget(self.label_memory_available)
-
-
-        self.horizontalLayout_4.addLayout(self.verticalLayout_6)
-
-
-        self.verticalLayout_11.addLayout(self.horizontalLayout_4)
-
-        self.progressBar_memory_percent = QProgressBar(self.groupBox_system_info)
-        self.progressBar_memory_percent.setObjectName(u"progressBar_memory_percent")
-        self.progressBar_memory_percent.setValue(24)
-
-        self.verticalLayout_11.addWidget(self.progressBar_memory_percent)
-
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.verticalLayout_11.addItem(self.verticalSpacer_2)
-
-        self.horizontalLayout_5 = QHBoxLayout()
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.verticalLayout_10 = QVBoxLayout()
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.label_14 = QLabel(self.groupBox_system_info)
-        self.label_14.setObjectName(u"label_14")
-
-        self.verticalLayout_10.addWidget(self.label_14)
-
-        self.label_6 = QLabel(self.groupBox_system_info)
-        self.label_6.setObjectName(u"label_6")
-
-        self.verticalLayout_10.addWidget(self.label_6)
-
-        self.label_7 = QLabel(self.groupBox_system_info)
-        self.label_7.setObjectName(u"label_7")
-
-        self.verticalLayout_10.addWidget(self.label_7)
-
-
-        self.horizontalLayout_5.addLayout(self.verticalLayout_10)
-
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_5.addItem(self.horizontalSpacer_4)
-
-        self.verticalLayout_7 = QVBoxLayout()
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.label_disk_partition = QLabel(self.groupBox_system_info)
-        self.label_disk_partition.setObjectName(u"label_disk_partition")
-
-        self.verticalLayout_7.addWidget(self.label_disk_partition)
-
-        self.label_disk_total = QLabel(self.groupBox_system_info)
-        self.label_disk_total.setObjectName(u"label_disk_total")
-
-        self.verticalLayout_7.addWidget(self.label_disk_total)
-
-        self.label_disk_available = QLabel(self.groupBox_system_info)
-        self.label_disk_available.setObjectName(u"label_disk_available")
-
-        self.verticalLayout_7.addWidget(self.label_disk_available)
-
-
-        self.horizontalLayout_5.addLayout(self.verticalLayout_7)
-
-
-        self.verticalLayout_11.addLayout(self.horizontalLayout_5)
-
-        self.progressBar_disk_percent = QProgressBar(self.groupBox_system_info)
-        self.progressBar_disk_percent.setObjectName(u"progressBar_disk_percent")
-        self.progressBar_disk_percent.setValue(24)
-
-        self.verticalLayout_11.addWidget(self.progressBar_disk_percent)
-
-        self.horizontalLayout_6 = QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.label_8 = QLabel(self.groupBox_system_info)
-        self.label_8.setObjectName(u"label_8")
-
-        self.horizontalLayout_6.addWidget(self.label_8)
-
-        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_6.addItem(self.horizontalSpacer_5)
-
-        self.label_process_io = QLabel(self.groupBox_system_info)
-        self.label_process_io.setObjectName(u"label_process_io")
-
-        self.horizontalLayout_6.addWidget(self.label_process_io)
-
-
-        self.verticalLayout_11.addLayout(self.horizontalLayout_6)
-
-        self.verticalLayout_11.setStretch(0, 2)
-        self.verticalLayout_11.setStretch(1, 1)
-        self.verticalLayout_11.setStretch(2, 1)
-        self.verticalLayout_11.setStretch(3, 2)
-        self.verticalLayout_11.setStretch(4, 1)
-        self.verticalLayout_11.setStretch(5, 1)
-        self.verticalLayout_11.setStretch(6, 3)
-        self.verticalLayout_11.setStretch(7, 1)
-        self.verticalLayout_11.setStretch(8, 1)
-
-        self.verticalLayout_12.addLayout(self.verticalLayout_11)
-
-
-        self.verticalLayout_14.addWidget(self.groupBox_system_info)
-
-        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
-
-        self.verticalLayout_13.addWidget(self.scrollArea_2)
-
         self.tabWidget.addTab(self.tab_Task, "")
         self.tab_Calibration = QWidget()
         self.tab_Calibration.setObjectName(u"tab_Calibration")
@@ -342,7 +78,7 @@ class Ui_MainWindow(object):
         self.scrollArea_3.setWidgetResizable(True)
         self.scrollAreaWidgetContents_3 = QWidget()
         self.scrollAreaWidgetContents_3.setObjectName(u"scrollAreaWidgetContents_3")
-        self.scrollAreaWidgetContents_3.setGeometry(QRect(0, 0, 324, 944))
+        self.scrollAreaWidgetContents_3.setGeometry(QRect(0, 0, 324, 948))
         self.verticalLayout_28 = QVBoxLayout(self.scrollAreaWidgetContents_3)
         self.verticalLayout_28.setObjectName(u"verticalLayout_28")
         self.groupBox_4 = QGroupBox(self.scrollAreaWidgetContents_3)
@@ -429,18 +165,18 @@ class Ui_MainWindow(object):
         self.verticalLayout_23.setObjectName(u"verticalLayout_23")
         self.lineEdit = QLineEdit(self.groupBox_5)
         self.lineEdit.setObjectName(u"lineEdit")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
-        self.lineEdit.setSizePolicy(sizePolicy2)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
+        self.lineEdit.setSizePolicy(sizePolicy1)
 
         self.verticalLayout_23.addWidget(self.lineEdit)
 
         self.lineEdit_2 = QLineEdit(self.groupBox_5)
         self.lineEdit_2.setObjectName(u"lineEdit_2")
-        sizePolicy2.setHeightForWidth(self.lineEdit_2.sizePolicy().hasHeightForWidth())
-        self.lineEdit_2.setSizePolicy(sizePolicy2)
+        sizePolicy1.setHeightForWidth(self.lineEdit_2.sizePolicy().hasHeightForWidth())
+        self.lineEdit_2.setSizePolicy(sizePolicy1)
 
         self.verticalLayout_23.addWidget(self.lineEdit_2)
 
@@ -572,28 +308,6 @@ class Ui_MainWindow(object):
         self.actionExport_Data.setText(QCoreApplication.translate("MainWindow", u"Export Data", None))
         self.actionQuit.setText(QCoreApplication.translate("MainWindow", u"Quit", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_File), QCoreApplication.translate("MainWindow", u"File", None))
-        self.groupBox_current_task.setTitle(QCoreApplication.translate("MainWindow", u"Current Task", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Task Name", None))
-        self.label_task_name.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_task_executing.setText(QCoreApplication.translate("MainWindow", u"A task is executing", None))
-        self.pushButton_next_task.setText(QCoreApplication.translate("MainWindow", u"Execute Task", None))
-        self.groupBox_system_info.setTitle(QCoreApplication.translate("MainWindow", u"System Info", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"CPU count", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"CPU percent", None))
-        self.label_cpu_count.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_cpu_percent.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Memory Total", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Memory Available", None))
-        self.label_memory_total.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_memory_available.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_14.setText(QCoreApplication.translate("MainWindow", u"Disk Partition", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Disk Total", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"Disk Available", None))
-        self.label_disk_partition.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_disk_total.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_disk_available.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Process IO", None))
-        self.label_process_io.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_Task), QCoreApplication.translate("MainWindow", u"Task", None))
         self.groupBox_4.setTitle(QCoreApplication.translate("MainWindow", u"Experimental Parameters", None))
         self.pushButton_change_meta_manually.setText(QCoreApplication.translate("MainWindow", u"Change Value", None))
