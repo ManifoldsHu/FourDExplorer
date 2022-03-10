@@ -52,8 +52,10 @@ date:               Jan 9, 2022
 
 
 from concurrent import futures
+from lib2to3.pytree import Base
 from typing import Iterator, Callable
 import time
+import traceback
 
 from PySide6.QtCore import (
     Signal, 
@@ -66,6 +68,10 @@ from PySide6.QtCore import (
 from PySide6.QtWidgets import QMessageBox
 
 from Constants import TaskState
+from bin.Log import LogUtil
+
+log_util = LogUtil(__name__)
+logger = log_util.logger
 
 
 def _packing(func: Callable, *arg, **kw) -> Callable:
@@ -223,58 +229,132 @@ class TaskManager(QObject):
         slot will be called. 
         """
         self._clearLastTask()
-        self._refresh()
-        self._submitNextTask()
-        self._refresh()
+        self._refresh()         # Reinitialize the state of task manager
+
+        _call_submitNextTask = True
+        while _call_submitNextTask:
+            _call_submitNextTask = self._submitNextTask()
+
+        self._refresh()         # Update the state of task manager
 
 
     def _clearLastTask(self):
         """
-        Set the _current_task to None.
+        Set the _current_task to None, and do follow work of the task.
         """
-        print('_clearLastTask is called')
         if self.current_task is None:
             return True
+
         elif self.current_task.state in (TaskState.Completed,):
-            self.current_task.follow()
-            self.current_task = None
-            print('current task is cleared: {0}'.format(self.current_task))
+            self._currentDoFollowWork()
             return True
+
+        elif self.current_task.state in (TaskState.Excepted,):
+            # Handle the exception, but still try doing following work.
+            for subtask in self.current_task:
+                if subtask.exception:
+                    logger.error('{0}\n{1}'.format(
+                        subtask.exception, subtask.rec_exc)
+                    )
+                    QMessageBox.warning(
+                        None,
+                        'Error: {0}'.format(self.current_task.name),
+                        'Error in subtask {0} occurred:\n {1}'.format(
+                            subtask.name, subtask.exception),
+                        QMessageBox.Ok,
+                    )
+
+            self._currentDoFollowWork()
+            return True
+
         else:
-            print('but the current task is not cleared')
             return False
 
-    def _submitNextTask(self):
+
+    def _currentDoFollowWork(self):
         """
-        Get a new task from the waiting queue.
+        Do follow work, and handle its exceptions.
         """
-        print('_submitNextTask is called')
+        try:
+            self.current_task.follow()
+        except BaseException as e:
+            logger.error(
+                '{0}\n{1}'.format(e, traceback.format_exc())
+            )
+            QMessageBox.warning(
+                None,
+                'Error: {0}'.format(self.current_task.name),
+                'Error when do follow work: \n {0}'.format(e),
+                QMessageBox.Ok,
+            )
+        finally:
+            self.current_task = None
+
+
+    def _submitNextTask(self) -> bool:
+        """
+        Get a new task from the waiting queue
+        
+        Will do prepare work of the task.
+
+        If this function returns False, then the task is submitted to the exec-
+        utor successfully, or the current task is still running, or there is no
+        waiting task. In other words, we do not need call this function again.
+
+        However, if this function returns True, then the task is not submitted
+        successfully. Some exceptions occured during the preparation of this t-
+        ask. So we abandon this task, try getting another task from the the
+        waiting queue, and submit it to the executor.
+
+        returns:
+            (bool) indicates whether task manager should recall this function
+                to get another task into the threading pool. 
+        """
+        
         if self.current_task:
-            print('but there is a task executing')
             return False
 
         task = self.model_waiting.popTask()
         if task is None:
-            print('but there is no waiting task')
             return False
 
         task.state = TaskState.Submitted
         task.task_completed.connect(self._startNextTask)
         task.task_progress.connect(self._sendProgress)
-        task.prepare()
 
-        for subtask in task:
-            subtask.future = self._executor.submit(subtask.getFunction())
-            subtask.future.add_done_callback(subtask.complete)
+        try:
+            task.prepare()
+        except BaseException as e:
+            # Abandon submitting
+            task.state = TaskState.Excepted
+            logger.error(
+                '{0}\n{1}'.format(e, traceback.format_exc())
+            )
+            QMessageBox.warning(
+                None, 
+                'Error: {0}'.format(self.current_task.name), 
+                'Error when do preparing work:\n {0}'.format(e),
+                QMessageBox.Ok,
+            )
+            return True # This function need to be called again.
 
-        self.current_task = task
-        return True
+        else:
+            for subtask in task:
+                subtask.future = self._executor.submit(
+                    subtask.getFunction()
+                )
+                subtask.future.add_done_callback(subtask.complete)
+            self.current_task = task
+            return False
+
 
     def _refresh(self):
         self.task_info_refresh.emit()
 
+
     def _sendProgress(self):
         self.progress_updated.emit(self.current_task.progress)
+
 
     def _abortForce(self):
         """
@@ -294,8 +374,15 @@ class TaskManager(QObject):
         And also the waiting queue will be cleared.
         """
         self.task_queue.clearWaiting()
+        self.task_queue.clearHistory()
         self._executor.shutdown(wait = False, cancel_futures = True)
     
+    def clearHistory(self):
+        """
+        Clear the list of history tasks.
+        """
+        self.task_queue.clearHistory()
+
 class TaskQueue(QObject):
     """
     任务的等待队列。
@@ -366,6 +453,10 @@ class TaskQueue(QObject):
             raise TypeError(('maxhistory must be int, not '
                 '{0}'.format(type(mlen).__name__)))
         self._maxhistory = mlen 
+
+    @property
+    def history_list(self) -> list:
+        return self._history
 
     def addTask(self, task: 'Task'):
         """
@@ -528,8 +619,9 @@ class Task(QObject):
         self._follow = None
         self._prepare = None
         self._comment = ''
-        self._progress = None
+        self._progress = 0
         self._state = TaskState.Initialized
+        self._has_progress = False
 
     @property
     def name(self) -> str:
@@ -577,6 +669,9 @@ class Task(QObject):
 
     def __contains__(self, subtask: 'Subtask') -> bool:
         return subtask in self._subtasks
+
+    def __getitem__(self, index: int):
+        return self.subtasks[index]
 
     def setFollow(self, func: Callable, *arg, **kw):
         """
@@ -651,7 +746,7 @@ class Task(QObject):
                 '{0}'.format(type(_comm).__name__)))
         self._comment = _comm
         
-    def addSubtask(self, name: str, func: Callable, *arg, **kw):
+    def addSubtask(self, name: str, func: Callable, *arg, **kw) -> 'Subtask':
         """
         Add a subtask to this task.
 
@@ -671,10 +766,19 @@ class Task(QObject):
         packed_func = _packing(func, *arg, **kw)
         subtask.setFunction(packed_func)
         subtask.name = name
+        subtask.subtask_excepted.connect(self.setExcepted)
         subtask.subtask_completed.connect(self.checkCompleted)
+        
         self._subtasks.append(subtask)
+        return subtask
 
-    def addSubtaskWithProgress(self, name: str, func: Callable, *arg, **kw):
+
+
+    def addSubtaskWithProgress(self, 
+            name: str, 
+            func: Callable, 
+            *arg, 
+            **kw) -> 'SubtaskWithProgress':
         """
         Add a subtask with progress to this task.
 
@@ -700,9 +804,11 @@ class Task(QObject):
         subtask.setFunction(packed_func)
         subtask.name = name
         subtask.subtask_progress.connect(self.setProgress)
+        subtask.subtask_excepted.connect(self.setExcepted)
         subtask.subtask_completed.connect(self.checkCompleted)
         self._subtasks.append(subtask)
-
+        self._has_progress = True
+        return subtask 
 
     @property
     def progress(self) -> int|None:
@@ -717,7 +823,7 @@ class Task(QObject):
         return self._progress
 
     @progress.setter
-    def progress(self, _pg: int|None):
+    def progress(self, _pg: int):
         """
         Set progress of the task.
 
@@ -727,11 +833,11 @@ class Task(QObject):
             _pg: (int or None)
         """
         if not isinstance(_pg, int):
-            self._progress = None
+            # self._progress = 0
             raise TypeError('progress must be int, not '
                 '{0}'.format(type(_pg).__name__))
         if _pg < 0 or _pg > 100:
-            self._progress = None
+            # self._progress = 0
             raise ValueError('progress must larger than 0 '
                 'and smaller than 100')
         self._progress = _pg 
@@ -742,22 +848,24 @@ class Task(QObject):
 
         If true, a task_completed signal will be emitted.
         """
-        print('checkCompleted is called')
         if self.state == TaskState.Completed:
-            print('It shows the task has been completed')
             return True
+            
         elif self.state == TaskState.Submitted:
-            print('checking whether all subtask completed')
             for subtask in self:
                 if not subtask.completed:
-                    print('subtask is not completed')
                     return False
             self.state = TaskState.Completed
-            print('task_completed signal is emitted')
+            self.task_completed.emit()
+            return True
+
+        elif self.state == TaskState.Excepted:
+            for subtask in self:
+                if not subtask.completed:
+                    return False
             self.task_completed.emit()
             return True
         else:
-            print(self.state)
             return False
         
     def setProgress(self, progress: int):
@@ -773,7 +881,26 @@ class Task(QObject):
         self.progress = progress
         self.task_progress.emit()
     
-    
+    def hasProgress(self) -> bool:
+        """
+        Returns whether this task has progress.
+
+        If there is no progress, in screen the progress bar will show a busy
+        indicator instead of a percentage of steps.
+        """
+        return self._has_progress
+
+    def setExcepted(self):
+        """
+        Set the state of the task to TaskState.Excepted.
+
+        When this function is called, this task or some of its subtask raised
+        an exception. The exception will be recorded in log, and may open a 
+        dialog to note the user.
+        """
+        self.state = TaskState.Excepted
+
+
 class Subtask(QObject):
     """
     并发执行的子任务。
@@ -790,7 +917,9 @@ class Subtask(QObject):
     has been completed.
 
     signals:
-        subtask_completed: emits when the function returns
+        subtask_completed: emits when the function returns.
+
+        subtask_excepted: emits when there is an unhandled exception raised.
 
     attributes:
         name: (str) the name of this subtask
@@ -801,8 +930,17 @@ class Subtask(QObject):
             calling future.result() will block the main thread.
 
         completed: (bool) whether this subtask is completed.
+
+        result: returns the result of the function. Will raise an exception
+            if there has been an exception raised.
+
+        exception: (None or BaseException) if there is an exception, it will
+            saved in this variable.
+
+        rec_exc: (None or str) traceback information if there is an exception
     """
-    subtask_completed = Signal()
+    subtask_completed = Signal()    # emits when the subtask is completed
+    subtask_excepted = Signal()     # emits when there is an exception raised
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
@@ -810,6 +948,9 @@ class Subtask(QObject):
         self._func = None
         self._name = 'anonymous'
         self._future = None
+        self._result = None
+        self._exception = None  # exception, if an exception occured
+        self._rec_exc = None    # trace back exc when an exception occured
     
     def __str__(self):
         return '<Subtask> name: {0}'.format(self.name)
@@ -819,13 +960,21 @@ class Subtask(QObject):
 
     @property
     def completed(self) -> bool:
+        """
+        Returns whether the function has been completed.
+        """
         if self.future:
             return self.future.done()
         else:
             return False
 
     @property
-    def future(self):
+    def future(self) -> futures.Future:
+        """
+        Will return the Future object if the Task is submitted to the executor.
+        If the task is still waiting or has never been submitted, this function
+        will return None.
+        """
         return self._future
 
     @future.setter
@@ -836,7 +985,7 @@ class Subtask(QObject):
         self._future = _ft
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
@@ -844,19 +993,90 @@ class Subtask(QObject):
         if not isinstance(_name, str):
             raise TypeError('name must be str, not '
                 '{0}'.format(type(_name).__name__))
+        self._name = _name
 
-    def getFunction(self):
+    @property
+    def result(self):
+        """
+        If the subtask is not completed, returns None. 
+        
+        Otherwise, when the subtask is completed, self.complete() method is 
+        called, and then the result can be gotten by this property.
+        """
+        return self._result
+
+    @property
+    def exception(self) -> BaseException:
+        """
+        If there is an exception raised when this subtask running, this method
+        will return the exception. Otherwise, it will return None.
+        """
+        return self._exception
+
+    @property
+    def rec_exc(self) -> str:
+        """
+        If there is an exception raised when this subtask sunning, this method
+        will return the traceback information. Otherwise, it will return None.
+        """
+        return self._rec_exc
+
+    def getFunction(self) -> Callable:
         return self._func
 
     def complete(self, future: futures.Future):
-        print('subtask complete: {0}'.format(future.result()))
-        self.subtask_completed.emit()
+        """
+        Will emits a completed signal, and save the result.
+
+        This function will act as a callback function, as an argument by 
+        futures.Future.add_call_back() function.
+
+        argument:
+            future: (futures.Future) The same as self.future
+        """
+        # self._exception = future.exception()
+        # if self._exception:
+            # self.subtask_excepted.emit()    
+            # set the task to TaskState.Excepted, 
+            # so there will be some exception handle work.
+
+        try:
+            self._result = future.result()
+        except BaseException:
+            self._exception = future.exception()
+            self._rec_exc = traceback.format_exc()
+        finally:
+            self.subtask_excepted.emit()
+            self.subtask_completed.emit()
 
     def setFunction(self, func: Callable):
+        """
+        Set the function to be executed in the threading pool.
+
+        To use this method, we must first packing all the arguments into the
+        callable (by lambda or other means). 
+
+        If we use addSubtask() method from the Task object, it will help us to
+        pack these arguments. 
+        """
         if not isinstance(func, Callable):
             raise TypeError('func must be Callable, not '
                 '{0}'.format(type(func).__name__))
         self._func = func
+
+    # def getResult(self):
+    #     """
+    #     Returns the result of this subtask.
+
+    #     NOTE: this function will returns None if the calculation
+    #     has not been completed. Make sure the calculation is done
+    #     when calling this function.
+    #     """
+    #     if not self.completed:
+    #         print('Get Result is called, but not completed')
+    #         return None
+    #     else:
+    #         return self.future.result()
 
 class SubtaskWithProgress(Subtask):
     """
@@ -893,7 +1113,7 @@ class TaskQueueModel(QAbstractListModel):
         - data(self, index: QModelIndex, role: int)
             根据 role 的不同，返回数据结构中内部存储的数据
 
-    This is a model for viewing the hierarchical structure of HDF file.
+    This is a model for viewing the tasks in the waiting queue.
 
     This is a part of Model/View architecture of Qt. If we want to display the
     path tree, we can instantiate QTreeView, and call its setModel() method.
@@ -952,8 +1172,8 @@ class TaskQueueModel(QAbstractListModel):
             return _task.name
         elif role == Qt.ToolTipRole:
             _task = self.task_queue[index.row()]
-            return '<Waiting Task>\n{0}'.format(
-                _task.comment
+            return '<Task>: {0}, state: {1}'.format(
+                _task.name, _task.state
             )
         else:
             return None
@@ -992,6 +1212,8 @@ class TaskQueueModel(QAbstractListModel):
         arguments:
             index: (QModelIndex) 
         """
+        if not index.isValid():
+            raise ValueError('Cannot cancel task: invalid index')
         self.beginRemoveRows(
             QModelIndex(),
             index.row(),
@@ -1001,64 +1223,152 @@ class TaskQueueModel(QAbstractListModel):
         self.endRemoveRows()
         return task
 
-    
-class ExampleTask(Task):
+
+class SubtaskListModel(QAbstractListModel):
     """
-    一个子例化 Task 的例子。
-    
-    里面包含三个子任务，每个会睡眠不等时间。它们会并发地运行，因此当最长的子
-    任务运行完成后该任务就完成了。
+    用来查看 Task 中下属 Subtask 信息的 Model。
 
-    An example of Task.
+    这是 Qt 中 Model/View 架构的一部分。要显示等待队列，通过实例化 QListView，
+    然后调用其 setModel() 方法，把这个类的实例传递进去。
 
-    There are 2 subtasks. They will sleep arbitrary seconds. They will execute
-    concurrently.
+    为了实现只读的、显示与数据分离的架构，这个 Model 类必须实现如下方法：
+        - rowCount(self, parent: QModelIndex) -> int
+            返回相应的 parent 之下有多少行
+
+        - data(self, index: QModelIndex, role: int)
+            根据 role 的不同，返回数据结构中内部存储的数据
+
+    This is a model for viewing information of subtasks of the task.
+
+    This is a part of Model/View architecture of Qt. If we want to display the
+    path tree, we can instantiate QTreeView, and call its setModel() method.
+
+    In order to realize a read-only and data-display decoupled architecture, we
+    need to reimplement the following methods:
+        - rowCount(self, parent: QModelIndex) -> int
+            Get number of rows under the parent
+
+        - data(self, index: QModelIndex, role: int)
+            Return the internal data according to the role
     """
-    def __init__(self, parent = None):
-        super().__init__(parent)
-        self.name = 'Sleep'
-        self.comment = 'I am sleeping'
 
-        self.addSubtaskWithProgress(        # Add a subtask that lasts longest. 
-            'sleep 1',                      # The function should be custom-made 
-            self.test_func_with_progress,   # to show the progress correctly.
-            10
-        )
+    def __init__(self, task: Task):
+        super().__init__()
+        self._task = task
 
+    @property
+    def task(self) -> Task:
+        return self._task 
 
-        self.addSubtask('sleep 2', time.sleep, 5)
-
-        # Do some preparation work.
-        self.setPrepare(
-            QMessageBox.information, 
-            None, 
-            'prepare', 
-            'Will sleep 10 seconds.', 
-            QMessageBox.Ok,
-        )
-
-        # Do some following work. The result of the subtasks can be gotten from
-        # subtask.future.result()
-        self.setFollow(
-            QMessageBox.information,
-            None,
-            'prepare',
-            'I wake up',
-            QMessageBox.Ok
-        )
-
-    def test_func_with_progress(self, signal: Signal, nums: int):
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
         """
-        Sleep nums seconds.
-
-        The first argument of this function must be the progress signal.
-
         arguments:
-            signal: (Signal) when calling addSubtaskWithProgress, this 
-                arguments is transferred automatically.
+            parent: (QModelIndex) usually must be QModelIndex()
 
-            nums: (int)
+        returns:
+            (int) number of subtasks.
         """
-        for second in range(nums):
-            time.sleep(1)
-            signal.emit(int((second + 1) / nums * 100))
+        return len(self.task)
+
+    def data(self, index: QModelIndex, role: int):
+        """
+        arguments:
+            index: (QModelIndex)
+
+            role: (Qt.ItemDataRole)
+
+        returns:
+            If role is Qt.DisplayRole, returns str.
+        """
+        if not index.isValid():
+            return None
+
+        subtask = self.task[index.row()]
+        name = subtask.name
+
+        if role == Qt.DisplayRole:
+            if subtask.completed:
+                return '{0} (completed)'.format(name)
+            else:
+                return '{0}'.format(name)
+
+        elif role == Qt.ToolTipRole:
+            if subtask.completed:
+                return '<Subtask>: {0} (completed)'.format(name)
+            else:
+                return '<Subtask>: {0}'.format(name)
+
+
+class HistoryTaskModel(QAbstractListModel):
+    """
+    用来查看历史任务的 Model。
+
+    这是 Qt 中 Model/View 架构的一部分。要显示等待队列，通过实例化 QListView，
+    然后调用其 setModel() 方法，把这个类的实例传递进去。
+
+    为了实现只读的、显示与数据分离的架构，这个 Model 类必须实现如下方法：
+        - rowCount(self, parent: QModelIndex) -> int
+            返回相应的 parent 之下有多少行
+
+        - data(self, index: QModelIndex, role: int)
+            根据 role 的不同，返回数据结构中内部存储的数据
+
+    This is a model for viewing history tasks.
+
+    This is a part of Model/View architecture of Qt. If we want to display the
+    path tree, we can instantiate QTreeView, and call its setModel() method.
+
+    In order to realize a read-only and data-display decoupled architecture, we
+    need to reimplement the following methods:
+        - rowCount(self, parent: QModelIndex) -> int
+            Get number of rows under the parent
+
+        - data(self, index: QModelIndex, role: int)
+            Return the internal data according to the role
+    """
+
+    def __init__(self, task_manager: TaskManager):
+        super().__init__()
+        self._task_manager = task_manager
+
+    @property
+    def task_manager(self) -> TaskManager:
+        return self._task_manager
+
+    @property
+    def history_list(self) -> list:
+        return self._task_manager.task_queue.history_list
+
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """
+        arguments:
+            parent: (QModelIndex) usually must be QModelIndex()
+
+        returns:
+            (int) number of history tasks.
+        """
+        return len(self.history_list)
+
+    def data(self, index: QModelIndex, role: int):
+        """
+        arguments:
+            index: (QModelIndex)
+
+            role: (Qt.ItemDataRole)
+
+        returns:
+            If role is Qt.DisplayRole, returns str.
+        """
+        if not index.isValid():
+            return None
+        task = self.history_list[index.row()]
+        if role == Qt.DisplayRole:
+            return task.name
+        elif role == Qt.ToolTipRole:
+            return '<Task>: {0}, state: {1}'.format(
+                task.name, task.state
+            )
+
+
+        
+

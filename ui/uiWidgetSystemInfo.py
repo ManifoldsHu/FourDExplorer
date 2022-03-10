@@ -23,6 +23,8 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(325, 427)
+        Form.setMinimumSize(QSize(0, 300))
+        Form.setMaximumSize(QSize(16777215, 500))
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_3 = QHBoxLayout()

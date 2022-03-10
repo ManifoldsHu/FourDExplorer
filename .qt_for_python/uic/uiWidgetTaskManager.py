@@ -24,6 +24,7 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(327, 532)
+        Form.setMinimumSize(QSize(0, 400))
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout = QHBoxLayout()
@@ -84,7 +85,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"Executing Task:", None))
-        self.label_current_task_name.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_current_task_name.setText(QCoreApplication.translate("Form", u"None", None))
         self.pushButton_detail.setText(QCoreApplication.translate("Form", u"Details", None))
         self.pushButton_history.setText(QCoreApplication.translate("Form", u"History Task", None))
     # retranslateUi

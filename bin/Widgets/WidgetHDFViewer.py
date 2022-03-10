@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 *------------------------- WidgetBaseHDFViewer.py ----------------------------*
 对 HDF5 文件内部的层次结构进行显示的模块。
 
@@ -23,7 +23,7 @@ author:         Hu Yiming
 date:           Feb 18, 2022
 *------------------------- WidgetBaseHDFViewer.py ----------------------------*
 
-'''
+"""
 
 import sys
 import os
@@ -37,7 +37,7 @@ from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
 
 
-from ui import uiWidgetBaseHDFViewer
+# from ui import uiWidgetBaseHDFViewer
 from bin.HDFManager import HDFHandler, HDFTreeModel
 from bin.Log import LogUtil
 
@@ -51,9 +51,11 @@ from Constants import HDFType, ItemDataRoles
 
 class WidgetHDFViewer(WidgetBaseHDFViewer):
     """
-        用于显示 HDF5 文件结构的基础组件，包含一个 QTreeView。 
+    用于显示 HDF5 文件结构的基础组件，包含一个 QTreeView。 
+
+    Widget to show HDF file structure, which includes a QTreeView.
     """
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget = None):
         """
         arguments:
             parent: (QWidget) The parent widget e.g. a dialog.
