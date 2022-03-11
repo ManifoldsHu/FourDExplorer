@@ -32,6 +32,7 @@ import configparser
 from PySide6.QtCore import QModelIndex, Qt, QPoint
 from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog
 from PySide6.QtGui import QRegularExpressionValidator
+from bin.Widgets.DialogAttrViewer import DialogAttrViewer
 from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.DialogCopyItem import DialogHDFCopy
@@ -436,7 +437,22 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         pass
         
     def showAttribute(self, index: QModelIndex = None):
-        pass
+        """
+        Shows a dialog to view attributions.
+
+        arguments:
+            index: QModelIndex()
+        """
+        dialog_attr = DialogAttrViewer(self)
+        if not index:
+            index = self.ui.treeView_HDF.currentIndex()
+        dialog_attr.setItemPath(index.data(role = ItemDataRoles.PathRole))
+        dialog_attr.show()
+
+
+
+
+
 # class HDFReadOnlyMenu(QMenu):
 #     """
 #     当点到 HDFTreeView 时的鼠标右键菜单。

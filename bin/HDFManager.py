@@ -59,7 +59,7 @@ All rights reserved.
 *------------------------------- HDFManager.py -------------------------------*
 """
 
-import sys
+# import sys
 import os
 from datetime import datetime
 import re
@@ -71,8 +71,16 @@ from typing import Iterator
 import h5py
 import numpy as np
 
-from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal, QObject
-from PySide6.QtWidgets import QApplication 
+from PySide6.QtCore import (
+    QAbstractItemModel, 
+    QModelIndex, 
+    Qt, 
+    Signal, 
+    QObject, 
+    QAbstractTableModel,)
+
+
+# from PySide6.QtWidgets import QApplication 
 
 from bin.Log import LogUtil
 from Constants import APP_VERSION, ItemDataRoles, HDFType
@@ -455,24 +463,9 @@ class HDFHandler(QObject):
 
         Will add child nodes recursively for the root_node and its childs.
         """
-        # if not self.file:
-        #     raise OSError('Must open a file before build HDFTree.')
-        
-        # def _addChildDeepFirst(parent: 'HDFGroupNode'):
-        #     if isinstance(parent, HDFGroupNode):
-        #         for key in self._file[parent.path]:
-        #             if isinstance(self._file[parent.path][key], h5py.Group):
-        #                 parent.addChild(HDFGroupNode(key))
-        #                 _addChildDeepFirst(parent[key])
-        #             elif isinstance(self._file[parent.path][key], h5py.Dataset):
-        #                 parent.addChild(HDFDataNode(key))
-
-        # self._root_node = HDFRootNode()
         if self.isFileOpened():
             self._root_node = self.addChildDeepFirst(HDFRootNode())
-        
-            # _addChildDeepFirst(self._root_node)
-
+            
     def addChildDeepFirst(self, parent: 'HDFGroupNode'):
         """
         Add child nodes recursively for the root_node and its childs.
@@ -774,95 +767,6 @@ class HDFHandler(QObject):
         
         copy_task = TaskCopy(self, item_path, dest_parent_path, new_name)
         copy_task.addToTaskManager()
-        
-
-    # def _packCopyTask(
-    #     self, 
-    #     item_path: str, 
-    #     dest_parent_path: str,
-    #     new_name: str
-    # ) -> Task:
-    #     """
-    #     Assemble the copying task.
-
-    #     arguments:
-    #         item_path: (str) path of the item to be copied
-
-    #         dest_parent_path: (str) path of the destination group
-
-    #         new_name: (str) new name of the replica
-
-    #     returns:
-    #         (Task)
-    #     """
-    #     copy_task = Task(self)
-    #     copy_task.addSubtask(
-    #         'Copy Items',
-    #         self.file.copy,
-    #         item_path,
-    #         dest_parent_path,
-    #         name = new_name,
-    #     )
-    #     copy_task.name = 'Copy'
-    #     copy_task.comment = (
-    #         'Copy item from: {0}\n'
-    #         'Destination:{1}\n'
-    #         'New name: {2}'.format(
-    #             item_path, dest_parent_path, new_name
-    #         )
-    #     )
-    #     copy_task.setPrepare(
-    #         self._copyPrepare,
-    #         item_path,
-    #         dest_parent_path,
-    #         new_name,
-    #     )
-    #     return copy_task
-        
-
-    # def _copyPrepare(self, 
-    #     item_path: str, 
-    #     dest_parent_path: str, 
-    #     new_name: str
-    # ):
-    #     """
-    #     提交到 TaskManager 的任务的准备工作。
-
-    #     Preparation work to submit to the task manager.
-    #     """
-    #     old_node = self.getNode(item_path)
-    #     dest_parent_node = self.getNode(dest_parent_path)
-    #     if isinstance(old_node, HDFGroupNode):
-    #         new_node = HDFGroupNode(name = new_name)
-    #     elif isinstance(old_node, HDFDataNode):
-    #         new_node = HDFDataNode(name = new_name)
-
-    #     dest_parent_index = self.model.indexFromPath(dest_parent_path)
-    #     row = self.model.rowCount(dest_parent_index)
-    #     self.model.beginInsertRows(
-    #         dest_parent_index,
-    #         row,
-    #         row,
-    #     )
-    #     dest_parent_node.addChild(new_node)
-    #     self.model.endInsertRows()
-        
-
-    # def _copyFollow(self,
-    #     item_path: str,
-    #     dest_parent_path: str,
-    #     new_name: str
-    # ):
-    #     """
-    #     提交到 TaskManager 的任务的后续工作。
-
-    #     Following work to submit to the task manager.
-    #     """
-    #     dest_parent_node = self.getNode(dest_parent_path)
-    #     new_node = dest_parent_node[new_name]
-    #     if isinstance(new_node, HDFGroupNode):
-    #         new_node = self.addChildDeepFirst(new_node)
-        
 
 
     def _getNewNameInSameGroup(self, node: 'HDFTreeNode'):
@@ -894,22 +798,7 @@ class HDFHandler(QObject):
                 _count += 1
         return new_name
     
-    # def _copyNode(self, node: 'HDFTreeNode') -> 'HDFTreeNode':
-    #     """
-    #     Copy node and its children recursively.
 
-    #     The name and of new nodes
-
-    #     arguments:
-    #         node: (HDFTreeNode) the node to be copied.
-        
-    #     returns:
-    #         (HDFTreeNode) new node, with all the children copied from the 
-    #             original node.
-    #     """
-    #     if isinstance(node, HDFGroupNode):
-    #         pass
-        
     def changeDataType(self, item_path: str, new_type: HDFType):
         """
         Change Data's type into lines, images, vector fields or 4D-STEM datacu-
@@ -1360,7 +1249,7 @@ class HDFDataNode(HDFTreeNode):
         # valid_name_pattern = r'^[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
         if not isinstance(new_name, str):
             raise TypeError(('new_name must be a str, not '
-                '{0}'.format(type(new_name))))
+                '{0}'.format(type(new_name).__name__)))
         elif new_name == '':
             raise ValueError(
                 'HDFDataNode name attribute cannot set as null string'
@@ -1700,41 +1589,19 @@ class HDFTreeModel(QAbstractItemModel):
                 return '<Root> {0} members'.format(len(node))
             elif node.hdf_type == HDFType.Group:
                 return '<Group> {0} members'.format(len(node))
-            elif node.hdf_type == HDFType.Line:
-                return '<Line> length: {0}, dtype: {1}'.format(
+            elif node.hdf_type in (
+                HDFType.Line, 
+                HDFType.Image, 
+                HDFType.VectorField, 
+                HDFType.FourDSTEM, 
+                HDFType.Data,
+            ):
+                type_str = '{0}'.format(node.hdf_type).split('.')[1]
+                return '<{0}> shape: {1}, dtype: {2}'.format(
+                    type_str,
                     self.hdf_handler.file[node.path].shape,
                     self.hdf_handler.file[node.path].dtype,
                 )
-            elif node.hdf_type == HDFType.Image:
-                return '<Image> shape: {0}, dtype: {1}'.format(
-                    self.hdf_handler.file[node.path].shape,
-                    self.hdf_handler.file[node.path].dtype,
-                )
-            elif node.hdf_type == HDFType.VectorField:
-                return '<Vector Field> shape: {0}, dtype: {1}'.format(
-                    self.hdf_handler.file[node.path].shape,
-                    self.hdf_handler.file[node.path].dtype,
-                )
-            elif node.hdf_type == HDFType.FourDSTEM:
-                return '<4D-STEM Dataset> shape: {0}, dtype: {1}'.format(
-                    self.hdf_handler.file[node.path].shape,
-                    self.hdf_handler.file[node.path].dtype,
-                )
-            elif node.hdf_type == HDFType.Data:
-                return '<Data> shape: {0}, dtype: {1}'.format(
-                    self.hdf_handler.file[node.path].shape,
-                    self.hdf_handler.file[node.path].dtype,
-                )
-            
-            # if isinstance(node, HDFRootNode):
-            #     return '<Root> {0} members'.format(len(node))
-            # elif isinstance(node, HDFGroupNode):
-            #     return '<Group> {0} members'.format(len(node))
-            # elif isinstance(node, HDFDataNode):
-            #     return '<Data> shape: {0}, dtype: {1}'.format(
-            #         self.hdf_handler.file[node.path].shape,
-            #         self.hdf_handler.file[node.path].dtype,
-            #     )
 
         elif role == self.DataRoles.HDFTypeRole:
             return node.hdf_type
@@ -2020,3 +1887,277 @@ class TaskCopy(Task):
 
     def addToTaskManager(self):
         self.task_manager.addTask(self)
+
+
+class HDFAttrModel(QAbstractTableModel):
+    """
+    用于显示 HDF5 对象的属性的 Model。
+
+    HDF5 对象的属性是一个类似于 Mapping 的数据结构，而该表格有两列，左列就是 key，右
+    列就是 Value。
+
+    这是 Qt 中 Model/View 架构的一部分。要显示等待队列，通过实例化 QListView，然后
+    调用其 setModel() 方法，把这个类的实例传递进去。
+
+    为了实现只读的、显示与数据分离的架构，这个 Model 类必须实现如下方法：
+        - rowCount(self, parent: QModelIndex) -> int
+            返回相应的 parent 之下有多少行
+
+        - data(self, index: QModelIndex, role: int)
+            根据 role 的不同，返回数据结构中内部存储的数据
+
+    注意，实践证明，不能使用 HDF5 本身的对象作为 ptr，原因不明，可能与 HDF5 采用的锁
+    机制有关；所以，唯一方案便是自己创建一个 meta 副本，而只在修改时访问 HDF5 文件。
+
+    This is a model for viewing attributions of HDF5 objects.
+
+    Attributions of HDF5 objects are like Mapping (dict in python), So we use
+    a table to show them. There are 2 columns in the table, the left contains
+    keys, while the right contains values.
+
+    This is a part of Model/View architecture of Qt. If we want to display the
+    path tree, we can instantiate QTreeView, and call its setModel() method.
+
+    In order to realize a read-only and data-display decoupled architecture, we
+    need to reimplement the following methods:
+        - rowCount(self, parent: QModelIndex) -> int
+            Get number of rows under the parent
+
+        - data(self, index: QModelIndex, role: int)
+            Return the internal data according to the role
+
+    NOTE: Practice shows that it seems we cannot use h5py.AttributeManager 
+    itself as the ptr, and I don't know why. So here we create a replica: meta
+    as a dict, which will always conserves the same as the attrs. Only when we
+    need to modify the attribution, we use attrs.
+
+    attributes:
+        hdf_handler: (HDFHandler)
+
+        item_path: (str) the corresponding h5py object's path
+
+        attrs: (h5py.AttributeManager) the AttributeManager of the h5py object
+
+        meta: (dict) replica. always conserves the same as self.attrs
+    """
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self._item_path = '/'
+        self._meta = {}
+        
+
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler
+
+    @property
+    def item_path(self) -> str:
+        return self._item_path
+
+    @item_path.setter
+    def item_path(self, path: str):
+        self.hdf_handler.getNode(path)
+        self._item_path = path 
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def attrs(self) -> h5py.AttributeManager:
+        return self.hdf_handler.file[self.item_path].attrs
+
+    def initialize(self, item_path: str):
+        self.item_path = item_path
+        self.beginRemoveRows(QModelIndex(), 0, self.rowCount())
+        self._meta = {}
+        self.endRemoveRows()
+        self.beginInsertRows(QModelIndex(), 0, len(self.attrs))
+        for key in self.attrs:
+            self.meta[key] = self.attrs[key]
+        self.endInsertRows()
+
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """
+        The number of columns.
+
+        arguments:
+            parent: (QModelIndex)
+
+        returns:
+            (int) 2. left is key, right is value.
+        """
+        return 2
+
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """
+        The number of rows.
+        """
+        return len(self.meta)
+
+    def data(self, index: QModelIndex, role: int):
+        """
+        The data of the attributions.
+
+        arguments:
+            index: (QModelIndex)
+
+            role: int (ItemDataRoles)
+        """
+        if not index.isValid():
+            return None
+        row = index.row()
+        column = index.column()
+        key = list(self.meta.keys())[row]
+        value = self.meta[key]
+        if role == Qt.DisplayRole:
+            if column == 0:
+                return '{0}'.format(key)
+            elif column == 1:
+                if isinstance(value, np.ndarray):
+                    if len(value) > 5:
+                        return ('<numpy.ndarray> shape: '
+                                '{0}'.format(value.shape))
+                return '{0}'.format(value)
+            else:
+                return None
+        elif role == Qt.ToolTipRole:
+            if isinstance(value, np.ndarray):
+                return '<numpy.ndarray> shape: {0}'.format(value.shape)
+            else:
+                return '<{0}>'.format(type(value).__name__)
+        else:
+            return None
+            
+    def headerData(
+        self, 
+        section: int, 
+        orientation: Qt.Orientation = Qt.Horizontal, 
+        role: int = Qt.DisplayRole
+    ):
+        """
+        Write the header data of the table.
+
+        arguments:
+            section: (int)
+
+            orientation: (Qt.Orientation)
+
+            role: (int)
+
+        returns:
+            (str) 'KEY' or 'VALUE' or ''.
+        """
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            if section == 0:
+                return 'KEY'
+            elif section == 1:
+                return 'VALUE'
+        return None
+
+    def indexFromKey(self, key: str) -> QModelIndex:
+        """
+        Get the index from a key.
+
+        arguments:
+            key: (str)
+
+        returns:
+            (QModelIndex) must be the index of column 0.
+        """
+        if not isinstance(key, str):
+            raise TypeError('key must be a str, not '
+                '{0}'.format(type(key).__name__))
+        if not key in self.meta:
+            raise KeyError('Key not founded.')
+        
+        row = list(self.meta.keys()).index(key)
+        column = 0
+        return self.createIndex(row, column)
+
+    def keyFromIndex(self, index: QModelIndex) -> str:
+        """
+        Get the key from the index.
+
+        arguments:
+            index: (QModelIndex)
+
+        returns:
+            (str) the key of the corresponding index, regardless the column.
+        """
+        row = index.row()
+        return list(self.meta.keys())[row]
+
+    def createItem(self, key: str, value):
+        """
+        Add an item.
+        
+        arguments:
+            key: (str)
+
+            value: Any (str, int, float, np.ndarray)
+        """
+        if not isinstance(key, str):
+            raise TypeError('key must be a str, not '
+                '{0}'.format(type(key).__name__))
+        if key in self.meta:
+            raise ValueError('key already exists.')
+
+        self.beginInsertRows(
+            QModelIndex(), 
+            self.rowCount(), 
+            self.rowCount(),
+        )
+        
+        self.attrs.create(key, value)
+        self.meta[key] = value
+        self.endInsertRows()
+
+    def deleteItem(self, index: QModelIndex):
+        """
+        Delete an item according to the index.
+
+        arguments:
+            index: (QModelIndex)
+        """
+        if not isinstance(index, QModelIndex):
+            raise TypeError('index must be QModelIndex, not '
+                '{0}'.format(type(index).__name__))
+        if not index.isValid():
+            return None
+        key = self.keyFromIndex(index)
+        row = index.row()
+        self.beginRemoveRows(QModelIndex(), row, row)
+        del self.attrs[key]
+        del self.meta[key]
+        self.endRemoveRows()
+
+    def modifyValue(self, index: QModelIndex, value):
+        """
+        Modify an item. The type should not be changed.
+
+        arguments:
+            index: (QModelIndex)
+
+            value: Any (must conserve the type of the original item)
+        """
+        if not isinstance(index, QModelIndex):
+            raise TypeError('index must be QModelIndex, not '
+                '{0}'.format(type(index).__name__))
+        if not index.isValid():
+            return None
+        key = self.keyFromIndex(index)
+        self.attrs.modify(key, value)
+        self.meta[key] = value
+        self.dataChanged().emit(QModelIndex(), index)
+    
+    
+
+
+
+
+
+    
+
+
