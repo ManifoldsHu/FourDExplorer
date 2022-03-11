@@ -159,6 +159,8 @@ class TaskManager(QObject):
     task_info_refresh = Signal()
     # emits whenever the current task is changed, e.g. a new task is submitted.
 
+    TaskState = TaskState
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self._task_queue = TaskQueue()
@@ -339,12 +341,12 @@ class TaskManager(QObject):
             return True # This function need to be called again.
 
         else:
+            self.current_task = task
             for subtask in task:
                 subtask.future = self._executor.submit(
                     subtask.getFunction()
                 )
                 subtask.future.add_done_callback(subtask.complete)
-            self.current_task = task
             return False
 
 
@@ -616,8 +618,8 @@ class Task(QObject):
         super().__init__(parent)
         self._name = 'untitled'
         self._subtasks = []
-        self._follow = None
-        self._prepare = None
+        self._follow = self._doNothing
+        self._prepare = self._doNothing
         self._comment = ''
         self._progress = 0
         self._state = TaskState.Initialized
@@ -673,6 +675,14 @@ class Task(QObject):
     def __getitem__(self, index: int):
         return self.subtasks[index]
 
+    def _doNothing(self):
+        """
+        Default preparation and following function.
+
+        This function will do nothing.
+        """
+        pass
+
     def setFollow(self, func: Callable, *arg, **kw):
         """
         Set the following function.
@@ -713,15 +723,13 @@ class Task(QObject):
         """
         Call the following function.
         """
-        if self._follow:
-            self._follow()
+        self._follow()
 
     def prepare(self):
         """
         Call the preparing function.
         """
-        if self._prepare:
-            self._prepare()
+        self._prepare()
 
     @property
     def comment(self) -> str:
@@ -1045,8 +1053,8 @@ class Subtask(QObject):
         except BaseException:
             self._exception = future.exception()
             self._rec_exc = traceback.format_exc()
-        finally:
             self.subtask_excepted.emit()
+        finally:
             self.subtask_completed.emit()
 
     def setFunction(self, func: Callable):

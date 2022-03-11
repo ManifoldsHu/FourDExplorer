@@ -34,6 +34,7 @@ from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog
 from PySide6.QtGui import QRegularExpressionValidator
 from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from bin.Widgets.DialogMoveItem import DialogHDFMove
+from bin.Widgets.DialogCopyItem import DialogHDFCopy
 from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
 
 
@@ -397,7 +398,36 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
 
 
     def showCopy(self, index: QModelIndex = None):
-        pass
+        """
+        Shows a dialog to copy an item.
+
+        arguments:
+            index: QModelIndex()
+        """
+        dialog_copy = DialogHDFCopy(self)
+        model = self.ui.treeView_HDF.model()
+        if not index:
+            index = self.ui.treeView_HDF.currentIndex()
+        dialog_copy.setItemPath(index.data(role = ItemDataRoles.PathRole))
+        dialog_code = dialog_copy.exec()
+        if not dialog_code == dialog_copy.Accepted:
+            return False
+        item_path = dialog_copy.getItemPath()
+        dest_path = dialog_copy.getDestPath()
+        try:
+            model.copyItem(
+                child = model.indexFromPath(item_path),
+                dest_parent = model.indexFromPath(dest_path),
+            )
+        except (KeyError, ValueError) as e:
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText('Fail to copy: {0}'.format(e))
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec()
+            return False
+
 
     def showChangeDataType(self, index: QModelIndex = None):
         pass

@@ -76,6 +76,7 @@ from PySide6.QtWidgets import QApplication
 
 from bin.Log import LogUtil
 from Constants import APP_VERSION, ItemDataRoles, HDFType
+from bin.TaskManager import Task, TaskManager
 
 
 # from bin import DataReaderEMPAD
@@ -106,7 +107,18 @@ class HDFHandler(QObject):
         - 根据 hdf_path 删除 Group 或 Data，同时修改对应的 HDFTree
         - 根据 hdf_path 移动 Group 或 Data，同时修改对应的 HDFTree
         - 根据 hdf_path 重命名 Group 或 Data，同时修改对应的 HDFTree
-        - (不提供复制的功能，原因是这很耗时，应当作为一个任务提交给 TaskManager)
+        - 根据 hdf_path 复制 Group 或 Data，同时修改对应的 HDFTree。这个过程很耗时，
+            所以打包成一个 Task，并且提交给 TaskManager。
+
+    可以为 Dataset 类指定扩展名，就像平时在 UNIX 或 Windows 操作系统中指定扩展名那
+    样子。扩展名不是必需的，但如果有扩展名可以帮助 4D-Explorer 更好地识别这些 Dataset
+    的类型。目前支持的数据集的类型及对应的扩展名如下：
+        FourDSTEM       4d
+        Line            line
+        Image           img
+        VectorField     vec
+    尽管我不认为有这个必要，但后续如果想要极致的可扩展性的话，可以考虑将类型系统也做得
+    和操作系统一样，使用一张表来确定类型，而不是写入代码里。
 
 
     注意，这个类使用单例模式。在程序的任何地方要想取到这个实例，要先取到全局变量 qApp, 
@@ -135,6 +147,7 @@ class HDFHandler(QObject):
                                             来可能出现的中间结果。关闭时应当删除该 
                                             Group 下所有数据。
 
+
           
     This is the encapsulated classes that use HDF5 file processing. It should 
     contain the following methods:    
@@ -152,11 +165,23 @@ class HDFHandler(QObject):
         - according to the hdf_path, remove items and fix HDFTree,
         - according to the hdf_path, move items and fix HDFTree,
         - according to the hdf_path, rename items and fix HDFTree,
-        - (there is no copy api, because it is time-consumed and should be a t-
-        ask to be submitted to the TaskManager)
-    
+        - according to the hdf_path, copy items and fix HDFTree. NOTE: copying
+            is time-consumed and comprehensive, so we pack the copy operation
+            into a Task, and submit it to the Task Manager.
 
-        
+
+    For those Dataset object in HDF5 file, we can give them an extension name,
+    just like the UNIX/Windows operation system, so 4D-Explorer will recognize
+    them and set appropriate HDFType to the node in the HDFTree. For now, we 
+    support these type of Dataset and corresponding extension names:
+        FourDSTEM       4d
+        Line            line
+        Image           img
+        VectorField     vec
+    Although I don't think it's necessary, but if we want more extendibility, 
+    we can register these types as a table in a file rather than write them in
+    the python code.
+
 
     NOTE: there is only SINGLE instance. Anywhere we need to get the pointer of
     this instance, use the global pointer qApp, and get qApp.hdf_handler. 
@@ -182,7 +207,7 @@ class HDFHandler(QObject):
                                             hich is a "number-algorithm" struc-
                                             ture.  
 
-    /Reconstruction/1_iCoM/1_imshow         As a Group, its attribution preser-
+    /Reconstruction/1_iCoM/1_imshow.img     As a Group, its attribution preser-
                                             ves the encapsulated drawing class 
                                             that stores the parameters to use 
                                             to draw the results of the matrix. 
@@ -200,10 +225,10 @@ class HDFHandler(QObject):
     Attributes:
         file_path: (str) the HDF5 file path.
         file: (h5py.File) the OPENED HDF5 file, or NoneType.
+        model: (HDFTreeModel) get the model of the file tree.
 
     Signals:
-        file_opened: emits when file is opened
-        file_closed: emits when file is closed
+        file_state_changed: When file is opened or closed, this signal emits.
     """
 
     file_state_changed = Signal()   # When file is opened or closed, 
@@ -433,18 +458,47 @@ class HDFHandler(QObject):
         # if not self.file:
         #     raise OSError('Must open a file before build HDFTree.')
         
-        def _addChildDeepFirst(parent: 'HDFGroupNode'):
-            if isinstance(parent, HDFGroupNode):
-                for key in self._file[parent.path]:
-                    if isinstance(self._file[parent.path][key], h5py.Group):
-                        parent.addChild(HDFGroupNode(key))
-                        _addChildDeepFirst(parent[key])
-                    elif isinstance(self._file[parent.path][key], h5py.Dataset):
-                        parent.addChild(HDFDataNode(key))
+        # def _addChildDeepFirst(parent: 'HDFGroupNode'):
+        #     if isinstance(parent, HDFGroupNode):
+        #         for key in self._file[parent.path]:
+        #             if isinstance(self._file[parent.path][key], h5py.Group):
+        #                 parent.addChild(HDFGroupNode(key))
+        #                 _addChildDeepFirst(parent[key])
+        #             elif isinstance(self._file[parent.path][key], h5py.Dataset):
+        #                 parent.addChild(HDFDataNode(key))
 
-        self._root_node = HDFRootNode()
+        # self._root_node = HDFRootNode()
         if self.isFileOpened():
-            _addChildDeepFirst(self._root_node)
+            self._root_node = self.addChildDeepFirst(HDFRootNode())
+        
+            # _addChildDeepFirst(self._root_node)
+
+    def addChildDeepFirst(self, parent: 'HDFGroupNode'):
+        """
+        Add child nodes recursively for the root_node and its childs.
+
+        Only Group and Dataset object in the HDF5 file will be added.
+
+        TODO: Other types like String, Referece and External Links.
+
+        arguments:
+            parent: (HDFGroupNode)
+
+        returns:
+            (HDFGroupNode) returns the parent node from the argument, but the
+                parent node has been added children.
+        """
+        if not isinstance(parent, HDFGroupNode):
+            raise TypeError('parent must be an HDFGroupNode, not '
+                '{0}'.format(type(parent).__name__))
+        
+        for key in self._file[parent.path]:
+            if isinstance(self._file[parent.path][key], h5py.Group):
+                parent.addChild(HDFGroupNode(key))
+                self.addChildDeepFirst(parent[key])
+            elif isinstance(self._file[parent.path][key], h5py.Dataset):
+                parent.addChild(HDFDataNode(key))
+        return parent
 
     def getNode(self, hdf_path: str) -> 'HDFTreeNode':
         """
@@ -678,6 +732,8 @@ class HDFHandler(QObject):
         parent_node.addChild(item_node)
         self.file.move(item_path, new_path)
 
+
+
     def copyItem(self, item_path: str, dest_parent_path: str):
         """
         TODO Copy item to destination.
@@ -691,9 +747,170 @@ class HDFHandler(QObject):
 
             dest_parent_path: (str) the destination group's path
         """
-        pass
+        if not isinstance(item_path, str):
+            raise TypeError(('item_path must be a str, not '
+                '{0}'.format(type(item_path).__name__)))
+        elif not isinstance(dest_parent_path, str):
+            raise TypeError(('dest_parent_path must be a str, not '
+                '{0}'.format(type(dest_parent_path).__name__)))
+        elif item_path == '/':
+            raise ValueError('Cannot copy the whole root.')
 
-    def changeDataType(self, item_path, new_type):
+        this_node = self.getNode(item_path)
+        this_parent_node = this_node.parent
+        dest_parent_node = self.getNode(dest_parent_path)
+
+        if not isinstance(dest_parent_node, HDFGroupNode):
+            raise ValueError('Destination must be a group')
+
+        if this_parent_node.path == dest_parent_path:
+            new_name = self._getNewNameInSameGroup(this_node)
+        else:
+            if this_node.name in dest_parent_node:
+                raise ValueError('Name {0} exists in destination: '
+                    '{1}'.format(this_node.name, dest_parent_path))
+            else:
+                new_name = this_node.name
+        
+        copy_task = TaskCopy(self, item_path, dest_parent_path, new_name)
+        copy_task.addToTaskManager()
+        
+
+    # def _packCopyTask(
+    #     self, 
+    #     item_path: str, 
+    #     dest_parent_path: str,
+    #     new_name: str
+    # ) -> Task:
+    #     """
+    #     Assemble the copying task.
+
+    #     arguments:
+    #         item_path: (str) path of the item to be copied
+
+    #         dest_parent_path: (str) path of the destination group
+
+    #         new_name: (str) new name of the replica
+
+    #     returns:
+    #         (Task)
+    #     """
+    #     copy_task = Task(self)
+    #     copy_task.addSubtask(
+    #         'Copy Items',
+    #         self.file.copy,
+    #         item_path,
+    #         dest_parent_path,
+    #         name = new_name,
+    #     )
+    #     copy_task.name = 'Copy'
+    #     copy_task.comment = (
+    #         'Copy item from: {0}\n'
+    #         'Destination:{1}\n'
+    #         'New name: {2}'.format(
+    #             item_path, dest_parent_path, new_name
+    #         )
+    #     )
+    #     copy_task.setPrepare(
+    #         self._copyPrepare,
+    #         item_path,
+    #         dest_parent_path,
+    #         new_name,
+    #     )
+    #     return copy_task
+        
+
+    # def _copyPrepare(self, 
+    #     item_path: str, 
+    #     dest_parent_path: str, 
+    #     new_name: str
+    # ):
+    #     """
+    #     提交到 TaskManager 的任务的准备工作。
+
+    #     Preparation work to submit to the task manager.
+    #     """
+    #     old_node = self.getNode(item_path)
+    #     dest_parent_node = self.getNode(dest_parent_path)
+    #     if isinstance(old_node, HDFGroupNode):
+    #         new_node = HDFGroupNode(name = new_name)
+    #     elif isinstance(old_node, HDFDataNode):
+    #         new_node = HDFDataNode(name = new_name)
+
+    #     dest_parent_index = self.model.indexFromPath(dest_parent_path)
+    #     row = self.model.rowCount(dest_parent_index)
+    #     self.model.beginInsertRows(
+    #         dest_parent_index,
+    #         row,
+    #         row,
+    #     )
+    #     dest_parent_node.addChild(new_node)
+    #     self.model.endInsertRows()
+        
+
+    # def _copyFollow(self,
+    #     item_path: str,
+    #     dest_parent_path: str,
+    #     new_name: str
+    # ):
+    #     """
+    #     提交到 TaskManager 的任务的后续工作。
+
+    #     Following work to submit to the task manager.
+    #     """
+    #     dest_parent_node = self.getNode(dest_parent_path)
+    #     new_node = dest_parent_node[new_name]
+    #     if isinstance(new_node, HDFGroupNode):
+    #         new_node = self.addChildDeepFirst(new_node)
+        
+
+
+    def _getNewNameInSameGroup(self, node: 'HDFTreeNode'):
+        """
+        Get a new name when copying a node inside one group.
+
+        Will conserve extension name, while add _replica to the name.
+
+        attribute:
+            node: (HDFTreeNode) the copied node
+
+        returns:
+            (str) new name, which will not collide with other items.
+        """
+        parent = node.parent
+        if '.' in node.name:
+            old_name, ext = node.name.split('.')
+            new_name = old_name + '_replica.' + ext 
+            _count = 1
+            while new_name in parent:
+                new_name = old_name + '_replica_{0}.'.format(_count) + ext
+                _count += 1
+        else:
+            old_name = node.name
+            new_name = old_name + '_replica'
+            _count = 1
+            while new_name in parent:
+                new_name = old_name + '_replica_{0}'.format(_count)
+                _count += 1
+        return new_name
+    
+    # def _copyNode(self, node: 'HDFTreeNode') -> 'HDFTreeNode':
+    #     """
+    #     Copy node and its children recursively.
+
+    #     The name and of new nodes
+
+    #     arguments:
+    #         node: (HDFTreeNode) the node to be copied.
+        
+    #     returns:
+    #         (HDFTreeNode) new node, with all the children copied from the 
+    #             original node.
+    #     """
+    #     if isinstance(node, HDFGroupNode):
+    #         pass
+        
+    def changeDataType(self, item_path: str, new_type: HDFType):
         """
         Change Data's type into lines, images, vector fields or 4D-STEM datacu-
         bes. Can also change data's type to general data.
@@ -1104,11 +1321,11 @@ class HDFDataNode(HDFTreeNode):
     attributes:
         name: (str)
         hdf_type: (HDFType) must be one of these:
-            HDFType.Data
-            HDFType.FourDSTEM
-            HDFType.Line
-            HDFType.Image
-            HDFType.VectorField
+            HDFType.Data                no extension name
+            HDFType.FourDSTEM           4d
+            HDFType.Line                line
+            HDFType.Image               img
+            HDFType.VectorField         vec
     """
     def __init__(self, name: str, parent: HDFGroupNode = None):
         """
@@ -1117,7 +1334,7 @@ class HDFDataNode(HDFTreeNode):
             parent: (HDFGroupNode)
         """
         super().__init__(name, parent)
-        self._hdf_type = HDFType.Data
+        self._updateTypeByExtension()
         
     @property
     def name(self):
@@ -1172,6 +1389,25 @@ class HDFDataNode(HDFTreeNode):
             raise TypeError(('new_type must be also a kind of data,'
                 ' i.e. one of these:\n {0}'.format(Datatypes)))
         self._hdf_type = new_type 
+
+    def _updateTypeByExtension(self):
+        """
+        Update HDF type according to the extension.
+        """
+        if '.' in self.name:
+            ext = self.name.split('.').pop()
+            if ext == '4d':
+                self.hdf_type = HDFType.FourDSTEM
+            elif ext == 'line':
+                self.hdf_type = HDFType.Line 
+            elif ext == 'img':
+                self.hdf_type = HDFType.Image
+            elif ext == 'vec':
+                self.hdf_type = HDFType.VectorField
+            else:
+                self.hdf_type = HDFType.Data
+        else:
+            self.hdf_type = HDFType.Data
 
 
 class HDFRootNode(HDFGroupNode):
@@ -1643,7 +1879,18 @@ class HDFTreeModel(QAbstractItemModel):
 
             dest_parent: (QModelIndex) the destination parent index
         """
-        pass
+        if not child.isValid():
+            raise ValueError('Cannot copy invalid item')
+        elif not dest_parent.isValid():
+            raise ValueError('Cannot copy to an invalid item')
+
+        child_path = child.data(role = self.DataRoles.PathRole)
+        dest_parent_path = dest_parent.data(role = self.DataRoles.PathRole)
+        
+        # Because copying is an asynchronous task, so here we do not update
+        # model. When the task do preparation and following work, the model
+        # is updated.
+        self.hdf_handler.copyItem(child_path, dest_parent_path)
 
 
     def changeItemType(self, child: QModelIndex, new_type: HDFType):
@@ -1673,23 +1920,103 @@ class HDFTreeModel(QAbstractItemModel):
         """
         for node in self.hdf_handler.matchNodeGenerator(kw):
             yield self.indexFromPath(node.path)
-        # def _matchSubIndex(index: QModelIndex):
-        #     node = index.internalPointer()
-        #     for key in node:
-                
-        #         if kw in key:
-        #             yield self.indexFromPath(node[key].path)
-        #         if isinstance(node[key], HDFGroupNode):
-        #             for subindex in _matchSubIndex()
 
-    
-    # def resetInternalData(self) -> None:
-    #     """
-    #     Reset the internal hdf structure of the model.
-    #     """
-        # self.hdf_handler.buildHDFTree()
-        # root = self.createIndex(0, 0, self._hdf_handler.root_node)
-        # self.dataChanged.emit(root, root)
-        # self.beginResetModel()
-        # self.hdf_handler.buildHDFTree()
-        # self.endResetModel()
+
+class TaskCopy(Task):
+    """
+    复制任务，将 HDF5 对象及其所有子对象都复制过去。
+
+    这个任务会提交到线程池运行。更多有关信息请查看 TaskManager 模块。
+
+    Copy an item with all its children to destination.
+
+    For more information of Task object, see TaskManager module.
+    """
+    def __init__(self,
+        parent: QObject, 
+        item_path: str, 
+        dest_parent_path: str, 
+        new_name: str
+    ):
+        super().__init__(parent)
+        self._item_path = item_path
+        self._dest_parent_path = dest_parent_path
+        self._new_name = new_name
+
+
+        self.name = 'copy'
+        self.comment = (
+            'Copy item from: {0}\n'
+            'Destination:{1}\n'
+            'New name: {2}'.format(
+                item_path, dest_parent_path, new_name
+            )
+        )
+
+        if dest_parent_path == '/':
+            new_path = '/' + new_name
+        else:
+            new_path = dest_parent_path + '/' + new_name
+        
+        self.addSubtask(
+            'Copy Items',
+            self.hdf_handler.file.copy,
+            item_path,
+            new_path,
+        )
+
+        self.setPrepare(self._copyPrepare)
+        self.setFollow(self._copyFollow)
+
+    @property 
+    def task_manager(self) -> TaskManager:
+        global qApp 
+        return qApp.task_manager
+
+    @property
+    def model(self) -> HDFTreeModel:
+        return self.hdf_handler.model
+
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler
+
+    def _copyPrepare(self):
+        """
+        Preparation work of copy. Create one node in the destination.
+        """
+        item_path = self._item_path
+        dest_parent_path = self._dest_parent_path
+        new_name = self._new_name
+
+        old_node = self.hdf_handler.getNode(item_path)
+        dest_parent_node = self.hdf_handler.getNode(dest_parent_path)
+        if isinstance(old_node, HDFGroupNode):
+            new_node = HDFGroupNode(new_name)
+        elif isinstance(old_node, HDFDataNode):
+            new_node = HDFDataNode(new_name)
+
+        dest_parent_index = self.model.indexFromPath(dest_parent_path)
+        row = self.model.rowCount(dest_parent_index)
+        # print('Prepare called')
+        self.model.beginInsertRows(dest_parent_index, row, row)
+        dest_parent_node.addChild(new_node)
+        self.model.endInsertRows()
+
+    def _copyFollow(self):
+        """
+        Following work of copy. Create child nodes recursively.
+        """
+        dest_parent_path = self._dest_parent_path
+        new_name = self._new_name
+        dest_parent_node = self.hdf_handler.getNode(dest_parent_path)
+        new_node = dest_parent_node[new_name]
+        if isinstance(new_node, HDFGroupNode):
+            new_node = self.hdf_handler.addChildDeepFirst(new_node)
+        new_index = self.model.indexFromPath(new_node.path)
+        self.model.dataChanged.emit(new_index, new_index)
+        # print('Follow called')
+
+    def addToTaskManager(self):
+        self.task_manager.addTask(self)

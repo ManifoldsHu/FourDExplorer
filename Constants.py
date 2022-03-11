@@ -40,15 +40,24 @@ class HDFType(IntEnum):
     
     Although external links may be reference of groups, we see it as data, and 
     use special methods to handle them.
+
+    For data with special types, we have extension name:
+        FourDSTEM:      4d
+        Line:           line
+        Image:          img
+        VectorField:    vec
+    These extension name will act just like in the operation system, and is not
+    a prerequisite for renderers or other algorithms. It is recommended to add 
+    these extension, because 4D-Explorer will be able to recognize them.
     """
     Item = 1
     Root = 10
     Group = 11
-    Data = 20
-    FourDSTEM = 21      # Dataset (data cube) of 4D-STEM
-    Line = 22           # One dimension matrix
-    Image = 23          # Two dimension matrix
-    VectorField = 24    # Matrix with shape (2, m, n)
+    Data = 20           # Dataset, extension: no extension
+    FourDSTEM = 21      # Dataset (data cube) of 4D-STEM, extension: 4d
+    Line = 22           # One dimension matrix, extension: line
+    Image = 23          # Two dimension matrix, extension: img
+    VectorField = 24    # Matrix with shape (2, m, n), extension: vec
     String = 30         # String
     Reference = 40      # Reference
 
