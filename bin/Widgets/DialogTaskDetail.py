@@ -17,7 +17,7 @@ date:           Mar 10, 2022
 
 from PySide6.QtWidgets import QDialog, QWidget
 from bin.TaskManager import TaskManager, Task, Subtask, SubtaskListModel
-from bin.Log import LogUtil 
+# from bin.Log import LogUtil 
 from ui import uiDialogTaskDetail
 
 class DialogTaskDetail(QDialog):

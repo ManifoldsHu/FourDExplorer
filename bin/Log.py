@@ -19,18 +19,16 @@ All rights reserved.
 代码示例
 Coding Example
 
-from bin.Log import LogUtil
-import traceback
+global qApp             # get the global QApplication object
+logger = qApp.logger
 
-log_util = LogUtil(__name__)
-logger = log_util.logger
 logger.info('Write a log')
 try:
     do something
     do something
     do something
 except BaseException as e:      # Or any other exception
-    logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+    logger.error('{0}'.format(e), exc_info = True)
 
 
 *---------------------------------- Log.py -----------------------------------*
@@ -41,11 +39,17 @@ import os.path
 import time
 
 from configparser import ConfigParser
+from PySide6.QtCore import QObject, Signal
 from Constants import ROOT_PATH, CONFIG_PATH
 
 class LogUtil(object):
     '''
         对Logger进行封装。
+
+        这个类里有三个 handler，分别是
+            - file_handler      向文件输出
+            - console_handler   向控制台(stdout)输出
+            - widget_handler    向主界面中的Log窗口输出
     '''
     def __init__(self, name, cLevel = logging.INFO, fLevel = logging.INFO):
         '''
@@ -85,15 +89,27 @@ class LogUtil(object):
         self.console_handler = logging.StreamHandler()
         self.console_handler.setLevel(cLevel)
 
+        self.widget_handler = logging.StreamHandler(stream = LogStream())
+        self.widget_handler.setLevel(cLevel)
+
         formatter = logging.Formatter(
-            ('%(asctime)s - %(filename)s -> %(funcName)s[line:%(lineno)d] - '
-            '%(levelname)s: %(message)s')
+            '%(asctime)s - %(filename)s -> %(funcName)s[line:%(lineno)d] - '
+            '%(levelname)s: %(message)s'
         )
+        
+        widget_formatter = WidgetFormatter(
+            '%(asctime)s - %(filename)s -> %(funcName)s[line:%(lineno)d] - '
+            '%(levelname)s: %(message)s'
+        )   # This formatter is used for the log widget in the main window.
+
+
         self.file_handler.setFormatter(formatter)
         self.console_handler.setFormatter(formatter)
+        self.widget_handler.setFormatter(widget_formatter)
 
         self.logger.addHandler(self.file_handler)
         self.logger.addHandler(self.console_handler)
+        self.logger.addHandler(self.widget_handler)
 
 
     def setCLevel(self, cLevel):
@@ -116,6 +132,7 @@ class LogUtil(object):
             logging.INFO, logging.WARNING, logging.ERROR and logging.CRITICAL')
         else:
             self.console_handler.setLevel(cLevel)
+            self.widget_handler.setLevel(cLevel)
 
     def setFLevel(self, fLevel):
         '''
@@ -174,3 +191,40 @@ class LogUtil(object):
         default_path = os.path.join(ROOT_PATH, 'logs')
         self.setLogPath(default_path)
 
+
+class LogStream(QObject):
+    """
+    一个Logging流。用于主界面上显示Log。
+
+    A stream of logging. Used to print logs in the MainWindow.
+    """
+    print_signal = Signal(str)
+    def __init__(self, parent: QObject = None):
+        """
+        arguments:
+            parent: (QObject)
+        """
+        super().__init__(parent)
+        
+    
+    def write(self, strings: str):
+        self.print_signal.emit(strings)
+
+
+class WidgetFormatter(logging.Formatter):
+    """
+    用于主界面的Log的格式。
+
+    与文件以及标准输出中的格式相同，但在出现异常时，只打印异常类、异常值，而不打印traceback。
+
+    Log formatter for the MainWindow Log Widget.
+
+    It is the same as the file and stderr, but ignores traceback.
+    """
+
+    def format(self, record):
+        record.exc_text = ''
+        return super().format(record)
+
+    def formatException(self, exc_info):
+        return ''

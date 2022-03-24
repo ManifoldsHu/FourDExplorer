@@ -40,8 +40,8 @@ from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
 
 
 # from ui import uiWidgetBaseHDFViewer
-from bin.HDFManager import HDFHandler, HDFTreeModel
-from bin.Log import LogUtil
+# from bin.HDFManager import HDFHandler, HDFTreeModel
+# from bin.Log import LogUtil
 
 from Constants import HDFType, ItemDataRoles
 # from app import ROOTPATH

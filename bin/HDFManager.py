@@ -67,6 +67,7 @@ import threading
 import traceback
 from collections.abc import Mapping
 from typing import Iterator
+from logging import Logger
 
 import h5py
 import numpy as np
@@ -82,7 +83,8 @@ from PySide6.QtCore import (
 
 # from PySide6.QtWidgets import QApplication 
 
-from bin.Log import LogUtil
+# from bin.Log import LogUtil
+
 from Constants import APP_VERSION, ItemDataRoles, HDFType
 from bin.TaskManager import Task, TaskManager
 
@@ -91,8 +93,8 @@ from bin.TaskManager import Task, TaskManager
 # from bin.BackEnd import BackEnd
 # from bin.Preview import PreviewHandler
 
-log_util = LogUtil(__name__)
-logger = log_util.logger 
+# log_util = LogUtil(__name__)
+# logger = log_util.logger 
 reValidHDFName = re.compile(
     r'[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
 )   # A valid hdf_name must be able to match this regular expression.
@@ -249,7 +251,11 @@ class HDFHandler(QObject):
         self._lock = threading.Lock()   # read/write lock
         self._root_node = HDFRootNode()
         self._createModel()
-        
+    
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger
 
     @property
     def file_path(self):
@@ -295,7 +301,7 @@ class HDFHandler(QObject):
                 is_valid = isinstance(file, h5py.File)
             return is_valid
         except OSError as e:
-            logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+            self.logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
             return False
           
      
@@ -346,7 +352,7 @@ class HDFHandler(QObject):
                 # create, truncate if exists
                 self._initializeFile(file)
         except OSError as e:
-            logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+            self.logger.error('{0}'.format(e), exc_info = True)
             return False
         return True
 
@@ -388,7 +394,7 @@ class HDFHandler(QObject):
                 self.file = h5py.File(self.file_path, mode='r+')
                 self.file_state_changed.emit()
         except OSError as e:
-            logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+            self.logger.error('{0}'.format(e), exc_info = True)
             return None
         return self.file
 
@@ -438,7 +444,7 @@ class HDFHandler(QObject):
                 os.remove(self.file_path)
                 return True
             except OSError as e:
-                logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+                self.logger.error('{0}'.format(e), exc_info = True)
                 return False
 
 

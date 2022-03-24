@@ -31,6 +31,7 @@ date:           Feb 26, 2022
 *--------------------------------- app.py ------------------------------------*
 """
 
+from logging import Logger
 from PySide6.QtWidgets import QApplication
 
 from bin.HDFManager import HDFHandler
@@ -68,6 +69,7 @@ class App(QApplication):
         self._hdf_handler = HDFHandler(self)
         self._theme_handler = ThemeHandler(self)
         self._task_manager = TaskManager(self)
+        self._log_util = LogUtil('4D-Explorer')
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -80,3 +82,11 @@ class App(QApplication):
     @property
     def task_manager(self) -> TaskManager:
         return self._task_manager
+
+    @property
+    def logger(self) -> Logger:
+        return self._log_util.logger
+
+    @property
+    def log_util(self) -> LogUtil:
+        return self._log_util

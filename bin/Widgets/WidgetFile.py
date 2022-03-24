@@ -38,7 +38,7 @@ import traceback
 # from PySide6.QtCore import QDir 
 from PySide6.QtWidgets import QWidget, QFileSystemModel, QFileDialog
 from ui import uiWidgetFile 
-from bin.Log import LogUtil
+# from bin.Log import LogUtil
 
 class WidgetFile(QWidget):
     """
@@ -59,8 +59,8 @@ class WidgetFile(QWidget):
         self.ui = uiWidgetFile.Ui_Form()
         self.ui.setupUi(self)
 
-        self._log_util = LogUtil(__name__)
-        self.logger = self._log_util.logger 
+        # self._log_util = LogUtil(__name__)
+        # self.logger = self._log_util.logger 
         
         global qApp
         self._hdf_handler = qApp.hdf_handler

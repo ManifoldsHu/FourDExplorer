@@ -35,7 +35,7 @@ import os
 
 from PySide6.QtWidgets import QWidget
 from ui import uiWidgetTask
-from bin.Log import LogUtil
+# from bin.Log import LogUtil
 
 class WidgetTask(QWidget):
     """
@@ -52,9 +52,9 @@ class WidgetTask(QWidget):
         self.ui = uiWidgetTask.Ui_Form()
         self.ui.setupUi(self)
 
-        self._log_util = LogUtil(__name__)
-        self.logger = self._log_util.logger
+        # self._log_util = LogUtil(__name__)
+        # self.logger = self._log_util.logger
 
         global qApp
         self._task_manager = qApp.task_manager
-        
+

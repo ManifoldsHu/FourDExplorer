@@ -16,12 +16,13 @@ date:           Feb 19, 2022
 
 import traceback
 from configparser import ConfigParser
+from logging import Logger
 
 from PySide6.QtCore import QObject
 
 from qt_material import apply_stylesheet
 
-from bin.Log import LogUtil
+# from bin.Log import LogUtil
 from Constants import CONFIG_PATH, UITheme
 
 
@@ -95,8 +96,13 @@ class ThemeHandler(QObject):
         self._app = qApp 
         self._config = ConfigParser()
         self._config.read(CONFIG_PATH, encoding = 'utf-8')
-        self._logger = LogUtil(__name__)
+        # self._logger = LogUtil(__name__)
         self._theme = UITheme.default
+    
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger
 
 
     def _applyTheme(self, theme: UITheme) -> bool:

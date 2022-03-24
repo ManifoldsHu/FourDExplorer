@@ -40,11 +40,11 @@ All rights reserved.
 import threading
 import queue
 import numpy as np
-from bin.Log import LogUtil
+# from bin.Log import LogUtil
 import time
 from xml.dom.minidom import parse
 
-logger = LogUtil(__name__)
+# logger = LogUtil(__name__)
 
 def readData(
     buffer: queue.Queue, 
@@ -124,7 +124,7 @@ def readData(
     -----------------------------------------------------------------------
     '''
     
-    logger.info('Start reading from the EMPAD raw file:\n{0}'.format(raw_path))
+    # logger.info('Start reading from the EMPAD raw file:\n{0}'.format(raw_path))
     start_time = time.time()
     scan_i, scan_j, dp_i, dp_j = shape
     with open(raw_path, 'rb') as raw_file:
@@ -149,8 +149,8 @@ def readData(
         # end flag
         buffer.put(-1)
         end_time = time.time()
-        logger.info('Complete reading. Time consumed: {0}'\
-            .format(end_time - start_time))
+        # logger.info('Complete reading. Time consumed: {0}'\
+            # .format(end_time - start_time))
 
 
 def readMetaData(xml_path: str) -> dict:

@@ -18,7 +18,7 @@ from PySide6.QtCore import Qt, QPoint, QModelIndex
 
 from bin.TaskManager import TaskManager, HistoryTaskModel, Task
 from bin.Widgets.DialogTaskDetail import DialogTaskDetail
-from bin.Log import LogUtil
+# from bin.Log import LogUtil
 from ui import uiDialogHistoryTasks
 
 class DialogHistoryTasks(QDialog):

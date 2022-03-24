@@ -68,10 +68,11 @@ from PySide6.QtCore import (
 from PySide6.QtWidgets import QMessageBox
 
 from Constants import TaskState
-from bin.Log import LogUtil
+from logging import Logger
+# from bin.Log import LogUtil
 
-log_util = LogUtil(__name__)
-logger = log_util.logger
+# log_util = LogUtil(__name__)
+# logger = log_util.logger
 
 
 def _packing(func: Callable, *arg, **kw) -> Callable:
@@ -190,6 +191,11 @@ class TaskManager(QObject):
             raise TypeError('current task must be a Task or None, not '
                 '{0}'.format(type(task).__name__))
 
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger
+
 
     def addTask(self, task: 'Task'):
         """
@@ -255,8 +261,12 @@ class TaskManager(QObject):
             # Handle the exception, but still try doing following work.
             for subtask in self.current_task:
                 if subtask.exception:
-                    logger.error('{0}\n{1}'.format(
-                        subtask.exception, subtask.rec_exc)
+                    # self.logger.error('{0}\n{1}'.format(
+                    #     subtask.exception, subtask.rec_exc)
+                    # )
+                    self.logger.error(
+                        '{0}'.format(subtask.exception), 
+                        exc_info = True,
                     )
                     QMessageBox.warning(
                         None,
@@ -280,9 +290,10 @@ class TaskManager(QObject):
         try:
             self.current_task.follow()
         except BaseException as e:
-            logger.error(
-                '{0}\n{1}'.format(e, traceback.format_exc())
-            )
+            # self.logger.error(
+            #     '{0}\n{1}'.format(e, traceback.format_exc())
+            # )
+            self.logger.error('{0}'.format(e), exc_info = True)
             QMessageBox.warning(
                 None,
                 'Error: {0}'.format(self.current_task.name),
@@ -329,9 +340,10 @@ class TaskManager(QObject):
         except BaseException as e:
             # Abandon submitting
             task.state = TaskState.Excepted
-            logger.error(
-                '{0}\n{1}'.format(e, traceback.format_exc())
-            )
+            # self.logger.error(
+            #     '{0}\n{1}'.format(e, traceback.format_exc())
+            # )
+            self.logger.error('{0}'.format(e), exc_info = True)
             QMessageBox.warning(
                 None, 
                 'Error: {0}'.format(self.current_task.name), 

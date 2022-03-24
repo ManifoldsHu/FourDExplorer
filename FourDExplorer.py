@@ -22,12 +22,12 @@ All rights reserved.
 """
 
 import sys
-import traceback
+
 
 from Constants import ROOT_PATH
 from bin.app import App 
 from bin.Widgets.MainWindow import MainWindow
-from bin.Log import LogUtil
+# from bin.Log import LogUtil
 
 
         
@@ -38,23 +38,21 @@ if __name__ == '__main__':
     app = App(sys.argv)
 
     ''' Initialize Log'''
-    log_util = LogUtil(__name__)
-    logger = log_util.logger 
-    logger.info('4D-Explorer is launched.')
+    logger = app.logger
+    
     
     ''' Initialize UI theme'''
     app.theme_handler.initializeTheme()
-
+    window = MainWindow()
     try:
-        window = MainWindow()
         window.show()
+        logger.info('4D-Explorer is launched.')
         quit = app.exec()
         if quit == 0:
             logger.info('4D-Explorer exits.')
     except BaseException as e:  # Any exceptions and their tracebacks will be 
                                 # recorded in logs.
-        exc_type, exc_value, exc_obj = sys.exc_info()
-        logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+        logger.error('{0}'.format(e), exc_info = True)
     finally:
         app._hdf_handler.closeFile()
         sys.exit()

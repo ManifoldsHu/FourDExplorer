@@ -27,7 +27,7 @@ from PySide6.QtCore import Qt, QPoint, QModelIndex
 
 from bin.TaskManager import TaskManager, Task
 from example.ExampleTask import ExampleSleep, ExampleSleepWithoutProgress
-from bin.Log import LogUtil
+# from bin.Log import LogUtil
 from bin.Widgets.DialogTaskDetail import DialogTaskDetail
 from bin.Widgets.DialogHistoryTasks import DialogHistoryTasks
 from ui import uiWidgetTaskManager
