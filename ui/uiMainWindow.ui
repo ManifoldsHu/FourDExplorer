@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1009</width>
+    <width>1207</width>
     <height>849</height>
    </rect>
   </property>
@@ -43,7 +43,7 @@
         <enum>QTabWidget::West</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideLeft</enum>
@@ -318,7 +318,7 @@
          <enum>Qt::ElideLeft</enum>
         </property>
         <property name="documentMode">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="tabsClosable">
          <bool>true</bool>
@@ -327,18 +327,8 @@
          <bool>true</bool>
         </property>
         <property name="tabBarAutoHide">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
-        <widget class="QWidget" name="tab_home">
-         <attribute name="title">
-          <string>Home</string>
-         </attribute>
-        </widget>
-        <widget class="QWidget" name="tab_2">
-         <attribute name="title">
-          <string>Tab 2</string>
-         </attribute>
-        </widget>
        </widget>
        <widget class="WidgetLog" name="widget_log" native="true">
         <property name="sizePolicy">
@@ -358,7 +348,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1009</width>
+     <width>1207</width>
      <height>22</height>
     </rect>
    </property>

@@ -56,10 +56,15 @@ class Ui_Form(object):
         self.widget.setObjectName(u"widget")
         self.verticalLayout = QVBoxLayout(self.widget)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.pushButton_new_or_close_file = QPushButton(self.widget)
-        self.pushButton_new_or_close_file.setObjectName(u"pushButton_new_or_close_file")
+        self.pushButton_new_file = QPushButton(self.widget)
+        self.pushButton_new_file.setObjectName(u"pushButton_new_file")
 
-        self.verticalLayout.addWidget(self.pushButton_new_or_close_file)
+        self.verticalLayout.addWidget(self.pushButton_new_file)
+
+        self.pushButton_close_file = QPushButton(self.widget)
+        self.pushButton_close_file.setObjectName(u"pushButton_close_file")
+
+        self.verticalLayout.addWidget(self.pushButton_close_file)
 
         self.pushButton_import_data = QPushButton(self.widget)
         self.pushButton_import_data.setObjectName(u"pushButton_import_data")
@@ -113,7 +118,8 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"HDF Hierarchy", None))
-        self.pushButton_new_or_close_file.setText(QCoreApplication.translate("Form", u"New H5 File", None))
+        self.pushButton_new_file.setText(QCoreApplication.translate("Form", u"New H5 File", None))
+        self.pushButton_close_file.setText(QCoreApplication.translate("Form", u"Close H5 File", None))
         self.pushButton_import_data.setText(QCoreApplication.translate("Form", u"Import Data", None))
         self.pushButton_export_data.setText(QCoreApplication.translate("Form", u"Export Data", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Working Directory", None))

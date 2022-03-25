@@ -84,7 +84,7 @@ class ExampleSleep(Task):
         )
 
 
-        self.addSubtask('sleep 5s', time.sleep, 5)
+        self.addSubtaskFunc('sleep 5s', time.sleep, 5)
 
         # Do some preparation work.
         self.setPrepare(
@@ -136,8 +136,8 @@ class ExampleSleepWithoutProgress(Task):
         self.name = 'Sleep, no progress'
         self.comment = 'I am sleeping, and do not know how long.'
 
-        self.addSubtask('Sleep 10s', time.sleep, 10)
-        self.calc_subtask = self.addSubtask(
+        self.addSubtaskFunc('Sleep 10s', time.sleep, 10)
+        self.calc_subtask = self.addSubtaskFunc(
             'Calculation', 
             self.calculation, 
             100

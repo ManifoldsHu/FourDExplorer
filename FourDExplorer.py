@@ -23,12 +23,9 @@ All rights reserved.
 
 import sys
 
-
 from Constants import ROOT_PATH
-from bin.app import App 
 from bin.Widgets.MainWindow import MainWindow
-# from bin.Log import LogUtil
-
+from bin.app import App 
 
         
 if __name__ == '__main__':
@@ -41,16 +38,16 @@ if __name__ == '__main__':
     logger = app.logger
     
     ''' Initialize Clean-up code'''
-    app.aboutToQuit.connect(app.hdf_handler.closeFile())
-    app.aboutToQuit.connect(app.task_manager.shutDown())
-    app.aboutToQuit.connect(lambda: logger.info('4D-Explorer exits'))
+    app.aboutToQuit.connect(app.cleanResources)
 
     ''' Initialize UI theme'''
     app.theme_handler.initializeTheme()
 
-
     window = MainWindow()
+    app.main_window = window
     window.show()
+    
     logger.info('4D-Explorer is launched.')
     quit = app.exec()
+    logger.info('4D-Explorer exits.')
     sys.exit(quit)

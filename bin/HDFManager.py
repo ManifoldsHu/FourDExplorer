@@ -326,7 +326,7 @@ class HDFHandler(QObject):
         arguments:
             h5_file: (h5py.File) Must be h5py.File or NoneType.
         """
-        if h5_file == None or isinstance(h5_file, h5py.File):
+        if h5_file is None or isinstance(h5_file, h5py.File):
             self._file = h5_file
         else:
             raise TypeError('file must be a h5py.File or None.')
@@ -375,7 +375,7 @@ class HDFHandler(QObject):
 
         root = file['/']
         root.attrs['4D-Explorer'] = True
-        root.attrs['FileCreateTime'] = '{0}'.format(datetime.now)
+        root.attrs['FileCreateTime'] = '{0}'.format(datetime.now())
         root.attrs['Version'] = str(APP_VERSION)
         
         self.logger.debug('Initialize file')
@@ -477,6 +477,8 @@ class HDFHandler(QObject):
         """
         if self.isFileOpened():
             self._root_node = self.addChildDeepFirst(HDFRootNode())
+        else:
+            self._root_node = HDFRootNode()
             
     def addChildDeepFirst(self, parent: 'HDFGroupNode'):
         """
@@ -691,10 +693,15 @@ class HDFHandler(QObject):
             raise ValueError(('Destination path must be a group: '
                 '{0}'.format(dest_parent_path)))
 
-        elif dest_parent_node == this_parent_node:
+        elif dest_parent_node is this_parent_node:
             raise ValueError('The destination is the same as current path')
 
+        elif dest_parent_node is this_node:
+            raise ValueError('The destination cannot be this group itself')
+
         elif dest_parent_node.isSubNode(this_node):
+            self.logger.debug(dest_parent_node.path)
+            self.logger.debug(this_node.path)
             raise ValueError(('The destination: {0}\n'
                 'cannot be subgroup of current group: '
                 '{1}'.format(dest_parent_path, this_node.path)))
@@ -711,7 +718,7 @@ class HDFHandler(QObject):
         this_parent_node.deleteChild(this_node)
         dest_parent_node.addChild(this_node)
         self.file.move(item_path, dest_path)
-        self.logger.debug('Move {0} to {2}'.format(
+        self.logger.debug('Move {0} to {1}'.format(
             item_path, dest_parent_path))
         
     def renameItem(self, item_path: str, new_name: str):
@@ -736,10 +743,39 @@ class HDFHandler(QObject):
         else:
             new_path = item_node.parent.path + '/' + new_name
 
-        parent_node.deleteChild(item_node)
-        item_node.name = new_name
-        parent_node.addChild(item_node)
+        
         self.file.move(item_path, new_path)
+
+        # We first remove the child node, then modify the name, and last add 
+        # the child node back to the current parent node.
+        
+        # Due to the complicate implication of rename operation, I can only
+        # use this method. I have no idea how to do it elegantly, with top-
+        # down approach. It seems that the rename operation can not be regarded
+        # as one 'atomic' operation, but must do it step by step. 
+
+        # Maybe a better approach is to rebuild the whole model... Here I
+        # guess there is methods to rebuild the indices under one parent index
+        # of QAbstractItemModel, but I have no idea how to do it.
+        parent_index = self.model.indexFromPath(parent_node.path)
+        self.model.beginRemoveRows(
+            parent_index,
+            self.model.indexFromPath(item_path).row(),
+            self.model.indexFromPath(item_path).row(),
+        )
+        parent_node.deleteChild(item_node)
+        self.model.endRemoveRows()
+
+        item_node.name = new_name
+
+        self.model.beginInsertRows(
+            parent_index,
+            self.model.rowCount(parent_index),
+            self.model.rowCount(parent_index),
+        )
+        parent_node.addChild(item_node)
+        self.model.endInsertRows()
+        
         self.logger.debug('Rename {0} to {1}'.format(item_path, new_name))
 
 
@@ -1003,7 +1039,7 @@ class HDFTreeNode(Mapping):
     def _path_in_tree(self) -> str:
         if self.parent is None or self.name == '':
             return ''
-        elif self.parent == None and self.name != '':
+        elif self.parent is None and self.name != '':
             return self.name
         else:
             return self.parent._path_in_tree + '/' + self.name
@@ -1024,11 +1060,12 @@ class HDFTreeNode(Mapping):
         if not isinstance(node, HDFTreeNode):
             raise TypeError(('node must be an HDFTreeNode, not '
                 '{0}'.format(type(node).__name__)))
-        if node == self:
+        
+        if node is self:
             return True
         ancestor = self
-        while ancestor:
-            if ancestor == node:
+        while not ancestor is None:
+            if ancestor is node:
                 return True
             ancestor = ancestor.parent
         return False
@@ -1280,7 +1317,7 @@ class HDFDataNode(HDFTreeNode):
             self._name = new_name
 
     @property
-    def hdf_type(self):
+    def hdf_type(self) -> HDFType:
         return self._hdf_type
 
     @hdf_type.setter
@@ -1503,6 +1540,11 @@ class HDFTreeModel(QAbstractItemModel):
         self._hdf_handler = hdf_handler
         
     
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger
+
     @property 
     def hdf_handler(self):
         return self._hdf_handler
@@ -1546,7 +1588,7 @@ class HDFTreeModel(QAbstractItemModel):
         """
         if not child.isValid():
             return QModelIndex()
-        elif child.internalPointer() == self.hdf_handler.root_node:
+        elif child.internalPointer() is self.hdf_handler.root_node:
             return QModelIndex()
         else:
             parent_node = child.internalPointer().parent
@@ -1616,7 +1658,9 @@ class HDFTreeModel(QAbstractItemModel):
                 HDFType.FourDSTEM, 
                 HDFType.Data,
             ):
-                type_str = '{0}'.format(node.hdf_type).split('.')[1]
+                # self.logger.debug('{0}'.format(node.hdf_type))
+                # type_str = '{0}'.format(node.hdf_type.name).split('.')[1]
+                type_str = '{0}'.format(node.hdf_type.name)
                 return '<{0}> shape: {1}, dtype: {2}'.format(
                     type_str,
                     self.hdf_handler.file[node.path].shape,
@@ -1754,7 +1798,7 @@ class HDFTreeModel(QAbstractItemModel):
 
         child_path = child.data(role = self.DataRoles.PathRole)
         self.hdf_handler.renameItem(child_path, name)
-        self.dataChanged.emit(child, child)
+
 
 
     def copyItem(self, child: QModelIndex, dest_parent: QModelIndex):
@@ -1845,7 +1889,7 @@ class TaskCopy(Task):
         else:
             new_path = dest_parent_path + '/' + new_name
         
-        self.addSubtask(
+        self.addSubtaskFunc(
             'Copy Items',
             self.hdf_handler.file.copy,
             item_path,

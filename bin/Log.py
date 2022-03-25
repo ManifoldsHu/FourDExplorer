@@ -402,6 +402,10 @@ class LogStream(QObject):
         
     
     def write(self, strings: str):
+        """
+        arguments:
+            strings: (str)
+        """
         self.print_signal.emit(strings)
 
 
@@ -409,7 +413,8 @@ class WidgetFormatter(logging.Formatter):
     """
     用于主界面的Log的格式。
 
-    与文件以及标准输出中的格式相同，但在出现异常时，只打印异常类、异常值，而不打印traceback。
+    与文件以及标准输出中的格式相同，但在出现异常时，只打印异常类、异常值，而不打印
+    traceback。
 
     Log formatter for the MainWindow Log Widget.
 

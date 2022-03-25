@@ -61,9 +61,16 @@
            <widget class="QWidget" name="widget" native="true">
             <layout class="QVBoxLayout" name="verticalLayout">
              <item>
-              <widget class="QPushButton" name="pushButton_new_or_close_file">
+              <widget class="QPushButton" name="pushButton_new_file">
                <property name="text">
                 <string>New H5 File</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_close_file">
+               <property name="text">
+                <string>Close H5 File</string>
                </property>
               </widget>
              </item>

@@ -23,7 +23,7 @@ Contents:
     - WidgetSystemInfo, to view information of system, like CPU, memories
 
 Promoted Widget:
-    - name of widget class: Widget Task
+    - name of widget class: WidgetTask
     - header file: bin.Widgets.WidgetTask
 
 author:         Hu Yiming

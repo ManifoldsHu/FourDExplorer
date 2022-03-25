@@ -30,7 +30,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1009, 849)
+        MainWindow.resize(1207, 849)
         self.actionNew = QAction(MainWindow)
         self.actionNew.setObjectName(u"actionNew")
         self.actionOpen = QAction(MainWindow)
@@ -253,16 +253,10 @@ class Ui_MainWindow(object):
         self.tabWidget_view.setTabPosition(QTabWidget.North)
         self.tabWidget_view.setTabShape(QTabWidget.Rounded)
         self.tabWidget_view.setElideMode(Qt.ElideLeft)
-        self.tabWidget_view.setDocumentMode(False)
+        self.tabWidget_view.setDocumentMode(True)
         self.tabWidget_view.setTabsClosable(True)
         self.tabWidget_view.setMovable(True)
-        self.tabWidget_view.setTabBarAutoHide(True)
-        self.tab_home = QWidget()
-        self.tab_home.setObjectName(u"tab_home")
-        self.tabWidget_view.addTab(self.tab_home, "")
-        self.tab_2 = QWidget()
-        self.tab_2.setObjectName(u"tab_2")
-        self.tabWidget_view.addTab(self.tab_2, "")
+        self.tabWidget_view.setTabBarAutoHide(False)
         self.splitter.addWidget(self.tabWidget_view)
         self.widget_log = WidgetLog(self.splitter)
         self.widget_log.setObjectName(u"widget_log")
@@ -279,7 +273,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1009, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1207, 22))
         self.menuFile = QMenu(self.menubar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuEdit = QMenu(self.menubar)
@@ -320,7 +314,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget_control.setCurrentIndex(0)
+        self.tabWidget_control.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -355,8 +349,6 @@ class Ui_MainWindow(object):
         self.pushButton_angle_DPC.setText(QCoreApplication.translate("MainWindow", u"Correct by DPC...", None))
         self.tabWidget_control.setTabText(self.tabWidget_control.indexOf(self.tab_Calibration), QCoreApplication.translate("MainWindow", u"Calibration", None))
         self.tabWidget_control.setTabText(self.tabWidget_control.indexOf(self.tab_Image), QCoreApplication.translate("MainWindow", u"Image", None))
-        self.tabWidget_view.setTabText(self.tabWidget_view.indexOf(self.tab_home), QCoreApplication.translate("MainWindow", u"Home", None))
-        self.tabWidget_view.setTabText(self.tabWidget_view.indexOf(self.tab_2), QCoreApplication.translate("MainWindow", u"Tab 2", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))
         self.menuTask.setTitle(QCoreApplication.translate("MainWindow", u"Task", None))

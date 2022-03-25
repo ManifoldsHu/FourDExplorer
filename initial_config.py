@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
+"""
+This script is used to create a default configuration file.
+"""
+
 from configparser import ConfigParser
 from Constants import CONFIG_PATH, ROOT_PATH, UITheme, LogLevel
 import os
 from bin.UIManager import ThemeHandler
+
 
 if __name__ == '__main__':
     config = ConfigParser()

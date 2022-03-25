@@ -87,7 +87,7 @@ class DialogHistoryTasks(QDialog):
         action_detail.triggered.connect(
             lambda: self.openDetail(task)
         )
-        menu.exec(pos = self.mapToGlobal(pos))
+        menu.exec(self.mapToGlobal(pos))
 
     def openDetail(self, task: Task):
         """

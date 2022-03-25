@@ -19,6 +19,7 @@ import sys
 import os
 from PySide6.QtWidgets import QMainWindow
 from ui.uiMainWindow import Ui_MainWindow
+from bin.Widgets.PageHome import PageHome
 
 
 
@@ -43,13 +44,15 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle('4D-Explorer')
 
+        self._page_home = PageHome(self)
+
         self._initFile()
         self._initTask()
         self._initCalibration()
         self._initImage()
-        self._initHome()
+        self._initViewers()
     
-
+        
 
     def _initFile(self):
         self.ui.actionNew.triggered.connect(
@@ -79,8 +82,20 @@ class MainWindow(QMainWindow):
         pass
 
 
-    def _initHome(self):
-        pass
+    def _initViewers(self):
+        """
+        Initialize the viewers (tabWidgets)
+        """
+        self.ui.tabWidget_view.addTab(self._page_home, 'HOME')
+        self.ui.tabWidget_view.setTabsClosable(True)
+        self.ui.tabWidget_view.tabCloseRequested.connect(self._close_view_tab)
+
+    def _close_view_tab(self, index):
+        self.ui.tabWidget_view.removeTab(index)
+        if self.ui.tabWidget_view.count() == 0:
+            self.ui.tabWidget_view.addTab(self._page_home, 'HOME')
+
+
 
 
 

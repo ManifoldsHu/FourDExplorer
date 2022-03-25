@@ -25,6 +25,7 @@ date:           Mar 2, 2022
 """
 
 from PySide6.QtWidgets import QWidget, QMessageBox
+from bin.HDFManager import HDFHandler
 from ui import uiWidgetBaseHDFViewer
 
 class WidgetBaseHDFViewer(QWidget):
@@ -36,20 +37,19 @@ class WidgetBaseHDFViewer(QWidget):
         self.ui = uiWidgetBaseHDFViewer.Ui_Form()
         self.ui.setupUi(self)
 
-        global qApp 
-        self._hdf_handler = qApp.hdf_handler
-
         self.ui.pushButton_search.setEnabled(
-            self._hdf_handler.isFileOpened()
+            self.hdf_handler.isFileOpened()
         )
         self.ui.pushButton_refresh.setEnabled(
-            self._hdf_handler.isFileOpened()
+            self.hdf_handler.isFileOpened()
         )
 
-        self._hdf_handler.file_state_changed.connect(
+        self.ui.pushButton_refresh.clicked.connect(self.refresh)
+
+        self.hdf_handler.file_state_changed.connect(
             self.changeStateByFileState)
 
-        self.ui.treeView_HDF.setModel(self._hdf_handler.model)
+        self.ui.treeView_HDF.setModel(self.hdf_handler.model)
 
         self._last_kw = ''  # last key word of the user, for searching
         self.ui.pushButton_search.clicked.connect(self.search)
@@ -61,25 +61,26 @@ class WidgetBaseHDFViewer(QWidget):
         (opened or close).
         """
         self.ui.pushButton_refresh.setEnabled(
-            self._hdf_handler.isFileOpened()
+            self.hdf_handler.isFileOpened()
         )
         self.ui.pushButton_search.setEnabled(
-            self._hdf_handler.isFileOpened()
+            self.hdf_handler.isFileOpened()
         )
         self.refresh()
 
     @property 
-    def hdf_handler(self):
-        return self._hdf_handler
+    def hdf_handler(self) -> HDFHandler:
+        global qApp
+        return qApp.hdf_handler
 
     
     def refresh(self):
         """
         Will rebuild the HDFTree and then create a new model.
         """
-        self._hdf_handler.buildHDFTree()
-        self._hdf_handler._createModel()
-        self.ui.treeView_HDF.setModel(self._hdf_handler.model)
+        self.hdf_handler.buildHDFTree()
+        self.hdf_handler._createModel()
+        self.ui.treeView_HDF.setModel(self.hdf_handler.model)
 
     def search(self) -> bool:
         """

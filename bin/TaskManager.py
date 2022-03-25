@@ -52,9 +52,7 @@ date:               Jan 9, 2022
 
 
 from concurrent import futures
-from lib2to3.pytree import Base
 from typing import Iterator, Callable
-import time
 import traceback
 
 from PySide6.QtCore import (
@@ -69,10 +67,6 @@ from PySide6.QtWidgets import QMessageBox
 
 from Constants import TaskState
 from logging import Logger
-# from bin.Log import LogUtil
-
-# log_util = LogUtil(__name__)
-# logger = log_util.logger
 
 
 def _packing(func: Callable, *arg, **kw) -> Callable:
@@ -246,9 +240,12 @@ class TaskManager(QObject):
         self._refresh()         # Update the state of task manager
 
 
-    def _clearLastTask(self):
+    def _clearLastTask(self) -> bool:
         """
         Set the _current_task to None, and do follow work of the task.
+
+        returns:
+            (bool) whether the last task is cleared.
         """
         if self.current_task is None:
             return True
@@ -261,9 +258,6 @@ class TaskManager(QObject):
             # Handle the exception, but still try doing following work.
             for subtask in self.current_task:
                 if subtask.exception:
-                    # self.logger.error('{0}\n{1}'.format(
-                    #     subtask.exception, subtask.rec_exc)
-                    # )
                     self.logger.error(
                         '{0}'.format(subtask.exception), 
                         exc_info = True,
@@ -288,11 +282,11 @@ class TaskManager(QObject):
         Do follow work, and handle its exceptions.
         """
         try:
+            self.logger.info('Task {0} completed.'.format(
+                self.current_task.name
+            ))
             self.current_task.follow()
         except BaseException as e:
-            # self.logger.error(
-            #     '{0}\n{1}'.format(e, traceback.format_exc())
-            # )
             self.logger.error('{0}'.format(e), exc_info = True)
             QMessageBox.warning(
                 None,
@@ -332,17 +326,15 @@ class TaskManager(QObject):
             return False
 
         task.state = TaskState.Submitted
+        self.logger.info('Task {0} submitted.'.format(task.name))
         task.task_completed.connect(self._startNextTask)
         task.task_progress.connect(self._sendProgress)
 
         try:
             task.prepare()
         except BaseException as e:
-            # Abandon submitting
+            # Abandon submitting if errors happen
             task.state = TaskState.Excepted
-            # self.logger.error(
-            #     '{0}\n{1}'.format(e, traceback.format_exc())
-            # )
             self.logger.error('{0}'.format(e), exc_info = True)
             QMessageBox.warning(
                 None, 
@@ -350,6 +342,7 @@ class TaskManager(QObject):
                 'Error when do preparing work:\n {0}'.format(e),
                 QMessageBox.Ok,
             )
+            self.logger.info('Task {0} aborted.'.format(task.name))
             return True # This function need to be called again.
 
         else:
@@ -390,6 +383,7 @@ class TaskManager(QObject):
         self.task_queue.clearWaiting()
         self.task_queue.clearHistory()
         self._executor.shutdown(wait = False, cancel_futures = True)
+        self.logger.debug('Executor in TaskManager shuts down')
     
     def clearHistory(self):
         """
@@ -766,9 +760,64 @@ class Task(QObject):
                 '{0}'.format(type(_comm).__name__)))
         self._comment = _comm
         
-    def addSubtask(self, name: str, func: Callable, *arg, **kw) -> 'Subtask':
+    def addSubtask(self, subtask: 'Subtask') -> 'Subtask':
         """
         Add a subtask to this task.
+
+        All of the subtask will be submitted to the threading pool, and they
+        will execute concurrently.
+
+        arguments:
+            subtask: (Subtask) the subtask to be added.
+        """
+        if not isinstance(subtask, Subtask):
+            raise TypeError('subtask must be Subtask object, not '
+                '{0}'.format(type(subtask).__name__))
+        
+        subtask.subtask_excepted.connect(self.setExcepted)
+        subtask.subtask_completed.connect(self.checkCompleted)
+        self._subtasks.append(subtask)
+        return subtask
+
+    def addSubtaskWithProgress(self, subtask: 'Subtask') -> 'Subtask':
+        """
+        Add a subtask with progress to this task by a function.
+
+        All of the subtask will be submitted to the threading pool, and they
+        will execute concurrently. Usually, only one subtask is with progress,
+        whose progress will show in the screen.
+
+        arguments:
+            name: (str)
+
+            func: (Callable) this function must accept the first argument as 
+                the progress signal, while the other arguments are accepted as
+                usual. Inside the function, the progress signal needs to emit
+                periodically (which is controlled by the function).
+
+            *arg: other positional arguments except the progress signal
+
+            **kw: other keyword arguments
+        """
+        if not isinstance(subtask, Subtask):
+            raise TypeError('subtask must be Subtask object, not '
+                '{0}'.format(type(subtask).__name__))
+
+        if self._has_progress:
+            raise RuntimeError('Only one subtask with progress can be added. ' 
+                'Use addSubtask() instead.')
+            
+        self.progress = 0
+        subtask.subtask_progress.connect(self.setProgress)
+        subtask.subtask_excepted.connect(self.setExcepted)
+        subtask.subtask_completed.connect(self.checkCompleted)
+        self._subtasks.append(subtask)
+        self._has_progress = True
+        return subtask
+
+    def addSubtaskFunc(self, name: str, func: Callable, *arg, **kw) -> 'Subtask':
+        """
+        Add a subtask to this task by a function.
 
         All of the subtask will be submitted to the threading pool, and they
         will execute concurrently.
@@ -794,13 +843,13 @@ class Task(QObject):
 
 
 
-    def addSubtaskWithProgress(self, 
+    def addSubtaskFuncWithProgress(self, 
             name: str, 
             func: Callable, 
             *arg, 
             **kw) -> 'SubtaskWithProgress':
         """
-        Add a subtask with progress to this task.
+        Add a subtask with progress to this task by a function.
 
         All of the subtask will be submitted to the threading pool, and they
         will execute concurrently. Usually, only one subtask is with progress,
@@ -818,6 +867,10 @@ class Task(QObject):
 
             **kw: other keyword arguments
         """
+        if self._has_progress:
+            raise RuntimeError('Only one subtask with progress can be added. ' 
+                'Use addSubtaskFunc() instead.')
+            
         self.progress = 0
         subtask = SubtaskWithProgress(self)
         packed_func = _packing(func, subtask.subtask_progress, *arg, **kw)
@@ -1054,15 +1107,10 @@ class Subtask(QObject):
         argument:
             future: (futures.Future) The same as self.future
         """
-        # self._exception = future.exception()
-        # if self._exception:
-            # self.subtask_excepted.emit()    
-            # set the task to TaskState.Excepted, 
-            # so there will be some exception handle work.
-
         try:
             self._result = future.result()
-        except BaseException:
+        except BaseException:   # set the task to TaskState.Excepted, 
+                                # so there will be some exception handle work.
             self._exception = future.exception()
             self._rec_exc = traceback.format_exc()
             self.subtask_excepted.emit()

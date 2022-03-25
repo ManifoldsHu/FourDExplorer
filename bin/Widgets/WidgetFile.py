@@ -92,7 +92,8 @@ class WidgetFile(QWidget):
         """
         self._hdf_handler.file_state_changed.connect(
             self.changeStateByFileState)
-        self.ui.pushButton_new_or_close_file.clicked.connect(self.newFile)
+        self.ui.pushButton_new_file.clicked.connect(self.newFile)
+        self.ui.pushButton_close_file.clicked.connect(self.closeFile)
         self.changeStateByFileState()
         # self.ui.widget_HDFTreeView.setReadOnly(False)
 
@@ -138,29 +139,15 @@ class WidgetFile(QWidget):
 
             self.ui.pushButton_import_data.setDisabled(False)
             self.ui.pushButton_export_data.setDisabled(False)
-            self.ui.pushButton_new_or_close_file.setText('Close File')
-            self.ui.pushButton_new_or_close_file.clicked.connect(
-                self.closeFile
-            )
-            try:
-                self.ui.pushButton_new_or_close_file.clicked.disconnect(
-                    self.newFile
-                )
-            except RuntimeError:
-                pass
+            self.ui.pushButton_new_file.setVisible(False)
+            self.ui.pushButton_close_file.setVisible(True)
+
         else:
             self.ui.pushButton_import_data.setDisabled(True)
             self.ui.pushButton_export_data.setDisabled(True)
-            self.ui.pushButton_new_or_close_file.setText('New File')
-            self.ui.pushButton_new_or_close_file.clicked.connect(
-                self.newFile
-            )
-            try:
-                self.ui.pushButton_new_or_close_file.clicked.disconnect(
-                    self.closeFile
-                )
-            except RuntimeError:
-                pass
+            self.ui.pushButton_new_file.setVisible(True)
+            self.ui.pushButton_close_file.setVisible(False)
+
 
 
     def openFile(self):

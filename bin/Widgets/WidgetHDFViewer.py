@@ -30,26 +30,17 @@ import os
 import configparser
 
 from PySide6.QtCore import QModelIndex, Qt, QPoint
-from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog
-from PySide6.QtGui import QRegularExpressionValidator
+from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog, QTabWidget
+# from PySide6.QtGui import QRegularExpressionValidator
+
 from bin.Widgets.DialogAttrViewer import DialogAttrViewer
 from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.DialogCopyItem import DialogHDFCopy
 from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
-
-
-# from ui import uiWidgetBaseHDFViewer
-# from bin.HDFManager import HDFHandler, HDFTreeModel
-# from bin.Log import LogUtil
+from bin.Widgets.PageViewImage import PageViewImage
 
 from Constants import HDFType, ItemDataRoles
-# from app import ROOTPATH
-
-# import h5py
-# from collections.abc import Mapping
-# from qt_material import apply_stylesheet
-
 
 class WidgetHDFViewer(WidgetBaseHDFViewer):
     """
@@ -70,8 +61,9 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         )
 
     @property
-    def hdf_handler(self):
-        return self._hdf_handler
+    def tabWidget_view(self) -> QTabWidget:
+        global qApp
+        return qApp.tabWidget_view
 
     def showContextMenu(self, pos: QPoint):
         """
@@ -434,7 +426,18 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         pass
 
     def showPlotting(self, index: QModelIndex = None):
-        pass
+        """
+        TODO
+
+        Shows a dialog to plot images.
+
+        arguments:
+            index: QModelIndex()
+        """
+        self.tabWidget_view.addTab(
+            PageViewImage(), 
+            index.data(role = ItemDataRoles.DisplayRole)
+        )
         
     def showAttribute(self, index: QModelIndex = None):
         """

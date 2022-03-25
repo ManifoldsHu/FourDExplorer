@@ -32,7 +32,7 @@ date:           Feb 26, 2022
 """
 
 from logging import Logger
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QTabWidget
 
 from bin.HDFManager import HDFHandler
 from bin.UIManager import ThemeHandler
@@ -59,6 +59,14 @@ class App(QApplication):
 
         theme_handler: (ThemeHandler) read only property. Use theme_handler to 
             manage themes, colors of interfaces.
+
+        task_manager: (TaskManager)
+
+        logger: (logging.Logger)
+
+        log_util: (LogUtil)
+
+        main_window: (MainWindow)
     """
     def __init__(self, argv):
         """
@@ -70,6 +78,8 @@ class App(QApplication):
         self._theme_handler = ThemeHandler(self)
         self._task_manager = TaskManager(self)
         self._log_util = LogUtil(self)
+        self._main_window = None
+
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -90,3 +100,26 @@ class App(QApplication):
     @property
     def log_util(self) -> LogUtil:
         return self._log_util
+
+    @property
+    def main_window(self):
+        return self._main_window
+
+    @main_window.setter
+    def main_window(self, _main_window):
+        if self._main_window is None:
+            self._main_window = _main_window
+        else:
+            raise ValueError('There have been one main window!')
+
+    @property
+    def tabWidget_view(self) -> QTabWidget:
+        return self._main_window.ui.tabWidget_view
+
+    def cleanResources(self):
+        """
+        To Clean up resources when the program exits.
+        """
+        self.hdf_handler.closeFile()
+        self.task_manager.shutDown()
+
