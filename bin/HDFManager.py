@@ -287,7 +287,7 @@ class HDFHandler(QObject):
 
         os.chdir(os.path.dirname(value))
         self._file_path = value
-
+        self.logger.debug('Set HDF file path to: {0}'.format(value))
 
     def isFilePathValid(self) -> bool:
         """
@@ -301,7 +301,7 @@ class HDFHandler(QObject):
                 is_valid = isinstance(file, h5py.File)
             return is_valid
         except OSError as e:
-            self.logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+            self.logger.error('{0}'.format(e), exc_info = True)
             return False
           
      
@@ -354,6 +354,7 @@ class HDFHandler(QObject):
         except OSError as e:
             self.logger.error('{0}'.format(e), exc_info = True)
             return False
+        self.logger.debug('Create file: {0}'.format(self.file_path))
         return True
 
 
@@ -376,8 +377,10 @@ class HDFHandler(QObject):
         root.attrs['4D-Explorer'] = True
         root.attrs['FileCreateTime'] = '{0}'.format(datetime.now)
         root.attrs['Version'] = str(APP_VERSION)
-          
-     
+        
+        self.logger.debug('Initialize file')
+    
+
     def openFile(self):
         """
         Open a h5 file. 
@@ -396,6 +399,7 @@ class HDFHandler(QObject):
         except OSError as e:
             self.logger.error('{0}'.format(e), exc_info = True)
             return None
+        self.logger.debug('Open file: {0}'.format(self.file_path))
         return self.file
 
 
@@ -411,6 +415,7 @@ class HDFHandler(QObject):
         if self.isFileOpened():
             self.file.close()
             self.file_state_changed.emit()
+            self.logger.debug('Close file.')
         self.file = None
           
 
@@ -442,6 +447,7 @@ class HDFHandler(QObject):
         if self.isFilePathValid():
             try:
                 os.remove(self.file_path)
+                self.logger.debug('Delete file: {0}'.format(self.file_path))
                 return True
             except OSError as e:
                 self.logger.error('{0}'.format(e), exc_info = True)
@@ -579,6 +585,7 @@ class HDFHandler(QObject):
 
         parent_node.addChild(HDFGroupNode(name))
         self.file[parent_path].create_group(name)
+        self.logger.debug('Create group {0} in {1}'.format(name, parent_path))
         
 
     def addNewData(self, 
@@ -623,7 +630,7 @@ class HDFHandler(QObject):
                 dtype = dtype, 
                 compression = compression,
             )
-        
+        self.logger.debug('Create data {0} in {1}'.format(name, parent_path))
 
     def deleteItem(self, item_path: str):
         """
@@ -646,6 +653,7 @@ class HDFHandler(QObject):
         
         parent_node.deleteChild(this_node)
         del self.file[item_path]
+        self.logger.debug('Delete {0}'.format(item_path))
 
     def moveItem(self, item_path: str, dest_parent_path: str):
         """
@@ -703,6 +711,8 @@ class HDFHandler(QObject):
         this_parent_node.deleteChild(this_node)
         dest_parent_node.addChild(this_node)
         self.file.move(item_path, dest_path)
+        self.logger.debug('Move {0} to {2}'.format(
+            item_path, dest_parent_path))
         
     def renameItem(self, item_path: str, new_name: str):
         """
@@ -730,12 +740,13 @@ class HDFHandler(QObject):
         item_node.name = new_name
         parent_node.addChild(item_node)
         self.file.move(item_path, new_path)
+        self.logger.debug('Rename {0} to {1}'.format(item_path, new_name))
 
 
 
     def copyItem(self, item_path: str, dest_parent_path: str):
         """
-        TODO Copy item to destination.
+        Copy item to destination.
 
         The copied item's name will add '_replica' automatically. Copying large
         dataset is time-consuming, so it should be encapsulated to a Task and 
@@ -772,7 +783,10 @@ class HDFHandler(QObject):
                 new_name = this_node.name
         
         copy_task = TaskCopy(self, item_path, dest_parent_path, new_name)
+        self.logger.debug('Copy task added, from {0} to {1}'.format(
+            item_path, dest_parent_path))
         copy_task.addToTaskManager()
+        
 
 
     def _getNewNameInSameGroup(self, node: 'HDFTreeNode'):
@@ -1974,6 +1988,12 @@ class HDFAttrModel(QAbstractTableModel):
     def attrs(self) -> h5py.AttributeManager:
         return self.hdf_handler.file[self.item_path].attrs
 
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger
+
+
     def initialize(self, item_path: str):
         self.item_path = item_path
         self.beginRemoveRows(QModelIndex(), 0, self.rowCount())
@@ -2119,6 +2139,8 @@ class HDFAttrModel(QAbstractTableModel):
         self.attrs.create(key, value)
         self.meta[key] = value
         self.endInsertRows()
+        self.logger.debug('Create Attribute {0} in {1}'.format(
+            key, self.item_path))
 
     def deleteItem(self, index: QModelIndex):
         """
@@ -2138,6 +2160,9 @@ class HDFAttrModel(QAbstractTableModel):
         del self.attrs[key]
         del self.meta[key]
         self.endRemoveRows()
+        self.logger.debug('Delete Attribute {0} in {1}'.format(
+            key, self.item_path
+        ))
 
     def modifyValue(self, index: QModelIndex, value):
         """
@@ -2157,7 +2182,9 @@ class HDFAttrModel(QAbstractTableModel):
         self.attrs.modify(key, value)
         self.meta[key] = value
         self.dataChanged().emit(QModelIndex(), index)
-    
+        self.logger.debug('Change the value of attribute {0} in {1}'.format(
+            key, self.item_path
+        ))
     
 
 

@@ -18,6 +18,7 @@ date:           Mar 24, 2022
 *------------------------------ WidgetLog.py ---------------------------------*
 """
 
+import os
 from PySide6.QtWidgets import QWidget 
 from bin.Log import LogUtil
 from ui import uiWidgetLog
@@ -37,6 +38,11 @@ class WidgetLog(QWidget):
         self.ui = uiWidgetLog.Ui_Form()
         self.ui.setupUi(self)
         self._initLogger()
+
+        self.ui.pushButton_open_log_directory.clicked.connect(
+            self.openLogDir
+        )
+        self.ui.pushButton_clear_log.clicked.connect(self.clearLog)
     
     @property
     def log_util(self) -> LogUtil:
@@ -47,7 +53,8 @@ class WidgetLog(QWidget):
         """
         Initialize the logger, set the stream.
         """
-        stream = self.log_util.widget_handler.stream
+        # stream = self.log_util.widget_handler.stream
+        stream = self.log_util.stream
         stream.print_signal.connect(self.printLog)
 
     def printLog(self, string: str):
@@ -58,6 +65,19 @@ class WidgetLog(QWidget):
             string: str
         """
         self.ui.textBrowser_log.append(string)
-        self.ui.textBrowser_log.cursor = self.ui.textBrowser_log.textCursor()
-        self.ui.textBrowser_log.moveCursor(self.ui.textBrowser_log.cursor.End)
+        cursor = self.ui.textBrowser_log.textCursor()
+        self.ui.textBrowser_log.cursor = cursor
+        self.ui.textBrowser_log.moveCursor(cursor.End)
     
+    def openLogDir(self):
+        """
+        Open the logging directory.
+        """
+        path = self.log_util.log_dir_path
+        os.startfile(path)
+    
+    def clearLog(self):
+        """
+        Clear the log textBrowser.
+        """
+        self.ui.textBrowser_log.clear()

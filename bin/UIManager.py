@@ -129,7 +129,8 @@ class ThemeHandler(QObject):
             self.theme = theme
             return True
         except BaseException as e:
-            self._logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+            # self._logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+            self.logger.error('{0}'.format(e), exc_info = True)
             return False
 
 
@@ -177,7 +178,8 @@ class ThemeHandler(QObject):
         try:
             theme_str = self._config['UI']['Theme']
         except BaseException as e:
-            self._logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+            # self._logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
+            self.logger.error('{0}'.format(e), exc_info = True)
         else:
             theme = NameToUITheme(theme_str)
             return theme

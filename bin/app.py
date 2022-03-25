@@ -69,7 +69,7 @@ class App(QApplication):
         self._hdf_handler = HDFHandler(self)
         self._theme_handler = ThemeHandler(self)
         self._task_manager = TaskManager(self)
-        self._log_util = LogUtil('4D-Explorer')
+        self._log_util = LogUtil(self)
 
     @property
     def hdf_handler(self) -> HDFHandler:

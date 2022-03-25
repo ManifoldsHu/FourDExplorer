@@ -40,19 +40,17 @@ if __name__ == '__main__':
     ''' Initialize Log'''
     logger = app.logger
     
-    
+    ''' Initialize Clean-up code'''
+    app.aboutToQuit.connect(app.hdf_handler.closeFile())
+    app.aboutToQuit.connect(app.task_manager.shutDown())
+    app.aboutToQuit.connect(lambda: logger.info('4D-Explorer exits'))
+
     ''' Initialize UI theme'''
     app.theme_handler.initializeTheme()
+
+
     window = MainWindow()
-    try:
-        window.show()
-        logger.info('4D-Explorer is launched.')
-        quit = app.exec()
-        if quit == 0:
-            logger.info('4D-Explorer exits.')
-    except BaseException as e:  # Any exceptions and their tracebacks will be 
-                                # recorded in logs.
-        logger.error('{0}'.format(e), exc_info = True)
-    finally:
-        app._hdf_handler.closeFile()
-        sys.exit()
+    window.show()
+    logger.info('4D-Explorer is launched.')
+    quit = app.exec()
+    sys.exit(quit)

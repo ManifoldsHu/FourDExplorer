@@ -37,6 +37,11 @@ class Ui_Form(object):
 
         self.horizontalLayout.addItem(self.horizontalSpacer)
 
+        self.pushButton_clear_log = QPushButton(Form)
+        self.pushButton_clear_log.setObjectName(u"pushButton_clear_log")
+
+        self.horizontalLayout.addWidget(self.pushButton_clear_log)
+
         self.pushButton_open_log_directory = QPushButton(Form)
         self.pushButton_open_log_directory.setObjectName(u"pushButton_open_log_directory")
 
@@ -59,6 +64,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"Messages and Logs", None))
+        self.pushButton_clear_log.setText(QCoreApplication.translate("Form", u"Clear", None))
         self.pushButton_open_log_directory.setText(QCoreApplication.translate("Form", u"Open Log Directory", None))
     # retranslateUi
 

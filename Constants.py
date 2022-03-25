@@ -14,6 +14,7 @@ date:           Feb 19, 2022
 *------------------------------ Constants.py ---------------------------------*
 '''
 
+import logging
 import os
 import sys
 from enum import Enum, IntEnum
@@ -135,7 +136,16 @@ class TaskState(IntEnum):
     Excepted = 7        # The task is aborted when executing, due to exceptions.
 
 
-
+class LogLevel(IntEnum):
+    """
+    The level of logging.
+    """
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    WARNING = logging.WARNING
+    ERROR = logging.ERROR
+    CRITICAL = logging.CRITICAL
+    FATAL = logging.FATAL
 
 
 
