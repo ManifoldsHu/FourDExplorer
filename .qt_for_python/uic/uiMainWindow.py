@@ -253,7 +253,7 @@ class Ui_MainWindow(object):
         self.tabWidget_view.setTabPosition(QTabWidget.North)
         self.tabWidget_view.setTabShape(QTabWidget.Rounded)
         self.tabWidget_view.setElideMode(Qt.ElideLeft)
-        self.tabWidget_view.setDocumentMode(True)
+        self.tabWidget_view.setDocumentMode(False)
         self.tabWidget_view.setTabsClosable(True)
         self.tabWidget_view.setMovable(True)
         self.tabWidget_view.setTabBarAutoHide(False)
@@ -314,7 +314,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.tabWidget_control.setCurrentIndex(2)
+        self.tabWidget_control.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(MainWindow)

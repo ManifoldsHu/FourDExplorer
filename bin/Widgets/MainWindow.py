@@ -50,7 +50,7 @@ class MainWindow(QMainWindow):
         self._initTask()
         self._initCalibration()
         self._initImage()
-        self._initViewers()
+        self._initTabViewers()
     
         
 
@@ -82,15 +82,15 @@ class MainWindow(QMainWindow):
         pass
 
 
-    def _initViewers(self):
+    def _initTabViewers(self):
         """
         Initialize the viewers (tabWidgets)
         """
         self.ui.tabWidget_view.addTab(self._page_home, 'HOME')
         self.ui.tabWidget_view.setTabsClosable(True)
-        self.ui.tabWidget_view.tabCloseRequested.connect(self._close_view_tab)
+        self.ui.tabWidget_view.tabCloseRequested.connect(self._closeViewTab)
 
-    def _close_view_tab(self, index):
+    def _closeViewTab(self, index):
         self.ui.tabWidget_view.removeTab(index)
         if self.ui.tabWidget_view.count() == 0:
             self.ui.tabWidget_view.addTab(self._page_home, 'HOME')

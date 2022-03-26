@@ -145,6 +145,14 @@ class Ui_Form(object):
 
         self.horizontalLayout.addWidget(self.groupBox_3)
 
+        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout.addItem(self.horizontalSpacer_5)
+
+        self.horizontalLayout.setStretch(0, 2)
+        self.horizontalLayout.setStretch(1, 2)
+        self.horizontalLayout.setStretch(2, 2)
+        self.horizontalLayout.setStretch(3, 1)
 
         self.verticalLayout_5.addLayout(self.horizontalLayout)
 
@@ -170,7 +178,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:26pt;\">Welcome to 4D-Explorer!</span></p></body></html>", None))
+        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:26pt;\">Hello, 4D-Explorer!</span></p></body></html>", None))
         self.commandLinkButton.setText(QCoreApplication.translate("Form", u"Watch tutorials about 4D-Explorer", None))
         self.commandLinkButton_2.setText(QCoreApplication.translate("Form", u"How does 4D-STEM work?", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Start Work", None))
@@ -182,7 +190,7 @@ class Ui_Form(object):
         self.pushButton_3.setText(QCoreApplication.translate("Form", u"Import Image", None))
         self.pushButton_4.setText(QCoreApplication.translate("Form", u"Import 4D-STEM Data", None))
         self.groupBox_3.setTitle(QCoreApplication.translate("Form", u"Calibration", None))
-        self.label_4.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt;\">Calibrate,</span></p><p><span style=\" font-size:12pt;\">make accurate</span></p></body></html>", None))
-        self.pushButton_6.setText(QCoreApplication.translate("Form", u"Start Calibration Navigator", None))
+        self.label_4.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt;\">Calibrate,</span></p><p><span style=\" font-size:12pt;\">makes accurate</span></p></body></html>", None))
+        self.pushButton_6.setText(QCoreApplication.translate("Form", u"Start Calibration", None))
     # retranslateUi
 

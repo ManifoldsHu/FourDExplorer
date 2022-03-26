@@ -31,11 +31,9 @@ date:           Mar 10, 2022
 *------------------------------ WidgetTask.py --------------------------------*
 """
 
-import os
-
 from PySide6.QtWidgets import QWidget
 from ui import uiWidgetTask
-# from bin.Log import LogUtil
+
 
 class WidgetTask(QWidget):
     """

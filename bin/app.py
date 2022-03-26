@@ -32,7 +32,7 @@ date:           Feb 26, 2022
 """
 
 from logging import Logger
-from PySide6.QtWidgets import QApplication, QTabWidget
+from PySide6.QtWidgets import QApplication, QTabWidget, QMainWindow
 
 from bin.HDFManager import HDFHandler
 from bin.UIManager import ThemeHandler
@@ -55,18 +55,28 @@ class App(QApplication):
 
     attributes:
         hdf_handler: (HDFHandler) read only property. Use hdf_handler to manage
-            HDF files.
+            HDF files. This is a singleton.
 
         theme_handler: (ThemeHandler) read only property. Use theme_handler to 
-            manage themes, colors of interfaces.
+            manage themes, colors of interfaces. This is a singleton.
 
-        task_manager: (TaskManager)
+        task_manager: (TaskManager) read only property. Use task_manager to 
+            submit tasks. This is a singleton.
 
-        logger: (logging.Logger)
+        logger: (logging.Logger) read only property. Use logger to print logs.
+            In 4D-Explorer I recommend to use this logger as a singleton.
 
-        log_util: (LogUtil)
+        log_util: (LogUtil) read only property. Use log_util to manage loggers.
 
-        main_window: (MainWindow)
+        main_window: (MainWindow) read only property. Get the instance of the 
+            MainWindow object.
+
+        tabWidget_view: (QTabWidget) read only property. Get the instance of 
+            the tabWidget_view, to add new pages (for viewing images).
+
+    signals:
+        aboutToQuit: emits when the application is about to quit. Will call 
+            cleanResources() method.
     """
     def __init__(self, argv):
         """
@@ -102,7 +112,7 @@ class App(QApplication):
         return self._log_util
 
     @property
-    def main_window(self):
+    def main_window(self) -> QMainWindow:
         return self._main_window
 
     @main_window.setter

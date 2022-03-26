@@ -43,7 +43,7 @@
         <enum>QTabWidget::West</enum>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideLeft</enum>
@@ -318,7 +318,7 @@
          <enum>Qt::ElideLeft</enum>
         </property>
         <property name="documentMode">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="tabsClosable">
          <bool>true</bool>

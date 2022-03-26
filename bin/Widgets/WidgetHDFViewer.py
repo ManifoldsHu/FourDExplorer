@@ -434,10 +434,11 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         arguments:
             index: QModelIndex()
         """
-        self.tabWidget_view.addTab(
+        new_index = self.tabWidget_view.addTab(
             PageViewImage(), 
             index.data(role = ItemDataRoles.DisplayRole)
         )
+        self.tabWidget_view.setCurrentIndex(new_index)
         
     def showAttribute(self, index: QModelIndex = None):
         """
