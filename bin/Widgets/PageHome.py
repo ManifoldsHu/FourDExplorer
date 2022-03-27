@@ -33,4 +33,4 @@ class PageHome(QWidget):
         self.ui = uiPageHome.Ui_Form()
         self.ui.setupUi(self)
 
-    
+        self.setWindowTitle('Home')

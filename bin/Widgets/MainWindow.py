@@ -18,6 +18,7 @@ date:               Feb 24, 2022
 import sys
 import os
 from PySide6.QtWidgets import QMainWindow
+from bin.TabViewManager import TabViewManager
 from ui.uiMainWindow import Ui_MainWindow
 from bin.Widgets.PageHome import PageHome
 
@@ -43,8 +44,6 @@ class MainWindow(QMainWindow):
         self._app = qApp
 
         self.setWindowTitle('4D-Explorer')
-
-        self._page_home = PageHome(self)
 
         self._initFile()
         self._initTask()
@@ -86,14 +85,9 @@ class MainWindow(QMainWindow):
         """
         Initialize the viewers (tabWidgets)
         """
-        self.ui.tabWidget_view.addTab(self._page_home, 'HOME')
-        self.ui.tabWidget_view.setTabsClosable(True)
-        self.ui.tabWidget_view.tabCloseRequested.connect(self._closeViewTab)
-
-    def _closeViewTab(self, index):
-        self.ui.tabWidget_view.removeTab(index)
-        if self.ui.tabWidget_view.count() == 0:
-            self.ui.tabWidget_view.addTab(self._page_home, 'HOME')
+        self._tabview_manager = TabViewManager(self)
+        self._tabview_manager.setTabWidget(self.ui.tabWidget_view)
+        self._tabview_manager.initializeTabView()
 
 
 

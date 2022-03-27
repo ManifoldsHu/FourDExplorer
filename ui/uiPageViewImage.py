@@ -19,8 +19,8 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QSizePolicy, QSlider,
     QSplitter, QVBoxLayout, QWidget)
 
-from bin.Widgets.WidgetImageHistPlot import WidgetImageHistPlot
-from bin.Widgets.WidgetImagePlot import WidgetImagePlot
+from bin.Widgets.WidgetPlotHist import WidgetPlotHist
+from bin.Widgets.WidgetPlotImage import WidgetPlotImage
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -85,7 +85,7 @@ class Ui_Form(object):
 
         self.verticalLayout_5.addLayout(self.horizontalLayout)
 
-        self.widget_image = WidgetImagePlot(self.widget)
+        self.widget_image = WidgetPlotImage(self.widget)
         self.widget_image.setObjectName(u"widget_image")
         sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -136,7 +136,7 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addWidget(self.label_4)
 
-        self.widget_hist_view = WidgetImageHistPlot(self.widget1)
+        self.widget_hist_view = WidgetPlotHist(self.widget1)
         self.widget_hist_view.setObjectName(u"widget_hist_view")
         sizePolicy.setHeightForWidth(self.widget_hist_view.sizePolicy().hasHeightForWidth())
         self.widget_hist_view.setSizePolicy(sizePolicy)

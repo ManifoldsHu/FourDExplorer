@@ -35,6 +35,7 @@ from logging import Logger
 from PySide6.QtWidgets import QApplication, QTabWidget, QMainWindow
 
 from bin.HDFManager import HDFHandler
+from bin.TabViewManager import TabViewManager
 from bin.UIManager import ThemeHandler
 from bin.TaskManager import TaskManager
 from bin.Log import LogUtil
@@ -122,9 +123,13 @@ class App(QApplication):
         else:
             raise ValueError('There have been one main window!')
 
+    # @property
+    # def tabWidget_view(self) -> QTabWidget:
+    #     return self._main_window.ui.tabWidget_view
+
     @property
-    def tabWidget_view(self) -> QTabWidget:
-        return self._main_window.ui.tabWidget_view
+    def tabview_manager(self) -> TabViewManager:
+        return self._main_window.tabview_manager
 
     def cleanResources(self):
         """

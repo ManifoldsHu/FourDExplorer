@@ -80,7 +80,7 @@
           </layout>
          </item>
          <item>
-          <widget class="WidgetImagePlot" name="widget_image" native="true">
+          <widget class="WidgetPlotImage" name="widget_image" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -136,7 +136,7 @@
           </widget>
          </item>
          <item>
-          <widget class="WidgetImageHistPlot" name="widget_hist_view" native="true">
+          <widget class="WidgetPlotHist" name="widget_hist_view" native="true">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -226,15 +226,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>WidgetImagePlot</class>
+   <class>WidgetPlotImage</class>
    <extends>QWidget</extends>
-   <header>bin.Widgets.WidgetImagePlot.h</header>
+   <header>bin.Widgets.WidgetPlotImage.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetImageHistPlot</class>
+   <class>WidgetPlotHist</class>
    <extends>QWidget</extends>
-   <header>bin.Widgets.WidgetImageHistPlot.h</header>
+   <header>bin.Widgets.WidgetPlotHist.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

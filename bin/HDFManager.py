@@ -1009,14 +1009,16 @@ class HDFTreeNode(Mapping):
 
         arguments:
             parent: (HDFTreeNode) either also an HDFTreeNode or NoneType. In 
-            most cases, if the parent is None, the node's name should be '', 
-            which indicates that this is a root node.
+                most cases, if the parent is None, the node's name should be 
+                null string '', which indicates that this is a root node.
         """
         if parent is None:
             self._parent = None
         elif not isinstance(parent, HDFGroupNode):
-            raise TypeError(('parent must be HDFTreeNode or NoneType,'
-                ' not {0}'.format(type(parent))))
+            raise TypeError('parent must be HDFTreeNode or NoneType,'
+                ' not {0}'.format(type(parent)))
+        elif parent is self:
+            raise ValueError('node parent cannot be itself!')
         else:
             self._parent = parent
 
