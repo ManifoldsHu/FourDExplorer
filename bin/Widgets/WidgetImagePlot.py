@@ -25,6 +25,7 @@ date:           Mar 26, 2022
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQT as FigureCanvas,
+    FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar,
 )
 from matplotlib.figure import Figure
@@ -47,8 +48,8 @@ class WidgetImagePlot(QWidget):
         self._ax.set_aspect('equal')
         
         self.vertical_layout = QVBoxLayout()
-        # self.vertical_layout.addWidget(
-            # NavigationToolbar(self._canvas, self))
+        self.vertical_layout.addWidget(
+            NavigationToolbar(self._canvas, self))
         self.vertical_layout.addWidget(self._canvas)
         self.setLayout(self.vertical_layout)
         self.showImage()

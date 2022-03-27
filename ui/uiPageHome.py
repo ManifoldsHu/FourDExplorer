@@ -178,7 +178,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:26pt;\">Welcome to 4D-Explorer!</span></p></body></html>", None))
+        self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:26pt;\">Hello, 4D-Explorer!</span></p></body></html>", None))
         self.commandLinkButton.setText(QCoreApplication.translate("Form", u"Watch tutorials about 4D-Explorer", None))
         self.commandLinkButton_2.setText(QCoreApplication.translate("Form", u"How does 4D-STEM work?", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Start Work", None))
