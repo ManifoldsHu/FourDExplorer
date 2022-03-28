@@ -19,8 +19,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QSizePolicy, QSlider,
     QSplitter, QVBoxLayout, QWidget)
 
-from bin.Widgets.WidgetPlotHist import WidgetPlotHist
-from bin.Widgets.WidgetPlotImage import WidgetPlotImage
+from bin.Widgets.WidgetPlots import (WidgetPlotHist, WidgetPlotImage)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -97,26 +96,6 @@ class Ui_Form(object):
 
 
         self.verticalLayout_6.addLayout(self.verticalLayout_5)
-
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.pushButton_refresh = QPushButton(self.widget)
-        self.pushButton_refresh.setObjectName(u"pushButton_refresh")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_refresh)
-
-        self.pushButton_export_image = QPushButton(self.widget)
-        self.pushButton_export_image.setObjectName(u"pushButton_export_image")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_export_image)
-
-        self.pushButton_export_data = QPushButton(self.widget)
-        self.pushButton_export_data.setObjectName(u"pushButton_export_data")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_export_data)
-
-
-        self.verticalLayout_6.addLayout(self.horizontalLayout_2)
 
         self.splitter.addWidget(self.widget)
         self.widget1 = QWidget(self.splitter)
@@ -232,9 +211,6 @@ class Ui_Form(object):
         self.pushButton_analysis.setText(QCoreApplication.translate("Form", u"Analyze...", None))
         self.pushButton_image_processing.setText(QCoreApplication.translate("Form", u"Image Processing...", None))
         self.pushButton_calibrate.setText(QCoreApplication.translate("Form", u"Calibrate...", None))
-        self.pushButton_refresh.setText(QCoreApplication.translate("Form", u"Refresh", None))
-        self.pushButton_export_image.setText(QCoreApplication.translate("Form", u"Export Image", None))
-        self.pushButton_export_data.setText(QCoreApplication.translate("Form", u"Export Data", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"Histogram", None))
         self.pushButton_4.setText(QCoreApplication.translate("Form", u"Image Attributes...", None))
         self.label.setText(QCoreApplication.translate("Form", u"Brightness", None))

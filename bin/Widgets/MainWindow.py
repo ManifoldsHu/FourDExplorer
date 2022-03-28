@@ -51,6 +51,9 @@ class MainWindow(QMainWindow):
         self._initImage()
         self._initTabViewers()
     
+    @property
+    def tabview_manager(self) -> TabViewManager:
+        return self._tabview_manager
         
 
     def _initFile(self):

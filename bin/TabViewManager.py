@@ -119,13 +119,13 @@ class TabViewManager(QObject):
             if len(self._tab_history) > self._tab_history_max:
                 self._tab_history.pop(0)
             self._tab_history.append(tab)
-            
 
         new_tab_index = self.tabWidget_view.addTab(
             tab, 
             tab.windowIcon(), 
             tab.windowTitle(),
         )
+        
         self.tabWidget_view.setCurrentIndex(new_tab_index)
         self.logger.debug('Open a new tab: {0}'.format(tab.windowTitle()))
 

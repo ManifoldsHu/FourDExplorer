@@ -33,7 +33,7 @@ class WidgetPlotBase(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
-        self._figure = Figure(tight_layout = True)
+        self._figure = Figure()
         self._canvas = FigureCanvas(self._figure)
         self._blit_manager = BlitManager(self._canvas)
         

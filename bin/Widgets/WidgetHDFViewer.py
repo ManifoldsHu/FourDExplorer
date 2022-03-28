@@ -25,12 +25,14 @@ date:           Feb 18, 2022
 
 """
 
+from logging import Logger
 import sys
 import os
 import configparser
 
 from PySide6.QtCore import QModelIndex, Qt, QPoint
 from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog, QTabWidget
+from bin.TabViewManager import TabViewManager
 # from PySide6.QtGui import QRegularExpressionValidator
 
 from bin.Widgets.DialogAttrViewer import DialogAttrViewer
@@ -60,10 +62,20 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
             self.showContextMenu
         )
 
+    # @property
+    # def tabWidget_view(self) -> QTabWidget:
+    #     global qApp
+    #     return qApp.tabWidget_view
+
     @property
-    def tabWidget_view(self) -> QTabWidget:
+    def logger(self) -> Logger:
         global qApp
-        return qApp.tabWidget_view
+        return qApp.logger
+
+    @property
+    def tabview_manager(self) -> TabViewManager:
+        global qApp
+        return qApp.tabview_manager
 
     def showContextMenu(self, pos: QPoint):
         """
@@ -427,18 +439,50 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
 
     def showPlotting(self, index: QModelIndex = None):
         """
-        TODO
+        Choose a plot method for the data.
 
-        Shows a dialog to plot images.
+        There are following kinds of data can be plotted:
+            - Line
+            - Image
+            - VecorField
+            - FourDSTEM
 
         arguments:
-            index: QModelIndex()
+            index: (QModelIndex)
         """
-        new_tab_index = self.tabWidget_view.addTab(
-            PageViewImage(), 
-            index.data(role = ItemDataRoles.DisplayRole)
-        )
-        self.tabWidget_view.setCurrentIndex(new_tab_index)
+        path = index.data(role = ItemDataRoles.PathRole)
+        node = self.hdf_handler.getNode(path)
+        if node.hdf_type == HDFType.Line:
+            page = self._plotLine(path)
+        elif node.hdf_type == HDFType.Image:
+            page = self._plotImage(path)
+        elif node.hdf_type == HDFType.VectorField:
+            page = self._plotVectorField(path)
+        elif node.hdf_type == HDFType.FourDSTEM:
+            page = self._plotFourDSTEM(path)
+        else:
+            shape = self.hdf_handler.file[path].shape
+            if len(shape) == 1:
+                page = self._plotLine(path)
+            elif len(shape) == 2 and shape[0] == 2:
+                page = self._plotLine(path)
+            elif len(shape) == 2:
+                page = self._plotImage(path)
+            elif len(shape) == 3 and shape[0] == 2:
+                page = self._plotVectorField(path)
+            elif len(shape) == 4:
+                page = self._plotFourDSTEM(path)
+            else:
+                self.logger.error('Cannot plot data: {0}'.format(path))
+                msg = QMessageBox(parent = self)
+                msg.setWindowTitle('Warning')
+                msg.setIcon(QMessageBox.Warning)
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.setText('Cannot plot this data.')
+                msg.exec()
+
+        self.tabview_manager.openTab(page)
+        
         
     def showAttribute(self, index: QModelIndex = None):
         """
@@ -454,7 +498,39 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         dialog_attr.show()
 
 
+    def _plotImage(self, path) -> PageViewImage:
+        """
+        To plot a image according to the path in the HDF5 file, return the page
+        where the figure locates.
 
+        arguments:
+            path: (str) 
+
+        returns:
+            (PageViewImage) The page to view image. This page is added to the 
+                tabWidget in the MainWindow.
+        """
+        page_image = PageViewImage()
+        try:
+            page_image.setImage(path)
+        except (KeyError, ValueError) as e:
+            self.logger.error(e, exc_info = True)
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('{0}'.format(e))
+            msg.exec()
+        return page_image
+
+    def _plotLine(self, path):
+        pass
+
+    def _plotVectorField(self, path):
+        pass
+
+    def _plotFourDSTEM(self, path):
+        pass
 
 
 # class HDFReadOnlyMenu(QMenu):
