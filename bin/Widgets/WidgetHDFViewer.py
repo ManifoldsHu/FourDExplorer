@@ -39,6 +39,8 @@ from bin.Widgets.DialogAttrViewer import DialogAttrViewer
 from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.DialogCopyItem import DialogHDFCopy
+from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
+from bin.Widgets.PageViewLine import PageViewLine
 from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
 from bin.Widgets.PageViewImage import PageViewImage
 
@@ -452,6 +454,7 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         """
         path = index.data(role = ItemDataRoles.PathRole)
         node = self.hdf_handler.getNode(path)
+        page = None
         if node.hdf_type == HDFType.Line:
             page = self._plotLine(path)
         elif node.hdf_type == HDFType.Image:
@@ -480,8 +483,8 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
                 msg.setStandardButtons(QMessageBox.Ok)
                 msg.setText('Cannot plot this data.')
                 msg.exec()
-
-        self.tabview_manager.openTab(page)
+        if not page is None:
+            self.tabview_manager.openTab(page)
         
         
     def showAttribute(self, index: QModelIndex = None):
@@ -523,14 +526,47 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
             msg.exec()
         return page_image
 
-    def _plotLine(self, path):
-        pass
+    def _plotLine(self, path) -> PageViewLine:
+        """
+        To plot a line according to the path in the HDF5 file, return the page
+        where the figure locates.
+
+        arguments:
+            path: (str)
+
+        returns:
+            (PageViewLine) The page to view line. This page is added to the 
+                tabWidget in the MainWindow.
+        """
+        page_line = PageViewLine()
+        try:
+            page_line.addLine(path, update_title = True)
+        except (KeyError, ValueError) as e:
+            self.logger.error(e, exc_info = True)
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('{0}'.format(e))
+            msg.exec()
+        return page_line
 
     def _plotVectorField(self, path):
         pass
 
     def _plotFourDSTEM(self, path):
-        pass
+        page_fourdstem = PageViewFourDSTEM()
+        try:
+            page_fourdstem.setFourDSTEM(path)
+        except (KeyError, ValueError) as e:
+            self.logger.error(e, exc_info = True)
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('{0}'.format(e))
+            msg.exec()
+        return page_fourdstem
 
 
 # class HDFReadOnlyMenu(QMenu):

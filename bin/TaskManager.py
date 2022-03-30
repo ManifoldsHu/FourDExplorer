@@ -352,6 +352,10 @@ class TaskManager(QObject):
                     subtask.getFunction()
                 )
                 subtask.future.add_done_callback(subtask.complete)
+                self.logger.debug(
+                    'subtask {0} submitted to the executor and has added '
+                    'done callback'.format(subtask.name)
+                )
             return False
 
 
@@ -1052,9 +1056,9 @@ class Subtask(QObject):
 
     @future.setter
     def future(self, _ft: futures.Future):
-        if not isinstance(_ft, futures.Future):
-            raise TypeError('future must be Future object, not '
-                '{0}'.format(type(_ft).__name__))
+        # if not isinstance(_ft, futures.Future):
+        #     raise TypeError('future must be Future object, not '
+        #         '{0}'.format(type(_ft).__name__))
         self._future = _ft
 
     @property

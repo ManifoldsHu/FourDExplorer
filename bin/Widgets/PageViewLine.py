@@ -63,7 +63,7 @@ class PageViewLine(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiPageViewLine.Ui_Form()
-        self.ui.setupUi()
+        self.ui.setupUi(self)
 
         self._data_paths = []
         self._line_ax = None
@@ -119,7 +119,7 @@ class PageViewLine(QWidget):
         Set the data_path of the line, to show the curve.
 
         Will set the data_path attribute. The line must be a 2D array with 
-        shape (2, n).
+        shape (2, n), or an 1D array with shape (n,).
 
         NOTE: This function is to add a new line. So other lines saved in the 
         self._data_paths and self._line_objects will not be cleared. If it is
@@ -140,14 +140,15 @@ class PageViewLine(QWidget):
                 '{0}'.format(type(data_path).__name__))
 
         line_node = self.hdf_handler.getNode(data_path)  
-        # May raise KeyError if the path is not exist
+        # May raise KeyError if the path does not exist
         if not isinstance(line_node, HDFDataNode):
             raise ValueError('Item {0} must be a Dataset'.format(data_path))
 
         data_object = self.hdf_handler.file[data_path]
-        if not (len(data_object.shape) == 1 or len(data_object.shape) == 2):
+        dim = len(data_object.shape)
+        if not (dim == 1 or dim == 2):
             raise ValueError('Data must be an 1D array or 2D matrix')
-        elif not (len(data_object.shape) == 2 and data_object.shape[0] == 2):
+        if dim == 2 and data_object.shape[0] != 2:
             raise ValueError('Data must be with shape (n,) or (2, n)')
         
         self._data_paths.append(data_path)
@@ -177,16 +178,17 @@ class PageViewLine(QWidget):
         """
         if len(data_object.shape) == 1:
             X_data = np.arange(len(data_object))
-            Y_data = data_object
+            Y_data = data_object[:]
         elif len(data_object.shape) == 2:
             X_data = data_object[0, :]
             Y_data = data_object[1, :]
         else:
             raise ValueError('Invalid data shape to draw line.')
         
-        line = self._line_ax.plot(X_data, Y_data)
-        self._line_objects.append(line)
-        self.line_blit_manager.addArtist(line)
+        plot_lines = self._line_ax.plot(X_data, Y_data)
+        for line in plot_lines:     # Axes.plot() returns List[Line2D]
+            self._line_objects.append(line)
+            self.line_blit_manager.addArtist(line)
         self.line_canvas.draw()
         self.line_canvas.flush_events()
 

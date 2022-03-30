@@ -93,8 +93,6 @@ class PageViewImage(QWidget):
             artists quickly or make animation effects. example: 
                 self.image_object.set_data(new_data)
                 self.image_blit_manager.update()
-
-        
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
@@ -186,10 +184,10 @@ class PageViewImage(QWidget):
                 '{0}'.format(type(data_path).__name__))
 
         img_node = self.hdf_handler.getNode(data_path)  
-        # May raise KeyError if the path is not exist
+        # May raise KeyError if the path does not exist
         if not isinstance(img_node, HDFDataNode):
             raise ValueError('Item {0} must be a Dataset'.format(data_path))
-            
+
         data_obj = self.hdf_handler.file[data_path]
         if not len(data_obj.shape) == 2:
             raise ValueError('Data must be a 2D matrix (single channel image)')

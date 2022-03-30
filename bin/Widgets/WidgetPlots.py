@@ -174,3 +174,24 @@ class WidgetPlotLine(WidgetPlotBase):
         super().__init__(parent)
 
 
+class WidgetPlotDP(WidgetPlotBase):
+    """
+    使用 matplotlib 显示 4D-STEM 衍射图样的部件。
+
+    Widget to show 4D-STEM diffraction pattern by matplotlib.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+
+
+class WidgetPlotPreview(WidgetPlotBase):
+    """
+    使用 matplotlib 在显示 4D-STEM 衍射图样时，显示样品实空间预览的部件。
+
+    Widget to show 4D-STEM real-space preview by matplotlib.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self.setToolBarVisible(False)
+
+    
