@@ -31,9 +31,11 @@ date:           Mar 30, 2022
 """
 
 from logging import Logger
-from typing import List
+from typing import List, Tuple
 
 from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import QTimer
+from matplotlib.backend_bases import MouseEvent
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas)
 from matplotlib.colorbar import Colorbar, make_axes
@@ -47,7 +49,7 @@ import numpy as np
 import h5py
 
 from bin.BlitManager import BlitManager
-from bin.HDFManager import HDFDataNode, HDFHandler
+from bin.HDFManager import HDFDataNode, HDFGroupNode, HDFHandler
 from ui import uiPageViewFourDSTEM
 
 class PageViewFourDSTEM(QWidget):
@@ -78,6 +80,10 @@ class PageViewFourDSTEM(QWidget):
         self._preview_object = None
         self._preview_hcursor_object = None
         self._preview_vcursor_object = None
+        self._tracking = False
+        self._scan_ii = 0
+        self._scan_jj = 0
+        
 
         self._initUI()
         
@@ -162,11 +168,11 @@ class PageViewFourDSTEM(QWidget):
 
     @property
     def scan_ii(self) -> int:
-        return self.ui.spinBox_scan_ii.value()
+        return self._scan_ii
 
     @property
     def scan_jj(self) -> int:
-        return self.ui.spinBox_scan_jj.value()
+        return self._scan_jj
 
     def setFourDSTEM(self, data_path: str):
         """
@@ -205,6 +211,18 @@ class PageViewFourDSTEM(QWidget):
         self.ui.spinBox_scan_ii.setMaximum(data_obj.shape[0])
         self.ui.spinBox_scan_jj.setMaximum(data_obj.shape[1])
         
+        if 'preview_path' in self.data_object.attrs:
+            preview_path = self.data_object.attrs['preview_path']
+            try:
+                self.setPreview(preview_path)
+            except (KeyError, ValueError, TypeError):
+                new_preview_path = self._createNewPreview()
+                self.setPreview(new_preview_path)
+        else:
+            new_preview_path = self._createNewPreview()
+            self.setPreview(new_preview_path)
+
+        # connect
 
     def _createAxes(self):
         """
@@ -290,7 +308,7 @@ class PageViewFourDSTEM(QWidget):
         TODO: read and save attributes, like norm, cmap, alpha, etc.
         """
         if self._preview_ax is None:
-            self._preview_ax = self.preview_figure.add_suplot()
+            self._preview_ax = self.preview_figure.add_subplot()
         if self.preview_object is None:
             self._preview_object = self.preview_ax.imshow(
                 self.hdf_handler.file[self.preview_path]
@@ -311,24 +329,28 @@ class PageViewFourDSTEM(QWidget):
         """
         if self.preview_hcursor_object is None:
             self._preview_hcursor_object = self.preview_ax.axhline(
-                y = 0,
+                y = self.scan_ii,
                 color = 'black',
-                linewidth = 4,
+                linewidth = 1,
             )
             self.preview_blit_manager.addArtist(self.preview_hcursor_object)
         else:
-            self.preview_hcursor_object.set_ydata(0)
+            self.preview_hcursor_object.set_ydata(
+                self.scan_ii
+            )
             self.preview_blit_manager.update()
 
         if self.preview_vcursor_object is None:
             self._preview_vcursor_object = self.preview_ax.axvline(
-                x = 0,
+                x = self.scan_jj,
                 color = 'black',
-                linewidth = 4,
+                linewidth = 1,
             )
             self.preview_blit_manager.addArtist(self.preview_vcursor_object)
         else:
-            self.preview_hcursor_object.set_xdata(0)
+            self.preview_hcursor_object.set_xdata(
+                self.scan_jj
+            )
             self.preview_blit_manager.update()
 
         self.preview_canvas.draw()
@@ -342,30 +364,138 @@ class PageViewFourDSTEM(QWidget):
         self.ui.lineEdit_preview_path.setReadOnly(True)
         self.ui.spinBox_scan_ii.setMinimum(0)
         self.ui.spinBox_scan_jj.setMinimum(0)
-        self.ui.spinBox_scan_ii.valueChanged.connect(self.updateDP)
-        self.ui.spinBox_scan_jj.valueChanged.connect(self.updateDP)
+        self.ui.spinBox_scan_ii.valueChanged.connect(self._updateDPBySpinBoxI)
+        self.ui.spinBox_scan_jj.valueChanged.connect(self._updateDPBySpinBoxJ)
+
+        self._cid_press = self.preview_canvas.mpl_connect(
+            'button_press_event',       # When button pressed in preview, 
+            self._startTrackingPreview  # start tracking the mouse location
+        )                               # and update DP for the location
+        self._cid_move = self.preview_canvas.mpl_connect(
+            'motion_notify_event',      # update DP for the location
+            self._updateDPByMouseMotion # NOTE: do NOT push mouse for a 
+        )                               # long time!
+
+        self._cid_release = self.preview_canvas.mpl_connect(
+            'button_release_event',     # End tracking the mouse location
+            self._endTrackingPreview    # when the button is released.
+        )
+        self._cid_leave = self.preview_canvas.mpl_connect(
+            'axes_leave_event',         # End tracking the mouse location
+            self._endTrackingPreview    # when the button leaves preview.
+        )
         
 
-    def updateDP(self):
+    def _updateDP(self):
         """
         Update the current diffraction pattern according to the location in 
-        the real space (in preview or in spinBoxes)
+        the real space (in preview or in spinBoxes).
         """
         if self.data_object is None:
             return None
 
         scan_i, scan_j, dp_i, dp_j = self.data_object.shape
-        if self.scan_ii > scan_i:
-            self.ui.spinBox_scan_ii.setValue(scan_i)
-        if self.scan_ii < 0:
-            self.ui.spinBox_scan_ii.setValue(0)
-        if self.scan_jj > scan_j:
-            self.ui.spinBox_scan_jj.setValue(scan_j)
-        if self.scan_jj < 0:
-            self.ui.spinBox_scan_jj.setValue(0)
+        scan_ii = max(0, min(scan_i, self.scan_ii)) # Avoid out of boundary
+        scan_jj = max(0, min(scan_j, self.scan_jj))
         
         self.dp_object.set_data(
-            self.data_object[self.scan_ii, self.scan_jj, :, :]
+            self.data_object[scan_ii, scan_jj, :, :]
         )
-        self.dp_blit_manager.update()            
+        self.dp_blit_manager.update()     
+
+        self.preview_hcursor_object.set_ydata(scan_ii)
+        self.preview_vcursor_object.set_xdata(scan_jj)
+        self.preview_blit_manager.update()
+    
+    def _updateDPBySpinBoxI(self):
+        self._scan_ii = self.ui.spinBox_scan_ii.value()
+        # self._scan_jj = self.ui.spinBox_scan_jj.value()
+        self._updateDP()
+    
+    def _updateDPBySpinBoxJ(self):
+        self._scan_jj = self.ui.spinBox_scan_jj.value()
+        self._updateDP()
+
+    def _updateDPByMouseMotion(self, event: MouseEvent):
+        """
+        Set the DP when the mouse is clicked on the preview.
+
+        arguments:
+            event: MouseEvent
+        """
+        if not self._tracking:
+            return None
+        # scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        if not event.ydata is None:
+            self._scan_ii = int(event.ydata)
+        if not event.xdata is None:
+            self._scan_jj = int(event.xdata)
+
+        self._updateDP()
+
+    def _startTrackingPreview(self, event: MouseEvent):
+        """
+        Start the tracking preview when the mouse is clicked on the preview.
+
+        arguments:
+            event: (MouseEvent)
+        """
+        self._tracking = True
+        self._updateDPByMouseMotion(event)
         
+
+    def _endTrackingPreview(self, event: MouseEvent):
+        """
+        End the tracking preview when the mouse is released.
+
+        arguments:
+            event: (MouseEvent)
+        """
+        self._updateDPByMouseMotion(event)
+        self._tracking = False 
+        self.ui.spinBox_scan_ii.setValue(self.scan_ii)
+        self.ui.spinBox_scan_jj.setValue(self.scan_jj)
+
+    def _createNewPreview(self) -> str:
+        """
+        Create a new preview image.
+
+        In default, it will be /.../[4D-STEM name]_preview . If there has been
+        a preview at this path, try to use it. Otherwise, add an index and try
+        again: /.../[4D-STEM name]_preview_1. The new path will be under the 
+        same group as the 4D-STEM dataset.
+
+        I cannot find a quick way to calculate a new preview image for now, so 
+        the preview image is set to be a zero matrix. Users can calculate a new
+        preview image and reset it themselves.
+
+        returns:
+            (str) the path of the new preview.
+        """
+        
+        data_node = self.hdf_handler.getNode(self.data_path)
+        preview_name = data_node.name + '_preview'
+        _count = 0
+        while preview_name in data_node.parent:
+            _count += 1
+            preview_name = data_node.name + '_preview_{0}'.format(_count)
+        if data_node.parent.path == '/':
+            preview_path = '/' + preview_name
+        else:
+            preview_path = data_node.parent.path + '/' + preview_name
+
+        self.data_object.attrs['preview_path'] = preview_path
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        # preview_data = self.data_object[:,:,int(dp_i/2),int(dp_j/2)]
+        
+
+        _index = self.hdf_handler.model.indexFromPath(self.data_path)
+        self.hdf_handler.model.insertData(
+            parent = _index.parent(),
+            name = preview_name,
+            shape = (scan_i, scan_j),
+            dtype = 'float32',
+        )   
+        
+        return preview_path
+
