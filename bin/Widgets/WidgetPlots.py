@@ -65,6 +65,7 @@ class WidgetPlotHist(WidgetPlotBase):
         Initialize histogram's axes and patches.
         """
         self._hist_ax = self.figure.add_subplot()
+        self._hist_ax.set_axis_off()
         
         verts = [(0.,0.)]       # set a simplest path to be initialized
         codes = [Path.MOVETO]
@@ -193,5 +194,6 @@ class WidgetPlotPreview(WidgetPlotBase):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setToolBarVisible(False)
+
 
     

@@ -125,7 +125,7 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
          <item>
-          <widget class="QPushButton" name="pushButton_4">
+          <widget class="QPushButton" name="pushButton_image_attributes">
            <property name="text">
             <string>Image Attributes...</string>
            </property>
@@ -182,10 +182,62 @@
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_normalize"/>
+              <widget class="QComboBox" name="comboBox_normalize">
+               <item>
+                <property name="text">
+                 <string>Linear</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Logrithm</string>
+                </property>
+               </item>
+              </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="comboBox_colormap"/>
+              <widget class="QComboBox" name="comboBox_colormap">
+               <item>
+                <property name="text">
+                 <string>viridis</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>plasma</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>gray</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>RdYlBu</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>twilight</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>hsv</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>jet</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Others</string>
+                </property>
+               </item>
+              </widget>
              </item>
             </layout>
            </item>

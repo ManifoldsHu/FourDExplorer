@@ -77,7 +77,7 @@ class ExampleSleep(Task):
         self.name = 'Sleep'
         self.comment = 'I am sleeping'
 
-        self.addSubtaskWithProgress(        # Add a subtask that lasts longest. 
+        self.addSubtaskFuncWithProgress(        # Add a subtask that lasts longest. 
             'sleep 10s',                      # The function should be custom-made 
             self.test_func_with_progress,   # to show the progress correctly.
             10

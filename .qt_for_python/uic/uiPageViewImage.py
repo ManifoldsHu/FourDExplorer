@@ -127,10 +127,10 @@ class Ui_Form(object):
 
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.pushButton_4 = QPushButton(self.widget1)
-        self.pushButton_4.setObjectName(u"pushButton_4")
+        self.pushButton_image_attributes = QPushButton(self.widget1)
+        self.pushButton_image_attributes.setObjectName(u"pushButton_image_attributes")
 
-        self.verticalLayout_3.addWidget(self.pushButton_4)
+        self.verticalLayout_3.addWidget(self.pushButton_image_attributes)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
@@ -174,11 +174,21 @@ class Ui_Form(object):
         self.verticalLayout_2.addWidget(self.horizontalSlider_contrast)
 
         self.comboBox_normalize = QComboBox(self.widget1)
+        self.comboBox_normalize.addItem("")
+        self.comboBox_normalize.addItem("")
         self.comboBox_normalize.setObjectName(u"comboBox_normalize")
 
         self.verticalLayout_2.addWidget(self.comboBox_normalize)
 
         self.comboBox_colormap = QComboBox(self.widget1)
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
         self.comboBox_colormap.setObjectName(u"comboBox_colormap")
 
         self.verticalLayout_2.addWidget(self.comboBox_colormap)
@@ -212,10 +222,22 @@ class Ui_Form(object):
         self.pushButton_image_processing.setText(QCoreApplication.translate("Form", u"Image Processing...", None))
         self.pushButton_calibrate.setText(QCoreApplication.translate("Form", u"Calibrate...", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"Histogram", None))
-        self.pushButton_4.setText(QCoreApplication.translate("Form", u"Image Attributes...", None))
+        self.pushButton_image_attributes.setText(QCoreApplication.translate("Form", u"Image Attributes...", None))
         self.label.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"Contrast", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Norm", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Colormap", None))
+        self.comboBox_normalize.setItemText(0, QCoreApplication.translate("Form", u"Linear", None))
+        self.comboBox_normalize.setItemText(1, QCoreApplication.translate("Form", u"Logrithm", None))
+
+        self.comboBox_colormap.setItemText(0, QCoreApplication.translate("Form", u"viridis", None))
+        self.comboBox_colormap.setItemText(1, QCoreApplication.translate("Form", u"plasma", None))
+        self.comboBox_colormap.setItemText(2, QCoreApplication.translate("Form", u"gray", None))
+        self.comboBox_colormap.setItemText(3, QCoreApplication.translate("Form", u"RdYlBu", None))
+        self.comboBox_colormap.setItemText(4, QCoreApplication.translate("Form", u"twilight", None))
+        self.comboBox_colormap.setItemText(5, QCoreApplication.translate("Form", u"hsv", None))
+        self.comboBox_colormap.setItemText(6, QCoreApplication.translate("Form", u"jet", None))
+        self.comboBox_colormap.setItemText(7, QCoreApplication.translate("Form", u"Others", None))
+
     # retranslateUi
 

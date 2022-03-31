@@ -67,14 +67,14 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QCommandLinkButton" name="commandLinkButton">
+          <widget class="QCommandLinkButton" name="commandLinkButton_tutorials">
            <property name="text">
             <string>Watch tutorials about 4D-Explorer</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCommandLinkButton" name="commandLinkButton_2">
+          <widget class="QCommandLinkButton" name="commandLinkButton_work">
            <property name="text">
             <string>How does 4D-STEM work?</string>
            </property>
@@ -129,14 +129,14 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pushButton_new_file">
             <property name="text">
              <string>New File</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="pushButton_open_file">
             <property name="text">
              <string>Open File</string>
             </property>
@@ -172,14 +172,14 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_3">
+           <widget class="QPushButton" name="pushButton_import_image">
             <property name="text">
              <string>Import Image</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="pushButton_import_fourDSTEM">
             <property name="text">
              <string>Import 4D-STEM Data</string>
             </property>
@@ -215,7 +215,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_6">
+           <widget class="QPushButton" name="pushButton_calibration">
             <property name="text">
              <string>Start Calibration</string>
             </property>

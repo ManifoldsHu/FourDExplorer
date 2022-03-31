@@ -49,15 +49,15 @@ class Ui_Form(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.commandLinkButton = QCommandLinkButton(Form)
-        self.commandLinkButton.setObjectName(u"commandLinkButton")
+        self.commandLinkButton_tutorials = QCommandLinkButton(Form)
+        self.commandLinkButton_tutorials.setObjectName(u"commandLinkButton_tutorials")
 
-        self.verticalLayout_4.addWidget(self.commandLinkButton)
+        self.verticalLayout_4.addWidget(self.commandLinkButton_tutorials)
 
-        self.commandLinkButton_2 = QCommandLinkButton(Form)
-        self.commandLinkButton_2.setObjectName(u"commandLinkButton_2")
+        self.commandLinkButton_work = QCommandLinkButton(Form)
+        self.commandLinkButton_work.setObjectName(u"commandLinkButton_work")
 
-        self.verticalLayout_4.addWidget(self.commandLinkButton_2)
+        self.verticalLayout_4.addWidget(self.commandLinkButton_work)
 
 
         self.horizontalLayout_2.addLayout(self.verticalLayout_4)
@@ -85,15 +85,15 @@ class Ui_Form(object):
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
-        self.pushButton = QPushButton(self.groupBox)
-        self.pushButton.setObjectName(u"pushButton")
+        self.pushButton_new_file = QPushButton(self.groupBox)
+        self.pushButton_new_file.setObjectName(u"pushButton_new_file")
 
-        self.verticalLayout.addWidget(self.pushButton)
+        self.verticalLayout.addWidget(self.pushButton_new_file)
 
-        self.pushButton_2 = QPushButton(self.groupBox)
-        self.pushButton_2.setObjectName(u"pushButton_2")
+        self.pushButton_open_file = QPushButton(self.groupBox)
+        self.pushButton_open_file.setObjectName(u"pushButton_open_file")
 
-        self.verticalLayout.addWidget(self.pushButton_2)
+        self.verticalLayout.addWidget(self.pushButton_open_file)
 
 
         self.horizontalLayout.addWidget(self.groupBox)
@@ -111,15 +111,15 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addItem(self.verticalSpacer_2)
 
-        self.pushButton_3 = QPushButton(self.groupBox_2)
-        self.pushButton_3.setObjectName(u"pushButton_3")
+        self.pushButton_import_image = QPushButton(self.groupBox_2)
+        self.pushButton_import_image.setObjectName(u"pushButton_import_image")
 
-        self.verticalLayout_2.addWidget(self.pushButton_3)
+        self.verticalLayout_2.addWidget(self.pushButton_import_image)
 
-        self.pushButton_4 = QPushButton(self.groupBox_2)
-        self.pushButton_4.setObjectName(u"pushButton_4")
+        self.pushButton_import_fourDSTEM = QPushButton(self.groupBox_2)
+        self.pushButton_import_fourDSTEM.setObjectName(u"pushButton_import_fourDSTEM")
 
-        self.verticalLayout_2.addWidget(self.pushButton_4)
+        self.verticalLayout_2.addWidget(self.pushButton_import_fourDSTEM)
 
 
         self.horizontalLayout.addWidget(self.groupBox_2)
@@ -137,10 +137,10 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addItem(self.verticalSpacer_3)
 
-        self.pushButton_6 = QPushButton(self.groupBox_3)
-        self.pushButton_6.setObjectName(u"pushButton_6")
+        self.pushButton_calibration = QPushButton(self.groupBox_3)
+        self.pushButton_calibration.setObjectName(u"pushButton_calibration")
 
-        self.verticalLayout_3.addWidget(self.pushButton_6)
+        self.verticalLayout_3.addWidget(self.pushButton_calibration)
 
 
         self.horizontalLayout.addWidget(self.groupBox_3)
@@ -179,18 +179,18 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:26pt;\">Hello, 4D-Explorer!</span></p></body></html>", None))
-        self.commandLinkButton.setText(QCoreApplication.translate("Form", u"Watch tutorials about 4D-Explorer", None))
-        self.commandLinkButton_2.setText(QCoreApplication.translate("Form", u"How does 4D-STEM work?", None))
+        self.commandLinkButton_tutorials.setText(QCoreApplication.translate("Form", u"Watch tutorials about 4D-Explorer", None))
+        self.commandLinkButton_work.setText(QCoreApplication.translate("Form", u"How does 4D-STEM work?", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Start Work", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt;\">Start work by getting </span></p><p><span style=\" font-size:12pt;\">an HDF5 file.</span></p><p><br/></p></body></html>", None))
-        self.pushButton.setText(QCoreApplication.translate("Form", u"New File", None))
-        self.pushButton_2.setText(QCoreApplication.translate("Form", u"Open File", None))
+        self.pushButton_new_file.setText(QCoreApplication.translate("Form", u"New File", None))
+        self.pushButton_open_file.setText(QCoreApplication.translate("Form", u"Open File", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Import Data", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt;\">Import data, </span></p><p><span style=\" font-size:12pt;\">view them,</span></p><p><span style=\" font-size:12pt;\">and analyze.</span></p></body></html>", None))
-        self.pushButton_3.setText(QCoreApplication.translate("Form", u"Import Image", None))
-        self.pushButton_4.setText(QCoreApplication.translate("Form", u"Import 4D-STEM Data", None))
+        self.pushButton_import_image.setText(QCoreApplication.translate("Form", u"Import Image", None))
+        self.pushButton_import_fourDSTEM.setText(QCoreApplication.translate("Form", u"Import 4D-STEM Data", None))
         self.groupBox_3.setTitle(QCoreApplication.translate("Form", u"Calibration", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt;\">Calibrate,</span></p><p><span style=\" font-size:12pt;\">makes accurate</span></p></body></html>", None))
-        self.pushButton_6.setText(QCoreApplication.translate("Form", u"Start Calibration", None))
+        self.pushButton_calibration.setText(QCoreApplication.translate("Form", u"Start Calibration", None))
     # retranslateUi
 

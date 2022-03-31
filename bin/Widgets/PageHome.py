@@ -15,7 +15,9 @@ date:           Mar 25, 2022
 """
 
 from PySide6.QtWidgets import QWidget
+from bin.TaskManager import TaskManager
 from ui import uiPageHome
+from example.ExampleTask import ExampleSleepWithoutProgress, ExampleSleep
 
 
 class PageHome(QWidget):
@@ -34,3 +36,19 @@ class PageHome(QWidget):
         self.ui.setupUi(self)
 
         self.setWindowTitle('Home')
+
+        self.ui.commandLinkButton_tutorials.clicked.connect(self._testTask)
+        self.ui.commandLinkButton_work.clicked.connect(self._testTask2)
+
+    @property
+    def task_manager(self) -> TaskManager:
+        global qApp
+        return qApp.task_manager
+
+    def _testTask(self):
+        task = ExampleSleepWithoutProgress(self)
+        self.task_manager.addTask(task)
+
+    def _testTask2(self):
+        task = ExampleSleep(self)
+        self.task_manager.addTask(task)
