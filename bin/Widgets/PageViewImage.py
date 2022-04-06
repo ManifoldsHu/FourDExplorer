@@ -222,6 +222,11 @@ class PageViewImage(QWidget):
             )
             self._colorbar_ax.xaxis.set_visible(False)
             self._colorbar_ax.yaxis.tick_right()
+
+            # Here, we must add the colorbar axes to the blit manager, so 
+            # that when the colorbar update mappables, the colorbar shown
+            # on the screen will also be updated.
+            self.image_blit_manager.addArtist(self._colorbar_ax)
         
     def _createImage(self):
         """
@@ -246,20 +251,15 @@ class PageViewImage(QWidget):
         Create the colorbar according to the image.
         """
         if self._colorbar_object is None:
-            # self._colorbar_object = Colorbar(
-            #     ax = self.colorbar_ax,
-            #     mappable = self.image_object,
-            # )
-            self._colorbar_object = self.image_figure.colorbar(
-                self.image_object,
-                cax = self._colorbar_ax,
+            self._colorbar_object = Colorbar(
+                ax = self.colorbar_ax,
+                mappable = self.image_object,
             )
+
             
         else:
             self.colorbar_object.update_normal(self.image_object)
 
-    # def updateImage(self):
-    #     pass
 
     def _initUI(self):
         """
@@ -295,7 +295,7 @@ class PageViewImage(QWidget):
         Set the brightness of the image.
 
         arguments:
-            brightness: (int) the changed brightness value.
+            brightness: (int) the changed brightness value. (0-99)
         """
         contrast = self.ui.horizontalSlider_contrast.value()
         norm_type = self.ui.comboBox_normalize.currentIndex()
@@ -308,14 +308,14 @@ class PageViewImage(QWidget):
         self.image_blit_manager.update()
 
         self.colorbar_object.update_normal(self.image_object)  
-        
+        self.image_blit_manager.update()
 
     def _updateContrast(self, contrast: int):
         """
         Set the contrast of the image.
 
         arguments:
-            contrast: (int) the changed contrast value.
+            contrast: (int) the changed contrast value. (0-99)
         """
         brightness = self.ui.horizontalSlider_brightness.value()
         norm_type = self.ui.comboBox_normalize.currentIndex()
@@ -325,8 +325,8 @@ class PageViewImage(QWidget):
             new_norm = self._calcLogarithmNorm(brightness, contrast)
         
         self.image_object.set_norm(new_norm)
-        self.image_blit_manager.update()
         self.colorbar_object.update_normal(self.image_object)   
+        self.image_blit_manager.update()
         
     def _calcLinearNorm(self, brightness: int, contrast: int) -> Normalize:
         """
@@ -400,8 +400,8 @@ class PageViewImage(QWidget):
             new_norm = self._calcLogarithmNorm(brightness, contrast)
             
         self.image_object.set_norm(new_norm)
-        self.image_blit_manager.update()
         self.colorbar_object.update_normal(self.image_object)
+        self.image_blit_manager.update()
         
 
     def _changeColormap(self, index: int):
@@ -423,11 +423,8 @@ class PageViewImage(QWidget):
         else:
             cmap = self.ui.comboBox_colormap.currentText()
             self.image_object.set_cmap(cmap)
-            self.image_blit_manager.update()
-
-            # It seems it does not work.
             self.colorbar_object.update_normal(self.image_object)
-            self.colorbar_ax.draw()
+            self.image_blit_manager.update()
 
 
     

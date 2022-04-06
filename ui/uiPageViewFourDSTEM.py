@@ -140,10 +140,10 @@ class Ui_Form(object):
 
         self.horizontalLayout_4.addWidget(self.lineEdit_preview_path)
 
-        self.pushButton_preview_reset = QPushButton(self.widget1)
-        self.pushButton_preview_reset.setObjectName(u"pushButton_preview_reset")
+        self.pushButton_browse_preview = QPushButton(self.widget1)
+        self.pushButton_browse_preview.setObjectName(u"pushButton_browse_preview")
 
-        self.horizontalLayout_4.addWidget(self.pushButton_preview_reset)
+        self.horizontalLayout_4.addWidget(self.pushButton_browse_preview)
 
 
         self.verticalLayout_6.addLayout(self.horizontalLayout_4)
@@ -155,6 +155,11 @@ class Ui_Form(object):
 
         self.verticalLayout_7 = QVBoxLayout()
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.pushButton_calculate_preview = QPushButton(self.widget1)
+        self.pushButton_calculate_preview.setObjectName(u"pushButton_calculate_preview")
+
+        self.verticalLayout_7.addWidget(self.pushButton_calculate_preview)
+
         self.pushButton_attributes = QPushButton(self.widget1)
         self.pushButton_attributes.setObjectName(u"pushButton_attributes")
 
@@ -201,12 +206,22 @@ class Ui_Form(object):
 
         self.verticalLayout_5.addWidget(self.horizontalSlider_contrast)
 
-        self.comboBox_norm = QComboBox(self.widget1)
-        self.comboBox_norm.setObjectName(u"comboBox_norm")
+        self.comboBox_normalize = QComboBox(self.widget1)
+        self.comboBox_normalize.addItem("")
+        self.comboBox_normalize.addItem("")
+        self.comboBox_normalize.setObjectName(u"comboBox_normalize")
 
-        self.verticalLayout_5.addWidget(self.comboBox_norm)
+        self.verticalLayout_5.addWidget(self.comboBox_normalize)
 
         self.comboBox_colormap = QComboBox(self.widget1)
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
         self.comboBox_colormap.setObjectName(u"comboBox_colormap")
 
         self.verticalLayout_5.addWidget(self.comboBox_colormap)
@@ -242,11 +257,24 @@ class Ui_Form(object):
         self.label_2.setText(QCoreApplication.translate("Form", u"DPi index (location in vertical direction)", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"DPj index (location in horizontal direction)", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"Preview Path", None))
-        self.pushButton_preview_reset.setText(QCoreApplication.translate("Form", u"Reset", None))
+        self.pushButton_browse_preview.setText(QCoreApplication.translate("Form", u"Browse Preview", None))
+        self.pushButton_calculate_preview.setText(QCoreApplication.translate("Form", u"Calculate Preview", None))
         self.pushButton_attributes.setText(QCoreApplication.translate("Form", u"4D-STEM attributes...", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Contrast", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"Norm", None))
         self.label_8.setText(QCoreApplication.translate("Form", u"Colormap", None))
+        self.comboBox_normalize.setItemText(0, QCoreApplication.translate("Form", u"Linear", None))
+        self.comboBox_normalize.setItemText(1, QCoreApplication.translate("Form", u"Logarithm", None))
+
+        self.comboBox_colormap.setItemText(0, QCoreApplication.translate("Form", u"viridis", None))
+        self.comboBox_colormap.setItemText(1, QCoreApplication.translate("Form", u"plasma", None))
+        self.comboBox_colormap.setItemText(2, QCoreApplication.translate("Form", u"gray", None))
+        self.comboBox_colormap.setItemText(3, QCoreApplication.translate("Form", u"RdYlBu", None))
+        self.comboBox_colormap.setItemText(4, QCoreApplication.translate("Form", u"twilight", None))
+        self.comboBox_colormap.setItemText(5, QCoreApplication.translate("Form", u"hsv", None))
+        self.comboBox_colormap.setItemText(6, QCoreApplication.translate("Form", u"jet", None))
+        self.comboBox_colormap.setItemText(7, QCoreApplication.translate("Form", u"Others", None))
+
     # retranslateUi
 

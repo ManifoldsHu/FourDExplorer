@@ -33,12 +33,13 @@ date:           Mar 30, 2022
 from logging import Logger
 from typing import List, Tuple
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QMessageBox
 from PySide6.QtCore import QTimer
 from matplotlib.backend_bases import MouseEvent
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas)
 from matplotlib.colorbar import Colorbar, make_axes
+from matplotlib.colors import Normalize, SymLogNorm
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
@@ -50,6 +51,7 @@ import h5py
 
 from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFDataNode, HDFGroupNode, HDFHandler
+from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from ui import uiPageViewFourDSTEM
 
 class PageViewFourDSTEM(QWidget):
@@ -205,6 +207,7 @@ class PageViewFourDSTEM(QWidget):
 
         self._createAxes()
         self._createDP()
+        self._createColorbar()
 
         self.ui.spinBox_scan_ii.setValue(0)
         self.ui.spinBox_scan_jj.setValue(0)
@@ -238,6 +241,7 @@ class PageViewFourDSTEM(QWidget):
             )
             self._colorbar_ax.xaxis.set_visible(False)
             self._colorbar_ax.yaxis.tick_right()
+            self.dp_blit_manager.addArtist(self._colorbar_ax)
 
     def _createDP(self):
         """
@@ -253,6 +257,18 @@ class PageViewFourDSTEM(QWidget):
         else:
             self.dp_object.set_data(self.data_object[0,0,:,:])
             self.dp_blit_manager.update()
+
+    def _createColorbar(self):
+        """
+        Create the colorbar according to the dp.
+        """
+        if self._colorbar_object is None:
+            self._colorbar_object = Colorbar(
+                ax = self.colorbar_ax,
+                mappable = self.dp_object,
+            )
+        else:
+            self.colorbar_object.update_normal(self.dp_object)
     
     def setPreview(self, preview_path: str):
         """
@@ -320,6 +336,7 @@ class PageViewFourDSTEM(QWidget):
             self.preview_object.set_data(
                 self.hdf_handler.file[self.preview_path]
             )
+            self.preview_object.autoscale()
             self.preview_blit_manager.update()
 
     def _createPreviewCursor(self):
@@ -348,7 +365,7 @@ class PageViewFourDSTEM(QWidget):
             )
             self.preview_blit_manager.addArtist(self.preview_vcursor_object)
         else:
-            self.preview_hcursor_object.set_xdata(
+            self.preview_vcursor_object.set_xdata(
                 self.scan_jj
             )
             self.preview_blit_manager.update()
@@ -384,7 +401,31 @@ class PageViewFourDSTEM(QWidget):
             'axes_leave_event',         # End tracking the mouse location
             self._endTrackingPreview    # when the button leaves preview.
         )
+
+        self.ui.horizontalSlider_brightness.setRange(0,99)
+        self.ui.horizontalSlider_contrast.setRange(0,99)
+        self.ui.horizontalSlider_brightness.setValue(50)
+        self.ui.horizontalSlider_contrast.setValue(50)
+        self.ui.horizontalSlider_brightness.valueChanged.connect(
+            self._updateBrightness
+        )
+        self.ui.horizontalSlider_contrast.valueChanged.connect(
+            self._updateContrast
+        )
         
+        self.ui.comboBox_colormap.setCurrentIndex(0)
+        self.ui.comboBox_colormap.currentIndexChanged.connect(
+            self._changeColormap
+        )
+        self.ui.comboBox_normalize.setCurrentIndex(0)
+        self.ui.comboBox_normalize.currentIndexChanged.connect(
+            self._changeNorm
+        )
+        
+        self.ui.pushButton_browse.clicked.connect(self._browse)
+        self.ui.pushButton_browse_preview.clicked.connect(
+            self._browsePreview
+        )
 
     def _updateDP(self):
         """
@@ -397,15 +438,17 @@ class PageViewFourDSTEM(QWidget):
         scan_i, scan_j, dp_i, dp_j = self.data_object.shape
         scan_ii = max(0, min(scan_i, self.scan_ii)) # Avoid out of boundary
         scan_jj = max(0, min(scan_j, self.scan_jj))
-        
         self.dp_object.set_data(
             self.data_object[scan_ii, scan_jj, :, :]
         )
+        self.colorbar_object.update_normal(self.dp_object)
         self.dp_blit_manager.update()     
 
         self.preview_hcursor_object.set_ydata(scan_ii)
         self.preview_vcursor_object.set_xdata(scan_jj)
+        
         self.preview_blit_manager.update()
+        
     
     def _updateDPBySpinBoxI(self):
         self._scan_ii = self.ui.spinBox_scan_ii.value()
@@ -498,4 +541,192 @@ class PageViewFourDSTEM(QWidget):
         )   
         
         return preview_path
+
+    def _browse(self):
+        """
+        Open a dialog to browse which 4D-STEM to be opened.
+        """
+        dialog = DialogHDFChoose(self)
+        dialog_code = dialog.exec()
+        if dialog_code == dialog.Accepted:
+            current_path = dialog.getCurrentPath()
+        try:
+            self.setFourDSTEM(current_path)
+        except (KeyError, ValueError, TypeError,) as e:
+            self.logger.error('{0}'.format(e), exc_info = True)
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('Cannot open this data: {0}'.format(e))
+            msg.exec()
+
+    def _browsePreview(self):
+        """
+        Open a dialog to browse which preview to set to the current 4D-STEM.
+
+        Will modify the attribute 'preview_path' of 4D-STEM data object to the
+        chosen preview path.
+        """
+        dialog = DialogHDFChoose(self)
+        dialog_code = dialog.exec()
+        if dialog_code == dialog.Accepted:
+            current_path = dialog.getCurrentPath()
+        try:
+            self.setPreview(current_path)
+        except (KeyError, ValueError, TypeError,) as e:
+            self.logger.error('{0}'.format(e), exc_info=True)
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('Cannot open this data: {0}'.format(e))
+            msg.exec()
+        else:
+            self.data_object.attrs['preview_path'] = current_path
+
+    def _updateBrightness(self, brightness: int):
+        """
+        Set the brightness of the image.
+
+        arguments:
+            brightness: (int) the changed brightness value. (0-99)
+        """
+        contrast = self.ui.horizontalSlider_contrast.value()
+        norm_type = self.ui.comboBox_normalize.currentIndex()
+        if norm_type == 0:      # Linear
+            new_norm = self._calcLinearNorm(brightness, contrast)
+        elif norm_type == 1:    # Logarithm
+            new_norm = self._calcLogarithmNorm(brightness, contrast)
+
+        self.dp_object.set_norm(new_norm)
+        self.dp_blit_manager.update()
+
+        self.colorbar_object.update_normal(self.dp_object)  
+        self.dp_blit_manager.update()
+
+    def _updateContrast(self, contrast: int):
+        """
+        Set the contrast of the image.
+
+        arguments:
+            contrast: (int) the changed contrast value. (0-99)
+        """
+        brightness = self.ui.horizontalSlider_brightness.value()
+        norm_type = self.ui.comboBox_normalize.currentIndex()
+        if norm_type == 0:      # Linear
+            new_norm = self._calcLinearNorm(brightness, contrast)
+        elif norm_type == 1:    # Logarithm
+            new_norm = self._calcLogarithmNorm(brightness, contrast)
+        
+        self.dp_object.set_norm(new_norm)
+        self.colorbar_object.update_normal(self.dp_object)   
+        self.dp_blit_manager.update()
+
+    def _calcLinearNorm(self, brightness: int, contrast: int) -> Normalize:
+        """
+        Calculate the linear normalization according to brightness and 
+        contrast value.
+
+        This linear normalization has following properties:
+            - if brightness == 0: 
+                vmax is set to the mimimum of the image, so the image looks 
+                like a whole black canvas.
+            - if brightness == 99:
+                vmin is set to the maximum of the image, so the image looks
+                like a whole white canvas.
+            - if contrast == 0:
+                vmin is set to (about) -infinite and vmax is set to (about) 
+                +infinite, so the image looks like a whole gray canvas.
+            - if contrast == 99:
+                vmax and vmin is set to (minimum + maximum)/2 of the image,
+                so the image looks like to be binarized (black and white).
+
+        arguments:
+            brightness: (int) must between 0 to 99
+
+            contrast: (int) must between 0 to 99
+        """
+        brightness = max(0, min(99, brightness))
+        contrast = max(0, min(99, contrast))
+
+        slope = np.tan((1/2 - (contrast + 1)/100)*(np.pi/2) + np.pi/4)
+
+        # Do not use self.data_object[self.scan_ii, self.scan_jj, :, :], to
+        # avoid calculate maximum and minimum of the data from the disk. 
+        # Rather, the array here is saved in the dp_object in memory.
+        hmin = np.min(self.dp_object.get_array())   
+        hmax = np.max(self.dp_object.get_array())
+        
+        vmin_tmp = brightness/50*(hmin - hmax) + hmax
+        vmax_tmp = brightness/50*(hmin - hmax) - hmin + 2*hmax
+        vmin = (vmin_tmp + vmax_tmp)/2 + slope*(vmin_tmp - vmax_tmp)/2
+        vmax = (vmax_tmp + vmin_tmp)/2 + slope*(vmax_tmp - vmin_tmp)/2
+        return Normalize(vmin = vmin, vmax = vmax)
+
+    def _calcLogarithmNorm(self, brightness: int, contrast: int):
+        """
+        Calculate the logarithm normalization according to the brightness
+        and contrast.
+
+        TODO: For now brightness and contrast do not work.
+
+        arguments:  
+            brightness: (int) must between 0 to 99
+
+            contrast: (int) must between 0 to 99
+        """
+        brightness = max(0, min(99, brightness))
+        contrast = max(0, min(99, contrast))
+        hmin = np.min(self.dp_object.get_array())   
+        hmax = np.max(self.dp_object.get_array())
+        return SymLogNorm(1, base = 2, vmin = hmin, vmax = hmax)
+
+    def _changeNorm(self, index: int):
+        """
+        Slots when current normalization is changed.
+
+        arguments:
+            index: (int)    0       Linear
+                            1       Logarithm
+        """
+        brightness = self.ui.horizontalSlider_brightness.value()
+        contrast = self.ui.horizontalSlider_contrast.value()
+        if index == 0:      # Linear
+            new_norm = self._calcLinearNorm(brightness, contrast)
+            
+        elif index == 1:    # Logarithm
+            new_norm = self._calcLogarithmNorm(brightness, contrast)
+            
+        self.dp_object.set_norm(new_norm)
+        self.colorbar_object.update_normal(self.dp_object)
+        self.dp_blit_manager.update()
+
+    def _changeColormap(self, index: int):
+        """
+        Slots when current colormap is changed.
+
+        Will change the diffraction pattern's AND the preview's colormaps.
+
+        arguments:
+            index: (int)    0       'viridis'
+                            1       'plasma'
+                            2       'gray'
+                            3       'RdYlBu'
+                            4       'twilight'
+                            5       'hsv'
+                            6       'jet'
+                            7       'Others'
+        """
+        if index > 6:
+            return None
+        else:
+            cmap = self.ui.comboBox_colormap.currentText()
+            self.dp_object.set_cmap(cmap)
+            self.colorbar_object.update_normal(self.dp_object)
+            self.dp_blit_manager.update()
+            
+            self.preview_object.set_cmap(cmap)
+            self.preview_blit_manager.update()
+
 
