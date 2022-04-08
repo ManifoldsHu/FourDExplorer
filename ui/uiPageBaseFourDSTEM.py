@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'uiPageViewFourDSTEM.ui'
+## Form generated from reading UI file 'uiPageBaseFourDSTEM.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.2.2
 ##
@@ -17,17 +17,18 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QSizePolicy, QSlider,
-    QSpinBox, QSplitter, QVBoxLayout, QWidget)
+    QSpacerItem, QSpinBox, QSplitter, QVBoxLayout,
+    QWidget)
 
-from bin.Widgets.WidgetPlots import (WidgetPlotDP, WidgetPlotPreview)
+from bin.Widgets.WidgetPlots import WidgetPlotDP
 
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(924, 575)
-        self.verticalLayout_7 = QVBoxLayout(Form)
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        Form.resize(785, 704)
+        self.verticalLayout_8 = QVBoxLayout(Form)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.splitter = QSplitter(Form)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
@@ -125,43 +126,19 @@ class Ui_Form(object):
         self.splitter.addWidget(self.layoutWidget)
         self.widget = QWidget(self.splitter)
         self.widget.setObjectName(u"widget")
-        self.verticalLayout_6 = QVBoxLayout(self.widget)
+        self.verticalLayout_7 = QVBoxLayout(self.widget)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_7.addItem(self.verticalSpacer)
+
+        self.verticalLayout_6 = QVBoxLayout()
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.label_4 = QLabel(self.widget)
-        self.label_4.setObjectName(u"label_4")
+        self.pushButton = QPushButton(self.widget)
+        self.pushButton.setObjectName(u"pushButton")
 
-        self.horizontalLayout_4.addWidget(self.label_4)
-
-        self.lineEdit_preview_path = QLineEdit(self.widget)
-        self.lineEdit_preview_path.setObjectName(u"lineEdit_preview_path")
-
-        self.horizontalLayout_4.addWidget(self.lineEdit_preview_path)
-
-        self.pushButton_browse_preview = QPushButton(self.widget)
-        self.pushButton_browse_preview.setObjectName(u"pushButton_browse_preview")
-
-        self.horizontalLayout_4.addWidget(self.pushButton_browse_preview)
-
-
-        self.verticalLayout_6.addLayout(self.horizontalLayout_4)
-
-        self.widget_preview = WidgetPlotPreview(self.widget)
-        self.widget_preview.setObjectName(u"widget_preview")
-
-        self.verticalLayout_6.addWidget(self.widget_preview)
-
-        self.pushButton_calculate_preview = QPushButton(self.widget)
-        self.pushButton_calculate_preview.setObjectName(u"pushButton_calculate_preview")
-
-        self.verticalLayout_6.addWidget(self.pushButton_calculate_preview)
-
-        self.pushButton_attributes = QPushButton(self.widget)
-        self.pushButton_attributes.setObjectName(u"pushButton_attributes")
-
-        self.verticalLayout_6.addWidget(self.pushButton_attributes)
+        self.verticalLayout_6.addWidget(self.pushButton)
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
@@ -230,10 +207,12 @@ class Ui_Form(object):
 
         self.verticalLayout_6.addLayout(self.horizontalLayout_5)
 
-        self.verticalLayout_6.setStretch(1, 1)
+
+        self.verticalLayout_7.addLayout(self.verticalLayout_6)
+
         self.splitter.addWidget(self.widget)
 
-        self.verticalLayout_7.addWidget(self.splitter)
+        self.verticalLayout_8.addWidget(self.splitter)
 
 
         self.retranslateUi(Form)
@@ -251,10 +230,7 @@ class Ui_Form(object):
         self.pushButton_calibrate.setText(QCoreApplication.translate("Form", u"Calibrate...", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"DPi index (rows of location)", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"DPj index (columns of location)", None))
-        self.label_4.setText(QCoreApplication.translate("Form", u"Preview Path", None))
-        self.pushButton_browse_preview.setText(QCoreApplication.translate("Form", u"Browse Preview", None))
-        self.pushButton_calculate_preview.setText(QCoreApplication.translate("Form", u"Calculate Preview", None))
-        self.pushButton_attributes.setText(QCoreApplication.translate("Form", u"4D-STEM attributes...", None))
+        self.pushButton.setText(QCoreApplication.translate("Form", u"4D-STEM attributes...", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Contrast", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"Norm", None))
