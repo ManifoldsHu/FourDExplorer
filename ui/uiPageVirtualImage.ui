@@ -156,22 +156,12 @@
              </item>
              <item>
               <property name="text">
-               <string>Segmented Ring (2 pieces)</string>
+               <string>Rectangle</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Segmented Ring (4 pieces)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Segmented Ring (6 pieces)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Segmented Ring (8 pieces)</string>
+               <string>Segmented Ring</string>
               </property>
              </item>
             </widget>
@@ -196,16 +186,13 @@
              <item>
               <widget class="QStackedWidget" name="stackedWidget_masks">
                <property name="currentIndex">
-                <number>3</number>
+                <number>4</number>
                </property>
                <widget class="WidgetMaskCircle" name="page_circle"/>
                <widget class="WidgetMaskRing" name="page_ring"/>
                <widget class="WidgetMaskWedge" name="page_wedge"/>
                <widget class="WidgetMaskRectangle" name="page_rectangle"/>
-               <widget class="WidgetMaskSegment2" name="page_segment_2"/>
-               <widget class="WidgetMaskSegment4" name="page_segment_4"/>
-               <widget class="WidgetMaskSegment6" name="page_segment_6"/>
-               <widget class="WidgetMaskSegment8" name="page_segment_8"/>
+               <widget class="WidgetMaskSegment" name="page_segment_ring"/>
               </widget>
              </item>
             </layout>
@@ -382,51 +369,33 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetMaskSegment2</class>
+   <class>WidgetMaskCircle</class>
    <extends>QWidget</extends>
-   <header>bin.Widgets.Masks.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>WidgetMaskWedge</class>
-   <extends>QWidget</extends>
-   <header>bin.Widgets.Masks.h</header>
+   <header>bin.Widgets.WidgetMasks.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>WidgetMaskRing</class>
    <extends>QWidget</extends>
-   <header>bin.Widgets.Masks.h</header>
+   <header>bin.Widgets.WidgetMasks.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetMaskCircle</class>
+   <class>WidgetMaskWedge</class>
    <extends>QWidget</extends>
-   <header>bin.Widgets.Masks.h</header>
+   <header>bin.Widgets.WidgetMasks.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetMaskSegment4</class>
+   <class>WidgetMaskSegment</class>
    <extends>QWidget</extends>
-   <header>bin.Widgets.Masks.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>WidgetMaskSegment6</class>
-   <extends>QWidget</extends>
-   <header>bin.Widgets.Masks.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>WidgetMaskSegment8</class>
-   <extends>QWidget</extends>
-   <header>bin.Widgets.Masks.h</header>
+   <header>bin.Widgets.WidgetMasks.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>WidgetMaskRectangle</class>
    <extends>QWidget</extends>
-   <header>bin.Widgets.Masks.h</header>
+   <header>bin.Widgets.WidgetMasks.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

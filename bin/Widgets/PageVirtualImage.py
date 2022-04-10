@@ -58,7 +58,7 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.axis import Axis
 from matplotlib.lines import Line2D
-from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Rectangle, Wedge
 
 import numpy as np
 import h5py
@@ -66,7 +66,190 @@ import h5py
 from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFHandler
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
+from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
 from ui import uiPageVirtualImage
+
+class PageVirtualImage(PageBaseFourDSTEM):
+    """
+    进行虚拟成像的部件类。
+
+    Ui 文件地址：ROOTPATH/ui/uiPageVirtualImage
+
+    Widget to calculate Virtual Image.
+
+    The path of the ui file: ROOTPATH/ui/uiPageVirtualImage
+
+    attributes:
+        hdf_handler: (HDFHandler) The handler to manage the hdf file and the
+            objects inside it.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self.ui = uiPageVirtualImage.Ui_Form()
+        self.ui.setupUi(self)
+
+        self._initBaseUi()
+
+        self._max_segment_num = 10      # The maximum number of segmented ring.
+        self._mask_widgets = []         # Must be the same order as the mode.
+        self._initMasks()
+        self.setWindowTitle('Virtual Image')
+        
+
+    @property
+    def mask_index(self) -> int:
+        """
+        Indicates which mask is used:
+            0       Circle
+            1       Ring
+            2       Wedge
+            3       Rectangle
+            4       Segmented Ring
+        """
+        return self.ui.comboBox_mode.currentIndex()
+
+    def _initMasks(self):
+        """
+        Initialize all of the mask patches, and add them to the axes.
+        """
+        self.ui.comboBox_mode.setCurrentIndex(0)
+        self.ui.stackedWidget_masks.setCurrentIndex(self.mask_index)
+        self.ui.comboBox_mode.currentIndexChanged.connect(self._changeMode)
+
+        self._initCircle()
+        self._initRing()
+        self._initWedge()
+        self._initRectangle()
+        self._initSegments()
+        
+
+    def _initCircle(self):
+        """
+        Initialize the circle patch and its managers.
+        """
+        self._patch_circle = Circle(
+            (0, 0),
+            radius = 5,
+            edgecolor = None,
+            facecolor = 'black',
+            alpha = 0.3,
+            visible = True,
+            fill = True,
+        )
+        self.dp_blit_manager.addArtist(self._patch_circle)
+        self.ui.page_circle.setBlitManager(self.dp_blit_manager)
+        self._mask_widgets.append(self.ui.page_circle)
+
+    def _initRing(self):
+        """
+        Initialize the ring patch and its managers.
+        """
+        self._patch_ring = Wedge(
+            (0, 0),
+            r = 5,                  # outer radius
+            theta_1 = 0,
+            theta_2 = 360,
+            width = 3,              # outer radius - inner radius
+            edgecolor = None,
+            facecolor = 'black',
+            alpha = 0.3,
+            visible = False,
+            fill = True,
+        )
+        self.dp_blit_manager.addArtist(self._patch_ring)
+        self.ui.page_ring.setBlitManager(self.dp_blit_manager)
+        self._mask_widgets.append(self.ui.page_ring)
+
+    def _initWedge(self):
+        """
+        Initialize the wedge patch and its managers.
+        """
+        self._patch_wedge = Wedge(
+            (0, 0),
+            r = 5,
+            theta_1 = 0,
+            theta_2 = 120,
+            width = 3,
+            edgecolor = None,
+            facecolor = 'black',
+            alpha = 0.3,
+            visible = False,
+            fill = True,
+        )
+        self.dp_blit_manager.addArtist(self._patch_wedge)
+        self.ui.page_wedge.setBlitManager(self.dp_blit_manager)
+        self._mask_widgets.append(self.ui.page_wedge)
+
+    def _initRectangle(self):
+        """
+        Initialize the rectangle patch and its managers.
+        """
+        self._patch_rectangle = Rectangle(
+            (0, 0),
+            width = 5,
+            height = 3,
+            edgecolor = None,
+            facecolor = 'black',
+            alpha = 0.3,
+            visible = False,
+            fill = True,
+        )
+        self.dp_blit_manager.addArtist(self._patch_rectangle)
+        self.ui.page_rectangle.setBlitManager(self.dp_blit_manager)
+        self._mask_widgets.append(self.ui.page_rectangle)
+
+    def _initSegments(self):
+        """
+        Initialize the segmented patches and their managers.
+        """
+        self._patch_segments = []
+        for ii in range(self._max_segment_num):
+            _wedge = Wedge(
+                (0, 0),
+                r = 5,
+                theta_1 = 0,
+                theta_2 = 180,
+                width = 3,
+                edgecolor = None,
+                face_color = 'black',
+                alpha = 0.3,
+                visible = False,
+                fill = True,
+            )
+            self._patch_segments.append(_wedge)
+            self.dp_blit_manager.addArtist(_wedge)
+        self.ui.page_segment_ring.setBlitManager(self.dp_blit_manager)
+        self._mask_widgets.append(self.ui.page_segment_ring)
+
+
+    def setFourDSTEM(self, data_path: str):
+        """
+        Set the data path in HDF5 file, to show the diffraction patterns.
+
+        Will set the data_path attribute. The FourDSTEM must be a 4D matrix.
+
+        arguments:
+            data_path: (str) the path of the 4D-STEM data.
+
+        raises:
+            TypeError, KeyError, ValueError
+        """
+        super(PageVirtualImage, self).setFourDSTEM(data_path)
+        scan_i, scan_j, dp_i, dp_j = self.hdf_handler.file[data_path].shape
+        for widget in self._mask_widgets:
+            widget.setCenter(
+                ((dp_j - 1)/2, (dp_i - 1)/2)
+            )
+        
+        
+        
+        
+
+    
+
+        
+        
+
 
 
 

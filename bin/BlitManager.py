@@ -27,6 +27,7 @@ All rights reserved
 
 from PySide6.QtCore import QObject
 from matplotlib.artist import Artist
+from matplotlib.backend_bases import Event
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas,
 )
@@ -73,9 +74,21 @@ class BlitManager(QObject):
     def figure(self) -> Figure:
         return self._canvas.figure
 
-    def _onDraw(self, event):
+    def __contains__(self, artist: Artist) -> bool:
+        """
+        Test whether the artist is managed by this manager.
+
+        arguments:
+            artist: (Artist)
+        """
+        return artist in self._artists
+
+    def _onDraw(self, event: Event):
         """
         The callback function to register with draw_event.
+
+        arguments:
+            event: (Event)
         """
         if not event is None:
             if not event.canvas is self.canvas:

@@ -186,12 +186,12 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
 
     def setFourDSTEM(self, data_path: str):
         """
-        Set the data path in HDF5 file, to show the image.
+        Set the data path in HDF5 file, to show the diffraction patterns.
 
         Will set the data_path attribute. The FourDSTEM must be a 4D matrix.
 
         arguments:
-            data_path: (str) the path of the image or data.
+            data_path: (str) the path of the 4D-STEM data.
 
         raises:
             TypeError, KeyError, ValueError
