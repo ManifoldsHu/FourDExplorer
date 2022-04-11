@@ -90,6 +90,9 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self._initBaseUi()
 
+        self.ui.comboBox_mode.currentIndexChanged.connect(
+            self.changeMode
+        )
         self._max_segment_num = 10      # The maximum number of segmented ring.
         self._mask_widgets = []         # Must be the same order as the mode.
         self._initMasks()
@@ -133,10 +136,11 @@ class PageVirtualImage(PageBaseFourDSTEM):
             edgecolor = None,
             facecolor = 'black',
             alpha = 0.3,
-            visible = True,
+            visible = False,
             fill = True,
         )
-        self.dp_blit_manager.addArtist(self._patch_circle)
+        
+        self.ui.page_circle.setPatch(self._patch_circle)
         self.ui.page_circle.setBlitManager(self.dp_blit_manager)
         self._mask_widgets.append(self.ui.page_circle)
 
@@ -156,7 +160,8 @@ class PageVirtualImage(PageBaseFourDSTEM):
             visible = False,
             fill = True,
         )
-        self.dp_blit_manager.addArtist(self._patch_ring)
+        
+        self.ui.page_ring.setPatch(self._patch_ring)
         self.ui.page_ring.setBlitManager(self.dp_blit_manager)
         self._mask_widgets.append(self.ui.page_ring)
 
@@ -241,7 +246,18 @@ class PageVirtualImage(PageBaseFourDSTEM):
                 ((dp_j - 1)/2, (dp_i - 1)/2)
             )
         
-        
+    def changeMode(self):
+        """
+        Change mask patch's mode according to mask index.
+        """
+        self.ui.stackedWidget_masks.setCurrentIndex(self.mask_index)
+
+        # Set the patch visible according to the index
+        for ii, widget in enumerate(self._mask_widgets):
+            widget.setMaskActivate(ii == self.mask_index)
+
+    def calcMask(self):
+        pass
         
         
 

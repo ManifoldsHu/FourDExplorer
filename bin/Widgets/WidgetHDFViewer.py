@@ -201,7 +201,30 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
 
             index: (QModelIndex) the current index
         """
-        return self._showDataMenu(pos, index)
+        menu = HDFFourDSTEMMenu(self)
+        menu.action_attributes.triggered.connect(
+            lambda: self.showAttribute(index)
+        )
+        menu.action_delete.triggered.connect(
+            lambda: self.showDelete(index)
+        )
+        menu.action_move.triggered.connect(
+            lambda: self.showMove(index)
+        )
+        menu.action_rename.triggered.connect(
+            lambda: self.showRename(index)
+        )
+        menu.action_copy.triggered.connect(
+            lambda: self.showCopy(index)
+        )
+        menu.action_show.triggered.connect(
+            lambda: self.showPlotting(index)
+        )
+        menu.action_change_type.triggered.connect(
+            lambda: self.showChangeDataType(index)
+        )
+        
+        # return self._showDataMenu(pos, index)
 
     def _showImageMenu(self, pos: QPoint, index: QModelIndex = None):
         """
@@ -597,6 +620,20 @@ class HDFBaseItemMenu(QMenu):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
+        self._model_index = QModelIndex()
+
+    @property
+    def model_index(self) -> QModelIndex:
+        return self._model_index
+
+    def setModelIndex(self, index: QModelIndex):
+        """
+        Set the model index that this menu should handle.
+        """
+        if not isinstance(index, QModelIndex):
+            raise TypeError('index must be QModelIndex object, not '
+                '{0}'.format(type(index).__name__))
+        self._model_index = index
 
     def addModifyActions(self):
         """
@@ -612,6 +649,7 @@ class HDFBaseItemMenu(QMenu):
             self.action_delete = self.addAction('Delete')
         if not 'Rename' in act_str_list:
             self.action_rename = self.addAction('Rename')
+            
     
     def addAtributeActions(self):
         """
@@ -721,10 +759,36 @@ class HDFFourDSTEMMenu(HDFBaseItemMenu):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
+
         self.action_show = self.addAction('Show')
         self.action_change_type = self.addAction('Change Type')
         self.addSeparator()
-        self.action_calibrate = self.addAction('Calibrate')
-        self.action_reconstruct = self.addAction('Reconstruct')
+
+        self.submenu_calibrate = self.addMenu('Calibrate')
+        self.action_parameters = self.submenu_calibrate.addAction(
+            'Optical Parameters'
+        )
+        self.action_align = self.submenu_calibrate.addAction('Align')
+        self.action_bkgrd_substract = self.submenu_calibrate.addAction(
+            'Backgroun Substract'
+        )
+        self.action_angle_correct = self.submenu_calibrate.addAction(
+            'Angular Offset Correct'
+        )
+
+        self.submenu_reconstruct = self.addMenu('Reconstruct')
+        self.action_virtual_image = self.submenu_reconstruct.addAction(
+            'Virtual Image'
+        )
+        self.action_DPC = self.submenu_reconstruct.addAction(
+            'Differentiated Phase Contrast (DPC)'
+        )
+        self.action_CoM = self.submenu_reconstruct.addAction(
+            'Center of Mass (CoM)'
+        )
+
+
         self.addModifyActions()
         self.addAtributeActions()
+
+
