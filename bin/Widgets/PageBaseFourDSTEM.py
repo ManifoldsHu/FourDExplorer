@@ -121,6 +121,7 @@ class PageBaseFourDSTEM(QWidget):
         self._scan_jj = 0
 
         # self._initBaseUi()
+        
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -207,9 +208,7 @@ class PageBaseFourDSTEM(QWidget):
         )
         
         self.ui.pushButton_browse.clicked.connect(self._browse)
-        self.ui.pushButton_browse_preview.clicked.connect(
-            self._browsePreview
-        )
+
 
     def setFourDSTEM(self, data_path: str):
         """
@@ -256,6 +255,7 @@ class PageBaseFourDSTEM(QWidget):
         """
         if self._dp_ax is None:
             self._dp_ax = self.dp_figure.add_subplot()
+            self.dp_blit_manager.addArtist(self._dp_ax)
         if self._colorbar_ax is None:
             self._colorbar_ax, _kw = make_axes(
                 self.dp_ax,
@@ -273,12 +273,23 @@ class PageBaseFourDSTEM(QWidget):
         TODO: read and save attributes, like norm, cmap, alpha, etc.
         """
         if self.dp_object is None:
-            self._dp_object = self.dp_ax.imshow(self.data_object[0,0,:,:])
+            # if not self.data_path:
+            #     self._dp_object = self.dp_ax.imshow(np.zeros((1,1)))
+            # else: 
+            self._dp_object = self.dp_ax.imshow(
+                self.data_object[0,0,:,:]
+            )
             self.dp_blit_manager.addArtist(self._dp_object)
             self.dp_canvas.draw()
             self.dp_canvas.flush_events()
         else:
+            # self.dp_ax.set_xlim(0, self.data_object.shape[3])
+            # self.dp_ax.set_ylim(0, self.data_object.shape[2])
+            # self.dp_ax.
             self.dp_object.set_data(self.data_object[0,0,:,:])
+            
+            # self.dp_object.set_norm(None)
+            self.dp_object.autoscale()
             self.dp_blit_manager.update()
 
     def _createColorbar(self):

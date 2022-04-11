@@ -80,15 +80,16 @@ class WidgetMaskBase(QWidget):
         self._patch = patch
 
         # reset blit manager to None when the patch is reset.
-        if not self.blit_manager is None:
-            if not patch in self.blit_manager:
-                self._blit_manager = None
+        # if not self.blit_manager is None:
+        #     if not patch in self.blit_manager:
+        #         self._blit_manager = None
     
     def setBlitManager(self, blit_manager: BlitManager):
         """
         Set the BlitManager to manage this patch.
 
-        Will add the patch to the blit manager's artist list.
+        Will NOT add the patch to the blit manager's artist list. We should 
+        add it by ourselves.
 
         arguments:
             blit_manager: (BlitManager)
@@ -97,8 +98,10 @@ class WidgetMaskBase(QWidget):
             raise TypeError('blit_manager must be a BlitManager object, not '
                 '{0}'.format(type(blit_manager).__name__))
         self._blit_manager = blit_manager
-        if not self.patch in blit_manager:
-            blit_manager.addArtist(self.patch)
+
+
+        # if not self.patch is None and not self.patch in blit_manager:
+        #     blit_manager.addArtist(self.patch)
 
     def isContained(self, loc: Tuple) -> bool:
         """
@@ -144,9 +147,18 @@ class WidgetMaskBase(QWidget):
                 '{0} is given'.format(len(loc)))
 
         self._center = loc
+        self._updateCenter()
+
+    def _updateCenter(self):
+        """
+        When the center is reset, reimplement this function to update.
+        """
+        self.logger.warning('_updateCenter() should be reimplemented')
 
     def setMaskActivate(self, is_activated: bool):
-        return self.patch.set_visible(is_activated)
+        self.logger.debug('{0}: {1}'.format(type(self).__name__, self.patch))
+        if not self.patch is None:
+            self.patch.set_visible(is_activated)
 
 
 
@@ -160,6 +172,7 @@ class WidgetMaskCircle(WidgetMaskBase):
         super().__init__(parent)
         self.ui = uiWidgetMaskCircle.Ui_Form()
         self.ui.setupUi(self)
+        self._initUi()
 
     @property
     def radius(self) -> float:
@@ -215,13 +228,15 @@ class WidgetMaskCircle(WidgetMaskBase):
         """
         self.ui.doubleSpinBox_circle_radius.setValue(5)
         self.ui.doubleSpinBox_circle_center_i.setValue(0)
+        self.ui.doubleSpinBox_circle_center_i.setRange(-32768, 32767)
+        self.ui.doubleSpinBox_circle_center_j.setRange(-32768, 32767)
         self.ui.doubleSpinBox_circle_center_j.setValue(0)
         self.ui.doubleSpinBox_circle_radius.setMinimum(0)
         
         self.ui.doubleSpinBox_circle_radius.valueChanged.connect(
             self._updateCircleShape
         )
-        self.ui.doubleSpinBox_circle_center_i.valueChagned.connect(
+        self.ui.doubleSpinBox_circle_center_i.valueChanged.connect(
             self._updateCircleLocation
         )
         self.ui.doubleSpinBox_circle_center_j.valueChanged.connect(
@@ -232,18 +247,21 @@ class WidgetMaskCircle(WidgetMaskBase):
         """
         Set the shape of the circle and update.
         """
-        self.ui.patch.set_radius(self.radius)
+        self.patch.set_radius(self.radius)
         self.blit_manager.update()
 
     def _updateCircleLocation(self):
         """
         Set the location of the circle and update
         """
-        self.ui.patch.set_center(
+        self.patch.set_center((
             self.center[1] + self.shift_j,
             self.center[0] + self.shift_i
-        )
+        ))
         self.blit_manager.update()
+
+    def _updateCenter(self):
+        return self._updateCircleLocation()
 
 
 class WidgetMaskRing(WidgetMaskBase):

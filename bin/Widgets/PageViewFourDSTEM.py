@@ -128,6 +128,8 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         self._tracking = False
 
         self._initBaseUi()
+        self._initUi()
+        
         self._initTracking()
 
     @property
@@ -162,6 +164,14 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
     def preview_blit_manager(self) -> BlitManager:
         return self.ui.widget_preview.blit_manager
 
+    def _initUi(self):
+        """
+        Initialize ui.
+        """
+        self.ui.pushButton_browse_preview.clicked.connect(
+            self._browsePreview
+        )
+        
     def _initTracking(self):
         """
         Initialize tracking mouse location in the preview image.

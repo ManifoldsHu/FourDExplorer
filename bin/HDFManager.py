@@ -1344,7 +1344,7 @@ class HDFDataNode(HDFTreeNode):
         """
         if '.' in self.name:
             ext = self.name.split('.').pop()
-            if ext == '4d':
+            if ext == '4dstem':
                 self.hdf_type = HDFType.FourDSTEM
             elif ext == 'line':
                 self.hdf_type = HDFType.Line 

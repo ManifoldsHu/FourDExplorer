@@ -89,15 +89,26 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self.ui.setupUi(self)
 
         self._initBaseUi()
+        self._createAxes()
+        # self._createDP()
+        # self._createColorbar()
 
         self.ui.comboBox_mode.currentIndexChanged.connect(
-            self.changeMode
+            self._changeMode
         )
         self._max_segment_num = 10      # The maximum number of segmented ring.
         self._mask_widgets = []         # Must be the same order as the mode.
-        self._initMasks()
+        # self._initMasks()
         self.setWindowTitle('Virtual Image')
+        # for ii, widget in enumerate(self._mask_widgets):
+        #     widget.setMaskActivate(ii == self.mask_index)
         
+        self._patch_circle = None
+        self._patch_rectangle = None
+        self._patch_ring = None
+        self._patch_segments = []
+        self._patch_wedge = None
+
 
     @property
     def mask_index(self) -> int:
@@ -124,24 +135,39 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self._initWedge()
         self._initRectangle()
         self._initSegments()
+
+        self.dp_canvas.draw()
+        self.dp_canvas.flush_events()
         
 
     def _initCircle(self):
         """
         Initialize the circle patch and its managers.
         """
+        # if not self._patch_circle is None:
+        #     self._patch_circle = self.dp_ax.add_patch(
+        #         Circle(
+        #             (0, 0),
+        #             radius = 50,
+        #             edgecolor = 'black',
+        #             facecolor = 'red',
+        #             # alpha = 1,
+        #             # visible = True,
+        #             fill = True,
+        #         )
+        #     )
         self._patch_circle = Circle(
             (0, 0),
-            radius = 5,
-            edgecolor = None,
-            facecolor = 'black',
-            alpha = 0.3,
-            visible = False,
+            radius = 50,
+            edgecolor = 'black',
+            facecolor = 'red',
+            alpha = 0.5,
             fill = True,
         )
-        
-        self.ui.page_circle.setPatch(self._patch_circle)
+        self.dp_ax.add_patch(self._patch_circle)
+        self.dp_blit_manager.addArtist(self._patch_circle)
         self.ui.page_circle.setBlitManager(self.dp_blit_manager)
+        self.ui.page_circle.setPatch(self._patch_circle)
         self._mask_widgets.append(self.ui.page_circle)
 
     def _initRing(self):
@@ -151,16 +177,16 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self._patch_ring = Wedge(
             (0, 0),
             r = 5,                  # outer radius
-            theta_1 = 0,
-            theta_2 = 360,
+            theta1 = 0,
+            theta2 = 360,
             width = 3,              # outer radius - inner radius
             edgecolor = None,
             facecolor = 'black',
             alpha = 0.3,
-            visible = False,
-            fill = True,
+            # visible = False,
+            # fill = True,
         )
-        
+        self.dp_ax.add_patch(self._patch_ring)
         self.ui.page_ring.setPatch(self._patch_ring)
         self.ui.page_ring.setBlitManager(self.dp_blit_manager)
         self._mask_widgets.append(self.ui.page_ring)
@@ -172,15 +198,16 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self._patch_wedge = Wedge(
             (0, 0),
             r = 5,
-            theta_1 = 0,
-            theta_2 = 120,
+            theta1 = 0,
+            theta2 = 120,
             width = 3,
             edgecolor = None,
             facecolor = 'black',
             alpha = 0.3,
-            visible = False,
-            fill = True,
+            # visible = False,
+            # fill = True,
         )
+        self.dp_ax.add_patch(self._patch_wedge)
         self.dp_blit_manager.addArtist(self._patch_wedge)
         self.ui.page_wedge.setBlitManager(self.dp_blit_manager)
         self._mask_widgets.append(self.ui.page_wedge)
@@ -196,9 +223,10 @@ class PageVirtualImage(PageBaseFourDSTEM):
             edgecolor = None,
             facecolor = 'black',
             alpha = 0.3,
-            visible = False,
-            fill = True,
+            # visible = False,
+            # fill = True,
         )
+        self.dp_ax.add_patch(self._patch_rectangle)
         self.dp_blit_manager.addArtist(self._patch_rectangle)
         self.ui.page_rectangle.setBlitManager(self.dp_blit_manager)
         self._mask_widgets.append(self.ui.page_rectangle)
@@ -212,17 +240,19 @@ class PageVirtualImage(PageBaseFourDSTEM):
             _wedge = Wedge(
                 (0, 0),
                 r = 5,
-                theta_1 = 0,
-                theta_2 = 180,
+                theta1 = 0,
+                theta2 = 180,
                 width = 3,
                 edgecolor = None,
-                face_color = 'black',
+                facecolor = 'black',
                 alpha = 0.3,
-                visible = False,
-                fill = True,
+                # visible = False,
+                # fill = True,
             )
+            self.dp_ax.add_patch(_wedge)
             self._patch_segments.append(_wedge)
             self.dp_blit_manager.addArtist(_wedge)
+
         self.ui.page_segment_ring.setBlitManager(self.dp_blit_manager)
         self._mask_widgets.append(self.ui.page_segment_ring)
 
@@ -240,21 +270,24 @@ class PageVirtualImage(PageBaseFourDSTEM):
             TypeError, KeyError, ValueError
         """
         super(PageVirtualImage, self).setFourDSTEM(data_path)
+        self._initMasks()
         scan_i, scan_j, dp_i, dp_j = self.hdf_handler.file[data_path].shape
         for widget in self._mask_widgets:
             widget.setCenter(
                 ((dp_j - 1)/2, (dp_i - 1)/2)
             )
         
-    def changeMode(self):
+        self.dp_blit_manager.update()
+        
+    def _changeMode(self):
         """
         Change mask patch's mode according to mask index.
         """
         self.ui.stackedWidget_masks.setCurrentIndex(self.mask_index)
 
         # Set the patch visible according to the index
-        for ii, widget in enumerate(self._mask_widgets):
-            widget.setMaskActivate(ii == self.mask_index)
+        # for ii, widget in enumerate(self._mask_widgets):
+        #     widget.setMaskActivate(ii == self.mask_index)
 
     def calcMask(self):
         pass

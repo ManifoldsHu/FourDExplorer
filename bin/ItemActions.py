@@ -621,7 +621,7 @@ class ActionShowImage(ActionShowData):
         page = self._plotImage(self.item_path)
         self.tabview_manager.openTab(page)
 
-class ActionShowViectorField(ActionShowData):
+class ActionShowVectorField(ActionShowData):
     """
     绘制二维矢量场的 Action。
 
@@ -653,6 +653,24 @@ class ActionVirtualImage(ActionShowData):
 
     Action to calculate 4D-STEM virtual images.
     """
+    def __init__(self, 
+        parent: QObject = None, 
+        item_index = QModelIndex(),
+        item_path = '',
+    ):
+        """
+        arguments:
+            parent: (QObject)
+
+            item_index: (QModelIndex) must be the index of the HDF model, in 
+                which there exist a valid item path.
+
+            item_path: (str) the item's path handled by this action.
+        """
+        super().__init__(parent, item_index, item_path)
+        self.setText('Virtual Image')
+        
+
     def plotData(self):
         """
         Force to use virtual image method.
