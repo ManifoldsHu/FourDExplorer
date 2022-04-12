@@ -79,7 +79,7 @@ class WidgetPlotHist(WidgetPlotBase):
             animated = True,
         )
         self._hist_patch = self._hist_ax.add_patch(init_patch)
-        self.blit_manager.addArtist(self._hist_patch)
+        self.blit_manager.addArtist('hist_patch', self._hist_patch)
         self.canvas.draw()
         self.canvas.flush_events()
     

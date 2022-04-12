@@ -247,6 +247,8 @@ class PageBaseFourDSTEM(QWidget):
         self.ui.spinBox_scan_ii.setMaximum(data_obj.shape[0])
         self.ui.spinBox_scan_jj.setMaximum(data_obj.shape[1])
 
+        self.dp_canvas.draw()
+        self.dp_canvas.flush_events()
 
 
     def _createAxes(self):
@@ -255,7 +257,7 @@ class PageBaseFourDSTEM(QWidget):
         """
         if self._dp_ax is None:
             self._dp_ax = self.dp_figure.add_subplot()
-            self.dp_blit_manager.addArtist(self._dp_ax)
+            self.dp_blit_manager.addArtist('dp_axes', self._dp_ax)
         if self._colorbar_ax is None:
             self._colorbar_ax, _kw = make_axes(
                 self.dp_ax,
@@ -264,7 +266,7 @@ class PageBaseFourDSTEM(QWidget):
             )
             self._colorbar_ax.xaxis.set_visible(False)
             self._colorbar_ax.yaxis.tick_right()
-            self.dp_blit_manager.addArtist(self._colorbar_ax)
+            self.dp_blit_manager.addArtist('colorbar_axes', self._colorbar_ax)
 
     def _createDP(self):
         """
@@ -272,25 +274,16 @@ class PageBaseFourDSTEM(QWidget):
 
         TODO: read and save attributes, like norm, cmap, alpha, etc.
         """
-        if self.dp_object is None:
-            # if not self.data_path:
-            #     self._dp_object = self.dp_ax.imshow(np.zeros((1,1)))
-            # else: 
-            self._dp_object = self.dp_ax.imshow(
-                self.data_object[0,0,:,:]
-            )
-            self.dp_blit_manager.addArtist(self._dp_object)
-            self.dp_canvas.draw()
-            self.dp_canvas.flush_events()
-        else:
-            # self.dp_ax.set_xlim(0, self.data_object.shape[3])
-            # self.dp_ax.set_ylim(0, self.data_object.shape[2])
-            # self.dp_ax.
-            self.dp_object.set_data(self.data_object[0,0,:,:])
-            
-            # self.dp_object.set_norm(None)
-            self.dp_object.autoscale()
-            self.dp_blit_manager.update()
+        if self._dp_object in self.dp_ax.images:
+            # clear dp objects in the axes.
+            _index = self.dp_ax.images.index(self._dp_object)
+            self.dp_ax.images.pop(_index)
+
+        self._dp_object = self.dp_ax.imshow(
+            self.data_object[0, 0, :, :]
+        )
+        self.dp_blit_manager['dp_image'] = self._dp_object
+        
 
     def _createColorbar(self):
         """

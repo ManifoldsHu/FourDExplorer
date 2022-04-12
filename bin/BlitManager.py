@@ -25,6 +25,7 @@ All rights reserved
 """
 
 
+from typing import Iterator
 from PySide6.QtCore import QObject
 from matplotlib.artist import Artist
 from matplotlib.backend_bases import Event
@@ -61,7 +62,7 @@ class BlitManager(QObject):
         super().__init__(parent)
         self._background = None
         self._canvas = canvas
-        self._artists = []
+        self._artists = {}
         
         # grab the background on every draw
         self._cid = self._canvas.mpl_connect('draw_event', self._onDraw)
@@ -74,14 +75,56 @@ class BlitManager(QObject):
     def figure(self) -> Figure:
         return self._canvas.figure
 
-    def __contains__(self, artist: Artist) -> bool:
+    def __getitem__(self, key: str) -> Artist:
+        return self._artists[key]
+
+    def __iter__(self) -> Iterator:
+        return iter(self._artists)
+
+    def __len__(self) -> int:
+        return len(self._artists)
+
+    def __str__(self) -> str:
+        return '<BlitManager> canvas: {0}'.format(self.canvas)
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __setitem__(self, key: str, artist: Artist):
+        """
+        Add or change an artist.
+
+        It is recommended to use artists' labels as keys.
+        """
+        if not isinstance(key, str):
+            raise TypeError('key must be a str, not '
+                '{0}'.format(type(key).__name__))
+        if not isinstance(artist, Artist):
+            raise TypeError('artist must be an Artist, not '
+                '{0}'.format(type(artist).__name__))
+        if not artist.figure is self.figure:
+            raise RuntimeError('The artist must be in the figure associated '
+                'with the canvas that this BlitManager is managing')
+        artist.set_animated(True)
+        self._artists[key] = artist
+
+    def __contains__(self, _object: str | Artist) -> bool:
         """
         Test whether the artist is managed by this manager.
 
         arguments:
             artist: (Artist)
         """
-        return artist in self._artists
+        if isinstance(_object, str):
+            return _object in self._artists.keys()
+        elif isinstance(_object, Artist):
+            return _object in self._artists.values()
+        else:
+            raise TypeError('_object must be a str or Artist, not '
+                '{0}'.format(type(_object).__name__))
+
+    def __delitem__(self, key: str):
+        del self._artists[key]
 
     def _onDraw(self, event: Event):
         """
@@ -99,27 +142,43 @@ class BlitManager(QObject):
         )
         self._drawAnimated()
 
-    def addArtist(self, artist: Artist):
+    def addArtist(self, key: str, artist: Artist):
         """
         Add an artist to be managed.
 
         arguments:
+            key: (str) The key of the artist. Recommended to use label.
+
             artist: (Artist) The artist to be added. It will be set to 
                 animated to be safe. The artist must be in the figure
                 associated with the canvas that this class is managing.
         """
-        if not artist.figure is self.figure:
-            raise RuntimeError('The artist must be in the figure associated '
-                'with the canvas that this BlitManager is managing')
+        if key in self._artists:
+            raise ValueError('There has been an artist with key '
+                '{0}'.format(key))
+        self[key] = artist
+    
+    def resetArtist(self, key: str, artist: Artist):
+        """
+        Reset an artist with key to be managed.
 
-        artist.set_animated(True)
-        self._artists.append(artist)
+        arguments:
+            key: (str) The key of the artist. Recommended to use label.
+
+            artist: (Artist) The artist to be reset. It will be set to
+                animated to be safe. The artist must be in the figure 
+                associated with the canvas that this class is managing.
+        """
+        if not key in self._artists:
+            raise KeyError('There is no artist with key '
+                '{0}'.format(key))
+        self[key] = artist
 
     def _drawAnimated(self):
         """
         Draw all of the animted artists.
         """
-        for artist in self._artists:
+        for artist in self._artists.values():
             self.figure.draw_artist(artist)
 
     def update(self):
@@ -138,116 +197,13 @@ class BlitManager(QObject):
         # let the GUI event loop process anything it has to do.
         self.canvas.flush_events()
 
-    
+    def keys(self):
+        return self._artists.keys()
 
-# class BlitManager(object):
-#     '''
-        
+    def artists(self):
+        return self._artists.values()
 
-#     '''
-#     def __init__(self, canvas, animated_artists = (), animated_collections = ()):
-#         '''
-#         Parameters:
-#         ---------------
-#         canvas : FigureCanvasAgg
-
-
-#         animated_artists : Iterable[Artist]
-#         List of the artists to manage
-#         '''
-#         self.canvas = canvas
-#         self._bg = None
-#         self._artists = []
-#         self._collections = []
-
-
-#         for artist in animated_artists:
-#             self.add_artist(artist)
-
-#         for collection in animated_collections:
-#             self.add_collection(collection)
-
-#         #为每次画图抓取背景
-#         self.cid = canvas.mpl_connect('draw_event', self.on_draw)
-
-
-#     def on_draw(self, event):
-#         '''
-#         回调，用于向 'draw_event' 登记
-#         '''
-#         cv = self.canvas
-#         if event is not None:
-#             if event.canvas != cv:
-#                 raise RuntimeError
-#         self._bg = cv.copy_from_bbox(cv.figure.bbox)
-#         self._draw_animated()
-
-
-#     def add_artist(self, art):
-#         '''
-#         添加一个需要处理的artist
-
-#         Parameters
-#         --------------
-#         art : Artist
-
-#         添加Artist，设置其为'animated'
-#         *art*必须在与此画布关联的图中
-
-#         '''
-#         if art.figure != self.canvas.figure:
-#             raise RuntimeError
-
-#         art.set_animated(True)
-#         self._artists.append(art)
-
-#     def add_collection(self, collection):
-#         '''
-#         添加一个需要处理的collection
-
-#         Parameters
-#         ---------------
-#         collection : instance of subclass of collections.Collection
-
-#         添加collection，设置其为'animated'
-#         其必须在与此画布关联的图中
-#         '''
-
-#         if collection.axes.figure != self.canvas.figure:
-#             raise RuntimeError
-
-#         collection.set_animated(True)
-#         self._collections.append(collection)
-
-
-#     def _draw_animated(self):
-#         '''
-#         画出所有可变的artists
-#         '''
-#         fig = self.canvas.figure
-#         for a in self._artists:
-#             fig.draw_artist(a)
-        
-#         for c in self._collections:
-#             fig.draw_artist(c)
-
-#     def update(self):
-#         '''
-#         更新屏幕
-#         '''
-#         cv = self.canvas
-#         fig = cv.figure
-#         if self._bg is None:
-#             self.on_draw(None)
-#         else:
-#             #储存background
-#             cv.restore_region(self._bg)
-#             #画出所有动态artist
-#             self._draw_animated()
-#             #更新GUI状态
-#             cv.blit(fig.bbox)
-
-#         #继续GUI事件循环
-#         cv.flush_events()
+    def items(self):
+        return self._artists.items()
 
         

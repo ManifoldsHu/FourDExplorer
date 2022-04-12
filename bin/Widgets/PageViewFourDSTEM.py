@@ -171,7 +171,7 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         self.ui.pushButton_browse_preview.clicked.connect(
             self._browsePreview
         )
-        
+
     def _initTracking(self):
         """
         Initialize tracking mouse location in the preview image.
@@ -266,8 +266,19 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         self._preview_path = preview_path
         self.ui.lineEdit_preview_path.setText(self.preview_path)
         
+        self._createPreviewAxes()
         self._createPreviewImage()
         self._createPreviewCursor()
+
+        self.preview_canvas.draw()
+        self.preview_canvas.flush_events()
+    
+    def _createPreviewAxes(self):
+        """
+        Create the axes that contains previewing image.
+        """
+        if self._preview_ax is None:
+            self._preview_ax = self.preview_figure.add_subplot()
 
     def _createPreviewImage(self):
         """
@@ -275,21 +286,17 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
 
         TODO: read and save attributes, like norm, cmap, alpha, etc.
         """
-        if self._preview_ax is None:
-            self._preview_ax = self.preview_figure.add_subplot()
-        if self.preview_object is None:
-            self._preview_object = self.preview_ax.imshow(
+        if self._preview_object in self.dp_ax.images:
+            # clear preview objects in the axes
+            _index = self.dp_ax.images.index(self._preview_object)
+            self.preview_ax.images.pop(_index)
+        
+        self._preview_object = self.preview_ax.imshow(
                 self.hdf_handler.file[self.preview_path]
-            )
-            self.preview_blit_manager.addArtist(self._preview_object)
-            self.preview_canvas.draw()
-            self.preview_canvas.flush_events()
-        else:
-            self.preview_object.set_data(
-                self.hdf_handler.file[self.preview_path]
-            )
-            self.preview_object.autoscale()
-            self.preview_blit_manager.update()
+        )
+        self.preview_blit_manager['preview_image'] = self._preview_object
+        
+        
 
     def _createPreviewCursor(self):
         """
@@ -302,7 +309,8 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
                 color = 'black',
                 linewidth = 1,
             )
-            self.preview_blit_manager.addArtist(self.preview_hcursor_object)
+            self.preview_blit_manager['preview_hcursor'] = (
+                self.preview_hcursor_object)    # Here is not a tuple
         else:
             self.preview_hcursor_object.set_ydata(
                 self.scan_ii
@@ -315,15 +323,16 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
                 color = 'black',
                 linewidth = 1,
             )
-            self.preview_blit_manager.addArtist(self.preview_vcursor_object)
+            self.preview_blit_manager['preview_vcursor'] = (
+                self.preview_vcursor_object)    # Here is not a tuple
+            
         else:
             self.preview_vcursor_object.set_xdata(
                 self.scan_jj
             )
             self.preview_blit_manager.update()
 
-        self.preview_canvas.draw()
-        self.preview_canvas.flush_events()
+        
 
     def _updateDP(self):
         """

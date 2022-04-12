@@ -67,8 +67,9 @@ class PageViewLine(QWidget):
 
         self._data_paths = []
         self._line_ax = None
-        self._line_objects = []
+        self._line_objects = [] # TODO: changed to be a dict
         self._model = None
+        self._count = 0     # TODO: use label rather than index 
         # self._cycler = cycler(
         #     color=['#1f77b4', 'green', 'blue', 'black'],
         #     linestyle = ['']
@@ -188,7 +189,7 @@ class PageViewLine(QWidget):
         plot_lines = self._line_ax.plot(X_data, Y_data)
         for line in plot_lines:     # Axes.plot() returns List[Line2D]
             self._line_objects.append(line)
-            self.line_blit_manager.addArtist(line)
+            self.line_blit_manager.addArtist(str(self._count),line)
         self.line_canvas.draw()
         self.line_canvas.flush_events()
 

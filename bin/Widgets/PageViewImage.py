@@ -207,6 +207,9 @@ class PageViewImage(QWidget):
         self._image_max = np.max(data_obj)
         self._image_min = np.min(data_obj)
 
+        self.image_canvas.draw()
+        self.image_canvas.flush_events()
+
 
     def _createAxes(self):
         """
@@ -214,6 +217,7 @@ class PageViewImage(QWidget):
         """
         if self._image_ax is None:
             self._image_ax = self.image_figure.add_subplot()
+            self.image_blit_manager.addArtist('image_axes', self._image_ax)
         if self._colorbar_ax is None:
             self._colorbar_ax, _kw = make_axes(
                 self.image_ax,
@@ -226,7 +230,7 @@ class PageViewImage(QWidget):
             # Here, we must add the colorbar axes to the blit manager, so 
             # that when the colorbar update mappables, the colorbar shown
             # on the screen will also be updated.
-            self.image_blit_manager.addArtist(self._colorbar_ax)
+            self.image_blit_manager['colorbar_axes'] = self._colorbar_ax
         
     def _createImage(self):
         """
@@ -234,15 +238,14 @@ class PageViewImage(QWidget):
 
         TODO: read and save attributes, like norm, cmap, alpha, etc.
         """
-        # attrs = self.data_object.attrs
-        if self.image_object is None:
-            self._image_object = self.image_ax.imshow(self.data_object)
-            self.image_blit_manager.addArtist(self._image_object)
-            self.image_canvas.draw()
-            self.image_canvas.flush_events()
-        else:
-            self.image_object.set_data(self.data_object)
-            self.image_blit_manager.update()
+        if self._image_object in self.image_ax.images:
+            _index = self.image_ax.images.index(self._image_object)
+            self.image_ax.images.pop(_index)
+        
+        self._image_object = self.image_ax.imshow(
+            self.data_object
+        )
+        self.image_blit_manager['image'] = self._image_object
         
         self.ui.widget_hist_view.drawHist(self.data_object)
         
@@ -256,7 +259,6 @@ class PageViewImage(QWidget):
                 mappable = self.image_object,
             )
 
-            
         else:
             self.colorbar_object.update_normal(self.image_object)
 
