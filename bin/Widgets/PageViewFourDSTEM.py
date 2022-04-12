@@ -129,7 +129,8 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
 
         self._initBaseUi()
         self._initUi()
-        
+        self._createAxes()
+        self._createPreviewAxes()
         self._initTracking()
 
     @property
@@ -266,7 +267,7 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         self._preview_path = preview_path
         self.ui.lineEdit_preview_path.setText(self.preview_path)
         
-        self._createPreviewAxes()
+        # self._createPreviewAxes()
         self._createPreviewImage()
         self._createPreviewCursor()
 
@@ -279,6 +280,7 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         """
         if self._preview_ax is None:
             self._preview_ax = self.preview_figure.add_subplot()
+            self.preview_blit_manager['preview_axes'] = self._preview_ax
 
     def _createPreviewImage(self):
         """

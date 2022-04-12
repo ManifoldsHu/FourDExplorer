@@ -238,7 +238,7 @@ class PageBaseFourDSTEM(QWidget):
         self._data_path = data_path
         self.ui.lineEdit_data_path.setText(self.data_path)
         
-        self._createAxes()
+        # self._createAxes()
         self._createDP()
         self._createColorbar()
 

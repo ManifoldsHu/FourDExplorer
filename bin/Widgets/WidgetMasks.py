@@ -19,7 +19,7 @@ date:           Apr 10, 2021
 """
 
 from logging import Logger
-from typing import Tuple
+from typing import List, Tuple
 
 from PySide6.QtWidgets import QWidget
 from matplotlib.figure import Figure
@@ -78,11 +78,6 @@ class WidgetMaskBase(QWidget):
             raise TypeError('patch must be Patch object, not '
                 '{0}'.format(type(patch).__name__))
         self._patch = patch
-
-        # reset blit manager to None when the patch is reset.
-        # if not self.blit_manager is None:
-        #     if not patch in self.blit_manager:
-        #         self._blit_manager = None
     
     def setBlitManager(self, blit_manager: BlitManager):
         """
@@ -98,10 +93,6 @@ class WidgetMaskBase(QWidget):
             raise TypeError('blit_manager must be a BlitManager object, not '
                 '{0}'.format(type(blit_manager).__name__))
         self._blit_manager = blit_manager
-
-
-        # if not self.patch is None and not self.patch in blit_manager:
-        #     blit_manager.addArtist(self.patch)
 
     def isContained(self, loc: Tuple) -> bool:
         """
@@ -147,13 +138,13 @@ class WidgetMaskBase(QWidget):
                 '{0} is given'.format(len(loc)))
 
         self._center = loc
-        self._updateCenter()
+        self._resetPatchCenter()
 
-    def _updateCenter(self):
+    def _resetPatchCenter(self):
         """
         When the center is reset, reimplement this function to update.
         """
-        self.logger.warning('_updateCenter() should be reimplemented')
+        self.logger.warning('_resetPatchCenter() should be reimplemented')
 
     def setMaskActivate(self, is_activated: bool):
         self.logger.debug('{0}: {1}'.format(type(self).__name__, self.patch))
@@ -174,26 +165,31 @@ class WidgetMaskCircle(WidgetMaskBase):
         self.ui.setupUi(self)
         self._initUi()
 
+        self._radius = 0
+        self._shift_i = 0
+        self._shift_j = 0
+
+
     @property
     def radius(self) -> float:
         """
         The radius of the circle.
         """
-        return self.ui.doubleSpinBox_circle_radius.value()
+        return self._radius
 
     @property
     def shift_i(self) -> float:
         """
         The vertical shift of the center of the circle.
         """
-        return self.ui.doubleSpinBox_circle_center_i.value()
+        return self._shift_i
 
     @property
     def shift_j(self) -> float:
         """
         The horizontal shift of the center of the circle.
         """
-        return self.ui.doubleSpinBox_circle_center_j.value()
+        return self._shift_j
 
     @property
     def patch(self) -> Circle:
@@ -213,25 +209,20 @@ class WidgetMaskCircle(WidgetMaskBase):
                 'or CirclePolygon patch, but given '
                 '{0}'.format(type(patch).__name__)
             )
+        
         self.ui.doubleSpinBox_circle_radius.setValue(patch.radius)
-        center_j, center_i = patch.center
-        self.ui.doubleSpinBox_circle_center_i.setValue(
-            center_i - self.center[0]
-        )
-        self.ui.doubleSpinBox_circle_center_j.setValue(
-            center_j - self.center[1]
-        )
+
     
     def _initUi(self):
         """
         Initialize uis.
         """
-        self.ui.doubleSpinBox_circle_radius.setValue(5)
+        self.ui.doubleSpinBox_circle_radius.setValue(0)
+        self.ui.doubleSpinBox_circle_radius.setRange(0, 32767)
         self.ui.doubleSpinBox_circle_center_i.setValue(0)
         self.ui.doubleSpinBox_circle_center_i.setRange(-32768, 32767)
-        self.ui.doubleSpinBox_circle_center_j.setRange(-32768, 32767)
         self.ui.doubleSpinBox_circle_center_j.setValue(0)
-        self.ui.doubleSpinBox_circle_radius.setMinimum(0)
+        self.ui.doubleSpinBox_circle_center_j.setRange(-32768, 32767)
         
         self.ui.doubleSpinBox_circle_radius.valueChanged.connect(
             self._updateCircleShape
@@ -247,21 +238,32 @@ class WidgetMaskCircle(WidgetMaskBase):
         """
         Set the shape of the circle and update.
         """
+        self._radius = self.ui.doubleSpinBox_circle_radius.value()
         self.patch.set_radius(self.radius)
         self.blit_manager.update()
 
     def _updateCircleLocation(self):
         """
-        Set the location of the circle and update
+        Set the location of the circle and update.
         """
+        self._shift_i = self.ui.doubleSpinBox_circle_center_i.value()
+        self._shift_j = self.ui.doubleSpinBox_circle_center_j.value()
+
         self.patch.set_center((
             self.center[1] + self.shift_j,
             self.center[0] + self.shift_i
         ))
         self.blit_manager.update()
 
-    def _updateCenter(self):
+    def _resetPatchCenter(self):
+        """
+        Reset the patch's shift to the center of the image.
+
+        This method is called whenever self.setCenter() method is called.
+        """
         return self._updateCircleLocation()
+        
+        
 
 
 class WidgetMaskRing(WidgetMaskBase):
@@ -296,5 +298,7 @@ class WidgetMaskSegment(WidgetMaskBase):
 
     The widget to manage segmented ring patches.
     """
-    pass
+    
+    def setPatch(self, patches: List[Patch]):
+        self._patch = patches
 

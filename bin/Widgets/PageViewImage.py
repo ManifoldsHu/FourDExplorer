@@ -110,6 +110,7 @@ class PageViewImage(QWidget):
         self.ui.lineEdit_image_path.setReadOnly(True)
 
         self._initUI()
+        self._createAxes()
 
 
     @property
@@ -200,7 +201,7 @@ class PageViewImage(QWidget):
         self.ui.lineEdit_image_path.setText(self.data_path)
         self.setWindowTitle('{0} - Image'.format(img_node.name))
 
-        self._createAxes()
+        # self._createAxes()
         self._createImage()
         self._createColorbar()
 
