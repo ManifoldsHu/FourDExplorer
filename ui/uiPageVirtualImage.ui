@@ -161,6 +161,16 @@
              </item>
              <item>
               <property name="text">
+               <string>Ellipse</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Polygon</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
                <string>Segmented Ring</string>
               </property>
              </item>
@@ -186,12 +196,14 @@
              <item>
               <widget class="QStackedWidget" name="stackedWidget_masks">
                <property name="currentIndex">
-                <number>4</number>
+                <number>5</number>
                </property>
                <widget class="WidgetMaskCircle" name="page_circle"/>
                <widget class="WidgetMaskRing" name="page_ring"/>
                <widget class="WidgetMaskWedge" name="page_wedge"/>
                <widget class="WidgetMaskRectangle" name="page_rectangle"/>
+               <widget class="WidgetMaskEllipse" name="page_ellipse"/>
+               <widget class="WidgetMaskPolygon" name="page_polygon"/>
                <widget class="WidgetMaskSegment" name="page_segment_ring"/>
               </widget>
              </item>
@@ -394,6 +406,18 @@
   </customwidget>
   <customwidget>
    <class>WidgetMaskRectangle</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetMasks.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetMaskEllipse</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetMasks.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetMaskPolygon</class>
    <extends>QWidget</extends>
    <header>bin.Widgets.WidgetMasks.h</header>
    <container>1</container>

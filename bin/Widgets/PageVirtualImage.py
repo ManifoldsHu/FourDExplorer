@@ -112,7 +112,9 @@ class PageVirtualImage(PageBaseFourDSTEM):
             1       Ring
             2       Wedge
             3       Rectangle
-            4       Segmented Ring
+            4       Ellipse
+            5       Polygon
+            6       Segmented Ring
         """
         return self.ui.comboBox_mode.currentIndex()
 
@@ -152,9 +154,9 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self._patch_circle = Circle(
             (0, 0),
             radius = 25,
-            edgecolor = 'black',
-            facecolor = 'red',
-            alpha = 0.3,
+            edgecolor = 'white',
+            facecolor = 'black',
+            alpha = 0.4,
             fill = True,
             visible = True,
         )
@@ -166,26 +168,30 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self.ui.page_circle.setPatch(self._patch_circle)
         self._mask_widgets.append(self.ui.page_circle)
 
-    def _initRing(self):
+    def _createRing(self):
         """
         Initialize the ring patch and its managers.
         """
+        if self._patch_ring in self.dp_ax.patches:
+            _index = self.dp_ax.patches.index(self._patch_ring)
+            self.dp_ax.patches.pop(_index)
+
         self._patch_ring = Annulus(
             (0, 0),
             r = 25,
             width = 15,
-            edgecolor = 'black',
-            facecolor = 'red',
-            alpha = 0.5,
+            edgecolor = 'white',
+            facecolor = 'black',
+            alpha = 0.4,
             fill = True,
             visible = False,
         )
 
         self.dp_ax.add_patch(self._patch_ring)
-        self.dp_blit_manager.addArtist('ring_patch', self._patch_ring)
+        self.dp_blit_manager['ring_patch'] = self._patch_ring
+        
         self.ui.page_ring.setBlitManager(self.dp_blit_manager)
         self.ui.page_ring.setPatch(self._patch_ring)
-        
         self._mask_widgets.append(self.ui.page_ring)
 
     def _initWedge(self):

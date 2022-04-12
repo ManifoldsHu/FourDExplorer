@@ -291,6 +291,21 @@ class WidgetMaskRectangle(WidgetMaskBase):
     """
     pass
 
+class WidgetMaskEllipse(WidgetMaskBase):
+    """
+    管理椭圆形的部件类。
+
+    The widget to manage ellipse patches.
+    """
+    pass
+
+class WidgetMaskPolygon(WidgetMaskBase):
+    """
+    管理正多边形的部件类。
+
+    The widget to manage polygon patches.
+    """
+    pass
 
 class WidgetMaskSegment(WidgetMaskBase):
     """

@@ -20,8 +20,8 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
     QSlider, QSpacerItem, QSpinBox, QSplitter,
     QStackedWidget, QVBoxLayout, QWidget)
 
-from bin.Widgets.WidgetMasks import (WidgetMaskCircle, WidgetMaskRectangle, WidgetMaskRing, WidgetMaskSegment,
-    WidgetMaskWedge)
+from bin.Widgets.WidgetMasks import (WidgetMaskCircle, WidgetMaskEllipse, WidgetMaskPolygon, WidgetMaskRectangle,
+    WidgetMaskRing, WidgetMaskSegment, WidgetMaskWedge)
 from bin.Widgets.WidgetPlots import WidgetPlotDP
 
 class Ui_Form(object):
@@ -150,6 +150,8 @@ class Ui_Form(object):
         self.comboBox_mode.addItem("")
         self.comboBox_mode.addItem("")
         self.comboBox_mode.addItem("")
+        self.comboBox_mode.addItem("")
+        self.comboBox_mode.addItem("")
         self.comboBox_mode.setObjectName(u"comboBox_mode")
 
         self.horizontalLayout_4.addWidget(self.comboBox_mode)
@@ -179,6 +181,12 @@ class Ui_Form(object):
         self.page_rectangle = WidgetMaskRectangle()
         self.page_rectangle.setObjectName(u"page_rectangle")
         self.stackedWidget_masks.addWidget(self.page_rectangle)
+        self.page_ellipse = WidgetMaskEllipse()
+        self.page_ellipse.setObjectName(u"page_ellipse")
+        self.stackedWidget_masks.addWidget(self.page_ellipse)
+        self.page_polygon = WidgetMaskPolygon()
+        self.page_polygon.setObjectName(u"page_polygon")
+        self.stackedWidget_masks.addWidget(self.page_polygon)
         self.page_segment_ring = WidgetMaskSegment()
         self.page_segment_ring.setObjectName(u"page_segment_ring")
         self.stackedWidget_masks.addWidget(self.page_segment_ring)
@@ -297,7 +305,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.stackedWidget_masks.setCurrentIndex(4)
+        self.stackedWidget_masks.setCurrentIndex(5)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -318,7 +326,9 @@ class Ui_Form(object):
         self.comboBox_mode.setItemText(1, QCoreApplication.translate("Form", u"Ring (Annular Dark Field)", None))
         self.comboBox_mode.setItemText(2, QCoreApplication.translate("Form", u"Wedge", None))
         self.comboBox_mode.setItemText(3, QCoreApplication.translate("Form", u"Rectangle", None))
-        self.comboBox_mode.setItemText(4, QCoreApplication.translate("Form", u"Segmented Ring", None))
+        self.comboBox_mode.setItemText(4, QCoreApplication.translate("Form", u"Ellipse", None))
+        self.comboBox_mode.setItemText(5, QCoreApplication.translate("Form", u"Polygon", None))
+        self.comboBox_mode.setItemText(6, QCoreApplication.translate("Form", u"Segmented Ring", None))
 
         self.pushButton_view_parameters.setText(QCoreApplication.translate("Form", u"View Mask Parameters in Physical Units", None))
         self.pushButton_attributes.setText(QCoreApplication.translate("Form", u"4D-STEM attributes...", None))
