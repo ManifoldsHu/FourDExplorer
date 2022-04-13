@@ -190,8 +190,8 @@ class Ui_Form(object):
         self.label_wedge_outer.setText(QCoreApplication.translate("Form", u"Outer Radius (pix)(&O)", None))
         self.label_wedge_open_angle.setText(QCoreApplication.translate("Form", u"Open Angle (deg)(&A)", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Location", None))
-        self.label_wedge_center_j.setText(QCoreApplication.translate("Form", u"horizontal shift(&J)", None))
-        self.label_wedge_center_i.setText(QCoreApplication.translate("Form", u"vertical shift(&I)", None))
+        self.label_wedge_center_j.setText(QCoreApplication.translate("Form", u"Horizontal Shift(&J)", None))
+        self.label_wedge_center_i.setText(QCoreApplication.translate("Form", u"Vertical Shift(&I)", None))
         self.label_wedge_rotate_angle.setText(QCoreApplication.translate("Form", u"Rotation Angle (deg)(&R)", None))
         self.pushButton_adjust_effects.setText(QCoreApplication.translate("Form", u"Adjust Effects...", None))
     # retranslateUi

@@ -58,7 +58,14 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.axis import Axis
 from matplotlib.lines import Line2D
-from matplotlib.patches import Circle, Rectangle, Wedge, Annulus
+from matplotlib.patches import (
+    Circle, 
+    Rectangle, 
+    Wedge, 
+    Annulus, 
+    Ellipse,
+    RegularPolygon,
+)
 
 import numpy as np
 import h5py
@@ -98,7 +105,9 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self._patch_ring = None
         self._patch_wedge = None
         self._patch_rectangle = None
-        self._patch_segments = None
+        self._patch_ellipse = None
+        self._patch_polygons = []
+        self._patch_segments = []
 
         self._createAxes()
         
@@ -134,9 +143,11 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
 
         self._createCircle()
-        # self._initRing()
-        # self._initWedge()
-        # self._initRectangle()
+        self._createRing()
+        self._createWedge()
+        self._createRectangle()
+        self._createEllipse()
+        self._createPolygon()
         # self._initSegments()
 
         self.dp_canvas.draw()
@@ -163,7 +174,6 @@ class PageVirtualImage(PageBaseFourDSTEM):
         
         self.dp_ax.add_patch(self._patch_circle)
         self.dp_blit_manager['circle_patch'] = self._patch_circle
-        
         self.ui.page_circle.setBlitManager(self.dp_blit_manager)
         self.ui.page_circle.setPatch(self._patch_circle)
         self._mask_widgets.append(self.ui.page_circle)
@@ -189,54 +199,122 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self.dp_ax.add_patch(self._patch_ring)
         self.dp_blit_manager['ring_patch'] = self._patch_ring
-        
         self.ui.page_ring.setBlitManager(self.dp_blit_manager)
         self.ui.page_ring.setPatch(self._patch_ring)
         self._mask_widgets.append(self.ui.page_ring)
 
-    def _initWedge(self):
+    def _createWedge(self):
         """
         Initialize the wedge patch and its managers.
         """
+        if self._patch_wedge in self.dp_ax.patches:
+            _index = self.dp_ax.patches.index(self._patch_wedge)
+            self.dp_ax.patches.pop(_index)
+
         self._patch_wedge = Wedge(
             (0, 0),
             r = 25,
             theta1 = 0,
             theta2 = 120,
             width = 15,
-            edgecolor = 'black',
-            facecolor = 'red',
-            alpha = 0.5,
+            edgecolor = 'white',
+            facecolor = 'black',
+            alpha = 0.4,
             fill = True,
             visible = False,
         )
 
         self.dp_ax.add_patch(self._patch_wedge)
+        self.dp_blit_manager['wedge_patch'] = self._patch_wedge
         self.ui.page_wedge.setBlitManager(self.dp_blit_manager)
-        self.dp_blit_manager.addArtist('wedge_patch', self._patch_wedge)
         self.ui.page_wedge.setPatch(self._patch_wedge)
         self._mask_widgets.append(self.ui.page_wedge)
 
-    def _initRectangle(self):
+    def _createRectangle(self):
         """
         Initialize the rectangle patch and its managers.
         """
+        if self._patch_rectangle in self.dp_ax.patches:
+            _index = self.dp_ax.patches.index(self._patch_rectangle)
+            self.dp_ax.patches.pop(_index)
+
         self._patch_rectangle = Rectangle(
             (0, 0),
             width = 25,
             height = 15,
-            edgecolor = 'black',
-            facecolor = 'red',
-            alpha = 0.5,
+            angle = 0,
+            edgecolor = 'white',
+            facecolor = 'black',
+            alpha = 0.4,
             fill = True,
             visible = False,
         )
 
         self.dp_ax.add_patch(self._patch_rectangle)
-        self.ui.page_rectangle.setBlitManager(self.dp_blit_manager)
         self.dp_blit_manager['rectangle_patch'] = self._patch_rectangle
+        self.ui.page_rectangle.setBlitManager(self.dp_blit_manager)
         self.ui.page_rectangle.setPatch(self._patch_rectangle)
         self._mask_widgets.append(self.ui.page_rectangle)
+
+    def _createEllipse(self):
+        """
+        Initialize the ellipse patch and its managers.
+        """
+        if self._patch_ellipse in self.dp_ax.patches:
+            _index = self.dp_ax.patches.index(self._patch_ellipse)
+            self.dp_ax.patches.pop(_index)
+
+        self._patch_ellipse = Ellipse(
+            (0, 0),
+            width = 25,
+            height = 15,
+            angle = 0,
+            edgecolor = 'white',
+            facecolor = 'black',
+            alpha = 0.4,
+            fill = True,
+            visible = False,
+        )
+
+        self.dp_ax.add_patch(self._patch_ellipse)
+        self.dp_blit_manager['ellipse_patch'] = self._patch_ellipse
+        self.ui.page_ellipse.setBlitManager(self.dp_blit_manager)
+        self.ui.page_ellipse.setPatch(self._patch_ellipse)
+        self._mask_widgets.append(self.ui.page_ellipse)
+
+    def _createPolygon(self):
+        """
+        Initialize the regular polygon patch and its managers.
+
+        There are at most 8 polygon patches, from 3 to 10.
+        """
+        for _polygon in self._patch_polygons:
+            if self._patch_polygon in self.dp_ax.patches:
+                _index = self.dp_ax.patches.index(self._patch_polygon)
+                self.dp_ax.patches.pop(_index)
+
+        self._patch_polygons = []
+        _max_vertices = self.ui.page_polygon.max_vertices
+        for ii in range(3, _max_vertices + 1):
+            _polygon = RegularPolygon(
+                (0, 0),
+                numVertices = ii,
+                radius = 25,
+                orientation = 0,
+                edgecolor = 'white',
+                facecolor = 'black',
+                alpha = 0.4,
+                fill = True,
+                visible = False,
+            )
+            self._patch_polygons.append(_polygon)
+            self.dp_ax.add_patch(_polygon)
+            self.dp_blit_manager['polygon_patch_{0}'.format(ii)] = _polygon
+        
+        self.ui.page_polygon.setBlitManager(self.dp_blit_manager)
+        self.ui.page_polygon.setPatch(self._patch_polygons)
+        self._mask_widgets.append(self.ui.page_polygon)
+        
 
     def _initSegments(self):
         """
@@ -299,6 +377,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         # Set the patch visible according to the index
         for ii, widget in enumerate(self._mask_widgets):
             widget.setMaskActivate(ii == self.mask_index)
+        self.dp_blit_manager.update()
 
     def calcMask(self):
         pass

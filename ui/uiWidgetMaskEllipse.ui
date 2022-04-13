@@ -15,9 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <widget class="QLabel" name="label_rectangle_parameter">
+    <widget class="QLabel" name="label">
      <property name="text">
-      <string>Rectangle parameters</string>
+      <string>Ellipse parameters</string>
      </property>
     </widget>
    </item>
@@ -30,12 +30,12 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="label_rectangle_width">
+         <widget class="QLabel" name="label_ellipse_width">
           <property name="text">
            <string>Width(&amp;W)</string>
           </property>
           <property name="buddy">
-           <cstring>doubleSpinBox_rectangle_width</cstring>
+           <cstring>doubleSpinBox_ellipse_width</cstring>
           </property>
          </widget>
         </item>
@@ -53,19 +53,19 @@
          </spacer>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_rectangle_width"/>
+         <widget class="QDoubleSpinBox" name="doubleSpinBox_ellipse_width"/>
         </item>
        </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <widget class="QLabel" name="label_rectangle_height">
+         <widget class="QLabel" name="label_ellipse_height">
           <property name="text">
            <string>Height(&amp;H)</string>
           </property>
           <property name="buddy">
-           <cstring>doubleSpinBox_rectangle_height</cstring>
+           <cstring>doubleSpinBox_ellipse_height</cstring>
           </property>
          </widget>
         </item>
@@ -83,7 +83,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_rectangle_height"/>
+         <widget class="QDoubleSpinBox" name="doubleSpinBox_ellipse_height"/>
         </item>
        </layout>
       </item>
@@ -99,12 +99,12 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_21">
         <item>
-         <widget class="QLabel" name="label_rectangle_rotation_angle">
+         <widget class="QLabel" name="label_ellipse_rotation_angle">
           <property name="text">
            <string>rotation angle(&amp;R)</string>
           </property>
           <property name="buddy">
-           <cstring>doubleSpinBox_rectangle_rotation_angle</cstring>
+           <cstring>doubleSpinBox_ellipse_rotation_angle</cstring>
           </property>
          </widget>
         </item>
@@ -122,19 +122,19 @@
          </spacer>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_rectangle_rotation_angle"/>
+         <widget class="QDoubleSpinBox" name="doubleSpinBox_ellipse_rotation_angle"/>
         </item>
        </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="QLabel" name="label_rectangle_center_j">
+         <widget class="QLabel" name="label_ellipse_center_j">
           <property name="text">
            <string>horizontal shift(&amp;J)</string>
           </property>
           <property name="buddy">
-           <cstring>doubleSpinBox_rectangle_center_j</cstring>
+           <cstring>doubleSpinBox_ellipse_center_j</cstring>
           </property>
          </widget>
         </item>
@@ -152,19 +152,19 @@
          </spacer>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_rectangle_center_j"/>
+         <widget class="QDoubleSpinBox" name="doubleSpinBox_ellipse_center_j"/>
         </item>
        </layout>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
-         <widget class="QLabel" name="label_rectangle_center_i">
+         <widget class="QLabel" name="label_ellipse_center_i">
           <property name="text">
            <string>vertical shift(&amp;I)</string>
           </property>
           <property name="buddy">
-           <cstring>doubleSpinBox_rectangle_center_i</cstring>
+           <cstring>doubleSpinBox_ellipse_center_i</cstring>
           </property>
          </widget>
         </item>
@@ -182,7 +182,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_rectangle_center_i"/>
+         <widget class="QDoubleSpinBox" name="doubleSpinBox_ellipse_center_i"/>
         </item>
        </layout>
       </item>
@@ -197,7 +197,7 @@
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer_2">
+    <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>

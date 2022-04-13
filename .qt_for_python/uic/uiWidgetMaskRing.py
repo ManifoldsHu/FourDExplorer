@@ -149,8 +149,8 @@ class Ui_Form(object):
         self.label_ring_inner.setText(QCoreApplication.translate("Form", u"Inner Radius (pix)(&I)", None))
         self.label_ring_outer.setText(QCoreApplication.translate("Form", u"Outer Radius (pix)(&O)", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Location", None))
-        self.label_ring_center_j.setText(QCoreApplication.translate("Form", u"horizontal shift(&J)", None))
-        self.label_ring_center_i.setText(QCoreApplication.translate("Form", u"vertical shift(&I)", None))
+        self.label_ring_center_j.setText(QCoreApplication.translate("Form", u"Horizontal Shift(&J)", None))
+        self.label_ring_center_i.setText(QCoreApplication.translate("Form", u"Vertical Shift(&I)", None))
         self.pushButton_adjust_effects.setText(QCoreApplication.translate("Form", u"Adjust Effects...", None))
     # retranslateUi
 
