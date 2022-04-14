@@ -4,14 +4,28 @@
 *------------------------------ WidgetMasks.py -------------------------------*
 用于使用 matplotlib 绘制各种几何形状的 Mask 的模组。
 
-使用这些类以调整各种形状的位置和大小。
+使用这些类以调整各种形状的位置和大小。其中包括：
+    - 圆形
+    - 环形
+    - 扇形
+    - 矩形
+    - 椭圆形
+    - 正多边形
+    - 分段环形
 
 作者：          胡一鸣
 创建时间：      2022年4月10日
 
 This module is used to plot geometric masks using matplotlib.
 
-Use these classes to manage masks' locations and shapes.
+Use these classes to manage masks' locations and shapes. This module includes:
+    - Circle
+    - Ring (Annulus)
+    - Wedge (Fan-like)
+    - Rectangle
+    - Ellipse
+    - Regular Polygon
+    - Segmented Ring
 
 author:         Hu Yiming
 date:           Apr 10, 2021
@@ -43,6 +57,7 @@ from ui import uiWidgetMaskWedge
 from ui import uiWidgetMaskRectangle
 from ui import uiWidgetMaskEllipse
 from ui import uiWidgetMaskPolygon
+from ui import uiWidgetMaskSegment
 
 class WidgetMaskBase(QWidget):
     """
@@ -172,7 +187,6 @@ class WidgetMaskBase(QWidget):
             self.patch.set_visible(is_activated)
 
 
-
 class WidgetMaskCircle(WidgetMaskBase):
     """
     管理圆形的部件类。
@@ -245,16 +259,16 @@ class WidgetMaskCircle(WidgetMaskBase):
         self.ui.doubleSpinBox_circle_center_j.setRange(-32768, 32767)
         
         self.ui.doubleSpinBox_circle_radius.valueChanged.connect(
-            self._updateCircleShape
+            self._updateShape
         )
         self.ui.doubleSpinBox_circle_center_i.valueChanged.connect(
-            self._updateCircleLocation
+            self._updateLocation
         )
         self.ui.doubleSpinBox_circle_center_j.valueChanged.connect(
-            self._updateCircleLocation
+            self._updateLocation
         )
         
-    def _updateCircleShape(self):
+    def _updateShape(self):
         """
         Set the shape of the circle and update.
         """
@@ -262,7 +276,7 @@ class WidgetMaskCircle(WidgetMaskBase):
         self.patch.set_radius(self.radius)
         self.blit_manager.update()
 
-    def _updateCircleLocation(self):
+    def _updateLocation(self):
         """
         Set the location of the circle and update.
         """
@@ -281,7 +295,22 @@ class WidgetMaskCircle(WidgetMaskBase):
 
         This method is called whenever self.setCenter() method is called.
         """
-        return self._updateCircleLocation()
+        return self._updateLocation()
+
+    def generateMeta(self) -> dict:
+        """
+        Generate the patch's metadata as a dict.
+
+        returns:
+            (dict)
+        """
+        meta = {
+            'MaskShape': 'Circle',
+            'MaskRadius': self.radius,
+            'MaskCenterShiftI': self.shift_i,
+            'MaskCenterShiftJ': self.shift_j, 
+        }
+        return meta
         
         
 
@@ -336,19 +365,19 @@ class WidgetMaskRing(WidgetMaskBase):
         self.ui.doubleSpinBox_ring_center_j.setRange(-32768, 32767)
 
         self.ui.doubleSpinBox_ring_inner.valueChanged.connect(
-            self._updateRingShapeByInner
+            self._updateByInner
         )
         self.ui.doubleSpinBox_ring_outer.valueChanged.connect(
-            self._updateRingShapeByOuter
+            self._updateByOuter
         )
         self.ui.doubleSpinBox_ring_center_i.valueChanged.connect(
-            self._updateRingLocation
+            self._updateLocation
         )
         self.ui.doubleSpinBox_ring_center_j.valueChanged.connect(
-            self._updateRingLocation
+            self._updateLocation
         )
 
-    def _updateRingShapeByInner(self):
+    def _updateInner(self):
         """
         Set the inner radius of the ring.
 
@@ -361,7 +390,7 @@ class WidgetMaskRing(WidgetMaskBase):
         self.patch.set_width(self.outer_radius - _inner_radius)
         self.blit_manager.update()
 
-    def _updateRingShapeByOuter(self):
+    def _updateOuter(self):
         """
         Set the outer radius of the ring.
 
@@ -374,7 +403,7 @@ class WidgetMaskRing(WidgetMaskBase):
         self.patch.set_width(_outer_radius - self.inner_radius)
         self.blit_manager.update()
 
-    def _updateRingLocation(self):
+    def _updateLocation(self):
         """
         Set the location of the ring.
         """
@@ -393,7 +422,7 @@ class WidgetMaskRing(WidgetMaskBase):
 
         This method is called whenever self.setCenter() method is called.
         """
-        return self._updateRingLocation()
+        return self._updateLocation()
 
     def setPatch(self, patch: Annulus):
         """
@@ -411,7 +440,44 @@ class WidgetMaskRing(WidgetMaskBase):
         width = patch.get_width()
         self.ui.doubleSpinBox_ring_inner.setValue(radii[0] - width)
         self.ui.doubleSpinBox_ring_outer.setValue(radii[0])
+
+    def isContained(self, loc: Tuple) -> bool:
+        """
+        Test whether loc is contained in the patch.
+
+        arguments:
+            loc: (Tuple) must be (i, j) coordinates in the axes.
+        """
+        if not isinstance(loc, Tuple):
+            raise TypeError('loc must be a tuple with 2 numbers, not '
+                '{0}'.format(type(loc).__name__))
+
+        elif len(loc) != 2:
+            raise ValueError('loc must be a tuple with 2 numbers, but '
+                '{0} is given'.format(len(loc)))
+
+        c_i = self.center[0] + self.shift_i
+        c_j = self.center[1] + self.shift_j
+        r_sq = (loc[0] - c_i)**2 + (loc[1] - c_j)**2
+        return (r_sq > self.inner_radius**2) and (
+                    r_sq < self.outer_radius**2)
         
+    def generateMeta(self) -> dict:
+        """
+        Generate the patch's metadata as a dict.
+
+        returns:
+            (dict)
+        """
+        meta = {
+            'MaskShape': 'Ring',
+            'MaskOuterRadius': self.outer_radius,
+            'MaskInnerRadius': self.inner_radius,
+            'MaskCenterShiftI': self.shift_i,
+            'MaskCenterShiftJ': self.shift_j, 
+        }
+        return meta
+
 
 class WidgetMaskWedge(WidgetMaskBase):
     """
@@ -470,25 +536,25 @@ class WidgetMaskWedge(WidgetMaskBase):
         self.ui.doubleSpinBox_wedge_rotate_angle.setRange(-32768, 32767)
 
         self.ui.doubleSpinBox_wedge_inner.valueChanged.connect(
-            self._updateWedgeShapeByInner
+            self._updateInner
         )
         self.ui.doubleSpinBox_wedge_outer.valueChanged.connect(
-            self._updateWedgeShapeByOuter
+            self._updateOuter
         )
         self.ui.doubleSpinBox_wedge_open_angle.valueChanged.connect(
-            self._updateWedgeShapeByOpenAngle
+            self._updateOpenAngle
         )
         self.ui.doubleSpinBox_wedge_rotate_angle.valueChanged.connect(
-            self._updateWedgeShapeByRotationAngle
+            self._updateRotationAngle
         )
         self.ui.doubleSpinBox_wedge_center_i.valueChanged.connect(
-            self._updateWedgeLocation
+            self._updateLocation
         )
         self.ui.doubleSpinBox_wedge_center_j.valueChanged.connect(
-            self._updateWedgeLocation
+            self._updateLocation
         )
 
-    def _updateWedgeShapeByInner(self):
+    def _updateInner(self):
         """
         Set the inner radius of the ring.
 
@@ -501,7 +567,7 @@ class WidgetMaskWedge(WidgetMaskBase):
         self.patch.set_width(self.outer_radius - _inner_radius)
         self.blit_manager.update()
         
-    def _updateWedgeShapeByOuter(self):
+    def _updateOuter(self):
         """
         Set the outer radius of the ring.
 
@@ -514,7 +580,7 @@ class WidgetMaskWedge(WidgetMaskBase):
         self.patch.set_width(_outer_radius - self.inner_radius)
         self.blit_manager.update()
 
-    def _updateWedgeShapeByOpenAngle(self):
+    def _updateOpenAngle(self):
         """
         Set the open angle of the wedge.
 
@@ -529,7 +595,7 @@ class WidgetMaskWedge(WidgetMaskBase):
         self.patch.set_theta2(theta_2)
         self.blit_manager.update()
 
-    def _updateWedgeShapeByRotationAngle(self):
+    def _updateRotationAngle(self):
         """
         Set the rotation angle of the wedge.
 
@@ -544,7 +610,7 @@ class WidgetMaskWedge(WidgetMaskBase):
         self.patch.set_theta2(theta_2)
         self.blit_manager.update()
 
-    def _updateWedgeLocation(self):
+    def _updateLocation(self):
         """
         Set the location of the wedge.
         """
@@ -565,7 +631,7 @@ class WidgetMaskWedge(WidgetMaskBase):
 
         This method is called whenever self.setCenter() method is called.
         """
-        return self._updateWedgeLocation()
+        return self._updateLocation()
 
     def setPatch(self, patch: Wedge):
         """
@@ -589,7 +655,24 @@ class WidgetMaskWedge(WidgetMaskBase):
         self.ui.doubleSpinBox_wedge_rotate_angle.setValue(theta_1)
         self.ui.doubleSpinBox_wedge_open_angle.setValue(theta_2 - theta_1)
         
-    
+    def generateMeta(self) -> dict:
+        """
+        Generate the patch's metadata as a dict.
+
+        returns:
+            (dict)
+        """
+        meta = {
+            'MaskShape': 'Wedge',
+            'MaskOuterRadius': self.outer_radius,
+            'MaskInnerRadius': self.inner_radius,
+            'MaskOpenAngle': self.open_angle,
+            'MaskRotationAnlge': self.rotation_angle,
+            'MaskCenterShiftI': self.shift_i,
+            'MaskCenterShiftJ': self.shift_j, 
+        }
+        return meta
+
 
 class WidgetMaskRectangle(WidgetMaskBase):
     """
@@ -645,22 +728,22 @@ class WidgetMaskRectangle(WidgetMaskBase):
         self.ui.doubleSpinBox_rectangle_center_j.setRange(-32768, 32767)
 
         self.ui.doubleSpinBox_rectangle_width.valueChanged.connect(
-            self._updateRectangleShapeByWidth
+            self._updateWidth
         )
         self.ui.doubleSpinBox_rectangle_height.valueChanged.connect(
-            self._updateRectangleShapeByHeight
+            self._updateHeight
         )
         self.ui.doubleSpinBox_rectangle_rotation_angle.valueChanged.connect(
-            self._updateRectangleShapeByRotationAngle
+            self._updateRotationAngle
         )
         self.ui.doubleSpinBox_rectangle_center_i.valueChanged.connect(
-            self._updateRectangleLocation
+            self._updateLocation
         )
         self.ui.doubleSpinBox_rectangle_center_j.valueChanged.connect(
-            self._updateRectangleLocation
+            self._updateLocation
         )
 
-    def _updateRectangleShapeByWidth(self):
+    def _updateWidth(self):
         """
         Set the width of the rectangle.
 
@@ -672,7 +755,7 @@ class WidgetMaskRectangle(WidgetMaskBase):
         self.patch.set_xy(_xy)
         self.blit_manager.update()
 
-    def _updateRectangleShapeByHeight(self):
+    def _updateHeight(self):
         """
         Set the height of the rectangle.
 
@@ -684,7 +767,7 @@ class WidgetMaskRectangle(WidgetMaskBase):
         self.patch.set_xy(_xy)
         self.blit_manager.update()
 
-    def _updateRectangleShapeByRotationAngle(self):
+    def _updateRotationAngle(self):
         """
         Set the rotation angle of the rectangle.
 
@@ -698,7 +781,7 @@ class WidgetMaskRectangle(WidgetMaskBase):
         self.patch.set_xy(_xy)
         self.blit_manager.update()
 
-    def _updateRectangleLocation(self):
+    def _updateLocation(self):
         """
         Set the rectangle location.
         """
@@ -714,7 +797,7 @@ class WidgetMaskRectangle(WidgetMaskBase):
 
         This method is called whenever self.setCenter() method is called.
         """
-        return self._updateRectangleLocation()
+        return self._updateLocation()
 
     def _calculateAnchor(self) -> Tuple[float, float]:
         """
@@ -760,6 +843,23 @@ class WidgetMaskRectangle(WidgetMaskBase):
         self.ui.doubleSpinBox_rectangle_width.setValue(width)
         self.ui.doubleSpinBox_rectangle_height.setValue(height)
         self.ui.doubleSpinBox_rectangle_rotation_angle.setValue(angle)
+
+    def generateMeta(self) -> dict:
+        """
+        Generate the patch's metadata as a dict.
+
+        returns:
+            (dict)
+        """
+        meta = {
+            'MaskShape': 'Rectangle',
+            'MaskWidth': self.width,
+            'MaskHeight': self.height,
+            'MaskRotationAngle': self.rotation_angle,
+            'MaskCenterShiftI': self.shift_i,
+            'MaskCenterShiftJ': self.shift_j, 
+        }
+        return meta
 
 
 class WidgetMaskEllipse(WidgetMaskBase):
@@ -816,22 +916,22 @@ class WidgetMaskEllipse(WidgetMaskBase):
         self.ui.doubleSpinBox_ellipse_center_j.setRange(-32768, 32767)
 
         self.ui.doubleSpinBox_ellipse_width.valueChanged.connect(
-            self._updateEllipseShapeByWidth
+            self._updateWidth
         )
         self.ui.doubleSpinBox_ellipse_height.valueChanged.connect(
-            self._updateEllipseShapeByHeight
+            self._updateHeight
         )
         self.ui.doubleSpinBox_ellipse_rotation_angle.valueChanged.connect(
-            self._updateEllipseShapeByRotationAngle
+            self._updateRotationAngle
         )
         self.ui.doubleSpinBox_ellipse_center_i.valueChanged.connect(
-            self._updateEllipseLocation
+            self._updateLocation
         )
         self.ui.doubleSpinBox_ellipse_center_j.valueChanged.connect(
-            self._updateEllipseLocation
+            self._updateLocation
         )
 
-    def _updateEllipseShapeByWidth(self):
+    def _updateWidth(self):
         """
         Set the width of the ellipse.
 
@@ -841,7 +941,7 @@ class WidgetMaskEllipse(WidgetMaskBase):
         self.patch.set_width(self.width)
         self.blit_manager.update()
 
-    def _updateEllipseShapeByHeight(self):
+    def _updateHeight(self):
         """
         Set the height of the ellipse.
         """
@@ -849,7 +949,7 @@ class WidgetMaskEllipse(WidgetMaskBase):
         self.patch.set_height(self.height)
         self.blit_manager.update()
 
-    def _updateEllipseShapeByRotationAngle(self):
+    def _updateRotationAngle(self):
         """
         Set the rotation angle of the ellipse.
         """
@@ -858,7 +958,7 @@ class WidgetMaskEllipse(WidgetMaskBase):
         self.patch.set_angle(self.rotation_angle)
         self.blit_manager.update()
 
-    def _updateEllipseLocation(self):
+    def _updateLocation(self):
         """
         Set the location of the ellipse.
         """
@@ -904,7 +1004,25 @@ class WidgetMaskEllipse(WidgetMaskBase):
 
         This method is called whenever self.setCenter() method is called.
         """
-        return self._updateEllipseLocation()
+        return self._updateLocation()
+
+    def generateMeta(self) -> dict:
+        """
+        Generate the patch's metadata as a dict.
+
+        returns:
+            (dict)
+        """
+        meta = {
+            'MaskShape': 'Ellipse',
+            'MaskWidth': self.width,
+            'MaskHeight': self.height,
+            'MaskRotationAngle': self.rotation_angle,
+            'MaskCenterShiftI': self.shift_i,
+            'MaskCenterShiftJ': self.shift_j, 
+        }
+        return meta
+
 
 class WidgetMaskPolygon(WidgetMaskBase):
     """
@@ -919,7 +1037,6 @@ class WidgetMaskPolygon(WidgetMaskBase):
         self.ui = uiWidgetMaskPolygon.Ui_Form()
         self.ui.setupUi(self)
         
-
         self._num_vertices = 3
         self._radius = 0
         self._shift_i = 0
@@ -969,22 +1086,22 @@ class WidgetMaskPolygon(WidgetMaskBase):
         self.ui.doubleSpinBox_polygon_rotate_angle.setRange(-32768, 32767)
 
         self.ui.spinBox_vertices_number.valueChanged.connect(
-            self._updatePolygonShapeByVertices
+            self._updateVertices
         )
         self.ui.doubleSpinBox_polygon_radius.valueChanged.connect(
-            self._updatePolygonShapeByRadius
+            self._updateRadius
         )
         self.ui.doubleSpinBox_polygon_center_i.valueChanged.connect(
-            self._updatePolygonLocation
+            self._updateLocation
         )
         self.ui.doubleSpinBox_polygon_center_j.valueChanged.connect(
-            self._updatePolygonLocation
+            self._updateLocation
         )
         self.ui.doubleSpinBox_polygon_rotate_angle.valueChanged.connect(
-            self._updatePolygonShapeByRotationAngle
+            self._updateRotationAngle
         )
 
-    def _updatePolygonShapeByVertices(self):
+    def _updateVertices(self):
         """
         Set the number of the vertices of the regular polygon.
 
@@ -995,7 +1112,7 @@ class WidgetMaskPolygon(WidgetMaskBase):
             polygon.set_visible(ii + 3 == self._num_vertices)
         self.blit_manager.update()
 
-    def _updatePolygonShapeByRadius(self):
+    def _updateRadius(self):
         """
         Set the radius of the regular polygon.
         """
@@ -1004,7 +1121,7 @@ class WidgetMaskPolygon(WidgetMaskBase):
             polygon.radius = self._radius
         self.blit_manager.update()
 
-    def _updatePolygonShapeByRotationAngle(self):
+    def _updateRotationAngle(self):
         """
         Set the rotation angle of the regular polygon.
         """
@@ -1014,7 +1131,7 @@ class WidgetMaskPolygon(WidgetMaskBase):
             polygon.orientation = self._rotation_angle * np.pi/180
         self.blit_manager.update()
 
-    def _updatePolygonLocation(self):
+    def _updateLocation(self):
         """
         Update the location of the regular polygon.
         """
@@ -1054,8 +1171,8 @@ class WidgetMaskPolygon(WidgetMaskBase):
 
         This method is called whenever self.setCenter() method is called.
         """
-        self.logger.debug('Polygon _resetPatchCenter is called')
-        self._updatePolygonLocation()
+        # self.logger.debug('Polygon _resetPatchCenter is called')
+        self._updateLocation()
 
     def setMaskActivate(self, is_activated: bool):
         """
@@ -1065,14 +1182,49 @@ class WidgetMaskPolygon(WidgetMaskBase):
         arguments:
             is_activate: (bool) 
         """
-        if is_activated:
-            for ii, polygon in enumerate(self.patch):
-                polygon.set_visible(ii + 3 == self._num_vertices)
-            self.blit_manager.update()
+        for ii, polygon in enumerate(self.patch):
+            polygon.set_visible(
+                (ii + 3 == self._num_vertices) and is_activated
+            )
+        self.blit_manager.update()
         
-        
+    def isContained(self, loc: Tuple) -> bool:
+        """
+        Test whether loc is contained in the patch.
 
-    
+        arguments:
+            loc: (Tuple) must be (i, j) coordinates in the axes.
+        """
+        if not isinstance(loc, Tuple):
+            raise TypeError('loc must be a tuple with 2 numbers, not '
+                '{0}'.format(type(loc).__name__))
+
+        elif len(loc) != 2:
+            raise ValueError('loc must be a tuple with 2 numbers, but '
+                '{0} is given'.format(len(loc)))
+
+        ax = self.patch[0].axes
+        coordinate = ax.transData.transform((loc[1], loc[0]))
+        _current_patch = self.patch[self._num_vertices - 3]
+        return _current_patch.contains_point(coordinate)
+
+    def generateMeta(self) -> dict:
+        """
+        Generate the patch's metadata as a dict.
+
+        returns:
+            (dict)
+        """
+        meta = {
+            'MaskShape': 'RegularPolygon',
+            'MaskRadius': self.radius,
+            'MaskVerticeNumber': self.num_vertices,
+            'MaskRotationAngle': self.rotation_angle,
+            'MaskCenterShiftI': self.shift_i,
+            'MaskCenterShiftJ': self.shift_j, 
+        }
+        return meta
+
 
 class WidgetMaskSegment(WidgetMaskBase):
     """
@@ -1080,7 +1232,257 @@ class WidgetMaskSegment(WidgetMaskBase):
 
     The widget to manage segmented ring patches.
     """
-    
-    def setPatch(self, patches: List[Patch]):
-        self._patch = patches
+    def __init__(self, parent: QWidget = None):
+        """
+        arguments:
+            parent: (QWidget)
+        """
+        super().__init__(parent)
+        self.ui = uiWidgetMaskSegment.Ui_Form()
+        self.ui.setupUi(self)
+        
+        self._num_segments = 2
+        self._inner_radius = 0
+        self._outer_radius = 0
+        self._open_angle = 0
+        self._shift_i = 0
+        self._shift_j = 0
+        self._rotation_angle = 0
+        self.max_segments = 10      # Max segments available.
 
+        self._initUi()
+
+    @property
+    def num_segments(self) -> int:
+        return self._num_segments
+
+    @property
+    def inner_radius(self) -> float:
+        return self._inner_radius
+
+    @property
+    def outer_radius(self) -> float:
+        return self._outer_radius
+
+    @property
+    def open_angle(self) -> float:
+        return self._open_angle
+
+    @property
+    def shift_i(self) -> float:
+        return self._shift_i
+
+    @property
+    def shift_j(self) -> float:
+        return self._shift_j
+
+    @property
+    def rotation_angle(self) -> float:
+        return self._rotation_angle
+
+    def _initUi(self):
+        """
+        Initialize Uis.
+        """
+        self.ui.spinBox_num_segments.setValue(2)
+        self.ui.spinBox_num_segments.setRange(1, self.max_segments)
+        self.ui.doubleSpinBox_segment_inner.setValue(0)
+        self.ui.doubleSpinBox_segment_inner.setRange(0, 65535)
+        self.ui.doubleSpinBox_segment_outer.setValue(0)
+        self.ui.doubleSpinBox_segment_outer.setRange(0, 65535)
+        self.ui.doubleSpinBox_segment_open_angle.setValue(0)
+        self.ui.doubleSpinBox_segment_open_angle.setRange(0, 360)
+        self.ui.doubleSpinBox_segment_rotate_angle.setValue(0)
+        self.ui.doubleSpinBox_segment_rotate_angle.setRange(-32768, 32767)
+        self.ui.doubleSpinBox_segment_center_i.setValue(0)
+        self.ui.doubleSpinBox_segment_center_i.setRange(-32768, 32767)
+        self.ui.doubleSpinBox_segment_center_j.setValue(0)
+        self.ui.doubleSpinBox_segment_center_j.setRange(-32768, 32767)
+        
+        self.ui.spinBox_num_segments.valueChanged.connect(
+            self._updateNumSegments
+        )
+        self.ui.doubleSpinBox_segment_inner.valueChanged.connect(
+            self._updateInnerRadius
+        )
+        self.ui.doubleSpinBox_segment_outer.valueChanged.connect(
+            self._updateOuterRadius
+        )
+        self.ui.doubleSpinBox_segment_open_angle.valueChanged.connect(
+            self._updateOpenAngle
+        )
+        self.ui.doubleSpinBox_segment_rotate_angle.valueChanged.connect(
+            self._updateRotationAngle
+        )
+        self.ui.doubleSpinBox_segment_center_i.valueChanged.connect(
+            self._updateLocation
+        )
+        self.ui.doubleSpinBox_segment_center_j.valueChanged.connect(
+            self._updateLocation
+        )
+
+    def _updateNumSegments(self):
+        """
+        Change patches' shape by change the number of the segments.
+        """
+        self._num_segments = self.ui.spinBox_num_segments.value()
+        self._resetThetas()
+        for ii, segment in enumerate(self.patch):
+            segment.set_visible(ii < self.num_segments)
+        self.blit_manager.update()
+        
+
+    def _updateOpenAngle(self):
+        """
+        Change patches' shape by change the open angle of the segments.
+        """
+        self._open_angle = self.ui.doubleSpinBox_segment_open_angle.value()
+        self._resetThetas()
+        self.blit_manager.update()
+        
+    def _updateRotationAngle(self):
+        """
+        Change patches' shape by change the rotation angle of the segments.
+        """
+        self._rotation_angle = (    # Here is NOT a tuple
+                self.ui.doubleSpinBox_segment_rotate_angle.value())
+        self._resetThetas()
+        self.blit_manager.update()
+
+    def _resetThetas(self):
+        """
+        Reset the start angle and end angle of the segment wedges.
+
+        Every wedge's angles will be decided by the number of wedges, the 
+        open angle and the rotation angle. 
+        """
+        open_angle = min(360, max(0, self.open_angle))
+        rotate_angle = self.rotation_angle
+        num = self.num_segments
+        if num < 1 or num > self.max_segments:
+            return None
+        for ii, segment in enumerate(self.patch):
+            theta_1 = rotate_angle + 360 / num * ii
+            theta_2 = theta_1 + open_angle
+            segment.set_theta1(theta_1)
+            segment.set_theta2(theta_2)
+            # self.logger.debug('Segment {0}: theta1 {1}; '
+            #     'theta2 {2}'.format(ii, theta_1, theta_2))
+        return None 
+    
+    def _updateInnerRadius(self):
+        """
+        Change patches' shape by change their inner radius.
+        """
+        self._inner_radius = self.ui.doubleSpinBox_segment_inner.value()
+        _inner_radius = min(self.inner_radius, self.outer_radius)
+        for segment in self.patch:
+            segment.set_radius(self.outer_radius)
+            segment.set_width(self.outer_radius - _inner_radius)
+        self.blit_manager.update()
+
+    def _updateOuterRadius(self):
+        """
+        Change patches' shape by change their outer radius.
+        """
+        self._outer_radius = self.ui.doubleSpinBox_segment_outer.value()
+        _outer_radius = max(self.outer_radius, self.inner_radius)
+        for segment in self.patch:
+            segment.set_radius(_outer_radius)
+            segment.set_width(_outer_radius - self.inner_radius)
+        self.blit_manager.update()
+
+    def _updateLocation(self):
+        """
+        Change patches' location. 
+        """
+        self._shift_i = self.ui.doubleSpinBox_segment_center_i.value()
+        self._shift_j = self.ui.doubleSpinBox_segment_center_j.value()
+        for ii, segment in enumerate(self.patch):
+            segment.set_center((
+                self.center[1] + self.shift_j,
+                self.center[0] + self.shift_i
+            ))
+        self.blit_manager.update()
+    
+    def _resetPatchCenter(self):
+        return self._updateLocation()
+
+    def setPatch(self, patch: List[Wedge]):
+        """
+        Set the patch list to be managed.
+
+        arguments:
+            patch: (List[Wedge])
+        """
+        if not isinstance(patch, Iterable):
+            raise TypeError('patch must be an Iterable with '
+                'Wedge, not {0}'.format(type(patch).__name__))
+        for p in patch:
+            if not isinstance(p, Wedge):
+                raise TypeError('patches must be a Iterable with '
+                    'Wedge in it, but given a {0}'.format(type(p).__name__))
+        self._patch = patch
+
+        theta_1 = patch[0].theta1
+        theta_2 = patch[0].theta2
+        radius = patch[0].r
+        width = patch[0].width
+
+        self.ui.doubleSpinBox_segment_outer.setValue(radius)
+        self.ui.doubleSpinBox_segment_inner.setValue(radius - width)
+        self.ui.doubleSpinBox_segment_rotate_angle.setValue(theta_1)
+        self.ui.doubleSpinBox_segment_open_angle.setValue(theta_2 - theta_1)
+
+    def setMaskActivate(self, is_activated: bool):
+        """
+        If the mask is inactivated, the patch will be invisible. Otherwise,
+        only the polygon with corresponding vertices will be visible.
+
+        arguments:
+            is_activate: (bool) 
+        """
+        for ii, segment in enumerate(self.patch):
+            segment.set_visible(ii < self.num_segments and is_activated)
+        self.blit_manager.update()
+
+    def isContained(self, loc: Tuple) -> bool:
+        """
+        Test whether loc is contained in the patch.
+
+        arguments:
+            loc: (Tuple) must be (i, j) coordinates in the axes.
+        """
+        if not isinstance(loc, Tuple):
+            raise TypeError('loc must be a tuple with 2 numbers, not '
+                '{0}'.format(type(loc).__name__))
+
+        elif len(loc) != 2:
+            raise ValueError('loc must be a tuple with 2 numbers, but '
+                '{0} is given'.format(len(loc)))
+
+        ax = self.patch[0].axes
+        coordinate = ax.transData.transform((loc[1], loc[0]))
+        for segment in self.patch[0:self.num_segments]:
+            if segment.contains_point(coordinate):
+                return True
+        return False
+        
+    def generateMeta(self) -> dict:
+        """
+        Generate the patch's metadata as a dict.
+
+        returns:
+            (dict)
+        """
+        meta = {
+            'MaskShape': 'SegmentRing',
+            'MaskSegmentNumber': self.num_segments,
+            'MaskInnerRadius': self.inner_radius,
+            'MaskOuterRadius': self.outer_radius,
+            'MaskOpenAngle': self.open_angle,
+            'MaskRotationAngle': self.rotation_angle,
+            'MaskCenterShiftI': self.shift_i,
+            'MaskCenterShiftJ': self.shift_j, 
+        }
+        return meta

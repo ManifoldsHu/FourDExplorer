@@ -348,6 +348,6 @@ class Ui_Form(object):
         self.comboBox_colormap.setItemText(6, QCoreApplication.translate("Form", u"jet", None))
         self.comboBox_colormap.setItemText(7, QCoreApplication.translate("Form", u"Others", None))
 
-        self.pushButton_start.setText(QCoreApplication.translate("Form", u"Start Calculation Virtual Image", None))
+        self.pushButton_start.setText(QCoreApplication.translate("Form", u"Start Calculation", None))
     # retranslateUi
 

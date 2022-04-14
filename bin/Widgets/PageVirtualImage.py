@@ -47,7 +47,7 @@ date:           Apr 8, 2022
 from logging import Logger
 # from typing import List, Tuple
 
-from PySide6.QtWidgets import QWidget, QMessageBox
+from PySide6.QtWidgets import QWidget, QMessageBox, QDialog
 
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas)
@@ -75,6 +75,7 @@ from bin.HDFManager import HDFHandler
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
 from ui import uiPageVirtualImage
+from ui import uiDialogTestPlot
 
 class PageVirtualImage(PageBaseFourDSTEM):
     """
@@ -137,6 +138,9 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self.ui.stackedWidget_masks.setCurrentIndex(self.mask_index)
         self.ui.comboBox_mode.currentIndexChanged.connect(self._changeMode)
 
+        self.ui.pushButton_start.setProperty('class', 'danger')
+        self.ui.pushButton_start.clicked.connect(self.startCalculationTest)
+
     def _createMasks(self):
         """
         Initialize all of the mask patches, and add them to the axes.
@@ -148,7 +152,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self._createRectangle()
         self._createEllipse()
         self._createPolygon()
-        # self._initSegments()
+        self._createSegments()
 
         self.dp_canvas.draw()
         self.dp_canvas.flush_events()
@@ -286,11 +290,12 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         Initialize the regular polygon patch and its managers.
 
-        There are at most 8 polygon patches, from 3 to 10.
+        The number of polygon patches is decided by _max_vertices. A polygon 
+        has at least 3 vertices.
         """
         for _polygon in self._patch_polygons:
-            if self._patch_polygon in self.dp_ax.patches:
-                _index = self.dp_ax.patches.index(self._patch_polygon)
+            if _polygon in self.dp_ax.patches:
+                _index = self.dp_ax.patches.index(_polygon)
                 self.dp_ax.patches.pop(_index)
 
         self._patch_polygons = []
@@ -316,28 +321,36 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self._mask_widgets.append(self.ui.page_polygon)
         
 
-    def _initSegments(self):
+    def _createSegments(self):
         """
         Initialize the segmented patches and their managers.
+
+        There are at most _max_segments (number) segments. 
         """
+        for _wedge in self._patch_segments:
+            if _wedge in self.dp_ax.patches:
+                _index = self.dp_ax.patches.index(_wedge)
+                self.dp_ax.patches.pop(_index)
+
         self._patch_segments = []
-        for ii in range(self._max_segment_num):
+        _max_segments = self.ui.page_segment_ring.max_segments
+        for ii in range(_max_segments):
             _wedge = Wedge(
                 (0, 0),
                 r = 25,
                 theta1 = 0,
-                theta2 = 180,
+                theta2 = 120,
                 width = 15,
-                edgecolor = 'black',
-                facecolor = 'red',
-                alpha = 0.5,
+                edgecolor = 'white',
+                facecolor = 'black',
+                alpha = 0.4,
                 fill = True,
                 visible = False,
             )
-            self.dp_ax.add_patch(_wedge)
             self._patch_segments.append(_wedge)
+            self.dp_ax.add_patch(_wedge)
             self.dp_blit_manager['segment_patch_{0}'.format(ii)] = _wedge
-            
+
         self.ui.page_segment_ring.setBlitManager(self.dp_blit_manager)
         self.ui.page_segment_ring.setPatch(self._patch_segments)
         self._mask_widgets.append(self.ui.page_segment_ring)
@@ -379,10 +392,59 @@ class PageVirtualImage(PageBaseFourDSTEM):
             widget.setMaskActivate(ii == self.mask_index)
         self.dp_blit_manager.update()
 
-    def calcMask(self):
-        pass
+    def calcMask(self) -> np.ndarray:
+        """
+        Calculate integration region of the virtual image.
+
+        This function returns a matrix whose shape is the same as the diffract-
+        ion patterns' size of the 4D-STEM dataset. Elements within the region 
+        will be 1, while otherwise will be 0.
+
+        returns:
+            (np.ndarray) 
+        """
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        mask = np.zeros((dp_i, dp_j), dtype = self.data_object.dtype)
+        widget = self._mask_widgets[self.mask_index]
+        for ii in range(dp_i):
+            for jj in range(dp_j):
+                mask[ii, jj] = widget.isContained((ii, jj))
+        return mask
+
+
+    def startCalculation(self):
+        """
+        Start calculate virtual image of 4D-STEM.
+
+        When the button 'Start Calculation' is clicked, this function will be 
+        called. 
+        """
+        widget = self._mask_widgets[self.mask_index]
+        mask_meta = widget.generateMeta()
+
+    def startCalculationTest(self):
+        """
+        Only for test.
+        """
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        mask = np.zeros((dp_i, dp_j), dtype = self.data_object.dtype)
+        for ii in range(dp_i):
+            for jj in range(dp_j):
+                widget = self._mask_widgets[self.mask_index]
+                mask[ii, jj] = widget.isContained((ii, jj))
+        dialog = DialogTestPlot(mask, self)
+        dialog.exec()
+
+
+class DialogTestPlot(QDialog):
+    def __init__(self, image, parent: QWidget = None):
+        super().__init__(parent)
+        self.ui = uiDialogTestPlot.Ui_Dialog()
+        self.ui.setupUi(self)
+        self.ax = self.ui.widget.figure.add_subplot(111)
+        self.ax.imshow(image)
         
-        
+    
 
     
 

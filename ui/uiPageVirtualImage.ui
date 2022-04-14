@@ -365,7 +365,7 @@
      <item>
       <widget class="QPushButton" name="pushButton_start">
        <property name="text">
-        <string>Start Calculation Virtual Image</string>
+        <string>Start Calculation</string>
        </property>
       </widget>
      </item>
