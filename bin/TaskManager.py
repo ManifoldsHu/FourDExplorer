@@ -877,7 +877,8 @@ class Task(QObject):
             
         self.progress = 0
         subtask = SubtaskWithProgress(self)
-        packed_func = _packing(func, subtask.subtask_progress, *arg, **kw)
+        packed_func = _packing(func, 
+            progress_signal = subtask.subtask_progress, *arg, **kw)
         subtask.setFunction(packed_func)
         subtask.name = name
         subtask.subtask_progress.connect(self.setProgress)

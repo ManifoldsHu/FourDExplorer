@@ -585,8 +585,14 @@ class HDFHandler(QObject):
             raise ValueError(('name {0} exists in {1}\n'
                 'path: {2}'.format(name, parent_node.name, parent_path)))
 
-        parent_node.addChild(HDFGroupNode(name))
         self.file[parent_path].create_group(name)
+
+        parent_model_index = self.model.indexFromPath(parent_path)
+        row = len(parent_node)
+        self.model.beginInsertRows(parent_model_index, row, row)
+        parent_node.addChild(HDFGroupNode(name))
+        self.model.endInsertRows()
+
         self.logger.debug('Create group {0} in {1}'.format(name, parent_path))
         
 
@@ -617,7 +623,6 @@ class HDFHandler(QObject):
             raise ValueError(('name {0} exists in {1}\n'
                 'path: {2}'.format(name, parent_node.name, parent_path)))
 
-        parent_node.addChild(HDFDataNode(name, parent_node))
         if shape == ():
             self.file[parent_path].create_dataset(
                 name,
@@ -632,6 +637,13 @@ class HDFHandler(QObject):
                 dtype = dtype, 
                 compression = compression,
             )
+
+        parent_model_index = self.model.indexFromPath(parent_path)
+        row = len(parent_node)
+        self.model.beginInsertRows(parent_model_index, row, row)
+        parent_node.addChild(HDFDataNode(name, parent_node))
+        self.model.endInsertRows()
+        
         self.logger.debug('Create data {0} in {1}'.format(name, parent_path))
 
     def deleteItem(self, item_path: str):
@@ -650,11 +662,18 @@ class HDFHandler(QObject):
                 '{0}'.format(type(item_path).__name__)))
         elif item_path == '/':
             raise ValueError('Cannot delete root')
+
+        del self.file[item_path]
+
         this_node = self.getNode(item_path)
         parent_node = this_node.parent
-        
+        parent_model_index = self.model.indexFromPath(parent_node.path)
+        row = self.getRank(item_path)
+
+        self.model.beginRemoveRows(parent_model_index, row, row)
         parent_node.deleteChild(this_node)
-        del self.file[item_path]
+        self.model.endRemoveRows()
+        
         self.logger.debug('Delete {0}'.format(item_path))
 
     def moveItem(self, item_path: str, dest_parent_path: str):
@@ -715,9 +734,25 @@ class HDFHandler(QObject):
         else:
             dest_path = dest_parent_path + '/' + this_node.name
         
+        self.file.move(item_path, dest_path)
+
+        this_parent_model_index = self.model.indexFromPath(
+            this_parent_node.path
+        )
+        this_row = self.getRank(item_path)
+        dest_parent_model_index = self.model.indexFromPath(dest_parent_path)
+        dest_row = len(dest_parent_node)
+        self.model.beginMoveRows(
+            this_parent_model_index,
+            this_row,
+            this_row,
+            dest_parent_model_index,
+            dest_row,
+        )
         this_parent_node.deleteChild(this_node)
         dest_parent_node.addChild(this_node)
-        self.file.move(item_path, dest_path)
+        self.model.endMoveRows()
+
         self.logger.debug('Move {0} to {1}'.format(
             item_path, dest_parent_path))
         
@@ -1317,6 +1352,7 @@ class HDFDataNode(HDFTreeNode):
             raise ValueError('Invalid name: {0}'.format(new_name))
         else:
             self._name = new_name
+            self._updateTypeByExtension()
 
     @property
     def hdf_type(self) -> HDFType:
@@ -1704,13 +1740,12 @@ class HDFTreeModel(QAbstractItemModel):
         """
         if not parent.isValid():
             raise ValueError('Cannot insert group in invalid parent index.')
-        row = self.rowCount(parent)
-        self.beginInsertRows(parent, row, row)
+
         self.hdf_handler.addNewGroup(
             parent.data(role = self.DataRoles.PathRole),
             name,
         )
-        self.endInsertRows()
+
         
 
     def insertData(self, 
@@ -1732,8 +1767,8 @@ class HDFTreeModel(QAbstractItemModel):
         """
         if not parent.isValid():
             raise ValueError('Cannot insert data in invalid parent index.')
-        row = self.rowCount(parent)
-        self.beginInsertRows(parent, row, row)
+        # row = self.rowCount(parent)
+        # self.beginInsertRows(parent, row, row)
         self.hdf_handler.addNewData(
             parent.data(role = self.DataRoles.PathRole),
             name = name,
@@ -1741,7 +1776,7 @@ class HDFTreeModel(QAbstractItemModel):
             dtype = dtype,
             compression = compression,
         )
-        self.endInsertRows()
+        # self.endInsertRows()
 
     def removeItem(self, child: QModelIndex):
         """
@@ -1753,10 +1788,10 @@ class HDFTreeModel(QAbstractItemModel):
         if not child.isValid():
             raise ValueError('Cannot remove invalid index')
         child_path = child.data(role = self.DataRoles.PathRole)
-        row = self.hdf_handler.getRank(child_path)
-        self.beginRemoveRows(child.parent(), row, row)
+        # row = self.hdf_handler.getRank(child_path)
+        # self.beginRemoveRows(child.parent(), row, row)
         self.hdf_handler.deleteItem(child_path)
-        self.endRemoveRows()
+        # self.endRemoveRows()
 
     def moveItem(self, child: QModelIndex, dest_parent: QModelIndex):
         """
@@ -1772,19 +1807,19 @@ class HDFTreeModel(QAbstractItemModel):
         if not dest_parent.isValid():
             raise ValueError('Cannot move items to invalid destination')
         child_path = child.data(role = self.DataRoles.PathRole)
-        row = self.hdf_handler.getRank(child_path)
-        self.beginMoveRows(
-            child.parent(),
-            row,
-            row,
-            dest_parent,
-            self.rowCount(dest_parent),
-        )
+        # row = self.hdf_handler.getRank(child_path)
+        # self.beginMoveRows(
+        #     child.parent(),
+        #     row,
+        #     row,
+        #     dest_parent,
+        #     self.rowCount(dest_parent),
+        # )
         self.hdf_handler.moveItem(
             child_path, 
             dest_parent.data(role = self.DataRoles.PathRole)
         )
-        self.endMoveRows()
+        # self.endMoveRows()
 
     def renameItem(self, child: QModelIndex, name: str):
         """
