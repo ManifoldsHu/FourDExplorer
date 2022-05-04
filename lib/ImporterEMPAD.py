@@ -7,10 +7,14 @@ Data importer from the EMPAD.
 *---------------------------- ImporterEMPAD.py -------------------------------*
 """
 
+from logging import Logger
 from xml.dom.minidom import Document, parse
 import os 
 
-from PySide6.QtCore import QObject 
+from PySide6.QtCore import QObject
+
+from bin.TaskManager import TaskManager
+from lib.TaskLoadData import TaskLoadFourDSTEMFromRaw 
 
 
 class ImporterEMPAD(QObject):
@@ -27,9 +31,25 @@ class ImporterEMPAD(QObject):
             ...
 
     """
-    def __init__(self, parent: QObject = None):
+    def __init__(self, 
+        item_name: str, 
+        item_parent_path: str, 
+        parent: QObject = None
+    ):
+        """
+        arguments:
+            item_name: (str) the created Dataset's name as an HDF object.
+
+            item_parent_path: (str) the path of the created Dataset's parent 
+                group.
+
+            parent: (QObject)
+        """
         super().__init__(parent)
         
+        self.item_name = item_name 
+        self.item_parent_path = item_parent_path
+
         # pre-defined parameters of EMPAD v1.0.0
         self.scalar_type = 'float'
         self.scalar_size = 4
@@ -48,8 +68,23 @@ class ImporterEMPAD(QObject):
             'camera': 'EMPAD',
         }
 
-    def parseHead(self, xml_path: str):
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger
 
+    @property
+    def task_manager(self) -> TaskManager:
+        global qApp
+        return qApp.task_manager
+
+    def parseHead(self, xml_path: str) -> dict:
+        """
+        Parse the header .xml file.
+
+        arguments:
+            xml_path: (str) the absolute path of the xml file.
+        """
         dom_tree = parse(xml_path)
         root: Document = dom_tree.documentElement
         self.xml_path = xml_path 
@@ -57,13 +92,9 @@ class ImporterEMPAD(QObject):
 
         self._parseLoadingData(root)
         self._parseCalibrateData(root)
+        self._parseOtherData(root)
         
-
-        # ----- Parsing parameters for calibrating -----
-        
-        
-
-        
+        return self.meta
 
     def _parseLoadingData(self, root: Document):
         """
@@ -119,6 +150,9 @@ class ImporterEMPAD(QObject):
             scan_size: the ration between the scanning region of EMPAD and the 
                 region of the conventional STEM.
 
+            scan_step_size: the scanning step size. In virtual image, it is the
+                same as the pixel size of the real space (dx).
+
             scale_factor: NOTE I don't know what this parameter means. For now
                 I use it to calculate step_size, which will actually shows on
                 the scale bar in reconstructed images. It is regarded to act
@@ -147,7 +181,7 @@ class ImporterEMPAD(QObject):
                         self._getData(mode, 'scan_size')
                     )
         except BaseException:
-            pass 
+            self.logger.error('Failed to parse scan_size item.')
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
@@ -173,19 +207,19 @@ class ImporterEMPAD(QObject):
             # 
             # If the formula is wrong, please raise an issue on GitHub.
             
-            self.meta['scanning_step_size_i'] = (
+            self.meta['scan_step_size_i'] = (
                 self.meta['full_scan_field_of_view_i'] * 
                 self.meta['scale_factor'] * 
                 self.meta['scan_size'] / self.scan_i
             )
 
-            self.meta['scanning_step_size_j'] = (
+            self.meta['scan_step_size_j'] = (
                 self.meta['full_scan_field_of_view_j'] *
                 self.meta['scale_factor'] * 
                 self.meta['scan_size'] / self.scan_j 
             )
         except BaseException:
-            pass
+            self.logger.error('Failed to parse scanning_step_size items.')
         
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
@@ -193,7 +227,7 @@ class ImporterEMPAD(QObject):
                 self._getData(iom, 'nominal_camera_length')
             )
         except BaseException:
-            pass 
+            self.logger.error('Failed to parse camera_length item.')
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
@@ -201,7 +235,7 @@ class ImporterEMPAD(QObject):
                 self._getData(iom, 'high_voltage')
             )
         except BaseException:
-            pass 
+            self.logger.error('Failed to parse voltage item.')
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
@@ -209,7 +243,7 @@ class ImporterEMPAD(QObject):
                 self._getData(iom, 'scan_rotation')
             )
         except BaseException:
-            pass 
+            self.logger.error('Failed to parse scan_rotation item.')
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
@@ -217,11 +251,14 @@ class ImporterEMPAD(QObject):
                 self._getData(iom, 'screen_current')
             )
         except BaseException:
-            pass 
+            self.logger.error('Failed to parse screen_current item.')
 
-    def _parseCalibrateData(self, root: Document):
+    def _parseOtherData(self, root: Document):
         """
-        Parsing other meta data.
+        Parsing other meta data, which may illustrate some property of the 
+        4D-STEM dataset.
+
+        These metadata will not affect calibration or reconstruction.
 
         arguments:
             root: (Document) The root of the dom tree.
@@ -230,9 +267,23 @@ class ImporterEMPAD(QObject):
             time_node = root.getElementsByTagName('timestamp')[0]
             self.meta['acquire_datetime'] = time_node.getAttribute('isoformat')
         except BaseException:
-            pass 
+            self.logger.error('Failed to parse acquire_datetime item.')
 
-
+        try:
+            self.meta['empad_version'] = str(
+                self._getData(root, 'software_version')
+            )
+            version = self.meta['empad_version'].split(' ')[0]
+            if version != '1.0.0':
+                self.logger.warning(
+                    'The parser is designed to parse 4D-STEM header file from '
+                    'EMPAD software v1.0.0, but the given header file is from '
+                    'version {0}. This may cause incompatibility '
+                    'problems.'.format(version)
+                )
+        except BaseException:
+            self.logger.error('Failed to parse empad_version item.')
+            
 
     def _getData(self, doc: Document, tag: str) -> str:
         """
@@ -245,8 +296,33 @@ class ImporterEMPAD(QObject):
         """
         return doc.getElementsByTagName(tag).childNodes[0].data
 
+    def loadData(self):
+        """
+        This method will submit a load task to the task manager.
 
-class ImporterEMPAD_NJU(QObject):
+        Before this method is called, parseHead() method must be called. Some
+        key arguments will be initialized by that method.
+        """
+        shape = (self.scan_i, self.scan_j, self.dp_i, self.dp_j)
+        self.task = TaskLoadFourDSTEMFromRaw(
+            shape = shape,
+            file_path = self.raw_path,
+            item_parent_path = self.item_parent_path,
+            item_name = self.item_name,
+            offset_to_first_image = self.offset_to_first_image,
+            gap_between_images = self.gap_between_images,
+            scalar_type = self.scalar_type,
+            scalar_size = self.scalar_size,
+            little_endian = self.little_endian,
+            parent = self, 
+            **self.meta,
+        )
+        self.task_manager.addTask(self.task)
+        
+
+
+
+class ImporterEMPAD_NJU(ImporterEMPAD):
     """
     The importer of EMPAD dataset.
 
@@ -261,7 +337,136 @@ class ImporterEMPAD_NJU(QObject):
 
     This importer corresponds to the EMPAD installed in Nanjing University.
     """
-    pass 
 
+    def _parseCalibrateData(self, root: Document):
+        """
+        Parsing the meta data for calibrating.
+
+        This function will try parsing:
+            full_scan_field_of_view: the physical length of the scanning 
+                region of the conventional STEM.
+            
+            scan_size: the ration between the scanning region of EMPAD and the 
+                region of the conventional STEM.
+
+            scan_step_size: the scanning step size. In virtual image, it is the
+                same as the pixel size of the real space (dx).
+
+            camera_length: the camera length (CL) of STEM.
+
+            voltage: the accelerate voltage of the electron beam.
+
+            screen_current: the total screen current. May use this to calculate
+                dose rate.
+
+            scan_rotation: the rotational angle between scanning orientations 
+                and the camera.
+
+            reciprocal_pixel_size: the dk of the diffraction space, unit: rad.
+            
+        arguments:
+            root: (Document) The root of the dom tree.
+        """
+        try:
+            for mode in root.getElementsByTagName('scan_parameters'):
+                if mode.getAttribute('mode') == 'acquire':
+                    self.meta['scan_size'] = float(
+                        self._getData(mode, 'scan_size')
+                    )
+        except BaseException:
+            self.logger.error('Failed to parse scan_size item.')
         
-    
+        try:
+            iom = root.getElementsByTagName('iom_measurements')[0]
+            full = self._getData(iom, 'optics.get_full_scan_field_of_view')
+
+            self.meta['full_scan_field_of_view_j'] = float(
+                full.split(', '[0].lstrip('['))
+            )
+            
+            self.meta['full_scan_field_of_view_i'] = float(
+                full.split(', ')[1].rstrip(']')
+            )
+            
+            self.meta['scan_step_size_i'] = (
+                self.meta['full_scan_field_of_view_i'] * 
+                self.meta['scan_size'] / self.scan_i
+            )
+
+            self.meta['scan_step_size_j'] = (
+                self.meta['full_scan_field_of_view_j'] * 
+                self.meta['scan_size'] / self.scan_j 
+            )
+        except BaseException:
+            self.logger.error('Failed to parse scanning_step_size items.')
+
+        try:
+            iom = root.getElementsByTagName('iom_measurements')[0]
+            self.meta['camera_length'] = float(
+                self._getData(iom, 'optics.get_cameralength')
+            )
+        except BaseException:
+            self.logger.error('Failed to parse camera_length item.')
+
+        try:
+            iom = root.getElementsByTagName('iom_measurements')[0]
+            self.meta['voltage'] = float(
+                self._getData(iom, 'source.get_voltage')
+            )
+        except BaseException:
+            self.logger.error('Failed to parse voltage item.')
+            
+        try:
+            iom = root.getElementsByTagName('iom_measurements')[0]
+            self.meta['scan_rotation'] = float(
+                self._getData(iom, 'column.get_scanrotation')
+            )
+        except BaseException:
+            self.logger.error('Failed to parse scan_rotation item.')
+
+        try:
+            iom = root.getElementsByTagName('iom_measurements')[0]
+            self.meta['screen_current'] = float(
+                self._getData(iom, 'source.get_screencurrent')
+            )
+        except BaseException:
+            self.logger.error('Failed to parse screen_current item.')
+
+        try:
+            iom = root.getElementsByTagName('iom_measurements')[0]
+            self.meta['reciprocal_pixel_size'] = float(
+                self._getData(iom, 'calibrated_diffraction_angle')
+            )
+        except BaseException:
+            self.logger.error('Failed to parse reciprocal_pixel_size item.')
+
+    def _parseOtherData(self, root: Document):
+        """
+        Parsing other meta data, which may illustrate some property of the 
+        4D-STEM dataset.
+
+        These metadata will not affect calibration or reconstruction.
+
+        arguments:
+            root: (Document) The root of the dom tree.
+        """
+        try:
+            time_node = root.getElementsByTagName('timestamp')[0]
+            self.meta['acquire_datetime'] = time_node.getAttribute('isoformat')
+        except BaseException:
+            self.logger.error('Failed to parse acquire_datetime item.')
+
+        try:
+            self.meta['empad_version'] = str(
+                self._getData(root, 'software_version')
+            )
+            version = self.meta['empad_version'].split(' ')[0]
+            if version != '0.51':
+                self.logger.warning(
+                    'The parser is designed to parse 4D-STEM header file from '
+                    'EMPAD software v0.51 (installed in Nanjing University), '
+                    'but the given header file is from version {0}. This may '
+                    'cause incompatibility problems.'.format(version)
+                )
+        except BaseException:
+            self.logger.error('Failed to parse empad_version item.')
