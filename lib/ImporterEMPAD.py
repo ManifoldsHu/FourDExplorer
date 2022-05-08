@@ -2,8 +2,24 @@
 
 """
 *---------------------------- ImporterEMPAD.py -------------------------------*
+从 EMPAD 中读取数据的 Data importer.
+
+4D-STEM 数据集的 Data importer 一般来说包含一个解析器，它是用来解析数据集的头文件的。
+这个解析器会收集 4D-STEM 数据集的元数据，以准备把整个数据集复制进 HDF5 文件里。然后，
+importer 就会创建一个任务，并把它提交到任务管理器中。
+
+作者：          胡一鸣
+创建时间：      2022年5月8日
+
 Data importer from the EMPAD.
 
+The Importers of 4D-STEM dataset has usually a parser to read the header file,
+and collect those metadata as a preparation for copying the whole dataset into
+the HDF5 file. Then, the importer will create a Task object and submit it to 
+the task manager.
+
+author:             Hu Yiming
+date:               May 8, 2022
 *---------------------------- ImporterEMPAD.py -------------------------------*
 """
 
@@ -141,14 +157,6 @@ class ImporterEMPAD(QObject):
 
         self.meta['raw_file'] = self.raw_path
 
-        # dir_path = os.path.dirname(self.xml_path)
-        #     # dom_tree = parse(xml_path)
-        #     # root = dom_tree.documentElement
-        # rf = root.getElementsByTagName('raw_file')[0]
-        # raw_name = rf.getAttribute('filename')
-        #     raw_path = os.path.join(dir_path, raw_name)
-
-        # print('Parse raw_file: {0}'.format(self.raw_path))
 
     def _parseCalibrateData(self, root: Document):
         """
@@ -191,8 +199,9 @@ class ImporterEMPAD(QObject):
                     self.meta['scan_size'] = float(
                         self._getData(mode, 'scan_size')
                     )
-        except BaseException:
-            self.logger.error('Failed to parse scan_size item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse scan_size item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
@@ -229,40 +238,45 @@ class ImporterEMPAD(QObject):
                 self.meta['scale_factor'] * 
                 self.meta['scan_size'] / self.scan_j 
             )
-        except BaseException:
-            self.logger.error('Failed to parse scanning_step_size items.')
+        except BaseException as e:
+            self.logger.error('Failed to parse scanning_step_size items.\n'
+                '{0}'.format(e), exc_info = True)
         
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['camera_length'] = float(
                 self._getData(iom, 'nominal_camera_length')
             )
-        except BaseException:
-            self.logger.error('Failed to parse camera_length item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse camera_length item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['voltage'] = float(
                 self._getData(iom, 'high_voltage')
             )
-        except BaseException:
-            self.logger.error('Failed to parse voltage item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse voltage item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['scan_rotation'] = float(
                 self._getData(iom, 'scan_rotation')
             )
-        except BaseException:
-            self.logger.error('Failed to parse scan_rotation item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse scan_rotation item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['screen_current'] = float(
                 self._getData(iom, 'screen_current')
             )
-        except BaseException:
-            self.logger.error('Failed to parse screen_current item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse screen_current item.\n'
+                '{0}'.format(e))
 
     def _parseOtherData(self, root: Document):
         """
@@ -277,8 +291,9 @@ class ImporterEMPAD(QObject):
         try:
             time_node = root.getElementsByTagName('timestamp')[0]
             self.meta['acquire_datetime'] = time_node.getAttribute('isoformat')
-        except BaseException:
-            self.logger.error('Failed to parse acquire_datetime item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse acquire_datetime item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             self.meta['empad_version'] = str(
@@ -292,8 +307,9 @@ class ImporterEMPAD(QObject):
                     'version {0}. This may cause incompatibility '
                     'problems.'.format(version)
                 )
-        except BaseException:
-            self.logger.error('Failed to parse empad_version item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse empad_version item.\n'
+                '{0}'.format(e), exc_info = True)
             
 
     def _getData(self, doc: Document, tag: str) -> str:
@@ -315,7 +331,6 @@ class ImporterEMPAD(QObject):
         key arguments will be initialized by that method.
         """
         shape = (self.scan_i, self.scan_j, self.dp_i, self.dp_j)
-        # print('in loadData(): {0}'.format(self.raw_path))
         self.task = TaskLoadFourDSTEMFromRaw(
             shape = shape,
             file_path = self.raw_path,
@@ -323,9 +338,6 @@ class ImporterEMPAD(QObject):
             item_name = self.item_name,
             offset_to_first_image = self.offset_to_first_image,
             gap_between_images = self.gap_between_images,
-            # scalar_type = self.scalar_type,
-            # scalar_size = self.scalar_size,
-            # little_endian = self.little_endian,
             parent = self, 
             **self.meta,
         )
@@ -379,7 +391,7 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
         arguments:
             root: (Document) The root of the dom tree.
         """
-        self.meta['is_flip'] = True 
+        self.meta['is_flipped'] = True 
 
         try:
             for mode in root.getElementsByTagName('scan_parameters'):
@@ -387,15 +399,16 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
                     self.meta['scan_size'] = float(
                         self._getData(mode, 'scan_size')
                     )
-        except BaseException:
-            self.logger.error('Failed to parse scan_size item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse scan_size item.\n'
+                '{0}'.format(e), exc_info = True)
         
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             full = self._getData(iom, 'optics.get_full_scan_field_of_view')
 
             self.meta['full_scan_field_of_view_j'] = float(
-                full.split(', '[0].lstrip('['))
+                full.split(', ')[0].lstrip('[')
             )
             
             self.meta['full_scan_field_of_view_i'] = float(
@@ -411,48 +424,54 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
                 self.meta['full_scan_field_of_view_j'] * 
                 self.meta['scan_size'] / self.scan_j 
             )
-        except BaseException:
-            self.logger.error('Failed to parse scanning_step_size items.')
+        except BaseException as e:
+            self.logger.error('Failed to parse scanning_step_size items.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['camera_length'] = float(
                 self._getData(iom, 'optics.get_cameralength')
             )
-        except BaseException:
-            self.logger.error('Failed to parse camera_length item.')
+        except BaseException as e: 
+            self.logger.error('Failed to parse camera_length item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['voltage'] = float(
                 self._getData(iom, 'source.get_voltage')
             )
-        except BaseException:
-            self.logger.error('Failed to parse voltage item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse voltage item.\n'
+                '{0}'.format(e), exc_info = True)
             
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['scan_rotation'] = float(
                 self._getData(iom, 'column.get_scanrotation')
             )
-        except BaseException:
-            self.logger.error('Failed to parse scan_rotation item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse scan_rotation item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['screen_current'] = float(
                 self._getData(iom, 'source.get_screencurrent')
             )
-        except BaseException:
-            self.logger.error('Failed to parse screen_current item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse screen_current item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             self.meta['reciprocal_pixel_size'] = float(
                 self._getData(iom, 'calibrated_diffraction_angle')
             )
-        except BaseException:
-            self.logger.error('Failed to parse reciprocal_pixel_size item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse reciprocal_pixel_size item.\n'
+                '{0}'.format(e), exc_info = True)
 
     def _parseOtherData(self, root: Document):
         """
@@ -467,8 +486,9 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
         try:
             time_node = root.getElementsByTagName('timestamp')[0]
             self.meta['acquire_datetime'] = time_node.getAttribute('isoformat')
-        except BaseException:
-            self.logger.error('Failed to parse acquire_datetime item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse acquire_datetime item.\n'
+                '{0}'.format(e), exc_info = True)
 
         try:
             self.meta['empad_version'] = str(
@@ -482,5 +502,6 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
                     'but the given header file is from version {0}. This may '
                     'cause incompatibility problems.'.format(version)
                 )
-        except BaseException:
-            self.logger.error('Failed to parse empad_version item.')
+        except BaseException as e:
+            self.logger.error('Failed to parse empad_version item.\n'
+                '{0}'.format(e), exc_info = True)

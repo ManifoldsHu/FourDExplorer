@@ -14,6 +14,8 @@ date:           May 5, 2022
 *--------------------------- WidgetImportRaw.py ------------------------------*
 """
 
+import os 
+
 from PySide6.QtWidgets import QWidget, QFileDialog
 
 from ui import uiWidgetImportRaw
@@ -44,6 +46,8 @@ class WidgetImportRaw(QWidget):
         )
         if raw_path == '':
             return 
+        raw_path = os.path.abspath(raw_path)
+        self.ui.lineEdit_raw_path.setText(raw_path)
 
     def getRawPath(self) -> str:
         return self.ui.lineEdit_raw_path.text()
@@ -79,7 +83,7 @@ class WidgetImportRaw(QWidget):
     def getOffsetToFirstImage(self) -> int:
         return self.ui.spinBox_offset_to_first_image.value()
 
-    def getGapBetweenTwoImages(self) -> int:
+    def getGapBetweenImages(self) -> int:
         return self.ui.spinBox_gap_between_images.value()
 
     def getLittleEndian(self) -> bool:

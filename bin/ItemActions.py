@@ -37,6 +37,7 @@ from bin.Widgets.PageVirtualImage import PageVirtualImage
 
 from Constants import HDFType, ItemDataRoles
 from lib.ImporterEMPAD import ImporterEMPAD, ImporterEMPAD_NJU
+from lib.ImporterRaw import ImporterRawFourDSTEM
 
 
 class ActionItemBase(QAction):
@@ -397,7 +398,8 @@ class ActionAttributes(ActionItemBase):
         """
         Shows a dialog to view attrbutes of the item.
         """
-        dialog_attr = DialogAttrViewer()
+        global qApp
+        dialog_attr = DialogAttrViewer(qApp.main_window)
         dialog_attr.setItemPath(self.item_path)
         dialog_attr.show()
 
@@ -422,7 +424,7 @@ class ActionChangeDataType(ActionItemBase):
             item_path: (str) the item's path handled by this action.
         """
         super().__init__(parent, item_index, item_path)
-        self.setText('Attributes')
+        self.setText('Change Data Type')
         self.triggered.connect(self.changeDataType)
 
     def changeDataType(self):
@@ -748,7 +750,21 @@ class ActionImportFourDSTEM(ActionItemBase):
             importer.loadData()
 
         elif mode == 3:
-            pass 
+            importer = ImporterRawFourDSTEM(new_name, parent_path)
+            meta = {
+                'raw_path': page.getRawPath(),
+                'scalar_type': page.getScalarType(),
+                'dp_i': page.getDp_i(),
+                'dp_j': page.getDp_j(),
+                'scan_i': page.getScan_i(),
+                'scan_j': page.getScan_j(),
+                'offset_to_first_image': page.getOffsetToFirstImage(),
+                'gap_between_images': page.getGapBetweenImages(),
+                'little_endian': page.getLittleEndian(),
+            }
+            importer.setMeta(**meta)
+            importer.loadData()
+
         else:
             pass 
         # dialog_create = DialogHDFCreate()

@@ -22,12 +22,11 @@ date:           Mar 10, 2022
 *-------------------------- WidgetTaskManager.py -----------------------------*
 """
 
-from PySide6.QtWidgets import QWidget, QMenu
+from PySide6.QtWidgets import QWidget, QMenu, QMessageBox
 from PySide6.QtCore import Qt, QPoint, QModelIndex
 
 from bin.TaskManager import TaskManager, Task
 from example.ExampleTask import ExampleSleep, ExampleSleepWithoutProgress
-# from bin.Log import LogUtil
 from bin.Widgets.DialogTaskDetail import DialogTaskDetail
 from bin.Widgets.DialogHistoryTasks import DialogHistoryTasks
 from ui import uiWidgetTaskManager
@@ -70,6 +69,7 @@ class WidgetTaskManager(QWidget):
     def _initCurrent(self):
         self.task_manager.task_info_refresh.connect(self.refreshCurrent)
         self.task_manager.progress_updated.connect(self.refreshProgress)
+        self.task_manager.task_exception.connect(self.warnException)
         self.refreshCurrent()
 
     def _initTaskQueue(self):
@@ -185,3 +185,18 @@ class WidgetTaskManager(QWidget):
         """
         dialog = DialogHistoryTasks(self)
         dialog.exec()
+
+    def warnException(self, exc: str):
+        """
+        Shows a dialog to warn the user that there exist an exception.
+        """
+        dialog = QMessageBox(
+            QMessageBox.Warning, 
+            'Error', 
+            exc, 
+            QMessageBox.Ok, 
+            self,
+        )
+        dialog.exec()
+        
+

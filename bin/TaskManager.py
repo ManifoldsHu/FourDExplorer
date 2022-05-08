@@ -154,6 +154,9 @@ class TaskManager(QObject):
     task_info_refresh = Signal()
     # emits whenever the current task is changed, e.g. a new task is submitted.
 
+    task_exception = Signal(str)
+    # emits whenever there are some exception occuring in the current task.
+
     TaskState = TaskState
 
     def __init__(self, parent: QObject = None):
@@ -263,13 +266,14 @@ class TaskManager(QObject):
                         '{0}'.format(subtask.exception), 
                         exc_info = True,
                     )
-                    # QMessageBox.warning(
-                    #     None,
-                    #     'Error: {0}'.format(self.current_task.name),
-                    #     'Error in subtask {0} occurred:\n {1}'.format(
-                    #         subtask.name, subtask.exception),
-                    #     QMessageBox.Ok,
-                    # )
+                    self.task_exception.emit(
+                        'An exception occured in Subtask {0}'
+                        ' of the Task {1}: {2}'.format(
+                            subtask.name,
+                            self.current_task.name, 
+                            subtask.exception,
+                        )
+                    )
 
             self._currentDoFollowWork()
             return True
@@ -289,12 +293,13 @@ class TaskManager(QObject):
             self.current_task.follow()
         except BaseException as e:
             self.logger.error('{0}'.format(e), exc_info = True)
-            # QMessageBox.warning(
-            #     None,
-            #     'Error: {0}'.format(self.current_task.name),
-            #     'Error when do follow work: \n {0}'.format(e),
-            #     QMessageBox.Ok,
-            # )
+            self.task_exception.emit(
+                'An exception occured when the Task {0} ' 
+                'is doing following work: {0}'.format(
+                    self.current_task.name,
+                    e,
+                )
+            )
         finally:
             self.current_task = None
 
@@ -337,14 +342,16 @@ class TaskManager(QObject):
             # Abandon submitting if errors happen
             task.state = TaskState.Excepted
             self.logger.error('{0}'.format(e), exc_info = True)
-            # QMessageBox.warning(
-            #     None, 
-            #     'Error: {0}'.format(self.current_task.name), 
-            #     'Error when do preparing work:\n {0}'.format(e),
-            #     QMessageBox.Ok,
-            # )
+            self.task_exception.emit(
+                'An exception occured when the Task {0} ' 
+                'is doing preparation work: {0}. '
+                'The task is aborted.'.format(
+                    task.name,
+                    e,
+                )
+            )
             self.logger.info('Task {0} aborted.'.format(task.name))
-            return True # This function need to be called again.
+            return True # This function is called again to run the next task.
 
         else:
             self.current_task = task

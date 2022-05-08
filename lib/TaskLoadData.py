@@ -170,6 +170,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         scalar_type: str = 'float',
         scalar_size: int = 4,
         little_endian: bool = True,
+        is_flipped = False,
         parent: QObject = None, 
         **meta,
     ):
@@ -213,6 +214,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         self._little_endian = little_endian
         self._offset_to_first_image = offset_to_first_image
         self._gap_between_images = gap_between_images
+        self._is_flipped = is_flipped
 
         self.name = 'Load 4D-STEM data'
         self.comment = (
@@ -306,6 +308,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
             offset_to_first_image = self._offset_to_first_image,
             gap_between_images = self._gap_between_images,
             little_endian = self._little_endian,
+            is_flipped = self._is_flipped,
         )
 
     def _showFourDSTEM(self):
