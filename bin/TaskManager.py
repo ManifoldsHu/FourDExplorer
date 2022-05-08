@@ -629,8 +629,8 @@ class Task(QObject):
         super().__init__(parent)
         self._name = 'untitled'
         self._subtasks = []
-        self._follow = self._doNothing
-        self._prepare = self._doNothing
+        self._follows = [self._doNothing]
+        self._prepares = [self._doNothing]
         self._comment = ''
         self._progress = 0
         self._state = TaskState.Initialized
@@ -698,7 +698,9 @@ class Task(QObject):
         """
         Set the following function.
         
-        The function will be called after the task is completed.
+        The function will be called after the task is completed. We can set 
+        following function multiple times, and those functions will be called
+        according to the order they were added.
 
         arguments:
             func: (Callable) the following function
@@ -710,13 +712,15 @@ class Task(QObject):
         if not isinstance(func, Callable):
             raise TypeError(('func must be a Callable, not '
                 '{0}'.format(type(func).__name__)))
-        self._follow = _packing(func, *arg, **kw)
+        self._follows.append(_packing(func, *arg, **kw))
 
     def setPrepare(self, func: Callable, *arg, **kw):
         """
         Set the preparing function.
 
-        The function will be called before the task is submitted.
+        The function will be called before the task is submitted. We can set
+        prepare function multiple times, and those functions will be called 
+        according to the order they were added.
 
         arguments:
             func: (Callable) the preparing function
@@ -728,19 +732,23 @@ class Task(QObject):
         if not isinstance(func, Callable):
             raise TypeError(('func must be a Callable, not '
                 '{0}'.format(type(func).__name__)))
-        self._prepare = _packing(func, *arg, **kw)
+        self._prepares.append(_packing(func, *arg, **kw))
 
     def follow(self):
         """
         Call the following function.
         """
-        self._follow()
+        # self._follow()
+        for func in self._follows:
+            func()
 
     def prepare(self):
         """
         Call the preparing function.
         """
-        self._prepare()
+        # self._prepare()
+        for func in self._prepares:
+            func()
 
     @property
     def comment(self) -> str:
