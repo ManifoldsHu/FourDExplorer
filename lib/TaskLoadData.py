@@ -21,11 +21,11 @@ from typing import Iterable, Mapping, Tuple
 from PySide6.QtCore import QObject, Signal 
 import h5py
 import numpy as np
-from bin.ItemActions import ActionShowFourDSTEM
+# from bin.ItemActions import ActionShowFourDSTEM
 
 from bin.TaskManager import Subtask, SubtaskWithProgress, Task
 from bin.HDFManager import HDFHandler
-from lib.ReadBinary import getDType, readFourDSTEMFromRaw, readFourDSTEMFromRawWithProgress
+from lib.ReadBinary import getDType, readFourDSTEMFromRaw
 
 class TaskBaseLoadData(Task):
     """

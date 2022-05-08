@@ -23,10 +23,12 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMessageBox, QWidget, QInputDialog
 
 from bin.HDFManager import HDFHandler, HDFType
-from bin.TabViewManager import TabViewManager
+from bin.TaskManager import Task
+# from bin.TabViewManager import TabViewManager
 from bin.Widgets.DialogAttrViewer import DialogAttrViewer
 from bin.Widgets.DialogCopyItem import DialogHDFCopy
 from bin.Widgets.DialogCreateItem import DialogHDFCreate
+from bin.Widgets.DialogImportFourDSTEM import DialogImportFourDSTEM
 from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
 from bin.Widgets.PageViewLine import PageViewLine
@@ -34,6 +36,7 @@ from bin.Widgets.PageViewImage import PageViewImage
 from bin.Widgets.PageVirtualImage import PageVirtualImage
 
 from Constants import HDFType, ItemDataRoles
+from lib.ImporterEMPAD import ImporterEMPAD, ImporterEMPAD_NJU
 
 
 class ActionItemBase(QAction):
@@ -98,7 +101,7 @@ class ActionCreate(ActionItemBase):
     """
     创建 HDF 文件对象的 Action。
 
-    Action to move HDF items.
+    Action to create HDF items.
     """
     def __init__(self, 
         parent: QObject = None,
@@ -454,7 +457,8 @@ class ActionShowData(ActionItemBase):
         self.triggered.connect(self.plotData)
 
     @property
-    def tabview_manager(self) -> TabViewManager:
+    # def tabview_manager(self) -> TabViewManager:
+    def tabview_manager(self):
         global qApp
         return qApp.tabview_manager
 
@@ -686,7 +690,72 @@ class ActionVirtualImage(ActionShowData):
             path: (str) The 4D-STEM path to calculate virtual images.
         """
         page = PageVirtualImage()
-        page.setFourDSTEM(self.item_path)
+        page.setFourDSTEM(path)
         return page
+
+class ActionImportFourDSTEM(ActionItemBase):
+    """
+    导入 EMPAD 的 4D-STEM 数据的 Action。
+
+    Action to import 4D-STEM dataset from EMPAD.
+    """
+    def __init__(self, 
+        parent: QObject = None, 
+        item_index = QModelIndex(),
+        item_path = '',
+    ):
+        """
+        arguments:
+            parent: (QObject)
+
+            item_index: (QModelIndex) must be the index of the HDF model, in 
+                which there exist a valid item path.
+
+            item_path: (str) the item's path handled by this action.
+        """
+        super().__init__(parent, item_index, item_path)
+        self.setText('Import 4D-STEM dataset')
+        self.triggered.connect(self.importFourDSTEM)
+
+    def importFourDSTEM(self):
+        """
+        Shows a dialog to import 4D-STEM dataset.
+        """
+        dialog_import = DialogImportFourDSTEM()
+        if self.item_path == '':
+            dialog_import.setParentPath('/')
+        else:
+            dialog_import.setParentPath(self.item_path)
+
+        dialog_code = dialog_import.exec()
+        if not dialog_code == dialog_import.Accepted:
+            return 
+        new_name = dialog_import.getNewName()
+        # print(new_name)
+        parent_path = dialog_import.getParentPath()
+        # print(parent_path)
+        mode = dialog_import.getImportMode()
+        page = dialog_import.getPage(mode)
+        if mode == 0:
+            importer = ImporterEMPAD(new_name, parent_path)
+            xml_path = page.getHeaderPath()
+            importer.parseHead(xml_path)
+            importer.loadData()
+        elif mode == 1:
+            importer = ImporterEMPAD_NJU(new_name, parent_path)
+            xml_path = page.getHeaderPath()
+            importer.parseHead(xml_path)
+            importer.loadData()
+
+        elif mode == 3:
+            pass 
+        else:
+            pass 
+        # dialog_create = DialogHDFCreate()
+        # dialog_create.initNames(parent_path = self.item_path)
+        # dialog_code = dialog_create.exec()
+        # if not dialog_code == dialog_create.Accepted:
+        #     return 
+
 
     

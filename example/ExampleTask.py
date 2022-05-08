@@ -80,7 +80,7 @@ class ExampleSleep(Task):
         self.addSubtaskFuncWithProgress(        # Add a subtask that lasts longest. 
             'sleep 10s',                      # The function should be custom-made 
             self.test_func_with_progress,   # to show the progress correctly.
-            10
+            10,
         )
 
 
@@ -105,7 +105,7 @@ class ExampleSleep(Task):
             QMessageBox.Ok
         )
 
-    def test_func_with_progress(self, signal: Signal, nums: int):
+    def test_func_with_progress(self, nums: int, progress_signal: Signal = None):
         """
         Sleep nums seconds.
 
@@ -119,7 +119,7 @@ class ExampleSleep(Task):
         """
         for second in range(nums):
             time.sleep(1)
-            signal.emit(int((second + 1) / nums * 100))
+            progress_signal.emit(int((second + 1) / nums * 100))
 
 
 class ExampleSleepWithoutProgress(Task):

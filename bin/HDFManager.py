@@ -601,7 +601,9 @@ class HDFHandler(QObject):
         name: str, 
         shape: tuple, 
         dtype: str = 'float32',
-        compression: str = 'gzip',):
+        compression: str = None,
+        # compression: str = 'gzip', # compression has some performance problem
+    ):
         """
         Create a dataset in the parent_path.
 

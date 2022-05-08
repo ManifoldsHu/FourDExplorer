@@ -202,6 +202,7 @@ class TaskManager(QObject):
             raise TypeError('task must be a Task, not '
                 '{0}'.format(type(task).__name__))
         task.state = TaskState.Waiting
+        task.setParent(self)
         self.model_waiting.addTask(task)
         self._startNextTask()
 
@@ -777,7 +778,7 @@ class Task(QObject):
         if not isinstance(subtask, Subtask):
             raise TypeError('subtask must be Subtask object, not '
                 '{0}'.format(type(subtask).__name__))
-        
+        subtask.setParent(self)
         subtask.subtask_excepted.connect(self.setExcepted)
         subtask.subtask_completed.connect(self.checkCompleted)
         self._subtasks.append(subtask)
@@ -812,6 +813,7 @@ class Task(QObject):
                 'Use addSubtask() instead.')
             
         self.progress = 0
+        subtask.setParent(self)
         subtask.subtask_progress.connect(self.setProgress)
         subtask.subtask_excepted.connect(self.setExcepted)
         subtask.subtask_completed.connect(self.checkCompleted)

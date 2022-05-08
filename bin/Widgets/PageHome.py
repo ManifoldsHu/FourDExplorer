@@ -16,6 +16,7 @@ date:           Mar 25, 2022
 
 from PySide6.QtWidgets import QWidget
 from bin.TaskManager import TaskManager
+from bin.ItemActions import ActionImportFourDSTEM
 from ui import uiPageHome
 from example.ExampleTask import ExampleSleepWithoutProgress, ExampleSleep
 
@@ -40,6 +41,10 @@ class PageHome(QWidget):
         self.ui.commandLinkButton_tutorials.clicked.connect(self._testTask)
         self.ui.commandLinkButton_work.clicked.connect(self._testTask2)
 
+        self.ui.pushButton_import_fourDSTEM.clicked.connect(
+            self._importFourDSTEM
+        )
+
     @property
     def task_manager(self) -> TaskManager:
         global qApp
@@ -52,3 +57,7 @@ class PageHome(QWidget):
     def _testTask2(self):
         task = ExampleSleep(self)
         self.task_manager.addTask(task)
+
+    def _importFourDSTEM(self):
+        self.import_action = ActionImportFourDSTEM()
+        self.import_action.trigger()

@@ -134,10 +134,21 @@ class ImporterEMPAD(QObject):
                     self.meta['scan_i'] = self.scan_i 
         
         dir_name = os.path.dirname(self.xml_path)
+
         raw_name_node = root.getElementsByTagName('raw_file')[0]
-        raw_name = raw_name_node.getAttribute('file_name')
+        raw_name = raw_name_node.getAttribute('filename')
         self.raw_path = os.path.join(dir_name, raw_name)
+
         self.meta['raw_file'] = self.raw_path
+
+        # dir_path = os.path.dirname(self.xml_path)
+        #     # dom_tree = parse(xml_path)
+        #     # root = dom_tree.documentElement
+        # rf = root.getElementsByTagName('raw_file')[0]
+        # raw_name = rf.getAttribute('filename')
+        #     raw_path = os.path.join(dir_path, raw_name)
+
+        # print('Parse raw_file: {0}'.format(self.raw_path))
 
     def _parseCalibrateData(self, root: Document):
         """
@@ -294,7 +305,7 @@ class ImporterEMPAD(QObject):
 
             tag: (str) child tag's name.
         """
-        return doc.getElementsByTagName(tag).childNodes[0].data
+        return doc.getElementsByTagName(tag)[0].childNodes[0].data
 
     def loadData(self):
         """
@@ -304,6 +315,7 @@ class ImporterEMPAD(QObject):
         key arguments will be initialized by that method.
         """
         shape = (self.scan_i, self.scan_j, self.dp_i, self.dp_j)
+        # print('in loadData(): {0}'.format(self.raw_path))
         self.task = TaskLoadFourDSTEMFromRaw(
             shape = shape,
             file_path = self.raw_path,
@@ -311,9 +323,9 @@ class ImporterEMPAD(QObject):
             item_name = self.item_name,
             offset_to_first_image = self.offset_to_first_image,
             gap_between_images = self.gap_between_images,
-            scalar_type = self.scalar_type,
-            scalar_size = self.scalar_size,
-            little_endian = self.little_endian,
+            # scalar_type = self.scalar_type,
+            # scalar_size = self.scalar_size,
+            # little_endian = self.little_endian,
             parent = self, 
             **self.meta,
         )
@@ -367,6 +379,8 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
         arguments:
             root: (Document) The root of the dom tree.
         """
+        self.meta['is_flip'] = True 
+
         try:
             for mode in root.getElementsByTagName('scan_parameters'):
                 if mode.getAttribute('mode') == 'acquire':
