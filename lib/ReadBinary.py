@@ -30,7 +30,7 @@ def getDType(
         scalar_type: (str) Must be one of these: (float, int, uint,)
 
         scalar_size: (int) How many bytes of one scalar number. Must be one of 
-            these: (1, 2, 4,)
+            these: (1, 2, 4, 8)
 
         little_endian: (bool) Is the byte order of the data little-endian?
 

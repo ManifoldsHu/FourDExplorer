@@ -48,6 +48,7 @@ from logging import Logger
 # from typing import List, Tuple
 
 from PySide6.QtWidgets import QWidget, QMessageBox, QDialog
+from PySide6.QtGui import QRegularExpressionValidator
 
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas)
@@ -71,11 +72,14 @@ import numpy as np
 import h5py
 
 from bin.BlitManager import BlitManager
-from bin.HDFManager import HDFHandler
+from bin.HDFManager import HDFHandler, reValidHDFName, HDFGroupNode
+from bin.TaskManager import TaskManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
+from lib.TaskReconstruction import TaskVirtualImage
 from ui import uiPageVirtualImage
 from ui import uiDialogTestPlot
+from ui import uiDialogCreateImage
 
 class PageVirtualImage(PageBaseFourDSTEM):
     """
@@ -112,8 +116,6 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self._createAxes()
         
-
-
     @property
     def mask_index(self) -> int:
         """
@@ -128,6 +130,11 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         return self.ui.comboBox_mode.currentIndex()
 
+    @property
+    def task_manager(self) -> TaskManager:
+        global qApp
+        return qApp.task_manager
+
     def _initUi(self):
         """
         Initialize Uis.
@@ -139,7 +146,8 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self.ui.comboBox_mode.currentIndexChanged.connect(self._changeMode)
 
         self.ui.pushButton_start.setProperty('class', 'danger')
-        self.ui.pushButton_start.clicked.connect(self.startCalculationTest)
+        # self.ui.pushButton_start.clicked.connect(self.startCalculationTest)
+        self.ui.pushButton_start.clicked.connect(self.startCalculation)
 
     def _createMasks(self):
         """
@@ -411,7 +419,6 @@ class PageVirtualImage(PageBaseFourDSTEM):
                 mask[ii, jj] = widget.isContained((ii, jj))
         return mask
 
-
     def startCalculation(self):
         """
         Start calculate virtual image of 4D-STEM.
@@ -419,19 +426,74 @@ class PageVirtualImage(PageBaseFourDSTEM):
         When the button 'Start Calculation' is clicked, this function will be 
         called. 
         """
+        dialog_save = DialogSaveImage(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+
+        meta = self._generateImageMeta()
+        mask = self._generateMask()
+        self.task = TaskVirtualImage(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            mask,
+            **meta,
+        )
+        self.task_manager.addTask(self.task)
+
+    def _generateImageMeta(self) -> dict:
+        """
+        Generate the meta data saved in the reconstructed image.
+        """
+        meta = {
+            'image_mode': 'Virtual Image',
+            'image_width': self.data_object.shape[1],
+            'image_height': self.data_object.shape[0],
+            'stem_path': self.data_path,
+        }
+        for key in self.data_object.attrs:
+            new_key = 'stem_' + key
+            meta[new_key] = self.data_object.attrs[key]
+            # meta.update(new_key = self.data_object.attrs[key])
+        
+        meta['pixel_unit'] = 'm'
+
+        if 'scan_step_size' in self.data_object.attrs:
+            meta['pixel_size_i'] = self.data_object.attrs['scan_step_size']
+            meta['pixel_size_j'] = self.data_object.attrs['scan_step_size']
+        if 'scan_step_size_i' in self.data_object.attrs:
+            meta['pixel_size_i'] = self.data_object.attrs['scan_step_size_i']
+        if 'scan_step_size_j' in self.data_object.attrs:
+            meta['pixel_size_j'] = self.data_object.attrs['scan_step_size_j'] 
+
         widget = self._mask_widgets[self.mask_index]
         mask_meta = widget.generateMeta()
+        meta.update(**mask_meta)
 
-    def startCalculationTest(self):
+        return meta 
+
+    def _generateMask(self) -> np.ndarray:
         """
-        Only for test.
+        Generate the integrate region.
         """
-        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape 
         mask = np.zeros((dp_i, dp_j), dtype = self.data_object.dtype)
         for ii in range(dp_i):
             for jj in range(dp_j):
                 widget = self._mask_widgets[self.mask_index]
                 mask[ii, jj] = widget.isContained((ii, jj))
+        return mask
+        
+
+    def startCalculationTest(self):
+        """
+        Only for test.
+        """
+        mask = self._generateMask()
         dialog = DialogTestPlot(mask, self)
         dialog.exec()
 
@@ -445,7 +507,91 @@ class DialogTestPlot(QDialog):
         self.ax.imshow(image)
         
     
+class DialogSaveImage(QDialog):
+    """
+    选择在 HDF 文件中保存重构图像路径的对话框。
 
+    Dialog to choose where to save the reconstructed image in the HDF file.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self.ui = uiDialogCreateImage.Ui_Dialog()
+        self.ui.setupUi(self)
+
+        self.ui.pushButton_ok.clicked.connect(self.accept)
+        self.ui.pushButton_cancel.clicked.connect(self.reject)
+        self.ui.pushButton_browse.clicked.connect(self.browseParent)
+
+        self.ui.lineEdit_name.setText('Untitled')
+        self._validateNewName()
+
+        
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp
+        return qApp.hdf_handler
+        
+    def browseParent(self) -> bool:
+        """
+        Open a dialog to browse a group to be parent.
+
+        returns:
+            (bool) whether a new path is set.
+        """
+        dialog_browse = DialogHDFChoose(self, only_group = True)
+        dialog_code = dialog_browse.exec()
+        if dialog_code == dialog_browse.Accepted:
+            current_path = dialog_browse.getCurrentPath()
+            self.ui.lineEdit_parent_path.setText(current_path)
+            return True 
+        else:
+            return False 
+
+    def setParentPath(self, item_path: str):
+        """
+        Set the parent group's path where imported dataset will locate.
+
+        arguments:
+            item_path: (str) 
+        """
+        if not isinstance(item_path, str):
+            raise TypeError('item_path must be a str, not '
+                '{0}'.format(type(item_path).__name__))
+        
+        node = self.hdf_handler.getNode(item_path)
+        if not isinstance(node, HDFGroupNode):
+            self.ui.lineEdit_parent_path.setText(node.parent.path)
+        else:
+            self.ui.lineEdit_parent_path.setText(item_path)
+
+    def getParentPath(self) -> str:
+        """
+        Return the parent group's path where imported dataset will locate.
+
+        returns:
+            (str)
+        """
+        return self.ui.lineEdit_parent_path.text()
+
+    def getNewName(self) -> str:
+        """
+        returns the new name of the imported dataset.
+
+        Will add '.4dstem' automatically as the extension.
+        """
+        name = self.ui.lineEdit_name.text()
+        if '.' in name:
+            if name.split('.')[-1] == 'img':
+                return name 
+        return name + '.img'
+
+    def _validateNewName(self):
+        """
+        Set validator by regular expressioin for the name.
+        """
+        self.re_validator = QRegularExpressionValidator()
+        self.re_validator.setRegularExpression(reValidHDFName.pattern)
+        self.ui.lineEdit_name.setValidator(self.re_validator)
     
 
         

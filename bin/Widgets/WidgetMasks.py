@@ -305,10 +305,10 @@ class WidgetMaskCircle(WidgetMaskBase):
             (dict)
         """
         meta = {
-            'MaskShape': 'Circle',
-            'MaskRadius': self.radius,
-            'MaskCenterShiftI': self.shift_i,
-            'MaskCenterShiftJ': self.shift_j, 
+            'mask_shape': 'Circle',
+            'mask_radius': self.radius,
+            'mask_center_shift_i': self.shift_i,
+            'mask_center_shift_j': self.shift_j, 
         }
         return meta
         
@@ -365,10 +365,10 @@ class WidgetMaskRing(WidgetMaskBase):
         self.ui.doubleSpinBox_ring_center_j.setRange(-32768, 32767)
 
         self.ui.doubleSpinBox_ring_inner.valueChanged.connect(
-            self._updateByInner
+            self._updateInner
         )
         self.ui.doubleSpinBox_ring_outer.valueChanged.connect(
-            self._updateByOuter
+            self._updateOuter
         )
         self.ui.doubleSpinBox_ring_center_i.valueChanged.connect(
             self._updateLocation
@@ -470,11 +470,11 @@ class WidgetMaskRing(WidgetMaskBase):
             (dict)
         """
         meta = {
-            'MaskShape': 'Ring',
-            'MaskOuterRadius': self.outer_radius,
-            'MaskInnerRadius': self.inner_radius,
-            'MaskCenterShiftI': self.shift_i,
-            'MaskCenterShiftJ': self.shift_j, 
+            'mask_shape': 'Ring',
+            'mask_outer_radius': self.outer_radius,
+            'mask_inner_radius': self.inner_radius,
+            'mask_center_shift_i': self.shift_i,
+            'mask_center_shift_j': self.shift_j, 
         }
         return meta
 
@@ -663,13 +663,13 @@ class WidgetMaskWedge(WidgetMaskBase):
             (dict)
         """
         meta = {
-            'MaskShape': 'Wedge',
-            'MaskOuterRadius': self.outer_radius,
-            'MaskInnerRadius': self.inner_radius,
-            'MaskOpenAngle': self.open_angle,
-            'MaskRotationAnlge': self.rotation_angle,
-            'MaskCenterShiftI': self.shift_i,
-            'MaskCenterShiftJ': self.shift_j, 
+            'mask_shape': 'Wedge',
+            'mask_outer_radius': self.outer_radius,
+            'mask_inner_radius': self.inner_radius,
+            'mask_open_angle': self.open_angle,
+            'mask_rotation_anlge': self.rotation_angle,
+            'mask_center_shift_i': self.shift_i,
+            'mask_center_shift_j': self.shift_j, 
         }
         return meta
 
@@ -852,12 +852,12 @@ class WidgetMaskRectangle(WidgetMaskBase):
             (dict)
         """
         meta = {
-            'MaskShape': 'Rectangle',
-            'MaskWidth': self.width,
-            'MaskHeight': self.height,
-            'MaskRotationAngle': self.rotation_angle,
-            'MaskCenterShiftI': self.shift_i,
-            'MaskCenterShiftJ': self.shift_j, 
+            'mask_shape': 'Rectangle',
+            'mask_width': self.width,
+            'mask_height': self.height,
+            'mask_rotation_angle': self.rotation_angle,
+            'mask_center_shift_i': self.shift_i,
+            'mask_center_shift_j': self.shift_j, 
         }
         return meta
 
@@ -1014,12 +1014,12 @@ class WidgetMaskEllipse(WidgetMaskBase):
             (dict)
         """
         meta = {
-            'MaskShape': 'Ellipse',
-            'MaskWidth': self.width,
-            'MaskHeight': self.height,
-            'MaskRotationAngle': self.rotation_angle,
-            'MaskCenterShiftI': self.shift_i,
-            'MaskCenterShiftJ': self.shift_j, 
+            'mask_shape': 'Ellipse',
+            'mask_width': self.width,
+            'mask_height': self.height,
+            'mask_rotation_angle': self.rotation_angle,
+            'mask_center_shift_i': self.shift_i,
+            'mask_center_shift_j': self.shift_j, 
         }
         return meta
 
@@ -1216,12 +1216,12 @@ class WidgetMaskPolygon(WidgetMaskBase):
             (dict)
         """
         meta = {
-            'MaskShape': 'RegularPolygon',
-            'MaskRadius': self.radius,
-            'MaskVerticeNumber': self.num_vertices,
-            'MaskRotationAngle': self.rotation_angle,
-            'MaskCenterShiftI': self.shift_i,
-            'MaskCenterShiftJ': self.shift_j, 
+            'mask_shape': 'RegularPolygon',
+            'mask_radius': self.radius,
+            'mask_vertice_number': self.num_vertices,
+            'mask_rotation_angle': self.rotation_angle,
+            'mask_center_shift_i': self.shift_i,
+            'mask_center_shift_j': self.shift_j, 
         }
         return meta
 
@@ -1476,13 +1476,13 @@ class WidgetMaskSegment(WidgetMaskBase):
             (dict)
         """
         meta = {
-            'MaskShape': 'SegmentRing',
-            'MaskSegmentNumber': self.num_segments,
-            'MaskInnerRadius': self.inner_radius,
-            'MaskOuterRadius': self.outer_radius,
-            'MaskOpenAngle': self.open_angle,
-            'MaskRotationAngle': self.rotation_angle,
-            'MaskCenterShiftI': self.shift_i,
-            'MaskCenterShiftJ': self.shift_j, 
+            'mask_shape': 'SegmentRing',
+            'mask_segment_number': self.num_segments,
+            'mask_inner_radius': self.inner_radius,
+            'mask_outer_radius': self.outer_radius,
+            'mask_open_angle': self.open_angle,
+            'mask_rotation_angle': self.rotation_angle,
+            'mask_center_shift_i': self.shift_i,
+            'mask_center_shift_j': self.shift_j, 
         }
         return meta

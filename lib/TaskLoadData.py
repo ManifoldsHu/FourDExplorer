@@ -315,7 +315,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         """
         Will open the 4D-STEM dataset in the HDF5 object.
 
-        This function works as the preparing function that will be called
+        This function works as the following function that will be called
         just after the task is completed.
         """
         self.logger.debug('Task {0} completed.'.format(self.name))

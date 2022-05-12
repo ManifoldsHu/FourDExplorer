@@ -76,6 +76,7 @@ class ImporterEMPAD(QObject):
         self.gap_between_images = 2 * self.dp_j * self.scalar_size
 
         self.meta = {
+            'data_mode': '4D-STEM',
             'dp_i': 128,
             'dp_j': 128,
             'scalar_type': 'float',
@@ -466,7 +467,7 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            self.meta['reciprocal_pixel_size'] = float(
+            self.meta['dp_pixel_size_reciprocal'] = float(
                 self._getData(iom, 'calibrated_diffraction_angle')
             )
         except BaseException as e:
