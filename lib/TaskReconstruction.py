@@ -23,7 +23,7 @@ import numpy as np
 from bin.TaskManager import Subtask, SubtaskWithProgress, Task
 from bin.HDFManager import HDFHandler
 from bin.Widgets.WidgetMasks import WidgetMaskBase
-from lib.FourDSTEMMapping import MapFourDSTEM, CalculateVirtualImage
+from lib.FourDSTEMMapping import CalculateCenterOfMass, CalculateVirtualImage
 
 class TaskBaseReconstruct(Task):
     """
@@ -42,6 +42,10 @@ class TaskBaseReconstruct(Task):
         """
         arguments:
             item_path: (str) the 4D-STEM dataset path.
+
+            image_parent_path: (str) the parent group's path of the new image.
+
+            image_name: (str) the reconstructed image's name.
 
             parent: (QObject)
 
@@ -122,6 +126,7 @@ class TaskVirtualImage(TaskBaseReconstruct):
 
         self._mask = mask
         self.setPrepare(self._createImage)
+        self.setFollow(self._showImage)
         self._bindSubtask()
 
     def _createImage(self):
@@ -163,4 +168,72 @@ class TaskVirtualImage(TaskBaseReconstruct):
         just after the task is completed.
         """
         self.logger.debug('Task {0} completed.'.format(self.name))
+
+
+class TaskCenterOfMass(TaskBaseReconstruct):
+    """
+    进行使用质心法计算差分相位衬度像的任务。
+
+    Task to calculate CoM vector fields.
+    """
+    def __init__(
+        self, 
+        item_path: str, 
+        image_parent_path: str, 
+        image_name: str,
+        mask: np.ndarray,
+        parent: QObject = None, 
+        **meta,
+    ):
+        super().__init__(
+            item_path, 
+            image_parent_path, 
+            image_name, 
+            parent, 
+            **meta,
+        )
+
+        self._mask = mask
+        self.setPrepare(self._createVectorField)
+        self._bindSubtask()
+
+    def _createVectorField(self):
+        """
+        Will create a dataset in HDF5 file according to the image_path. 
+
+        This function works as the preparing function that will be called
+        just before the task is submitted.
+        """
+        data_object = self.hdf_handler.file[self.stem_path]
+        scan_i, scan_j, dp_i, dp_j = data_object.shape
+        self.hdf_handler.addNewData(
+            self._image_parent_path,
+            self._image_name,
+            (2, scan_i, scan_j),
+            'float64',
+        )
+        for key, value in self._meta.items():
+            self.hdf_handler.file[self.image_path].attrs[key] = value 
+
+    def _bindSubtask(self):
+        """
+        Add subtask, which the practical worker.
+        """
+        self.addSubtaskFuncWithProgress(
+            'Calculating Center Of Mass',
+            CalculateCenterOfMass,
+            item_path = self.stem_path,
+            mask = self._mask,
+            result_path = self.image_path,
+        )
+
+    def _showImage(self):
+        """
+        Will open the reconstructed image in the HDF5 object.
+
+        This function works as the following function that will be called
+        just after the task is completed.
+        """
+        self.logger.debug('Task {0} completed.'.format(self.name))
+
 

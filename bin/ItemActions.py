@@ -33,7 +33,9 @@ from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
 from bin.Widgets.PageViewLine import PageViewLine
 from bin.Widgets.PageViewImage import PageViewImage
+from bin.Widgets.PageViewVectorField import PageViewVectorField
 from bin.Widgets.PageVirtualImage import PageVirtualImage
+from bin.Widgets.PageCenterOfMass import PageCenterOfMass 
 
 from Constants import HDFType, ItemDataRoles
 from lib.ImporterEMPAD import ImporterEMPAD, ImporterEMPAD_NJU
@@ -574,7 +576,29 @@ class ActionShowData(ActionItemBase):
         return page_line
 
     def _plotVectorField(self, path):
-        pass
+        """
+        To plot a vector field according to the path in the HDF5 file, return
+        the page where the figure locates.
+
+        arguments:
+            path: (str)
+
+        returns:
+            (PageViewVectorField) The page to view the vector field. This page
+                is added to the tabWidget in the MainWindow.
+        """
+        page_vector = PageViewVectorField()
+        try:
+            page_vector.setVectorField(path)
+        except (KeyError, ValueError) as e:
+            self.logger.error(e, exc_info = True)
+            msg = QMessageBox()
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('{0}'.format(e))
+            msg.exec()
+        return page_vector
 
     def _plotFourDSTEM(self, path):
         """
@@ -733,9 +757,9 @@ class ActionImportFourDSTEM(ActionItemBase):
         if not dialog_code == dialog_import.Accepted:
             return 
         new_name = dialog_import.getNewName()
-        # print(new_name)
+
         parent_path = dialog_import.getParentPath()
-        # print(parent_path)
+
         mode = dialog_import.getImportMode()
         page = dialog_import.getPage(mode)
         if mode == 0:
@@ -767,11 +791,46 @@ class ActionImportFourDSTEM(ActionItemBase):
 
         else:
             pass 
-        # dialog_create = DialogHDFCreate()
-        # dialog_create.initNames(parent_path = self.item_path)
-        # dialog_code = dialog_create.exec()
-        # if not dialog_code == dialog_create.Accepted:
-        #     return 
 
 
+class ActionCenterOfMass(ActionShowData):
+    """
+    计算 4D-STEM 虚拟成像的 Action。
+
+    Action to calculate 4D-STEM virtual images.
+    """
+    def __init__(self,
+        parent: QObject = None,
+        item_index = QModelIndex(),
+        item_path = '',
+    ):
+        """
+        arguments:
+            parent: (QObject)
+
+            item_index: (QModelIndex) must be the index of the HDF model, in 
+                which there exist a valid item path.
+
+            item_path: (str) the item's path handled by this action.
+        """
+        super().__init__(parent, item_index, item_path)
+        self.setText('Center Of Mass')
+
+    def plotData(self):
+        """
+        Force to use CoM method.
+        """
+        page = self._openCenterOfMass(self.item_path)
+        self.tabview_manager.openTab(page)
+
+    def _openCenterOfMass(self, path: str):
+        """
+        Open a page to calculate virtual images.
+
+        arguments:
+            path: (str) The 4D-STEM path to calculate virtual images.
+        """
+        page = PageCenterOfMass()
+        page.setFourDSTEM(path)
+        return page
     

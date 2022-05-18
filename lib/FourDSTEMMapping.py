@@ -161,9 +161,8 @@ def CalculateVirtualImage(
 
 def CalculateCenterOfMass(
     item_path: str,
-    mask: np.ndarray|h5py.Dataset|str = None,
-    result_com_i: np.ndarray|h5py.Dataset|str = None,
-    result_com_j: np.ndarray|h5py.Dataset|str = None,
+    mask: np.ndarray|h5py.Dataset,
+    result_path: str,
     progress_signal: Signal = None,
 ) -> tuple[np.ndarray]:
     """
@@ -203,13 +202,17 @@ def CalculateCenterOfMass(
 
     if mask is None:
         mask = np.ones(dp_i, dp_j)
-    filters = (vec_i*mask, vec_j*mask)
+    filters = [vec_i*mask, vec_j*mask]
 
-    if result_com_i is None:
-        result_com_i = np.zeros((scan_i, scan_j))
-    if result_com_j is None:
-        result_com_j = np.zeros((scan_i, scan_j))
-    results = (result_com_i, result_com_j)
+    result_com_i = np.zeros((scan_i, scan_j))
+    result_com_j = np.zeros((scan_i, scan_j))
+    results = [result_com_i, result_com_j]
 
-    return MapFourDSTEM(item_path, filters, results, progress_signal)
+    MapFourDSTEM(item_path, filters, results, progress_signal)
+
+    result_dataset = hdf_handler.file[result_path]
+    result_dataset[0,:,:] = result_com_i 
+    result_dataset[1,:,:] = result_com_j 
+
+    
 

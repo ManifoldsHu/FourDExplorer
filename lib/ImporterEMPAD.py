@@ -467,9 +467,13 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            self.meta['dp_pixel_size_reciprocal'] = float(
+            self.meta['dp_pixel_size_i'] = float(
                 self._getData(iom, 'calibrated_diffraction_angle')
             )
+            self.meta['dp_pixel_size_j'] = float(
+                self._getData(iom, 'calibrated_diffraction_angle')
+            )
+            self.meta['dp_pixel_size_unit'] = 'rad'
         except BaseException as e:
             self.logger.error('Failed to parse reciprocal_pixel_size item.\n'
                 '{0}'.format(e), exc_info = True)

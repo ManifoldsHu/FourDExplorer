@@ -36,6 +36,7 @@ from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog
 
 from bin.TabViewManager import TabViewManager
 from bin.ItemActions import (
+    ActionCenterOfMass,
     ActionCreate,
     ActionMove,
     ActionRename,
@@ -157,6 +158,7 @@ class HDFBaseItemMenu(QMenu):
         self._action_show_vector_field = ActionShowVectorField(self, index)
         self._action_show_fourdstem = ActionShowFourDSTEM(self, index)
         self._action_virtual_image = ActionVirtualImage(self, index)
+        self._action_center_of_mass = ActionCenterOfMass(self, index)
     
     @property
     def model_index(self) -> QModelIndex:
@@ -488,7 +490,8 @@ class HDFFourDSTEMMenu(HDFBaseItemMenu):
         menu_calibrate = self.addMenu('Calibrate')
         menu_reconstruct = self.addMenu('Reconstruct')
         menu_reconstruct.addActions([
-            self._action_virtual_image
+            self._action_virtual_image,
+            self._action_center_of_mass,
         ])
         
         self.addSeparator()

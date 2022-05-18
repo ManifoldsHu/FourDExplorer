@@ -23,7 +23,7 @@ Contents:
 
 Promoted Widget:
     - name of widget class: PageViewFourDSTEM
-    - header file: bin.Widget.PageViewFourDSTEM
+    - header file: bin.Widgets.PageViewFourDSTEM
 
 author:         Hu Yiming
 date:           Mar 30, 2022
@@ -262,7 +262,7 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         if (preview_data_obj.shape[0] != scan_i 
                 or preview_data_obj.shape[1] != scan_j):
             raise ValueError('The preview image\'s shape must be equal to the'
-                'first two dimensions of the 4D-STEM dataset.')
+                ' first two dimensions of the 4D-STEM dataset.')
         
         self._preview_path = preview_path
         self.ui.lineEdit_preview_path.setText(self.preview_path)
@@ -391,10 +391,10 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         """
         Create a new preview image.
 
-        In default, it will be /.../[4D-STEM name]_preview . If there has been
-        a preview at this path, try to use it. Otherwise, add an index and try
-        again: /.../[4D-STEM name]_preview_1. The new path will be under the 
-        same group as the 4D-STEM dataset.
+        In default, it will be /.../[4D-STEM name]_preview.img . If there has
+        been a preview at this path, try to use it. Otherwise, add an index and 
+        try again: /.../[4D-STEM name]_preview_1.img . The new path will be 
+        under the same group as the 4D-STEM dataset.
 
         I cannot find a quick way to calculate a new preview image for now, so 
         the preview image is set to be a zero matrix. Users can calculate a new
@@ -405,11 +405,17 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         """
         
         data_node = self.hdf_handler.getNode(self.data_path)
-        preview_name = data_node.name + '_preview'
+        if '.' in data_node.name:
+            name_array = data_node.name.split('.').pop()
+            original_name = '.'.join(name_array)
+        else:
+            original_name = data_node.name
+
+        preview_name = original_name + '_preview.img'
         _count = 0
         while preview_name in data_node.parent:
             _count += 1
-            preview_name = data_node.name + '_preview_{0}'.format(_count)
+            preview_name = original_name + '_preview_{0}.img'.format(_count)
         if data_node.parent.path == '/':
             preview_path = '/' + preview_name
         else:

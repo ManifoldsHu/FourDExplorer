@@ -109,7 +109,7 @@ class PageViewImage(QWidget):
 
         self.ui.lineEdit_image_path.setReadOnly(True)
 
-        self._initUI()
+        self._initUi()
         self._createAxes()
 
 
@@ -201,12 +201,13 @@ class PageViewImage(QWidget):
         self.ui.lineEdit_image_path.setText(self.data_path)
         self.setWindowTitle('{0} - Image'.format(img_node.name))
 
+        self._image_max = np.max(data_obj)
+        self._image_min = np.min(data_obj)
+
         # self._createAxes()
         self._createImage()
         self._createColorbar()
 
-        self._image_max = np.max(data_obj)
-        self._image_min = np.min(data_obj)
 
         self.image_canvas.draw()
         self.image_canvas.flush_events()
@@ -244,7 +245,9 @@ class PageViewImage(QWidget):
             self.image_ax.images.pop(_index)
         
         self._image_object = self.image_ax.imshow(
-            self.data_object
+            self.data_object,
+            vmin = self._image_min,
+            vmax = self._image_max,
         )
         self.image_blit_manager['image'] = self._image_object
         
@@ -264,7 +267,7 @@ class PageViewImage(QWidget):
             self.colorbar_object.update_normal(self.image_object)
 
 
-    def _initUI(self):
+    def _initUi(self):
         """
         Initialize UI
         """
@@ -439,6 +442,9 @@ class PageViewImage(QWidget):
         dialog_code = dialog.exec()
         if dialog_code == dialog.Accepted:
             current_path = dialog.getCurrentPath()
+        else:
+            return 
+            
         try:
             self.setImage(current_path)
         except (KeyError, ValueError, TypeError,) as e:

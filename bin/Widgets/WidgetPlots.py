@@ -195,5 +195,23 @@ class WidgetPlotPreview(WidgetPlotBase):
         super().__init__(parent)
         self.setToolBarVisible(False)
 
+class WidgetPlotBackground(WidgetPlotBase):
+    """
+    使用 matplotlib 在显示矢量场时，显示背景图的部件。
 
-    
+    Widget to show the background image when opening a vector field.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self.setToolBarVisible(False)
+
+class WidgetPlotQuiver(WidgetPlotBase):
+    """
+    使用 matplotlib 显示矢量场 (Quiver) 的部件。
+
+    Widget to show the vector fields by matplotlib.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        
+

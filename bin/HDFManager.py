@@ -1032,6 +1032,8 @@ class HDFTreeNode(Mapping):
                     '{0}'.format(type(new_name))))
             elif reValidHDFName.fullmatch(new_name) is None:
                 raise ValueError('Invalid name: {0}'.format(new_name))
+            elif new_name[-1] == '.':
+                raise ValueError('Invalid name: {0}'.format(new_name))
             else:
                 self._name = new_name
                 
@@ -1351,6 +1353,8 @@ class HDFDataNode(HDFTreeNode):
                 'HDFDataNode name attribute cannot set as null string'
             )
         elif reValidHDFName.fullmatch(new_name) is None:
+            raise ValueError('Invalid name: {0}'.format(new_name))
+        elif new_name[-1] == '.':
             raise ValueError('Invalid name: {0}'.format(new_name))
         else:
             self._name = new_name
