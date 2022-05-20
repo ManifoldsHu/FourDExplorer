@@ -190,8 +190,8 @@ class PageViewVectorField(QWidget):
         self.ui.lineEdit_vector_path.setText(self.data_path)
         self.setWindowTitle('{0} - Vector'.format(img_node.name))
 
-        self._createQuiver()
-        
+        # We must first render the background image, in order not to 
+        # cover the vector field.
         if 'background_path' in self.data_object.attrs:
             background_path = self.data_object.attrs['background_path']
             try:
@@ -203,9 +203,11 @@ class PageViewVectorField(QWidget):
             new_background_path = self._createNewBackground()
             self.setBackground(new_background_path)
 
+        self._createQuiver()
+        
         self.image_canvas.draw()
         self.image_canvas.flush_events()
-        # self._createBackground()
+        
 
 
     def _createAxes(self):
@@ -249,28 +251,31 @@ class PageViewVectorField(QWidget):
         array_i = np.linspace(0, height - 1, height)
         array_j = np.linspace(0, width - 1, width)
         coord_i, coord_j = np.meshgrid(array_i, array_j, indexing = 'ij')
-        vec_i, vec_j = self.data_object[0, :, :], self.data_object[1, :, :]
+        vec_i, vec_j = self.data_object
 
         if 'quiver_scale' in self.data_object.attrs:
             quiver_scale = self.data_object.attrs['quiver_scale']
         else:
-            quiver_scale = None
+            self.data_object.attrs['quiver_scale'] = 1
+            quiver_scale = 1
         
         if 'quiver_width' in self.data_object.attrs:
             quiver_width = self.data_object.attrs['quiver_width']
         else:
+            self.data_object.attrs['quiver_width'] = 0.15
             quiver_width = 0.15
         
         if 'quiver_color' in self.data_object.attrs:
             quiver_color = self.data_object.attrs['quiver_color']
         else:
-            quiver_color = 'white'
+            self.data_object.attrs['quiver_color'] = 'black'
+            quiver_color = 'black'
+
+        X, Y = coord_j, coord_i 
+        U, V = vec_j, vec_i 
 
         self._quiver_object = self.image_ax.quiver(
-            coord_i,
-            coord_j,
-            vec_i,
-            vec_j,
+            X, Y, U, V,
             units = 'xy',
             scale = quiver_scale,
             width = quiver_width,
@@ -324,6 +329,7 @@ class PageViewVectorField(QWidget):
         
         self._background_path = background_path
         self.ui.lineEdit_background_path.setText(self.background_path)
+        self.data_object.attrs['background_path'] = background_path
 
         self._createBackgroundImage()
         self._createColorbar()
@@ -355,7 +361,8 @@ class PageViewVectorField(QWidget):
             self.image_ax.images.pop(_index)
         
         self._image_object = self.image_ax.imshow(
-            self.hdf_handler.file[self.background_path]
+            self.hdf_handler.file[self.background_path],
+            interpolation = 'hermite',
         )
         self._image_object.set_visible(self.background_visible)
         self.image_blit_manager['image'] = self._image_object 
@@ -458,7 +465,8 @@ class PageViewVectorField(QWidget):
         # Get a valid new name of the new background image
         data_node = self.hdf_handler.getNode(self.data_path)
         if '.' in data_node.name:
-            name_array = data_node.name.split('.').pop()
+            name_array = data_node.name.split('.')
+            name_array.pop()
             original_name = '.'.join(name_array)
         else:
             original_name = data_node.name 

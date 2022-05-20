@@ -90,28 +90,6 @@ def MapFourDSTEM(
             raise IndexError('the shape of the result matrices must be the'
                 'same as the scanning coordinates of the 4D-STEM dataset')
 
-    # if isinstance(filters, (np.ndarray, h5py.Dataset, str)):
-    #     filters = [filters]
-    # for filter in filters:
-    #     if isinstance(filter, str):
-    #         filter = hdf_handler.file[filter]
-    
-
-    
-    # if results is None:
-    #     results = [np.zeros((scan_i, scan_j)) for _ in filters]
-    # elif isinstance(results, (np.ndarray, h5py.Dataset, str)):
-    #     results = [results]
-
-    # _results = []
-
-    # for result in results:
-    #     if isinstance(result, str):
-    #         _results.append(hdf_handler.file[result])
-    #     else:
-            
-    #         _results.append(result)
-
     result_lock = Lock()
     for ii in range(scan_i):
         for jj in range(scan_j):
@@ -152,17 +130,11 @@ def CalculateVirtualImage(
     result_object = hdf_handler.file[result_path]
     return MapFourDSTEM(item_path, [mask], [result_object], progress_signal)
 
-    # if result is None:
-    #     result, = MapFourDSTEM(item_path, (mask,), progress_signal)
-    # else:
-    #     result, = MapFourDSTEM(item_path, (mask,), (result,), progress_signal)
-    # return result
 
 
 def CalculateCenterOfMass(
     item_path: str,
     mask: np.ndarray|h5py.Dataset,
-    result_path: str,
     progress_signal: Signal = None,
 ) -> tuple[np.ndarray]:
     """
@@ -198,21 +170,25 @@ def CalculateCenterOfMass(
     center_j = (dp_j - 1)/2
     array_i = np.linspace(- center_i, dp_i - center_i - 1, dp_i)
     array_j = np.linspace(- center_j, dp_j - center_j - 1, dp_j)
-    vec_i, vec_j = np.meshgrid(array_i, array_j, indexing = 'ij')
+    loc_i, loc_j = np.meshgrid(array_i, array_j, indexing = 'ij')
 
     if mask is None:
         mask = np.ones(dp_i, dp_j)
-    filters = [vec_i*mask, vec_j*mask]
 
-    result_com_i = np.zeros((scan_i, scan_j))
-    result_com_j = np.zeros((scan_i, scan_j))
-    results = [result_com_i, result_com_j]
+    # To calculate center of mass, we should calculate
+    #       Σrm(r)/Σm(r)
+    # Where m is the mass distribution, r is location vector.
+    filters = [loc_i*mask, loc_j*mask, mask]
+    first_momentum_i = np.zeros((scan_i, scan_j))
+    first_momentum_j = np.zeros((scan_i, scan_j))
+    region_integral = np.zeros((scan_i, scan_j))
+    results = [first_momentum_i, first_momentum_j, region_integral]
 
     MapFourDSTEM(item_path, filters, results, progress_signal)
 
-    result_dataset = hdf_handler.file[result_path]
-    result_dataset[0,:,:] = result_com_i 
-    result_dataset[1,:,:] = result_com_j 
+    com_i = first_momentum_i/(region_integral + 1e-12)
+    com_j = first_momentum_j/(region_integral + 1e-12)
 
-    
+    return (com_i, com_j)
+
 

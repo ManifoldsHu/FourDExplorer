@@ -113,6 +113,9 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
                 
             elif chosen_type == HDFType.Image:
                 menu = HDFImageMenu(self, index)
+            
+            elif chosen_type == HDFType.VectorField:
+                menu = HDFVectorFieldMenu(self, index)
                 
             elif chosen_type == HDFType.Data:
                 menu = HDFDataMenu(self, index)

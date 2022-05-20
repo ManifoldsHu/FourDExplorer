@@ -542,14 +542,15 @@ class DialogSaveImage(QDialog):
         dialog_code = dialog_browse.exec()
         if dialog_code == dialog_browse.Accepted:
             current_path = dialog_browse.getCurrentPath()
-            self.ui.lineEdit_parent_path.setText(current_path)
+            if current_path:
+                self.ui.lineEdit_parent_path.setText(current_path)
             return True 
         else:
             return False 
 
     def setParentPath(self, item_path: str):
         """
-        Set the parent group's path where imported dataset will locate.
+        Set the parent group's path where created images will locate.
 
         arguments:
             item_path: (str) 

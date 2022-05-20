@@ -266,8 +266,8 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         
         self._preview_path = preview_path
         self.ui.lineEdit_preview_path.setText(self.preview_path)
-        
-        # self._createPreviewAxes()
+        self.data_object.attrs['preview_path'] = preview_path
+
         self._createPreviewImage()
         self._createPreviewCursor()
 
@@ -455,8 +455,8 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
             msg.setStandardButtons(QMessageBox.Ok)
             msg.setText('Cannot open this data: {0}'.format(e))
             msg.exec()
-        else:
-            self.data_object.attrs['preview_path'] = current_path
+        # else:
+        #     self.data_object.attrs['preview_path'] = current_path
 
     def _changeColormap(self, index: int):
         """
