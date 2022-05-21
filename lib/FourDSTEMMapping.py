@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-*----------------------------- ReadBinary.py ---------------------------------*
+*-------------------------- FourDSTEMMapping.py ------------------------------*
 提供了将 4D-STEM 数据集映射为二维图像的一些函数。
 
 作者：          胡一鸣
@@ -11,7 +11,7 @@ Here provides some functions to map 4D-STEM to 2D images.
 
 author:         Hu Yiming
 date:           Apr 29, 2022
-*----------------------------- ReadBinary.py ---------------------------------*
+*-------------------------- FourDSTEMMapping.py ------------------------------*
 """
 
 from typing import Iterable

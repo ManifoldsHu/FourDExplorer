@@ -578,7 +578,7 @@ class DialogSaveImage(QDialog):
         """
         returns the new name of the imported dataset.
 
-        Will add '.4dstem' automatically as the extension.
+        Will add '.img' automatically as the extension.
         """
         name = self.ui.lineEdit_name.text()
         if '.' in name:

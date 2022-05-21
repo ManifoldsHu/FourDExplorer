@@ -406,7 +406,8 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         
         data_node = self.hdf_handler.getNode(self.data_path)
         if '.' in data_node.name:
-            name_array = data_node.name.split('.').pop()
+            name_array = data_node.name.split('.')
+            name_array.pop()
             original_name = '.'.join(name_array)
         else:
             original_name = data_node.name

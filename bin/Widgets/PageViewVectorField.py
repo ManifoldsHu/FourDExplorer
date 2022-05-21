@@ -32,7 +32,7 @@ date:           Mar 30, 2022
 
 from logging import Logger
 import os
-from PySide6.QtWidgets import QWidget, QMessageBox 
+from PySide6.QtWidgets import QWidget, QMessageBox, QInputDialog, QDialog
 from matplotlib.backend_bases import MouseEvent 
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas)
@@ -46,9 +46,14 @@ import h5py
 import numpy as np
 
 from bin.BlitManager import BlitManager
-from bin.HDFManager import HDFDataNode, HDFHandler 
+from bin.HDFManager import HDFDataNode, HDFHandler
+from bin.TaskManager import TaskManager 
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
+from bin.Widgets.PageVirtualImage import DialogSaveImage
+from lib.TaskVectorFieldProcess import TaskRotateVectorAngle
+from ui import uiDialogCreateImage
 from ui import uiPageViewVectorField
+from ui import uiDialogAdjustQuiverEffect
 
 class PageViewVectorField(QWidget):
     """
@@ -160,6 +165,11 @@ class PageViewVectorField(QWidget):
     @property
     def background_visible(self) -> bool:
         return self.ui.checkBox_background_visible.isChecked()
+
+    @property
+    def task_manager(self) -> TaskManager:
+        global qApp 
+        return qApp.task_manager
 
     def setVectorField(self, data_path: str):
         """
@@ -395,6 +405,29 @@ class PageViewVectorField(QWidget):
         self.ui.pushButton_browse_background.clicked.connect(
             self._browseBackground
         )
+        self.ui.pushButton_vector_processing.clicked.connect(
+            self._vectorProcessing
+        )
+        self.ui.pushButton_adjust_effects.clicked.connect(
+            self._adjustEffects
+        )
+
+    def _adjustEffects(self):
+        """
+        Open a dialog to adjust quiver display effects.
+        """
+        dialog = DialogAdjustQuiverEffect(self)
+        dialog.setVectorField(self.data_path)
+        dialog_code = dialog.exec()
+        if dialog_code == DialogAdjustQuiverEffect.Rejected:
+            return 
+
+        self.data_object.attrs['quiver_scale'] = dialog.getScale()
+        self.data_object.attrs['quiver_width'] = dialog.getWidth()
+        self.data_object.attrs['quiver_color'] = dialog.getColor()
+        
+        self.setVectorField(self.data_path)
+
 
     def _browse(self):
         """
@@ -497,3 +530,156 @@ class PageViewVectorField(QWidget):
 
         return bkgrd_path
         
+
+    def _vectorProcessing(self):
+        """
+        Open a menu to show vector processing methods.
+
+        Including change angles, subtracting mean vector, and calculate curl, 
+        divergence, potential, ...
+        """
+        angle, is_accepted = QInputDialog.getDouble(
+            self,
+            'Input rotation angle',
+            'Here input a rotation angle of every vector. Unit: degree',
+            0,
+            minValue = -360,
+            maxValue = 360,
+            decimals = 1,
+            step = 1,
+        )
+
+        if not is_accepted:
+            return 
+        
+        dialog_save = DialogSaveVectorField(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+        meta = self.data_object.attrs 
+        
+        self.task = TaskRotateVectorAngle(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            angle = angle,
+            parent = self,
+            **meta,
+        )
+        
+        self.task_manager.addTask(self.task)
+
+
+class DialogSaveVectorField(DialogSaveImage):
+    """
+    选择在 HDF 文件中保存矢量场的路径。
+
+    Dialog to choose where to save the reconstructed image in the HDF file.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+    
+    def getNewName(self) -> str:
+        """
+        returns the new name of the imported dataset.
+
+        Will add '.img' automatically as the extension.
+        """
+        name = self.ui.lineEdit_name.text()
+        if '.' in name:
+            if name.split('.')[-1] == 'vec':
+                return name 
+        return name + '.vec'
+
+
+class DialogAdjustQuiverEffect(QDialog):
+    """
+    用于调整矢量场箭头图的效果的对话框。
+
+    Dialog to adjust quiver display effect.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self.ui = uiDialogAdjustQuiverEffect.Ui_Dialog()
+        self.ui.setupUi(self)
+        self._item_path = None 
+        self._colors = {
+            'blue': 0,
+            'cyan': 1,
+            'green': 2,
+            'black': 3,
+            'magenta': 4,
+            'red': 5,
+            'white': 6,
+            'yellow': 7,
+        }
+        self.ui.doubleSpinBox_scale.setMaximum(1e9)
+        self.ui.doubleSpinBox_scale.setMinimum(0.01)
+        self.ui.doubleSpinBox_width.setMinimum(0.01)
+
+        self.ui.pushButton_cancel.clicked.connect(self.reject)
+        self.ui.pushButton_ok.clicked.connect(self.accept)
+    
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp
+        return qApp.hdf_handler
+
+    @property 
+    def data_object(self) -> h5py.Dataset:
+        return self.hdf_handler.file[self._item_path]
+
+    @property
+    def data_scale(self) -> float:
+        return self.data_object.attrs['quiver_scale']
+
+    @property
+    def data_width(self) -> float:
+        return self.data_object.attrs['quiver_width']
+
+    @property 
+    def data_color(self) -> str:
+        return self.data_object.attrs['quiver_color']
+
+    def setVectorField(self, item_path: str):
+        """
+        arguments:
+            item_path: (str) the vector field's path in hdf5 file.
+        """
+        self._item_path = item_path
+         
+        self.ui.doubleSpinBox_scale.setValue(self.data_scale)
+        self.ui.doubleSpinBox_width.setValue(self.data_width)
+        self.ui.comboBox_color.setCurrentIndex(
+            self._colors[self.data_color]
+        )
+
+    def getScale(self) -> float:
+        return self.ui.doubleSpinBox_scale.value()
+
+    def getWidth(self) -> float:
+        return self.ui.doubleSpinBox_width.value()
+
+    def getColor(self) -> str:
+        return self.ui.comboBox_color.currentText()
+
+    
+
+
+
+# if 'quiver_scale' in self.data_object.attrs:
+#             quiver_scale = self.data_object.attrs['quiver_scale']
+#         else:
+#             self.data_object.attrs['quiver_scale'] = 1
+#             quiver_scale = 1
+        
+#         if 'quiver_width' in self.data_object.attrs:
+#             quiver_width = self.data_object.attrs['quiver_width']
+#         else:
+#             self.data_object.attrs['quiver_width'] = 0.15
+#             quiver_width = 0.15
+        
+#         if 'quiver_color' in self.data_object.attrs:
