@@ -368,7 +368,7 @@ class DialogCreateCoM(QDialog):
         return self._addNameExt(self.ui.lineEdit_CoMj.text(), 'img')
 
     def getDCoMName(self) -> str:
-        return self._addNameExt(self.ui.checkBox_dCoM.text(), 'img')
+        return self._addNameExt(self.ui.lineEdit_dCoM.text(), 'img')
 
     def getICoMName(self) -> str:
         return self._addNameExt(self.ui.lineEdit_iCoM.text(), 'img')

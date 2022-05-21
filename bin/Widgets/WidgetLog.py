@@ -64,10 +64,11 @@ class WidgetLog(QWidget):
         arguments:
             string: str
         """
-        self.ui.textBrowser_log.append(string)
         cursor = self.ui.textBrowser_log.textCursor()
-        self.ui.textBrowser_log.cursor = cursor
         self.ui.textBrowser_log.moveCursor(cursor.End)
+        cursor.insertText(string)
+        self.ui.textBrowser_log.setTextCursor(cursor)
+        self.ui.textBrowser_log.ensureCursorVisible()
     
     def openLogDir(self):
         """
