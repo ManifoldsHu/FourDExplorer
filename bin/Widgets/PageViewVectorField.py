@@ -32,7 +32,12 @@ date:           Mar 30, 2022
 
 from logging import Logger
 import os
-from PySide6.QtWidgets import QWidget, QMessageBox, QInputDialog, QDialog
+from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QInputDialog
+from PySide6.QtWidgets import QDialog
+# from PySide6.QtWidgets import QMenu
+# from PySide6.QtCore import QPoint
 from matplotlib.backend_bases import MouseEvent 
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas)
@@ -50,10 +55,12 @@ from bin.HDFManager import HDFDataNode, HDFHandler
 from bin.TaskManager import TaskManager 
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.PageVirtualImage import DialogSaveImage
-from lib.TaskVectorFieldProcess import TaskRotateVectorAngle
+from lib.TaskVectorFieldProcess import TaskCurl, TaskDivergence, TaskPotential, TaskRotateVectorAngle, TaskSliceI
+from lib.TaskVectorFieldProcess import TaskSubtractVectorOffset
 from ui import uiDialogCreateImage
 from ui import uiPageViewVectorField
 from ui import uiDialogAdjustQuiverEffect
+from ui import uiDialogVectorProcessing
 
 class PageViewVectorField(QWidget):
     """
@@ -533,10 +540,41 @@ class PageViewVectorField(QWidget):
 
     def _vectorProcessing(self):
         """
-        Open a menu to show vector processing methods.
+        Open a dialog to show vector processing methods.
 
         Including change angles, subtracting mean vector, and calculate curl, 
         divergence, potential, ...
+        """
+        dialog = DialogVectorProcessing(self)
+        dialog_code = dialog.exec()
+        if not dialog_code == dialog.Accepted:
+            return 
+        result = dialog.getResult()
+        if result == 'rotate':
+            self._vectorRotateAngle()
+        if result == 'subtract':
+            self._vectorSubtract()
+        if result == 'potential':
+            self._vectorPotential()
+        if result == 'divergence':
+            self._vectorDivergence()
+        if result == 'curl':
+            self._vectorCurl()
+        if result == 'vec_i':
+            self._vectorSliceI()
+        if result == 'vec_j':
+            self._vectorSliceJ()
+
+
+    def _vectorRotateAngle(self):
+        """
+        Rotate every vector an angle.
+
+        In practical experiment, there may exist some angular shift between 
+        the scanning array and the pixelized camera, but we usually cannot 
+        be aware of this by pure 4D-STEM dataset. Fortunately, we know that
+        some vector fields (like Electric field) keeps non-curl, so we use 
+        this property to get correct vector fields.
         """
         angle, is_accepted = QInputDialog.getDouble(
             self,
@@ -571,6 +609,142 @@ class PageViewVectorField(QWidget):
         )
         
         self.task_manager.addTask(self.task)
+
+    def _vectorSubtract(self):
+        """
+        Subtract every vector by their mean vector.
+
+        In practical experiment, there may exist some shift between the center
+        of the diffraction pattern and the origin of the diffraction plane. In 
+        this case, the calculated center of mass will have an global offset. 
+        Here this function will be able to recover the fine architecture of the
+        vector field, by set the vector offset to be zero.
+        """
+        dialog_save = DialogSaveVectorField(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+        meta = self.data_object.attrs 
+
+        self.task = TaskSubtractVectorOffset(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            parent = self,
+            **meta,
+        )
+        self.task_manager.addTask(self.task)
+
+    def _vectorPotential(self):
+        """
+        Calculate potential for the vector field.
+
+        The vector field should be a non-curl field, otherwise the result is 
+        invalid in physics.
+        """
+        dialog_save = DialogSaveImage(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+        meta = self.data_object.attrs 
+
+        self.task = TaskPotential(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            parent = self,
+            **meta,
+        )
+
+    def _vectorDivergence(self):
+        """
+        Calculate divergence for the vector field.
+        """
+        dialog_save = DialogSaveImage(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+        meta = self.data_object.attrs 
+
+        self.task = TaskDivergence(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            parent = self,
+            **meta,
+        )
+
+    def _vectorCurl(self):
+        """
+        Calculate curl for the vector field.
+        """
+        dialog_save = DialogSaveImage(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+        meta = self.data_object.attrs 
+
+        self.task = TaskCurl(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            parent = self,
+            **meta,
+        )
+
+    def _vectorSliceI(self):
+        """
+        Slice i-component for the vector field.
+        """
+        dialog_save = DialogSaveImage(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+        meta = self.data_object.attrs 
+
+        self.task = TaskSliceI(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            parent = self,
+            **meta,
+        )
+
+    def _vectorSliceJ(self):
+        """
+        Slice j-component for the vector field.
+        """
+        dialog_save = DialogSaveImage(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+        meta = self.data_object.attrs 
+
+        self.task = TaskSliceI(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            parent = self,
+            **meta,
+        )
 
 
 class DialogSaveVectorField(DialogSaveImage):
@@ -667,8 +841,68 @@ class DialogAdjustQuiverEffect(QDialog):
         return self.ui.comboBox_color.currentText()
 
     
+class DialogVectorProcessing(QDialog):
+    """
+    用于计算 Vector Field 相关操作的对话框。
 
+    Dialog to calculate some processings for vector fields.
+    """
+    def __init__(self, parent: QWidget):
+        super().__init__(parent)
+        self.ui = uiDialogVectorProcessing.Ui_Dialog()
+        self.ui.setupUi(self)
+        self.ui.pushButton_rotate_vector_angle.clicked.connect(
+            self._rotate_vector_angle
+        )
+        self.ui.pushButton_subtract_mean_vector.clicked.connect(
+            self._subtract_mean_vector
+        )
+        self.ui.pushButton_calculate_curl.clicked.connect(
+            self._calculate_curl
+        )
+        self.ui.pushButton_calculate_divergence.clicked.connect(
+            self._calculate_divergence
+        )
+        self.ui.pushButton_calculate_potential.clicked.connect(
+            self._calculate_potential
+        )
+        self.ui.pushButton_vec_i.clicked.connect(
+            self._slice_vec_i
+        )
+        self.ui.pushButton_vec_j.clicked.connect(
+            self._slice_vec_j
+        )
 
+    def getResult(self):
+        return self._result
+
+    def _rotate_vector_angle(self):
+        self._result = 'rotate'
+        self.accept()
+
+    def _subtract_mean_vector(self):
+        self._result = 'subtract'
+        self.accept()
+
+    def _calculate_curl(self):
+        self._result = 'curl'
+        self.accept()
+
+    def _calculate_divergence(self):
+        self._result = 'divergence'
+        self.accept()
+
+    def _calculate_potential(self):
+        self._result = 'potential'
+        self.accept()
+
+    def _slice_vec_i(self):
+        self._result = 'vec_i'
+        self.accept()
+
+    def _slice_vec_j(self):
+        self._result = 'vec_j'
+        self.accept()
 
 # if 'quiver_scale' in self.data_object.attrs:
 #             quiver_scale = self.data_object.attrs['quiver_scale']
