@@ -485,3 +485,10 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
             
             self.preview_object.set_cmap(cmap)
             self.preview_blit_manager.update()
+
+    
+
+
+
+
+

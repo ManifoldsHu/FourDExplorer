@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-*---------------------------- TaskLoadData.py --------------------------------*
+*------------------------- TaskReconstruction.py -----------------------------*
 包含读取 4D-STEM 数据并计算虚拟成像的任务。
 
 作者:           胡一鸣
@@ -11,7 +11,7 @@ This module includes tasks calculate Virtual Image of 4D-STEM dataset.
 
 author:         Hu Yiming
 date:           Apr 29, 2021
-*---------------------------- TaskLoadData.py --------------------------------*
+*------------------------- TaskReconstruction.py -----------------------------*
 """
 
 from logging import Logger

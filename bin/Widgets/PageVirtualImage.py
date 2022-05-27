@@ -421,7 +421,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
     def startCalculation(self):
         """
-        Start calculate virtual image of 4D-STEM.
+        Start to calculate virtual image of 4D-STEM.
 
         When the button 'Start Calculation' is clicked, this function will be 
         called. 

@@ -30,6 +30,7 @@ from bin.Widgets.DialogCopyItem import DialogHDFCopy
 from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from bin.Widgets.DialogImportFourDSTEM import DialogImportFourDSTEM
 from bin.Widgets.DialogMoveItem import DialogHDFMove
+from bin.Widgets.PageAlignFourDSTEM import PageAlignFourDSTEM
 from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
 from bin.Widgets.PageViewLine import PageViewLine
 from bin.Widgets.PageViewImage import PageViewImage
@@ -834,3 +835,41 @@ class ActionCenterOfMass(ActionShowData):
         page.setFourDSTEM(path)
         return page
     
+
+class ActionAlign(ActionShowData):
+    """
+    对 4D-STEM 数据集进行平移合轴的 Action。
+
+    Action to align 4D-STEM dataset.
+    """
+    def __init__(self,
+        parent: QObject = None,
+        item_index = QModelIndex(),
+        item_path = '',    
+    ):
+        """
+        arguments:
+            parent: (QObject)
+
+            item_index: (QModelIndex) must be the index of the HDF model, in
+                which there exist a valid item path.
+
+            item_path: (str) the item's path handled by this action.
+        """
+        super().__init__(parent, item_index, item_path)
+        self.setText('Alignment')
+
+    def plotData(self):
+        """
+        Force to use PageAlignFourDSTEM.
+        """
+        page = self._openAlign(self.item_path)
+        self.tabview_manager.openTab(page)
+
+    def _openAlign(self, path: str):
+        """
+        Open a page to align the 4D-STEM dataset.
+        """
+        page = PageAlignFourDSTEM()
+        page.setFourDSTEM(path)
+        return page 
