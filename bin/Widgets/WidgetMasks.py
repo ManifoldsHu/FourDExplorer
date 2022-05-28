@@ -32,6 +32,7 @@ date:           Apr 10, 2021
 *------------------------------ WidgetMasks.py -------------------------------*
 """
 
+from copy import deepcopy
 from logging import Logger
 from typing import Iterable, List, Tuple
 
@@ -123,23 +124,45 @@ class WidgetMaskBase(QWidget):
                 '{0}'.format(type(blit_manager).__name__))
         self._blit_manager = blit_manager
 
-    def isContained(self, loc: Tuple) -> bool:
+    def isContained(self, loc: np.ndarray) -> np.ndarray:
         """
         Test whether loc is contained in the patch.
 
         arguments:
-            loc: (Tuple) must be (i, j) coordinates in the axes.
-        """
-        if not isinstance(loc, Tuple):
-            raise TypeError('loc must be a tuple with 2 numbers, not '
-                '{0}'.format(type(loc).__name__))
+            loc: (np.ndarray) the locations, with shape (N, 2).
 
-        elif len(loc) != 2:
-            raise ValueError('loc must be a tuple with 2 numbers, but '
-                '{0} is given'.format(len(loc)))
+        returns:
+            (np.ndarray) a boolean array with shape (N,)
+        """
+        # if not isinstance(loc, Tuple):
+        #     raise TypeError('loc must be a tuple with 2 numbers, not '
+        #         '{0}'.format(type(loc).__name__))
+
+        # elif len(loc) != 2:
+        #     raise ValueError('loc must be a tuple with 2 numbers, but '
+        #         '{0} is given'.format(len(loc)))
         
-        coordinate = self.axes.transData.transform((loc[1], loc[0]))
-        return self.patch.contains_point(coordinate)
+        # coordinate = self.axes.transData.transform((loc[1], loc[0]))
+        # return self.patch.contains_point(coordinate)
+
+        if not isinstance(loc, np.ndarray):
+            raise TypeError('loc must be a np.ndarray, not '
+                '{0}'.format(type(loc).__name__))
+        if len(loc.shape) != 2:
+            raise ValueError('loc must be an array with shape (N, 2), '
+                'but given {0}'.format(loc.shape))
+        elif loc.shape[1] != 2:
+            raise ValueError('loc must be an array with shape (N, 2), '
+                'but given {0}'.format(loc.shape))
+
+        tmp_patch = deepcopy(self.patch)
+        tmp_patch._transform = None     # Here we use a new patch with the 
+                                        # same shape, but not linked to any 
+                                        # coordinate transformations to 
+                                        # calculate masks. This can accelerate
+                                        # speeds by about 10 times.
+        return tmp_patch.contains_point(loc)
+        
         
     def setCenter(self, loc: Tuple):
         """
@@ -182,7 +205,7 @@ class WidgetMaskBase(QWidget):
         arguments:
             is_activate: (bool) 
         """
-        # self.logger.debug('{0}: {1}'.format(type(self).__name__, self.patch))
+        
         if not self.patch is None:
             self.patch.set_visible(is_activated)
 
