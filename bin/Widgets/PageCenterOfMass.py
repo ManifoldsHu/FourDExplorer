@@ -118,7 +118,7 @@ class PageCenterOfMass(PageVirtualImage):
             meta['com_inverted'] = is_com_inverted
             meta['com_mean_set_to_zero'] = is_mean_set_to_zero
 
-        mask = self._generateMask()
+        mask = self.calcMask()
         self.task = TaskCenterOfMass(
             item_path = self.data_path,
             image_parent_path = parent_path,

@@ -310,7 +310,7 @@ class TaskBaseVectorToImage(TaskBaseReconstruct):
         just before the task is submitted.
         """
         data_object = self.hdf_handler.file[self.source_path]
-        height, width = data_object.shape 
+        _, height, width = data_object.shape 
         self.hdf_handler.addNewData(
             self._image_parent_path,
             self._image_name,

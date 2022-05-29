@@ -443,7 +443,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         image_parent_path = dialog_save.getParentPath()
 
         meta = self._generateImageMeta()
-        mask = self._generateMask()
+        mask = self.calcMask()
         self.task = TaskVirtualImage(
             self.data_path,
             image_parent_path,

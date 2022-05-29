@@ -55,7 +55,12 @@ from bin.HDFManager import HDFDataNode, HDFHandler
 from bin.TaskManager import TaskManager 
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.PageVirtualImage import DialogSaveImage
-from lib.TaskVectorFieldProcess import TaskCurl, TaskDivergence, TaskPotential, TaskRotateVectorAngle, TaskSliceI
+from lib.TaskVectorFieldProcess import TaskCurl
+from lib.TaskVectorFieldProcess import TaskDivergence
+from lib.TaskVectorFieldProcess import TaskPotential
+from lib.TaskVectorFieldProcess import TaskRotateVectorAngle
+from lib.TaskVectorFieldProcess import TaskSliceI
+from lib.TaskVectorFieldProcess import TaskSliceJ
 from lib.TaskVectorFieldProcess import TaskSubtractVectorOffset
 from ui import uiDialogCreateImage
 from ui import uiPageViewVectorField
@@ -661,6 +666,7 @@ class PageViewVectorField(QWidget):
             parent = self,
             **meta,
         )
+        self.task_manager.addTask(self.task)
 
     def _vectorDivergence(self):
         """
@@ -682,6 +688,7 @@ class PageViewVectorField(QWidget):
             parent = self,
             **meta,
         )
+        self.task_manager.addTask(self.task)
 
     def _vectorCurl(self):
         """
@@ -703,6 +710,7 @@ class PageViewVectorField(QWidget):
             parent = self,
             **meta,
         )
+        self.task_manager.addTask(self.task)
 
     def _vectorSliceI(self):
         """
@@ -724,6 +732,7 @@ class PageViewVectorField(QWidget):
             parent = self,
             **meta,
         )
+        self.task_manager.addTask(self.task)
 
     def _vectorSliceJ(self):
         """
@@ -738,13 +747,14 @@ class PageViewVectorField(QWidget):
         image_parent_path = dialog_save.getParentPath()
         meta = self.data_object.attrs 
 
-        self.task = TaskSliceI(
+        self.task = TaskSliceJ(
             self.data_path,
             image_parent_path,
             image_name,
             parent = self,
             **meta,
         )
+        self.task_manager.addTask(self.task)
 
 
 class DialogSaveVectorField(DialogSaveImage):
