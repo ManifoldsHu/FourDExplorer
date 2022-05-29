@@ -134,16 +134,6 @@ class WidgetMaskBase(QWidget):
         returns:
             (np.ndarray) a boolean array with shape (N,)
         """
-        # if not isinstance(loc, Tuple):
-        #     raise TypeError('loc must be a tuple with 2 numbers, not '
-        #         '{0}'.format(type(loc).__name__))
-
-        # elif len(loc) != 2:
-        #     raise ValueError('loc must be a tuple with 2 numbers, but '
-        #         '{0} is given'.format(len(loc)))
-        
-        # coordinate = self.axes.transData.transform((loc[1], loc[0]))
-        # return self.patch.contains_point(coordinate)
 
         if not isinstance(loc, np.ndarray):
             raise TypeError('loc must be a np.ndarray, not '
@@ -161,7 +151,7 @@ class WidgetMaskBase(QWidget):
                                         # coordinate transformations to 
                                         # calculate masks. This can accelerate
                                         # speeds by about 10 times.
-        return tmp_patch.contains_point(loc)
+        return tmp_patch.contains_points(loc)
         
         
     def setCenter(self, loc: Tuple):
@@ -464,26 +454,37 @@ class WidgetMaskRing(WidgetMaskBase):
         self.ui.doubleSpinBox_ring_inner.setValue(radii[0] - width)
         self.ui.doubleSpinBox_ring_outer.setValue(radii[0])
 
-    def isContained(self, loc: Tuple) -> bool:
+    def isContained(self, loc: np.ndarray) -> np.ndarray:
         """
         Test whether loc is contained in the patch.
 
         arguments:
-            loc: (Tuple) must be (i, j) coordinates in the axes.
-        """
-        if not isinstance(loc, Tuple):
-            raise TypeError('loc must be a tuple with 2 numbers, not '
-                '{0}'.format(type(loc).__name__))
+            loc: (np.ndarray) the locations, with shape (N, 2).
 
-        elif len(loc) != 2:
-            raise ValueError('loc must be a tuple with 2 numbers, but '
-                '{0} is given'.format(len(loc)))
+        returns:
+            (np.ndarray) a boolean array with shape (N,)
+        """
+        if not isinstance(loc, np.ndarray):
+            raise TypeError('loc must be a np.ndarray, not '
+                '{0}'.format(type(loc).__name__))
+        if len(loc.shape) != 2:
+            raise ValueError('loc must be an array with shape (N, 2), '
+                'but given {0}'.format(loc.shape))
+        elif loc.shape[1] != 2:
+            raise ValueError('loc must be an array with shape (N, 2), '
+                'but given {0}'.format(loc.shape))
 
         c_i = self.center[0] + self.shift_i
         c_j = self.center[1] + self.shift_j
-        r_sq = (loc[0] - c_i)**2 + (loc[1] - c_j)**2
-        return (r_sq > self.inner_radius**2) and (
-                    r_sq < self.outer_radius**2)
+        r_sq = (loc[:,0] - c_i)**2 + (loc[:,1] - c_j)**2
+        _is_contained = np.zeros(r_sq.shape, dtype = np.bool8)
+        # _is_contained[r_sq > self.inner_radius**2 
+        #     and r_sq < self.outer_radius**2] = True 
+        _is_contained[r_sq > self.inner_radius**2] = True 
+        _is_contained[r_sq > self.outer_radius**2] = False 
+        return _is_contained
+        # return (r_sq > self.inner_radius**2) and (
+        #             r_sq < self.outer_radius**2)
         
     def generateMeta(self) -> dict:
         """
@@ -1211,25 +1212,34 @@ class WidgetMaskPolygon(WidgetMaskBase):
             )
         self.blit_manager.update()
         
-    def isContained(self, loc: Tuple) -> bool:
+    def isContained(self, loc: np.ndarray) -> np.ndarray:
         """
         Test whether loc is contained in the patch.
 
         arguments:
-            loc: (Tuple) must be (i, j) coordinates in the axes.
+            loc: (np.ndarray) the locations, with shape (N, 2).
+
+        returns:
+            (np.ndarray) a boolean array with shape (N,)
         """
-        if not isinstance(loc, Tuple):
-            raise TypeError('loc must be a tuple with 2 numbers, not '
+        if not isinstance(loc, np.ndarray):
+            raise TypeError('loc must be a np.ndarray, not '
                 '{0}'.format(type(loc).__name__))
+        if len(loc.shape) != 2:
+            raise ValueError('loc must be an array with shape (N, 2), '
+                'but given {0}'.format(loc.shape))
+        elif loc.shape[1] != 2:
+            raise ValueError('loc must be an array with shape (N, 2), '
+                'but given {0}'.format(loc.shape))
 
-        elif len(loc) != 2:
-            raise ValueError('loc must be a tuple with 2 numbers, but '
-                '{0} is given'.format(len(loc)))
-
-        ax = self.patch[0].axes
-        coordinate = ax.transData.transform((loc[1], loc[0]))
         _current_patch = self.patch[self._num_vertices - 3]
-        return _current_patch.contains_point(coordinate)
+        tmp_patch = deepcopy(_current_patch)
+        tmp_patch._transform = None     # Here we use a new patch with the 
+                                        # same shape, but not linked to any 
+                                        # coordinate transformations to 
+                                        # calculate masks. This can accelerate
+                                        # speeds by about 10 times.
+        return tmp_patch.contains_points(loc)
 
     def generateMeta(self) -> dict:
         """
@@ -1469,27 +1479,33 @@ class WidgetMaskSegment(WidgetMaskBase):
             segment.set_visible(ii < self.num_segments and is_activated)
         self.blit_manager.update()
 
-    def isContained(self, loc: Tuple) -> bool:
+    def isContained(self, loc: np.ndarray) -> np.ndarray:
         """
         Test whether loc is contained in the patch.
 
         arguments:
-            loc: (Tuple) must be (i, j) coordinates in the axes.
+            loc: (np.ndarray) the locations, with shape (N, 2).
+
+        returns:
+            (np.ndarray) a boolean array with shape (N,)
         """
-        if not isinstance(loc, Tuple):
-            raise TypeError('loc must be a tuple with 2 numbers, not '
+        if not isinstance(loc, np.ndarray):
+            raise TypeError('loc must be a np.ndarray, not '
                 '{0}'.format(type(loc).__name__))
+        if len(loc.shape) != 2:
+            raise ValueError('loc must be an array with shape (N, 2), '
+                'but given {0}'.format(loc.shape))
+        elif loc.shape[1] != 2:
+            raise ValueError('loc must be an array with shape (N, 2), '
+                'but given {0}'.format(loc.shape))
 
-        elif len(loc) != 2:
-            raise ValueError('loc must be a tuple with 2 numbers, but '
-                '{0} is given'.format(len(loc)))
+        _is_contained = np.zeros((loc.shape[0],), dtype = np.bool8)
+        segs = [deepcopy(seg) for seg in self.patch]
+        for seg in segs[0:self.num_segments]:
+            seg._transform = None 
+            _is_contained += seg.contains_points(loc)
+        return _is_contained
 
-        ax = self.patch[0].axes
-        coordinate = ax.transData.transform((loc[1], loc[0]))
-        for segment in self.patch[0:self.num_segments]:
-            if segment.contains_point(coordinate):
-                return True
-        return False
         
     def generateMeta(self) -> dict:
         """

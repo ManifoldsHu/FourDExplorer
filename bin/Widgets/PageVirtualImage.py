@@ -412,12 +412,20 @@ class PageVirtualImage(PageBaseFourDSTEM):
             (np.ndarray) 
         """
         scan_i, scan_j, dp_i, dp_j = self.data_object.shape
-        mask = np.zeros((dp_i, dp_j), dtype = self.data_object.dtype)
+        index = np.arange(dp_i * dp_j)
+        x = np.floor_divide(index, dp_j).reshape((dp_i*dp_j, 1))
+        y = np.mod(index, dp_j).reshape((dp_i * dp_j, 1))
+        coords = np.concatenate((y, x), axis = 1)
         widget = self._mask_widgets[self.mask_index]
-        for ii in range(dp_i):
-            for jj in range(dp_j):
-                mask[ii, jj] = widget.isContained((ii, jj))
+        _is_contained = widget.isContained(coords)
+        mask = _is_contained.reshape((dp_i, dp_j))
         return mask
+        # mask = np.zeros((dp_i, dp_j), dtype = self.data_object.dtype)
+        # widget = self._mask_widgets[self.mask_index]
+        # for ii in range(dp_i):
+        #     for jj in range(dp_j):
+        #         mask[ii, jj] = widget.isContained((ii, jj))
+        # return mask
 
     def startCalculation(self):
         """
@@ -476,24 +484,24 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         return meta 
 
-    def _generateMask(self) -> np.ndarray:
-        """
-        Generate the integrate region.
-        """
-        scan_i, scan_j, dp_i, dp_j = self.data_object.shape 
-        mask = np.zeros((dp_i, dp_j), dtype = self.data_object.dtype)
-        for ii in range(dp_i):
-            for jj in range(dp_j):
-                widget = self._mask_widgets[self.mask_index]
-                mask[ii, jj] = widget.isContained((ii, jj))
-        return mask
+    # def _generateMask(self) -> np.ndarray:
+    #     """
+    #     Generate the integrate region.
+    #     """
+    #     scan_i, scan_j, dp_i, dp_j = self.data_object.shape 
+    #     mask = np.zeros((dp_i, dp_j), dtype = self.data_object.dtype)
+    #     for ii in range(dp_i):
+    #         for jj in range(dp_j):
+    #             widget = self._mask_widgets[self.mask_index]
+    #             mask[ii, jj] = widget.isContained((ii, jj))
+    #     return mask
         
 
     def startCalculationTest(self):
         """
         Only for test.
         """
-        mask = self._generateMask()
+        mask = self.calcMask()
         dialog = DialogTestPlot(mask, self)
         dialog.exec()
 
