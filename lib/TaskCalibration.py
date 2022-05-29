@@ -146,6 +146,8 @@ class TaskFourDSTEMAlign(TaskBaseFourDSTEMModify):
         This function works as the preparing function that will be called 
         just before the task is submitted.
         """
+        print('output_path: {0}'.format(self.output_path))
+        
         if self.output_path != self.source_path:
             data_object = self.hdf_handler.file[self.source_path]
             # scan_i, scan_j, dp_i, dp_j = data_object.shape 

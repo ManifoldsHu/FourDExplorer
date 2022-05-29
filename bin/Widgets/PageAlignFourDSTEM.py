@@ -288,7 +288,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         if dialog_save.getIsInplace():
             data_node = self.hdf_handler.getNode(self.data_path)
             output_name = data_node.name 
-            output_parent_path = data_node.path 
+            output_parent_path = data_node.parent.path 
         else:
             output_name = dialog_save.getNewName()
             output_parent_path = dialog_save.getParentPath()
