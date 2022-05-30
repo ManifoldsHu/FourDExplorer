@@ -362,8 +362,8 @@ class PageViewImage(QWidget):
         contrast = max(0, min(99, contrast))
 
         slope = np.tan((1/2 - (contrast + 1)/100)*(np.pi/2) + np.pi/4)
-        hmin = self._image_min
-        hmax = self._image_max
+        hmin = float(self._image_min)
+        hmax = float(self._image_max)
         vmin_tmp = brightness/50*(hmin - hmax) + hmax
         vmax_tmp = brightness/50*(hmin - hmax) - hmin + 2*hmax
         vmin = (vmin_tmp + vmax_tmp)/2 + slope*(vmin_tmp - vmax_tmp)/2
