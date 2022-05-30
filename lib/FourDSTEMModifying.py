@@ -72,10 +72,10 @@ def RollingDiffractionPattern(
         
     
 def FilteringDiffractionPattern(
-    item_path,
-    window_min,
-    window_max,
-    result_path,
+    item_path: str,
+    result_path: str,
+    window_min: float = None,
+    window_max: float = None,
     progress_signal: Signal = None,
 ) -> np.ndarray| h5py.Dataset:
     """
@@ -112,8 +112,10 @@ def FilteringDiffractionPattern(
         for jj in range(scan_j):
             with result_lock:
                 dp = data_object[ii, jj, :, :]
-                dp[dp > window_max] = window_max
-                dp[dp < window_min] = window_min
+                if window_max is not None:
+                    dp[dp > window_max] = window_max
+                if window_min is not None:
+                    dp[dp < window_min] = 0
                 result_object[ii, jj, :, :] = dp 
         progress_signal.emit(int(ii/scan_i*100))
 

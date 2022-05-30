@@ -244,8 +244,8 @@ class PageBaseFourDSTEM(QWidget):
 
         self.ui.spinBox_scan_ii.setValue(0)
         self.ui.spinBox_scan_jj.setValue(0)
-        self.ui.spinBox_scan_ii.setMaximum(data_obj.shape[0])
-        self.ui.spinBox_scan_jj.setMaximum(data_obj.shape[1])
+        self.ui.spinBox_scan_ii.setMaximum(data_obj.shape[0] - 1)
+        self.ui.spinBox_scan_jj.setMaximum(data_obj.shape[1] - 1)
 
         self.dp_canvas.draw()
         self.dp_canvas.flush_events()

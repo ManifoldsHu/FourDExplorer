@@ -15,10 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QDoubleSpinBox, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QSizePolicy,
-    QSlider, QSpacerItem, QSpinBox, QSplitter,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
+    QHBoxLayout, QLabel, QLineEdit, QPushButton,
+    QSizePolicy, QSlider, QSpacerItem, QSpinBox,
+    QSplitter, QVBoxLayout, QWidget)
 
 from bin.Widgets.WidgetPlots import (WidgetPlotDP, WidgetPlotHist)
 
@@ -187,10 +187,15 @@ class Ui_Form(object):
 
         self.verticalLayout_6.addLayout(self.horizontalLayout_4)
 
-        self.pushButton_apply_window = QPushButton(self.widget1)
-        self.pushButton_apply_window.setObjectName(u"pushButton_apply_window")
+        self.checkBox_apply_window_min = QCheckBox(self.widget1)
+        self.checkBox_apply_window_min.setObjectName(u"checkBox_apply_window_min")
 
-        self.verticalLayout_6.addWidget(self.pushButton_apply_window)
+        self.verticalLayout_6.addWidget(self.checkBox_apply_window_min)
+
+        self.checkBox_apply_window_max = QCheckBox(self.widget1)
+        self.checkBox_apply_window_max.setObjectName(u"checkBox_apply_window_max")
+
+        self.verticalLayout_6.addWidget(self.checkBox_apply_window_max)
 
         self.pushButton_attributes = QPushButton(self.widget1)
         self.pushButton_attributes.setObjectName(u"pushButton_attributes")
@@ -303,7 +308,8 @@ class Ui_Form(object):
         self.label_4.setText(QCoreApplication.translate("Form", u"Select Window Filter", None))
         self.label_9.setText(QCoreApplication.translate("Form", u"Window Min Value", None))
         self.label_10.setText(QCoreApplication.translate("Form", u"Window Max Value", None))
-        self.pushButton_apply_window.setText(QCoreApplication.translate("Form", u"Apply Window", None))
+        self.checkBox_apply_window_min.setText(QCoreApplication.translate("Form", u"Applying Window (Min Constrain)", None))
+        self.checkBox_apply_window_max.setText(QCoreApplication.translate("Form", u"Applying Window (Max Constrain)", None))
         self.pushButton_attributes.setText(QCoreApplication.translate("Form", u"4D-STEM attributes...", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Contrast", None))

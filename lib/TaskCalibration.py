@@ -5,12 +5,12 @@
 包含读取 4D-STEM 数据、计算 Calibration 并产生新的 4D-STEM 的任务。
 
 作者:           胡一鸣
-创建日期:       2022年4月29日
+创建日期:       2022年5月26日
 
 This module includes tasks calculate Virtual Image of 4D-STEM dataset.
 
 author:         Hu Yiming
-date:           Apr 29, 2021
+date:           May 26, 2022
 *---------------------------- TaskCalibration.py --------------------------------*
 """
 
@@ -155,6 +155,23 @@ class TaskFourDSTEMAlign(TaskBaseFourDSTEMModify):
         parent: QObject = None,
         **meta,
     ):
+        """
+        arguments:
+            item_path: (str) the source 4D-STEM dataset path.
+
+            output_parent_path: (str) the parent group's path of the modified 
+                4D-STEM dataset.
+
+            output_name: (str) the new modified 4D-STEM dataset's name.
+
+            translation_vector: (tuple) the displacement vector of every 
+                diffraction pattern.
+
+            parent: (QObject)
+
+            **meta: (key word arguments) other meta data that should be stored
+                in the attrs of reconstructed HDF5 object
+        """
         super().__init__(
             item_path, 
             output_parent_path, 
@@ -186,11 +203,33 @@ class TaskFourDSTEMFiltering(TaskBaseFourDSTEMModify):
         item_path: str,
         output_parent_path: str,
         output_name: str,
-        window_min: float,
-        window_max: float,
+        window_min: float = None,
+        window_max: float = None,
         parent: QObject = None,
         **meta,
     ):
+        """
+        arguments:
+            item_path: (str) the source 4D-STEM dataset path.
+
+            output_parent_path: (str) the parent group's path of the modified 
+                4D-STEM dataset.
+
+            output_name: (str) the new modified 4D-STEM dataset's name.
+
+            window_min: (float) the minimum value of the window. Any value in 
+                the dataset that smaller than this will be set to zero. If it
+                is None, no minimum edge is applied.
+
+            window_max: (float) the maximum value of the window. Any value in
+                the dataset that larger than this will be set to the window_max
+                value. If it is None, no maximum edge is applied.
+
+            parent: (QObject)
+
+            **meta: (key word arguments) other meta data that should be stored
+                in the attrs of reconstructed HDF5 object
+        """
         super().__init__(
             item_path, 
             output_parent_path, 

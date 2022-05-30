@@ -186,9 +186,16 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_apply_window">
+         <widget class="QCheckBox" name="checkBox_apply_window_min">
           <property name="text">
-           <string>Apply Window</string>
+           <string>Applying Window (Min Constrain)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBox_apply_window_max">
+          <property name="text">
+           <string>Applying Window (Max Constrain)</string>
           </property>
          </widget>
         </item>
