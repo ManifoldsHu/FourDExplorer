@@ -11,6 +11,7 @@ Desktop.ini
 *.egg-info
 dist
 build
+.qt_for_python
 
 #Log:
 logs
