@@ -22,7 +22,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(314, 306)
+        Dialog.resize(314, 322)
         self.verticalLayout_3 = QVBoxLayout(Dialog)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.groupBox = QGroupBox(Dialog)
@@ -38,6 +38,11 @@ class Ui_Dialog(object):
         self.pushButton_rotate_vector_angle.setObjectName(u"pushButton_rotate_vector_angle")
 
         self.verticalLayout.addWidget(self.pushButton_rotate_vector_angle)
+
+        self.pushButton_flip = QPushButton(self.groupBox)
+        self.pushButton_flip.setObjectName(u"pushButton_flip")
+
+        self.verticalLayout.addWidget(self.pushButton_flip)
 
 
         self.verticalLayout_3.addWidget(self.groupBox)
@@ -85,6 +90,7 @@ class Ui_Dialog(object):
         self.groupBox.setTitle(QCoreApplication.translate("Dialog", u"Generate Vector Field", None))
         self.pushButton_subtract_mean_vector.setText(QCoreApplication.translate("Dialog", u"Subtract Vector Offset", None))
         self.pushButton_rotate_vector_angle.setText(QCoreApplication.translate("Dialog", u"Rotate Vector Angle", None))
+        self.pushButton_flip.setText(QCoreApplication.translate("Dialog", u"Flip Vector's Components", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Dialog", u"Generate Images", None))
         self.pushButton_calculate_potential.setText(QCoreApplication.translate("Dialog", u"Calculate Potential", None))
         self.pushButton_calculate_divergence.setText(QCoreApplication.translate("Dialog", u"Calculate Divergence", None))

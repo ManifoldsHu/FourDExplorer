@@ -161,5 +161,5 @@ def readFourDSTEMFromRaw(
                     dataset[ii, jj, :, :] = data
             progress_signal.emit(int((ii+1)/scan_i*100))
     
-    print('is_flipped: ', is_flipped)
+    # print('is_flipped: ', is_flipped)
 

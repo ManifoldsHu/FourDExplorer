@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>314</width>
-    <height>306</height>
+    <height>322</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,6 +31,13 @@
        <widget class="QPushButton" name="pushButton_rotate_vector_angle">
         <property name="text">
          <string>Rotate Vector Angle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_flip">
+        <property name="text">
+         <string>Flip Vector's Components</string>
         </property>
        </widget>
       </item>

@@ -55,7 +55,7 @@ from bin.HDFManager import HDFDataNode, HDFHandler
 from bin.TaskManager import TaskManager 
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.PageVirtualImage import DialogSaveImage
-from lib.TaskVectorFieldProcess import TaskCurl
+from lib.TaskVectorFieldProcess import TaskCurl, TaskFlipVectorField
 from lib.TaskVectorFieldProcess import TaskDivergence
 from lib.TaskVectorFieldProcess import TaskPotential
 from lib.TaskVectorFieldProcess import TaskRotateVectorAngle
@@ -559,6 +559,8 @@ class PageViewVectorField(QWidget):
             self._vectorRotateAngle()
         if result == 'subtract':
             self._vectorSubtract()
+        if result == 'flip':
+            self._vectorFlip()
         if result == 'potential':
             self._vectorPotential()
         if result == 'divergence':
@@ -642,6 +644,55 @@ class PageViewVectorField(QWidget):
             **meta,
         )
         self.task_manager.addTask(self.task)
+
+    def _vectorFlip(self):
+        """
+        Exchange every vector's i, j components.
+
+        In practical experiment, the coordinate of the diffraction plane may 
+        differ from the convention of 4D-Explorer. For example, both typical 
+        i-j indexing and x-y coordinates are right-handed system:
+
+            ┌------------> j        ^y
+            |                       |
+            |                       |
+            |                       |
+            |                       |
+            v                       |
+            i                       └----------------> x
+
+
+        However, in some conventions, the coordinate is left-handed:
+
+            ┌------------> x       
+            |                       
+            |                      
+            |                       
+            |                       
+            v                       
+            y
+
+        In this case, the calculated vector field's components should be 
+        exchanged in order to reveal correct electromagnetic field.   
+        """
+        dialog_save = DialogSaveVectorField(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        image_name = dialog_save.getNewName()
+        image_parent_path = dialog_save.getParentPath()
+        meta = self.data_object.attrs 
+
+        self.task = TaskFlipVectorField(
+            self.data_path,
+            image_parent_path,
+            image_name,
+            parent = self,
+            **meta,
+        )
+        self.task_manager.addTask(self.task)
+        
 
     def _vectorPotential(self):
         """
@@ -867,6 +918,9 @@ class DialogVectorProcessing(QDialog):
         self.ui.pushButton_subtract_mean_vector.clicked.connect(
             self._subtract_mean_vector
         )
+        self.ui.pushButton_flip.clicked.connect(
+            self._flip
+        )
         self.ui.pushButton_calculate_curl.clicked.connect(
             self._calculate_curl
         )
@@ -912,6 +966,10 @@ class DialogVectorProcessing(QDialog):
 
     def _slice_vec_j(self):
         self._result = 'vec_j'
+        self.accept()
+
+    def _flip(self):
+        self._result = 'flip'
         self.accept()
 
 # if 'quiver_scale' in self.data_object.attrs:
