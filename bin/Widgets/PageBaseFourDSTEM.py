@@ -412,8 +412,8 @@ class PageBaseFourDSTEM(QWidget):
         # Do not use self.data_object[self.scan_ii, self.scan_jj, :, :], to
         # avoid calculate maximum and minimum of the data from the disk. 
         # Rather, the array here is saved in the dp_object in memory.
-        hmin = np.min(self.dp_object.get_array())   
-        hmax = np.max(self.dp_object.get_array())
+        hmin = float(np.min(self.dp_object.get_array()))   
+        hmax = float(np.max(self.dp_object.get_array()))
         
         vmin_tmp = brightness/50*(hmin - hmax) + hmax
         vmax_tmp = brightness/50*(hmin - hmax) - hmin + 2*hmax

@@ -145,7 +145,7 @@ class PageViewImage(QWidget):
 
     @property
     def hist_figure(self) -> Figure:
-        return self.ui.widget_image.figure
+        return self.ui.widget_hist_view.figure
 
     @property
     def image_ax(self) -> Axes:
@@ -444,7 +444,7 @@ class PageViewImage(QWidget):
             current_path = dialog.getCurrentPath()
         else:
             return 
-            
+
         try:
             self.setImage(current_path)
         except (KeyError, ValueError, TypeError,) as e:

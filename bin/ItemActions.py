@@ -31,6 +31,7 @@ from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from bin.Widgets.DialogImportFourDSTEM import DialogImportFourDSTEM
 from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.PageAlignFourDSTEM import PageAlignFourDSTEM
+from bin.Widgets.PageBkgrdFourDSTEM import PageBkgrdFourDSTEM
 from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
 from bin.Widgets.PageViewLine import PageViewLine
 from bin.Widgets.PageViewImage import PageViewImage
@@ -873,3 +874,45 @@ class ActionAlign(ActionShowData):
         page = PageAlignFourDSTEM()
         page.setFourDSTEM(path)
         return page 
+
+class ActionBkgrd(ActionShowData):
+    """
+    对 4D-STEM 数据进行抠背底操作的 Action。
+
+    Action to subtract background of 4D-STEM data.
+    """
+    def __init__(self,
+        parent: QObject = None,
+        item_index = QModelIndex(),
+        item_path = '',     
+    ):
+        """
+        arguments:
+            parent: (QObject)
+
+            item_index: (QModelIndex) must be the index of the HDF model, in
+                which there exist a valid item path.
+
+            item_path: (str) the item's path handled by this action.
+        """
+        super().__init__(parent, item_index, item_path)
+        self.setText('Background Filtering')
+
+    def plotData(self):
+        """
+        Force to use PageBkgrdFourDSTEM.
+        """
+        page = self._openBkgrd(self.item_path)
+        self.tabview_manager.openTab(page)
+
+    def _openBkgrd(self, path: str):
+        """
+        Open a page to filter the background for 4D-STEM dataset.
+        """
+        page = PageBkgrdFourDSTEM()
+        page.setFourDSTEM(path)
+        return page 
+
+
+
+

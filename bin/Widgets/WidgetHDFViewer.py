@@ -51,6 +51,7 @@ from bin.ItemActions import (
     ActionShowVectorField,
     ActionShowFourDSTEM,
     ActionVirtualImage,
+    ActionBkgrd,
 )
 
 from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
@@ -164,6 +165,7 @@ class HDFBaseItemMenu(QMenu):
         self._action_virtual_image = ActionVirtualImage(self, index)
         self._action_center_of_mass = ActionCenterOfMass(self, index)
         self._action_align = ActionAlign(self, index)
+        self._action_bkgrd = ActionBkgrd(self, index)
     
     @property
     def model_index(self) -> QModelIndex:
@@ -495,6 +497,7 @@ class HDFFourDSTEMMenu(HDFBaseItemMenu):
         menu_calibrate = self.addMenu('Calibrate')
         menu_calibrate.addActions([
             self._action_align,
+            self._action_bkgrd,
         ])
         menu_reconstruct = self.addMenu('Reconstruct')
         menu_reconstruct.addActions([

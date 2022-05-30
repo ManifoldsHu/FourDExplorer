@@ -23,7 +23,7 @@ import numpy as np
 from bin.TaskManager import Subtask, SubtaskWithProgress, Task
 from bin.HDFManager import HDFHandler
 from bin.Widgets.WidgetMasks import WidgetMaskBase
-from lib.FourDSTEMModifying import RollingDiffractionPattern
+from lib.FourDSTEMModifying import FilteringDiffractionPattern, RollingDiffractionPattern
 
 
 class TaskBaseFourDSTEMModify(Task):
@@ -67,6 +67,8 @@ class TaskBaseFourDSTEMModify(Task):
                 self._item_path, self._output_name
             )
         )
+        self.setPrepare(self._createFourDSTEM)
+        self.setFollow(self._showFourDSTEM)
 
     @property
     def source_path(self) -> str:
@@ -102,39 +104,6 @@ class TaskBaseFourDSTEMModify(Task):
         for key in meta:
             self._meta[key] = meta[key]
 
-class TaskFourDSTEMAlign(TaskBaseFourDSTEMModify):
-    """
-    对 4D-STEM 数据集进行合轴的任务。
-
-    Task to align the 4D-STEM dataset.
-    """
-    def __init__(
-        self,
-        item_path: str,
-        output_parent_path: str,
-        output_name: str,
-        translation_vector: tuple,
-        parent: QObject = None,
-        **meta,
-    ):
-        super().__init__(
-            item_path, 
-            output_parent_path, 
-            output_name, 
-            parent, 
-            **meta
-        )
-        self._translation_vector = translation_vector
-        self.setPrepare(self._createFourDSTEM)
-        self.setFollow(self._showFourDSTEM)
-        self.addSubtaskFuncWithProgress(
-            'Rolling Diffraction Patterns',
-            RollingDiffractionPattern,
-            item_path = self.source_path,
-            translation_vector = self._translation_vector,
-            result_path = self.output_path,
-        )
-    
     def _createFourDSTEM(self):
         """
         Will create a dataset in HDF5 file according to the output path.
@@ -169,6 +138,79 @@ class TaskFourDSTEMAlign(TaskBaseFourDSTEMModify):
         after the task is completed.
         """
         self.logger.debug('Task {0} completed.'.format(self.name))
+
+
+class TaskFourDSTEMAlign(TaskBaseFourDSTEMModify):
+    """
+    对 4D-STEM 数据集进行合轴的任务。
+
+    Task to align the 4D-STEM dataset.
+    """
+    def __init__(
+        self,
+        item_path: str,
+        output_parent_path: str,
+        output_name: str,
+        translation_vector: tuple,
+        parent: QObject = None,
+        **meta,
+    ):
+        super().__init__(
+            item_path, 
+            output_parent_path, 
+            output_name, 
+            parent, 
+            **meta
+        )
+        self._translation_vector = translation_vector
+        
+        self.name = '4D-STEM Alignment'
+
+        self.addSubtaskFuncWithProgress(
+            'Rolling Diffraction Patterns',
+            RollingDiffractionPattern,
+            item_path = self.source_path,
+            translation_vector = self._translation_vector,
+            result_path = self.output_path,
+        )
+
+
+class TaskFourDSTEMFiltering(TaskBaseFourDSTEMModify):
+    """
+    对 4D-STEM 数据集进行抠背底的任务。
+
+    Task to subtract background for 4D-STEM dataset (by filtering).
+    """
+    def __init__(
+        self,
+        item_path: str,
+        output_parent_path: str,
+        output_name: str,
+        window_min: float,
+        window_max: float,
+        parent: QObject = None,
+        **meta,
+    ):
+        super().__init__(
+            item_path, 
+            output_parent_path, 
+            output_name, 
+            parent, 
+            **meta
+        )
+
+        self.name = '4D-STEM Background Subtraction'
+        self._window_min = window_min
+        self._window_max = window_max 
+        self.addSubtaskFuncWithProgress(
+            'Window Filtering Diffraction Patterns',
+            FilteringDiffractionPattern,
+            item_path = self.source_path,
+            window_min = self._window_min,
+            window_max = self._window_max,
+            result_path = self.output_path,
+        )
+    
 
     
 

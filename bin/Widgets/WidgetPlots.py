@@ -134,17 +134,17 @@ class WidgetPlotHist(WidgetPlotBase):
         so we should also modify the limits of the axes.
 
         In order to avoid some bar to be too high, we constrain y-limit to be
-        four times of the characteristic value:
+        ten times of the characteristic value:
             if we suppose the data's values distribute uniformly, the height of 
             each bar is set to be the caracteristic value, i.e.
-            max y-limit =  4/(hist_x[-1] - hist_x[0])
+            max y-limit =  10/(hist_x[-1] - hist_x[0])
 
         arguments:
             data: (np.ndarray or ArrayLike) recommended to be 2D matrix.
         """
         hist_y, hist_x = np.histogram(
             data, 
-            bins = 100, 
+            bins = 500, 
             density = True,
         )   # hist_y is a list of histogram's height (length = bins), 
             # while hist_x is a list of pick point (length = bins + 1)
@@ -156,10 +156,10 @@ class WidgetPlotHist(WidgetPlotBase):
         if hist_x[-1] - hist_x[0] > 0:
             self.axes.set_ylim(0, min(
                 np.max(hist_y),
-                4 / (hist_x[-1] - hist_x[0]),
+                10 / (hist_x[-1] - hist_x[0]),
             ))
         else:
-            self.axes.set_ylim(0, 4 / hist_x[-1])
+            self.axes.set_ylim(0, 10 / hist_x[-1])
 
         self.blit_manager.update()
         self.canvas.flush_events()

@@ -59,7 +59,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
 
     Widget to align 4D-STEM dataset.
 
-    The path of the ui file: ROOTPATH/ui/uiPageViewFourDSTEM
+    The path of the ui file: ROOTPATH/ui/uiPageAlignFourDSTEM
 
     attributes:
         hdf_handler: (HDFHandler) The handler to manage the hdf file and the 
