@@ -91,7 +91,25 @@ class PageBkgrdFourDSTEM(PageBaseFourDSTEM):
             the real space. This is also regarded as the column index in a 
             matrix.
 
-        
+        min_cursor_object: (Line2D) The cursor in the histogram indicating the
+            left edge of the filtering window.
+
+        max_cursor_object: (Line2D) The cursor in the histogram indicating the
+            right edge of the filtering window.
+
+        task_manager: (TaskManager) The task manager where task is submitted.
+
+        hist_canvas: (FigureCanvas) The FigureCanvas object of histogram.
+
+        hist_figure: (Figure) The figure object of the histogram.
+
+        hist_ax: (Axes) The axes object of the histogram.
+
+        hist_blit_manager: (BlitManager) The BlitManager of the histogram.
+
+        window_min: (float) the left edge of the filtering window.
+
+        window_max: (float) the right edge of the filtering window.
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)

@@ -84,11 +84,11 @@ def FilteringDiffractionPattern(
     arguments:
         item_path: (str) the 4D-STEM data's path in HDF5 file.
 
+        result_path: (str) the HDF object path to store the result.  
+
         window_min: (float) the minimum value of the filtering window.
 
         window_max: (float) the maximum value of the filtering window.
-
-        result_path: (str) the HDF object path to store the result.  
     """
     global qApp
     hdf_handler = qApp.hdf_handler
@@ -120,4 +120,39 @@ def FilteringDiffractionPattern(
         progress_signal.emit(int(ii/scan_i*100))
 
     return result_object 
+
+def RotatingDiffractionPattern(
+    item_path: str,
+    result_path: str,
+    rotate_angle: float = 0,
+    progress_signal: Signal = None,
+)-> np.ndarray| h5py.Dataset:
+    """
+    Rotate every diffraction patterns (for calibrating).
+
+    arguments:
+        item_path: (str) the 4D-STEM data's path in HDF5 file.
+
+        result_path: (str) the HDF object path to store the result. 
+
+        rotate_angle: (float) the rotation angle. Unit: degree.
+    """
+    global qApp 
+    hdf_handler = qApp.hdf_handler
+    result_object = hdf_handler.file[result_path]
+    data_object = hdf_handler.file[item_path]
+
+    if not isinstance(data_object, (h5py.Dataset, np.ndarray)):
+        raise TypeError('data object must be a np.ndarray or '
+            'h5py.Dataset, not {0}'.format(type(data_object).__name__))
+    if not isinstance(result_object, (h5py.Dataset, np.ndarray)):
+        raise TypeError('result object must be a np.ndarray or '
+            'h5py.Dataset, not {0}'.format(type(result_object).__name__))
+
+    if result_object.shape != data_object.shape:
+        raise ValueError('result object\'s shape must be the same as the '
+            'source data object\'s shape.')
+
+    pass 
+
 

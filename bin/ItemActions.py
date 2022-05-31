@@ -32,6 +32,7 @@ from bin.Widgets.DialogImportFourDSTEM import DialogImportFourDSTEM
 from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.PageAlignFourDSTEM import PageAlignFourDSTEM
 from bin.Widgets.PageBkgrdFourDSTEM import PageBkgrdFourDSTEM
+from bin.Widgets.PageRotateFourDSTEM import PageRotateFourDSTEM
 from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
 from bin.Widgets.PageViewLine import PageViewLine
 from bin.Widgets.PageViewImage import PageViewImage
@@ -913,6 +914,43 @@ class ActionBkgrd(ActionShowData):
         page.setFourDSTEM(path)
         return page 
 
+class ActionRotate(ActionShowData):
+    """
+    对 4D-STEM 进行旋转 DP 操作的 Action。
+
+    Action to rotate diffraction patterns of 4D-STEM data.
+    """
+    def __init__(self,
+        parent: QObject = None,
+        item_index = QModelIndex(),
+        item_path = '',
+    ):
+        """
+        arguments:
+            parent: (QObject)
+
+            item_index: (QModelIndex) must be the index of the HDF model, in
+                which there exist a valid item path.
+
+            item_path: (str) the item's path handled by this action.
+        """
+        super().__init__(parent, item_index, item_path)
+        self.setText('Rotational Offset Calibrating')
+
+    def plotData(self):
+        """
+        Force to use PageBkgrdFourDSTEM.
+        """
+        page = self._openRotate(self.item_path)
+        self.tabview_manager.openTab(page)
+
+    def _openRotate(self, path):
+        """
+        Open a page to find the rotational angle.
+        """
+        page = PageRotateFourDSTEM()
+        page.setFourDSTEM(path)
+        return page 
 
 
 

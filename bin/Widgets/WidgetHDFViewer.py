@@ -45,6 +45,7 @@ from bin.ItemActions import (
     ActionDelete,
     ActionAttributes,
     ActionChangeDataType,
+    ActionRotate,
     ActionShowData,
     ActionShowLine,
     ActionShowImage,
@@ -166,6 +167,7 @@ class HDFBaseItemMenu(QMenu):
         self._action_center_of_mass = ActionCenterOfMass(self, index)
         self._action_align = ActionAlign(self, index)
         self._action_bkgrd = ActionBkgrd(self, index)
+        self._action_rotate = ActionRotate(self, index)
     
     @property
     def model_index(self) -> QModelIndex:
@@ -498,6 +500,7 @@ class HDFFourDSTEMMenu(HDFBaseItemMenu):
         menu_calibrate.addActions([
             self._action_align,
             self._action_bkgrd,
+            self._action_rotate,
         ])
         menu_reconstruct = self.addMenu('Reconstruct')
         menu_reconstruct.addActions([

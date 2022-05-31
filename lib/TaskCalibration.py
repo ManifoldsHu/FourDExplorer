@@ -23,7 +23,9 @@ import numpy as np
 from bin.TaskManager import Subtask, SubtaskWithProgress, Task
 from bin.HDFManager import HDFHandler
 from bin.Widgets.WidgetMasks import WidgetMaskBase
-from lib.FourDSTEMModifying import FilteringDiffractionPattern, RollingDiffractionPattern
+from lib.FourDSTEMModifying import FilteringDiffractionPattern
+from lib.FourDSTEMModifying import RollingDiffractionPattern
+from lib.FourDSTEMModifying import RotatingDiffractionPattern
 
 
 class TaskBaseFourDSTEMModify(Task):
@@ -251,7 +253,55 @@ class TaskFourDSTEMFiltering(TaskBaseFourDSTEMModify):
         )
     
 
-    
+class TaskFourDSTEMRotate(TaskBaseFourDSTEMModify):
+    """
+    对 4D-STEM 数据集进行旋转的任务。
+
+    Task to rotate diffraction patterns for 4D-STEM dataset.
+    """
+    def __init__(
+        self,
+        item_path: str,
+        output_parent_path: str,
+        output_name: str,
+        rotation_angle: float,
+        parent: QObject = None,
+        **meta,
+    ):
+        """
+        arguments:
+            item_path: (str) the source 4D-STEM dataset path.
+
+            output_parent_path: (str) the parent group's path of the modified 
+                4D-STEM dataset.
+
+            output_name: (str) the new modified 4D-STEM dataset's name.
+
+            rotation_angle: (float) the rotation angle of every diffraction 
+                pattern. (Unit: deg) 
+
+            parent: (QObject)
+
+            **meta: (key word arguments) other meta data that should be stored
+                in the attrs of reconstructed HDF5 object
+        """
+        super().__init__(
+            item_path, 
+            output_parent_path, 
+            output_name, 
+            parent, 
+            **meta
+        )
+        self.name = '4D-STEM Rotate'
+        self._rotation_angle = rotation_angle
+        self.addSubtaskFuncWithProgress(
+            'Rotate Diffraction Patterns',
+            RotatingDiffractionPattern,
+            item_path = self.source_path,
+            rotation_angle = self._rotation_angle,
+            result_path = self.output_path,
+        )
+
 
 
 

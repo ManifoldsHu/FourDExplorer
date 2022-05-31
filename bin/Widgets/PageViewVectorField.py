@@ -692,7 +692,7 @@ class PageViewVectorField(QWidget):
             **meta,
         )
         self.task_manager.addTask(self.task)
-        
+
 
     def _vectorPotential(self):
         """
@@ -853,7 +853,10 @@ class DialogAdjustQuiverEffect(QDialog):
         }
         self.ui.doubleSpinBox_scale.setMaximum(1e9)
         self.ui.doubleSpinBox_scale.setMinimum(0.01)
+        self.ui.doubleSpinBox_scale.setValue(1)
         self.ui.doubleSpinBox_width.setMinimum(0.01)
+        self.ui.doubleSpinBox_width.setValue(0.15)
+        self.ui.comboBox_color.setCurrentIndex(3)
 
         self.ui.pushButton_cancel.clicked.connect(self.reject)
         self.ui.pushButton_ok.clicked.connect(self.accept)
