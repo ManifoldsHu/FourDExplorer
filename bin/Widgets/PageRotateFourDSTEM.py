@@ -40,12 +40,12 @@ from matplotlib.lines import Line2D
 from matplotlib.quiver import Quiver 
 from matplotlib.transforms import Affine2D
 import numpy as np
-from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from scipy.ndimage import rotate
 
 from bin.BlitManager import BlitManager 
 from bin.TaskManager import TaskManager 
 from bin.HDFManager import HDFDataNode
+from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.DialogSaveFourDSTEM import DialogSaveFourDSTEM
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
 from bin.Widgets.PageViewVectorField import DialogAdjustQuiverEffect
@@ -56,11 +56,11 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
     """
     对 4D-STEM 衍射图样进行旋转操作的部件类。
 
-    Ui 文件地址：ROOTPATH/ui/uiPageRotateFourDSTEM
+    Ui 文件地址：ROOTPATH/ui/uiPageRotateFourDSTEM.ui
 
     Widget to rotate diffraction patterns of 4D-STEM dataset.
 
-    The path of the ui file: ROOTPATH/ui/uiPageRotateFourDSTEM
+    The path of the ui file: ROOTPATH/ui/uiPageRotateFourDSTEM.ui
 
     attributes:
         
@@ -176,7 +176,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         
         
 
-    def setVectorField(self, vec_path: str = None, read_attr: bool = False):
+    def setVectorField(self, vec_path: str = '', read_attr: bool = False):
         """
         Set the vector fields path.
 
@@ -186,7 +186,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
 
             read_attr: (bool) whether display effects are from Dataset.attrs.
         """
-        if vec_path is None:
+        if vec_path == '':
             self._vec_data = None 
             return 
             
@@ -320,7 +320,11 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         self.setVectorField(self.vec_path)
 
     def _calculateRotationAngle(self):
-        pass 
+        """
+        Open a dialog to calculate rotational angle.
+        """
+        # rotate_dialog = 
+        pass
 
     def _changeQuiverAngle(self):
         """
