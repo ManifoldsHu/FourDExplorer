@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Find the rotation angle of every vector, corresponding to convergent field.</string>
+      <string>Find the rotation angle of every vector, corresponding to conservative field.</string>
      </property>
     </widget>
    </item>

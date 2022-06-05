@@ -46,6 +46,7 @@ from bin.BlitManager import BlitManager
 from bin.TaskManager import TaskManager 
 from bin.HDFManager import HDFDataNode
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
+from bin.Widgets.DialogFindRotationAngle import DialogFindRotationAngle
 from bin.Widgets.DialogSaveFourDSTEM import DialogSaveFourDSTEM
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
 from bin.Widgets.PageViewVectorField import DialogAdjustQuiverEffect
@@ -69,7 +70,6 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         super().__init__(parent)
         self.ui = uiPageRotateFourDSTEM.Ui_Form()
         self.ui.setupUi(self)
-
         
         self._quiver_object = None 
         self._vec_data = None 
@@ -84,7 +84,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         self._initUi()
 
     @property
-    def rotate_angle(self) -> float:
+    def rotation_angle(self) -> float:
         return self.ui.doubleSpinBox_rotation_angle.value()
 
     @property
@@ -174,7 +174,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         )
         self.ui.doubleSpinBox_rotation_angle.setRange(-360, 720)
         
-        
+        self.ui.pushButton_start.clicked.connect(self.startCalculation)
 
     def setVectorField(self, vec_path: str = '', read_attr: bool = False):
         """
@@ -279,7 +279,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         scan_jj = max(0, min(scan_j, self.scan_jj))
         dp = self.data_object[scan_ii, scan_jj, :, :]
 
-        dp_rotate = rotate(dp, - self.rotate_angle, reshape = False)
+        dp_rotate = rotate(dp, - self.rotation_angle, reshape = False)
         self.dp_object.set_data(dp_rotate)
         self.dp_blit_manager.update()
 
@@ -323,8 +323,26 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         """
         Open a dialog to calculate rotational angle.
         """
-        # rotate_dialog = 
-        pass
+        if self.vec_path == '':
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('Should set a Center of Mass vector field first.\n'
+                'If there has not been any yet, you can calculate one for\n'
+                'this 4D-STEM dataset.')
+            msg.exec()
+            return self._browseVectorField()
+
+        rotate_dialog = DialogFindRotationAngle(self)
+        rotate_dialog.setVectorField(self.vec_path)
+        dialog_code = rotate_dialog.exec()
+        if dialog_code == rotate_dialog.Accepted:
+            self.ui.doubleSpinBox_rotation_angle.setValue(
+                rotate_dialog.getRotationAngle()
+            )
+        else:
+            pass
 
     def _changeQuiverAngle(self):
         """
@@ -347,11 +365,43 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         original_data = self.hdf_handler.file[self.vec_path]
         vec_i = original_data[0, :, :]
         vec_j = original_data[1, :, :]
-        angle_rad = self.rotate_angle * np.pi / 180
+        angle_rad = self.rotation_angle * np.pi / 180
         new_vec_i = vec_i * np.cos(angle_rad) - vec_j * np.sin(angle_rad)
         new_vec_j = vec_i * np.sin(angle_rad) + vec_j * np.cos(angle_rad)
         self.vec_data[0, :, :] = new_vec_i 
         self.vec_data[1, :, :] = new_vec_j
+
+    def startCalculation(self):
+        """
+        Start to apply the rotation to all of the diffraction patterns.
+        """
+        dialog_save = DialogSaveFourDSTEM(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        if dialog_save.getIsInplace():
+            data_node = self.hdf_handler.getNode(self.data_path)
+            output_name = data_node.name 
+            output_parent_path = data_node.parent.path 
+        else:
+            output_name = dialog_save.getNewName()
+            output_parent_path = dialog_save.getParentPath()
+
+        meta = self.data_object.attrs
+        if 'rotation_angle' in meta:
+            meta['rotation_angle'] += self.rotation_angle
+        else:
+            meta['rotation_angle'] = self.rotation_angle 
+
+        self.task = TaskFourDSTEMRotate(
+            self.data_path,
+            output_parent_path,
+            output_name,
+            self.rotation_angle,
+            **meta,
+        )
+        self.task_manager.addTask(self.task) 
 
 
 # class DialogAdjustQuiverEffect(QDialog):
