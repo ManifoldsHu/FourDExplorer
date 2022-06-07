@@ -175,6 +175,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         self.ui.doubleSpinBox_rotation_angle.setRange(-360, 720)
         
         self.ui.pushButton_start.clicked.connect(self.startCalculation)
+        self.ui.pushButton_start.setProperty('class', 'danger')
 
     def setVectorField(self, vec_path: str = '', read_attr: bool = False):
         """
@@ -279,7 +280,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         scan_jj = max(0, min(scan_j, self.scan_jj))
         dp = self.data_object[scan_ii, scan_jj, :, :]
 
-        dp_rotate = rotate(dp, - self.rotation_angle, reshape = False)
+        dp_rotate = rotate(dp, self.rotation_angle, reshape = False)
         self.dp_object.set_data(dp_rotate)
         self.dp_blit_manager.update()
 
@@ -366,8 +367,8 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         vec_i = original_data[0, :, :]
         vec_j = original_data[1, :, :]
         angle_rad = self.rotation_angle * np.pi / 180
-        new_vec_i = vec_i * np.cos(angle_rad) - vec_j * np.sin(angle_rad)
-        new_vec_j = vec_i * np.sin(angle_rad) + vec_j * np.cos(angle_rad)
+        new_vec_i = vec_i * np.cos(angle_rad) + vec_j * np.sin(angle_rad)
+        new_vec_j = - vec_i * np.sin(angle_rad) + vec_j * np.cos(angle_rad)
         self.vec_data[0, :, :] = new_vec_i 
         self.vec_data[1, :, :] = new_vec_j
 

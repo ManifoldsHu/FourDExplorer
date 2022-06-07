@@ -20,6 +20,7 @@ from threading import Lock
 from PySide6.QtCore import Signal
 import numpy as np 
 import h5py
+from scipy.ndimage import rotate
 
 
 def RollingDiffractionPattern(
@@ -153,6 +154,15 @@ def RotatingDiffractionPattern(
         raise ValueError('result object\'s shape must be the same as the '
             'source data object\'s shape.')
 
-    pass 
+    scan_i, scan_j, dp_i, dp_j = data_object.shape 
+    result_lock = Lock()
+    for ii in range(scan_i):
+        for jj in range(scan_j):
+            with result_lock:
+                dp = data_object[ii, jj, :, :]
+                dp_rotate = rotate(dp, rotate_angle, reshape = False)
+                result_object[ii, jj, :, :] = dp_rotate 
+        progress_signal.emit(int(ii/scan_i*100))
 
+    return result_object
 
