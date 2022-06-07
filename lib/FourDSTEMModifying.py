@@ -125,7 +125,7 @@ def FilteringDiffractionPattern(
 def RotatingDiffractionPattern(
     item_path: str,
     result_path: str,
-    rotate_angle: float = 0,
+    rotation_angle: float = 0,
     progress_signal: Signal = None,
 )-> np.ndarray| h5py.Dataset:
     """
@@ -160,7 +160,7 @@ def RotatingDiffractionPattern(
         for jj in range(scan_j):
             with result_lock:
                 dp = data_object[ii, jj, :, :]
-                dp_rotate = rotate(dp, rotate_angle, reshape = False)
+                dp_rotate = rotate(dp, rotation_angle, reshape = False)
                 result_object[ii, jj, :, :] = dp_rotate 
         progress_signal.emit(int(ii/scan_i*100))
 

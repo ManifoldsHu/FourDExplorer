@@ -390,10 +390,10 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
             output_parent_path = dialog_save.getParentPath()
 
         meta = self.data_object.attrs
-        if 'rotation_angle' in meta:
-            meta['rotation_angle'] += self.rotation_angle
+        if 'calibrated_rotation_angle' in meta:
+            meta['calibrated_rotation_angle'] += self.rotation_angle
         else:
-            meta['rotation_angle'] = self.rotation_angle 
+            meta['calibrated_rotation_angle'] = self.rotation_angle 
 
         self.task = TaskFourDSTEMRotate(
             self.data_path,
