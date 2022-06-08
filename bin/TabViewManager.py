@@ -30,7 +30,12 @@ date:           Mar 27, 2021
 from logging import Logger
 from typing import List
 
-from PySide6.QtWidgets import QTabWidget, QWidget
+from PySide6.QtWidgets import (
+    QTabWidget, 
+    QWidget, 
+    QScrollArea,
+    QVBoxLayout,
+)
 from PySide6.QtCore import QObject
 
 from bin.Widgets.PageHome import PageHome
@@ -90,8 +95,6 @@ class TabViewManager(QObject):
         self.tabWidget_view.setTabsClosable(True)
         self.tabWidget_view.tabCloseRequested.connect(self.closeTab)
         
-
-    
     def closeTab(self, tab_index: int):
         """
         Slots when the user requests to close a tab.
@@ -102,34 +105,88 @@ class TabViewManager(QObject):
         if self.tabWidget_view.count() == 0:
             self.openTab(self.page_home)
 
-    def openTab(self, tab: QWidget):
+    def getTab(self, index: int):
+        """
+        Returns the tab page according to the index.
+
+        NOTE: tabWidget.widget() will return a QScrollArea, rather than 
+        the page itself, which is what we want.
+
+        arguments:
+            index: (int) the index of the page.
+
+        returns:
+            (QWidget)
+        """
+
+
+    def openTab(self, page: QWidget):
         """
         Open a tab.
 
         Usually the tab should be a Page, but other widgets are not forbidden.
+
+        Will automatically add put the page in a scroll area.
         
         arguments:
-            tab: (QWidget) the tab to be opened.
+            page: (QWidget) the tab to be opened.
         """
         for ii in range(self.tabWidget_view.count()):
-            if tab is self.tabWidget_view.widget(ii):
+            # if tab is self.tabWidget_view.widget(ii):
+            if page is self.getTab(ii):
                 raise RuntimeError('Tab has been opened.')
         
-        if not tab is self._page_home:
+        if not page is self._page_home:
             if len(self._tab_history) > self._tab_history_max:
                 self._tab_history.pop(0)
-            self._tab_history.append(tab)
+            self._tab_history.append(page)
+
+
+        # _new_tab = QWidget()
+        # _new_tab.verticalLayout = QVBoxLayout(_new_tab)
+        scroll_area = self._encapsulatePageToScrollArea(page)
 
         new_tab_index = self.tabWidget_view.addTab(
-            tab, 
-            tab.windowIcon(), 
-            tab.windowTitle(),
+            scroll_area,
+            page.windowIcon(),
+            page.windowTitle(),
         )
+
+        # new_tab_index = self.tabWidget_view.addTab(
+        #     tab, 
+        #     tab.windowIcon(), 
+        #     tab.windowTitle(),
+        # )
         
         self.tabWidget_view.setCurrentIndex(new_tab_index)
-        self.logger.debug('Open a new tab: {0}'.format(tab.windowTitle()))
+        self.logger.debug('Open a new page: {0}'.format(page.windowTitle()))
 
-    
+    def _encapsulatePageToScrollArea(self, page: QWidget) -> QScrollArea:
+        """
+        Encapsulate a page to a QScrollArea.
+
+        Then if the page is too large, it can still full display.
+
+        arguments:
+            page: (QWidget)
+
+        returns:
+            (QScrollArea)
+        """
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.scrollAreaWidgetContents = QWidget()
+        scroll_area.setWidget(scroll_area.scrollAreaWidgetContents)
+        scroll_area.verticalLayout = QVBoxLayout(
+            scroll_area.scrollAreaWidgetContents
+        )
+        scroll_area.verticalLayout.addWidget(page)
+        page.setParent(scroll_area.scrollAreaWidgetContents)
+        if page.minimumHeight() < 600:
+            page.setMinimumHeight(600)
+        if page.minimumWidth() < 800:
+            page.setMinimumWidth(800)
+        return scroll_area
 
 
         

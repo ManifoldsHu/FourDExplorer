@@ -78,7 +78,10 @@ from PySide6.QtCore import (
     Qt, 
     Signal, 
     QObject, 
-    QAbstractTableModel,)
+    QAbstractTableModel,
+    # QSize,
+)
+# from PySide6.QtGui import QIcon
 
 
 # from PySide6.QtWidgets import QApplication 
@@ -87,6 +90,7 @@ from PySide6.QtCore import (
 
 from Constants import APP_VERSION, ItemDataRoles, HDFType
 from bin.TaskManager import Task, TaskManager
+# from ui.resources import icon_rc
 
 
 # from bin import DataReaderEMPAD
@@ -1593,6 +1597,11 @@ class HDFTreeModel(QAbstractItemModel):
     def hdf_handler(self):
         return self._hdf_handler
 
+    @property 
+    def theme_handler(self):
+        global qApp 
+        return qApp.theme_handler
+
     def index(self, 
         row: int, 
         column: int, 
@@ -1684,7 +1693,7 @@ class HDFTreeModel(QAbstractItemModel):
         elif role == self.DataRoles.DisplayRole:    # same as Qt.DisplayRole
             if isinstance(node, HDFRootNode):
                 if self.hdf_handler.isFileOpened():
-                    return '(ROOT)'
+                    return os.path.split(self.hdf_handler.file_path)[1]
                 else:
                     return 'CREATE/OPEN A FILE'
             else:
@@ -1713,7 +1722,58 @@ class HDFTreeModel(QAbstractItemModel):
 
         elif role == self.DataRoles.HDFTypeRole:
             return node.hdf_type
+        elif role == self.DataRoles.DecorationRole:
+            if (node.hdf_type == HDFType.Root
+                    and self.hdf_handler.isFileOpened()):
+                return self.theme_handler.iconProvider(
+                    u':/HDFItem/icons/database.png'
+                )
+            elif node.hdf_type == HDFType.Group:
+                return self.theme_handler.iconProvider(
+                    u':/HDFItem/icons/folder.png'
+                )
+            elif node.hdf_type == HDFType.Image:
+                return self.theme_handler.iconProvider(
+                    u':/HDFItem/icons/image.png'
+                )
+            elif node.hdf_type == HDFType.FourDSTEM:
+                return self.theme_handler.iconProvider(
+                    u':/HDFItem/icons/cube.png'
+                )
+            elif node.hdf_type == HDFType.Line:
+                return self.theme_handler.iconProvider(
+                    u':/HDFItem/icons/line.png'
+                )
+            elif node.hdf_type == HDFType.VectorField:
+                return self.theme_handler.iconProvider(
+                    u':/HDFItem/icons/vector.png'
+                )
+            elif node.hdf_type == HDFType.Data:
+                return self.theme_handler.iconProvider(
+                    u':/HDFItem/icons/squares.png'
+                )
+                # icon = QIcon()
+                # icon.addFile(u':/HDFItem/icons/database.png', QSize(), QIcon.Normal, QIcon.Off)
+                # return icon
         else:
+            return None
+
+    def headerData(self, 
+        section: int, 
+        orientation: Qt.Orientation = Qt.Horizontal, 
+        role: int = Qt.DisplayRole,
+    ):
+        """
+        Get the data for the header.
+
+        arguments:
+            section: (int) the section (index) of the header.
+
+            orientation: (Qt.Orientation) Qt.Vertical or Qt.Horizontal
+
+            role: (int)
+        """
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             return None
 
     def indexFromPath(self, hdf_path: str) -> QModelIndex:

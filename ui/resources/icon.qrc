@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="HDFItem">
+    <file>icons/squares.png</file>
+    <file>icons/folder.png</file>
+    <file>icons/vector.png</file>
+    <file>icons/line.png</file>
+    <file>icons/image.png</file>
+    <file>icons/cube.png</file>
+    <file>icons/database.png</file>
+  </qresource>
+</RCC>

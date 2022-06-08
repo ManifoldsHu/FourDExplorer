@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1207</width>
-    <height>0</height>
+    <height>665</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>384</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
@@ -85,8 +85,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>319</width>
-              <height>948</height>
+              <width>992</width>
+              <height>944</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -304,8 +304,8 @@
        <widget class="QTabWidget" name="tabWidget_view">
         <property name="minimumSize">
          <size>
-          <width>800</width>
-          <height>600</height>
+          <width>0</width>
+          <height>0</height>
          </size>
         </property>
         <property name="tabPosition">

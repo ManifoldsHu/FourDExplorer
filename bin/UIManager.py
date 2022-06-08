@@ -14,16 +14,16 @@ date:           Feb 19, 2022
 *----------------------------- UIManager.py ----------------------------------*
 """
 
-import traceback
 from configparser import ConfigParser
 from logging import Logger
 
-from PySide6.QtCore import QObject
-
+from PySide6.QtCore import QObject, QSize
+from PySide6.QtGui import QIcon 
 from qt_material import apply_stylesheet
 
 # from bin.Log import LogUtil
 from Constants import CONFIG_PATH, UITheme
+from ui.resources import icon_rc
 
 
 
@@ -202,3 +202,16 @@ class ThemeHandler(QObject):
             self._theme = NameToUITheme(theme)
         else:
             raise TypeError('Argument theme must be of UITheme or a string')
+
+    def iconProvider(self, icon_rc: str):
+        """
+        Get icons from resources.
+        """
+        if not isinstance(icon_rc, str):
+            raise TypeError('icon_rc must be a str, not '
+                '{0}'.format(type(icon_rc).__name__))
+
+        icon = QIcon()
+        icon.addFile(icon_rc, QSize(), QIcon.Normal, QIcon.Off)
+        return icon 
+
