@@ -18,52 +18,13 @@ from configparser import ConfigParser
 from logging import Logger
 import os
 
-from PySide6.QtCore import QObject, QSize
-from PySide6.QtGui import QIcon 
+from PySide6.QtCore import QObject, QSize, Qt
+from PySide6.QtGui import QIcon, QPixmap
 from qt_material import apply_stylesheet
 
 # from bin.Log import LogUtil
 from Constants import CONFIG_PATH, ROOT_PATH, UIThemeColor, UIThemeMode
 from ui.resources import icon_rc
-
-
-
-# def UIThemeToFileName(theme: UITheme) -> str:
-#     """
-#     将 UITheme 枚举类转化为对应的皮肤的文件名。
-
-#     Converse UITheme type to file_name. file_name is a string like 
-#         'light_blue.xml'
-
-#     arguments:
-#         theme: (UITheme) The current theme applied to 4D-Explorer
-
-#     returns:
-#         (str) 
-#     """
-#     if not isinstance(theme, UITheme):
-#         raise TypeError('Argument theme must be of UITheme')
-#     file_name = theme.name + '.xml'
-#     return file_name
-
-
-# def NameToUITheme(name: str):
-#     '''
-#     将对应皮肤的文件名或者名字转化为 UITheme 枚举类。
-
-#     Converse file_name to a UITheme.
-
-#     arguments:
-#         name: (str) This is a string like 'light_blue.xml' or 'light_blue'
-
-#     returns:
-#         (UITheme)
-#     '''
-#     name = name.split('.')[0]
-#     return UITheme[name]
-
-
-
 
 class ThemeHandler(QObject):
     """
@@ -204,119 +165,27 @@ class ThemeHandler(QObject):
             self._applyTheme(UIThemeMode.default, UIThemeColor.default)
         
 
-        
-
-        
-        
-    # def _applyThemeColor(self, theme_color: UIThemeColor) -> bool:
-    #     """
-    #     arguments:
-    #         theme: (UIThemeColor)
-    #     """
-
-    #     try:
-    #         if theme.name.split('_')[0] == 'light':
-    #             apply_stylesheet(
-    #                 self._app, 
-    #                 theme = UIThemeToFileName(theme),
-    #                 invert_secondary = True,    # It is recommended to use inv-
-    #                                             # ert secondary color in light
-    #                                             # theme.
-    #             )
-            
-    #         else:
-    #             apply_stylesheet(
-    #                 self._app,
-    #                 theme = UIThemeToFileName(theme),
-    #                 invert_secondary = False,
-    #             )
-    #         self.theme = theme
-    #         return True
-    #     except BaseException as e:
-    #         # self._logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
-    #         self.logger.error('{0}'.format(e), exc_info = True)
-    #         return False
-
-
-    # def _applyCurrentTheme(self):
-    #     # self._applyTheme(self.theme)
-    #     apply_stylesheet(self._app, os.path.join(ROOT_PATH, 'ui', 'resources', 'themes', 'indigo_light_400.xml'), invert_secondary=True)
-
-
-    # def initializeTheme(self):
-    #     """
-    #     Read theme from the configure file and then set it as the current theme.
-    #     """
-    #     self.theme = self._readTheme()
-    #     self._applyCurrentTheme()
-
-
-    # def changeTheme(self, theme: UITheme):
-    #     """
-    #     Change, apply and save the current theme.
-
-    #     arguments:
-    #         theme: (UITheme) the theme to be applied.
-    #     """
-    #     self._saveTheme(theme)
-    #     self._applyCurrentTheme(self)
-
-
-    # def _saveTheme(self, theme = UITheme):
-    #     """
-    #     arguments:
-    #         theme: (UITheme) the theme to be saved.
-    #     """
-    #     with open(CONFIG_PATH, 'w', encoding = 'UTF-8') as f:
-    #         self._config['UI']['Theme'] = theme.name
-    #         self._config.write(f)
-    #         self.theme = theme
-
-
-    # def _readTheme(self) -> UITheme:
-    #     """
-    #     Read the theme from configuration file.
-
-    #     returns:
-    #         (UITheme)
-    #     """
-    #     try:
-    #         theme_str = self._config['UI']['Theme']
-    #     except BaseException as e:
-    #         # self._logger.error('{0}\n{1}'.format(e, traceback.format_exc()))
-    #         self.logger.error('{0}'.format(e), exc_info = True)
-    #     else:
-    #         theme = NameToUITheme(theme_str)
-    #         return theme
-
-
-    # @property
-    # def theme(self) -> UITheme:
-    #     return self._theme
-
-
-    # @theme.setter
-    # def theme(self, theme: UITheme|str):
-    #     """
-    #     arguments:
-    #         theme: (UITheme or str)
-    #     """
-    #     if isinstance(theme, UITheme):
-    #         self._theme = theme
-    #     elif isinstance(theme, str):
-    #         self._theme = NameToUITheme(theme)
-    #     else:
-    #         raise TypeError('Argument theme must be of UITheme or a string')
-
     def iconProvider(self, icon_rc: str):
         """
         Get icons from resources.
+
+        arguments:
+            icon_rc: (str) like ':/HDFItem/icons/cube.png'
+
+        returns:
+            (QIcon)
         """
         if not isinstance(icon_rc, str):
             raise TypeError('icon_rc must be a str, not '
                 '{0}'.format(type(icon_rc).__name__))
 
+        icon_light_rc = icon_rc.rstrip('.png') + '_light.png'
         icon = QIcon()
-        icon.addFile(icon_rc, QSize(), QIcon.Normal, QIcon.On)
+        if self.theme_mode == UIThemeMode.Dark :
+            icon.addFile(icon_rc, QSize(), QIcon.Selected, QIcon.On)
+            icon.addFile(icon_light_rc, QSize(), QIcon.Normal, QIcon.On)
+        else:
+            icon.addFile(icon_rc, QSize(), QIcon.Normal, QIcon.On)
+            icon.addFile(icon_light_rc, QSize(), QIcon.Selected, QIcon.On)
         return icon 
 

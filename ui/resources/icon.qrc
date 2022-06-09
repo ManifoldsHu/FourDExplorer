@@ -1,5 +1,12 @@
 <RCC>
   <qresource prefix="HDFItem">
+    <file>icons/compass_light.png</file>
+    <file>icons/cube_light.png</file>
+    <file>icons/database_light.png</file>
+    <file>icons/folder_light.png</file>
+    <file>icons/image_light.png</file>
+    <file>icons/line_light.png</file>
+    <file>icons/squares_light.png</file>
     <file>icons/compass_dark.png</file>
     <file>icons/compass.png</file>
     <file>icons/cube_dark.png</file>
