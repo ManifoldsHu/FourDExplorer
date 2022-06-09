@@ -390,10 +390,11 @@
      <string>View</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuSettings">
+   <widget class="QMenu" name="menuConfigure">
     <property name="title">
-     <string>Settings</string>
+     <string>Configure</string>
     </property>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -406,7 +407,7 @@
    <addaction name="menuCalibrate"/>
    <addaction name="menuImage"/>
    <addaction name="menuView"/>
-   <addaction name="menuSettings"/>
+   <addaction name="menuConfigure"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -438,6 +439,11 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

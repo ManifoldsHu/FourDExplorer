@@ -19,6 +19,7 @@ import sys
 import os
 from PySide6.QtWidgets import QMainWindow
 from bin.TabViewManager import TabViewManager
+from bin.Widgets.PageSettings import PageSettings
 from ui.uiMainWindow import Ui_MainWindow
 from bin.Widgets.PageHome import PageHome
 
@@ -50,6 +51,7 @@ class MainWindow(QMainWindow):
         self._initCalibration()
         self._initImage()
         self._initTabViewers()
+        self._initSettings()
     
     @property
     def tabview_manager(self) -> TabViewManager:
@@ -67,7 +69,10 @@ class MainWindow(QMainWindow):
             self.ui.tab_File.closeFile
         )
         
-
+    def _initSettings(self):
+        self.ui.actionSettings.triggered.connect(
+            lambda: self.tabview_manager.openTab(PageSettings(self))
+        )
 
 
     def _initTask(self):

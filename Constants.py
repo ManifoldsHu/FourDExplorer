@@ -94,33 +94,69 @@ class ItemDataRoles(IntEnum):
     AccessibleDescriptionRole = Qt.AccessibleDescriptionRole
 
 
-class UITheme(IntEnum):
+class UIThemeColor(IntEnum):
     """
-    The theme of ui. Default is light_blue
+    The primary color of ui. Default is Indigo.
     """
-    dark_amber = 110
-    dark_blue = 120
-    dark_cyan = 130
-    dark_lightgreen = 140
-    dark_pink = 150
-    dark_purple = 160
-    dark_red = 170
-    dark_teal = 180
-    dark_yellow = 190
+    Amber = 1000
+    Blue = 1010
+    BlueGray = 1020
+    Brown = 1030
+    Cyan = 1040
+    DeepOrange = 1050
+    DeepPurple = 1060
+    Gray = 1070
+    Green = 1080
+    Indigo = 1090
+    LightBlue = 1100
+    LightGreen = 1110
+    Lime = 1120
+    Orange = 1130
+    Pink = 1140
+    Purple = 1150
+    Red = 1160
+    Teal = 1170
+    Yellow = 1180
 
-    light_amber = 210
-    light_blue = 220
-    light_cyan = 230
-    light_cyan_500 = 231
-    light_lightgreen = 240
-    light_pink = 250
-    light_purple = 260
-    light_red = 270
-    light_teal = 280
-    light_yellow = 290
+    default = 1090
 
-    default = 220
-    default_dark = 130
+class UIThemeMode(IntEnum):
+    """
+    The mode of ui. Default is Light.
+    """
+    Light = 1
+    Dark = 2
+    Classical = 3
+
+    default = 1
+
+# class UITheme(IntEnum):
+#     """
+#     The theme of ui. Default is light_blue
+#     """
+#     dark_amber = 110
+#     dark_blue = 120
+#     dark_cyan = 130
+#     dark_lightgreen = 140
+#     dark_pink = 150
+#     dark_purple = 160
+#     dark_red = 170
+#     dark_teal = 180
+#     dark_yellow = 190
+
+#     light_amber = 210
+#     light_blue = 220
+#     light_cyan = 230
+#     light_cyan_500 = 231
+#     light_lightgreen = 240
+#     light_pink = 250
+#     light_purple = 260
+#     light_red = 270
+#     light_teal = 280
+#     light_yellow = 290
+
+#     default = 220
+#     default_dark = 130
 
 
 class TaskState(IntEnum):

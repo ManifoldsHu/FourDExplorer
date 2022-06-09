@@ -22,6 +22,7 @@ All rights reserved.
 """
 
 import sys
+from time import time
 
 from Constants import ROOT_PATH
 from bin.Widgets.MainWindow import MainWindow
@@ -33,7 +34,7 @@ if __name__ == '__main__':
         sys.path.append(ROOT_PATH)
 
     app = App(sys.argv)
-
+    
     ''' Initialize Log'''
     logger = app.logger
     
@@ -41,7 +42,7 @@ if __name__ == '__main__':
     app.aboutToQuit.connect(app.cleanResources)
 
     ''' Initialize UI theme'''
-    app.theme_handler.initializeTheme()
+    app.theme_handler.initTheme() 
 
     window = MainWindow()
     app.main_window = window

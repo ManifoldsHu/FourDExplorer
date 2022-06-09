@@ -43,6 +43,8 @@ class Ui_MainWindow(object):
         self.actionExport_Data.setObjectName(u"actionExport_Data")
         self.actionQuit = QAction(MainWindow)
         self.actionQuit.setObjectName(u"actionQuit")
+        self.actionSettings = QAction(MainWindow)
+        self.actionSettings.setObjectName(u"actionSettings")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -286,8 +288,8 @@ class Ui_MainWindow(object):
         self.menuImage.setObjectName(u"menuImage")
         self.menuView = QMenu(self.menubar)
         self.menuView.setObjectName(u"menuView")
-        self.menuSettings = QMenu(self.menubar)
-        self.menuSettings.setObjectName(u"menuSettings")
+        self.menuConfigure = QMenu(self.menubar)
+        self.menuConfigure.setObjectName(u"menuConfigure")
         self.menuHelp = QMenu(self.menubar)
         self.menuHelp.setObjectName(u"menuHelp")
         MainWindow.setMenuBar(self.menubar)
@@ -301,7 +303,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuCalibrate.menuAction())
         self.menubar.addAction(self.menuImage.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
-        self.menubar.addAction(self.menuSettings.menuAction())
+        self.menubar.addAction(self.menuConfigure.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen)
@@ -311,6 +313,7 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionExport_Data)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
+        self.menuConfigure.addAction(self.actionSettings)
 
         self.retranslateUi(MainWindow)
 
@@ -328,6 +331,7 @@ class Ui_MainWindow(object):
         self.actionImport_Data.setText(QCoreApplication.translate("MainWindow", u"Import Data", None))
         self.actionExport_Data.setText(QCoreApplication.translate("MainWindow", u"Export Data", None))
         self.actionQuit.setText(QCoreApplication.translate("MainWindow", u"Quit", None))
+        self.actionSettings.setText(QCoreApplication.translate("MainWindow", u"Settings", None))
         self.tabWidget_control.setTabText(self.tabWidget_control.indexOf(self.tab_File), QCoreApplication.translate("MainWindow", u"File", None))
         self.tabWidget_control.setTabText(self.tabWidget_control.indexOf(self.tab_Task), QCoreApplication.translate("MainWindow", u"Task", None))
         self.groupBox_4.setTitle(QCoreApplication.translate("MainWindow", u"Experimental Parameters", None))
@@ -355,7 +359,7 @@ class Ui_MainWindow(object):
         self.menuCalibrate.setTitle(QCoreApplication.translate("MainWindow", u"Calibrate", None))
         self.menuImage.setTitle(QCoreApplication.translate("MainWindow", u"Image", None))
         self.menuView.setTitle(QCoreApplication.translate("MainWindow", u"View", None))
-        self.menuSettings.setTitle(QCoreApplication.translate("MainWindow", u"Settings", None))
+        self.menuConfigure.setTitle(QCoreApplication.translate("MainWindow", u"Configure", None))
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u"Help", None))
     # retranslateUi
 

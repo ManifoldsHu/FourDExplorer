@@ -118,7 +118,10 @@ class TabViewManager(QObject):
         returns:
             (QWidget)
         """
-
+        scroll_area = self.tabWidget_view.widget(index)
+        return scroll_area.page
+        
+        
 
     def openTab(self, page: QWidget):
         """
@@ -132,7 +135,6 @@ class TabViewManager(QObject):
             page: (QWidget) the tab to be opened.
         """
         for ii in range(self.tabWidget_view.count()):
-            # if tab is self.tabWidget_view.widget(ii):
             if page is self.getTab(ii):
                 raise RuntimeError('Tab has been opened.')
         
@@ -141,9 +143,6 @@ class TabViewManager(QObject):
                 self._tab_history.pop(0)
             self._tab_history.append(page)
 
-
-        # _new_tab = QWidget()
-        # _new_tab.verticalLayout = QVBoxLayout(_new_tab)
         scroll_area = self._encapsulatePageToScrollArea(page)
 
         new_tab_index = self.tabWidget_view.addTab(
@@ -151,12 +150,6 @@ class TabViewManager(QObject):
             page.windowIcon(),
             page.windowTitle(),
         )
-
-        # new_tab_index = self.tabWidget_view.addTab(
-        #     tab, 
-        #     tab.windowIcon(), 
-        #     tab.windowTitle(),
-        # )
         
         self.tabWidget_view.setCurrentIndex(new_tab_index)
         self.logger.debug('Open a new page: {0}'.format(page.windowTitle()))
@@ -181,11 +174,8 @@ class TabViewManager(QObject):
             scroll_area.scrollAreaWidgetContents
         )
         scroll_area.verticalLayout.addWidget(page)
+        scroll_area.page = page 
         page.setParent(scroll_area.scrollAreaWidgetContents)
-        if page.minimumHeight() < 600:
-            page.setMinimumHeight(600)
-        if page.minimumWidth() < 800:
-            page.setMinimumWidth(800)
         return scroll_area
 
 
