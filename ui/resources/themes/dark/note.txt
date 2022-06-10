@@ -1,0 +1,6 @@
+These .xml files as Android material theme are produced from 
+
+https://material.io/resources/color/
+
+of which dark theme colors are 300 deep, and the secondary color is gray with
+900 deep.

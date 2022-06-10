@@ -21,6 +21,7 @@ import os
 from PySide6.QtCore import QObject, QSize, Qt
 from PySide6.QtGui import QIcon, QPixmap
 from qt_material import apply_stylesheet
+from matplotlib.style import use as useMatplotlibStyle
 
 # from bin.Log import LogUtil
 from Constants import CONFIG_PATH
@@ -206,6 +207,7 @@ class ThemeHandler(QObject):
                 invert_secondary = True, 
                 extra=extra,
             )
+            useMatplotlibStyle('default')
         elif theme_mode == UIThemeMode.Dark:
             path = os.path.join(self.dark_theme_path, xml_file)
             apply_stylesheet(
@@ -214,8 +216,10 @@ class ThemeHandler(QObject):
                 invert_secondary = False, 
                 extra=extra,
             )
+            useMatplotlibStyle('dark_background')
         elif theme_mode == UIThemeMode.Classical:
             self._app.setStyleSheet('')     # Not recommended
+            useMatplotlibStyle('default')
         
 
     def initTheme(self):
