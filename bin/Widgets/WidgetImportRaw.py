@@ -33,6 +33,7 @@ class WidgetImportRaw(QWidget):
 
         self.ui.lineEdit_raw_path.setReadOnly(True)
         self.ui.pushButton_browse.clicked.connect(self._chooseRawFile)
+        self.ui.checkBox_little_endian.setChecked(True)
 
     def _chooseRawFile(self):
         """

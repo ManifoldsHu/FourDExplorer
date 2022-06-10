@@ -245,6 +245,7 @@ class DialogCreateCoM(QDialog):
             'electric field. It is inverted from the center of mass, due to\n'
             'negative charge of the electron beam.'
         )
+        self.ui.radioButton_use_electric.setChecked(True)
 
         self.ui.checkBox_CoM.setChecked(True)
         self.ui.checkBox_CoM.stateChanged.connect(self._checkCoM)
