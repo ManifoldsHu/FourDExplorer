@@ -100,12 +100,18 @@ def readFourDSTEMFromRaw(
     gap_between_images: int = 0,    # The gap between every two images
     little_endian: bool = True,     # Is data in the file little-endian?
     is_flipped: bool = False,       # Is chirality of 2D x 2D the same?
+    rotate90: int = 0,              # Times every image should be rotated.
     progress_signal: Signal = None, # The progress signal of the task
 ):
     """
     This function will read data from a binary raw file. The Dataset object
     in the HDF5 file must be a 4-dimensional dataset, of which the first two 
     indices indicate the scanning location of the diffraction pattern.
+
+    This function can also do some processing when loading. For example, it 
+    can do transposing and rotate every diffraction patterns. NOTE: The process
+    is always first transposing (if is_flipped is True), and then rotate (if 
+    rot90 does not equal to 0).
 
     arguments:
         raw_path: (str) The absolute path of the raw file.
@@ -132,6 +138,11 @@ def readFourDSTEMFromRaw(
 
         little_endian: (bool) default to be True. If false, will read with
             big_endian.
+
+        rot90: (int) How many times should the data be rotated 90 counter-
+            clockwise. Default is 0. In some cases, the coordinate of the 
+            source data is xy, but in 4D-Explorer we use ij, so we must rotate 
+            90° when loading the 4D-STEM dataset.
     """
     global qApp 
     hdf_handler = qApp.hdf_handler
@@ -156,9 +167,10 @@ def readFourDSTEMFromRaw(
                     offset = bool(ii + jj) * gap_between_images,
                 )).reshape((dp_i, dp_j))
                 if is_flipped:
-                    dataset[ii, jj, :, :] = data.T 
+                    dataset[ii, jj, :, :] = np.rot90(data.T, rotate90)
                 else:
-                    dataset[ii, jj, :, :] = data
+                    dataset[ii, jj, :, :] = np.rot90(data, rotate90)
+                    
             progress_signal.emit(int((ii+1)/scan_i*100))
     
     # print('is_flipped: ', is_flipped)

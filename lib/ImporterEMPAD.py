@@ -392,7 +392,11 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
         arguments:
             root: (Document) The root of the dom tree.
         """
-        self.meta['is_flipped'] = True 
+        self.meta['is_flipped'] = True  # When loading the dataset, every image
+                                        # should be transposed.
+
+        self.meta['rotate90'] = 1       # When loading the dataset, every image
+                                        # should be rotated 90°.
 
         try:
             for mode in root.getElementsByTagName('scan_parameters'):

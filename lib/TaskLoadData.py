@@ -171,6 +171,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         scalar_size: int = 4,
         little_endian: bool = True,
         is_flipped = False,
+        rotate90: int = 0,
         parent: QObject = None, 
         **meta,
     ):
@@ -197,6 +198,18 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
             scalar_size: (int) How many bytes of one scalar number. Must be one 
                 of these: (1, 2, 4,)
 
+            little_endian: (bool) Is the raw data little-endian or big-endian? 
+                Default is True.
+
+            is_flipped: (bool) Whether the data should be transposed when 
+                reading. Default is False.
+
+            rotate90: (int) How many times should the data be rotated 90 degree
+                counter-clockwise. Default is 0. In some cases, the coordinate 
+                of the source data is xy, but in 4D-Explorer we use ij, so we 
+                must rotate every diffraction pattern 90° when loading the 
+                4D-STEM dataset.
+
             **meta: (key word arguments) other meta data that should be stored
                 in the attrs of HDF5 object.
         """
@@ -215,6 +228,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         self._offset_to_first_image = offset_to_first_image
         self._gap_between_images = gap_between_images
         self._is_flipped = is_flipped
+        self._rotate90 = rotate90 
 
         self.name = 'Load 4D-STEM data'
         self.comment = (
@@ -309,6 +323,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
             gap_between_images = self._gap_between_images,
             little_endian = self._little_endian,
             is_flipped = self._is_flipped,
+            rotate90 = self._rotate90,
         )
 
     def _showFourDSTEM(self):
