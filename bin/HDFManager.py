@@ -1746,7 +1746,7 @@ class HDFTreeModel(QAbstractItemModel):
                 )
             elif node.hdf_type == HDFType.VectorField:
                 return self.theme_handler.iconProvider(
-                    u':/HDFItem/icons/vector.png'
+                    u':/HDFItem/icons/compass.png'
                 )
             elif node.hdf_type == HDFType.Data:
                 return self.theme_handler.iconProvider(

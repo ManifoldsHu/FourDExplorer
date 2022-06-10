@@ -79,6 +79,14 @@ class PageSettings(QWidget):
             self._applyThemeColor
         )
 
+        density_index = self.ui.comboBox_theme_density.findText(
+            self.theme_handler.theme_density.name 
+        )
+        self.ui.comboBox_theme_density.setCurrentIndex(density_index)
+        self.ui.comboBox_theme_density.currentIndexChanged.connect(
+            self._applyThemeDensity
+        )
+
     def _initLog(self):
         """
         Initialize the log tab.
@@ -128,6 +136,14 @@ class PageSettings(QWidget):
         theme_color = self.ui.comboBox_theme_color.currentText()
         self.theme_handler.applyThemeColor(theme_color)
         self.logger.info('Applying Theme Color: {0}'.format(theme_color))
+
+    def _applyThemeDensity(self):
+        """
+        Apply the changes of the theme density.
+        """
+        theme_density = self.ui.comboBox_theme_density.currentText()
+        self.theme_handler.applyThemeDensity(theme_density)
+        self.logger.info('Applying Theme Density: {0}'.format(theme_density))
 
     def _applyLogLevels(self):
         """

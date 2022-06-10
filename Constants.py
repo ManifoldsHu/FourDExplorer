@@ -130,34 +130,19 @@ class UIThemeMode(IntEnum):
 
     default = 1
 
-# class UITheme(IntEnum):
-#     """
-#     The theme of ui. Default is light_blue
-#     """
-#     dark_amber = 110
-#     dark_blue = 120
-#     dark_cyan = 130
-#     dark_lightgreen = 140
-#     dark_pink = 150
-#     dark_purple = 160
-#     dark_red = 170
-#     dark_teal = 180
-#     dark_yellow = 190
 
-#     light_amber = 210
-#     light_blue = 220
-#     light_cyan = 230
-#     light_cyan_500 = 231
-#     light_lightgreen = 240
-#     light_pink = 250
-#     light_purple = 260
-#     light_red = 270
-#     light_teal = 280
-#     light_yellow = 290
+class UIThemeDensity(IntEnum):
+    """
+    The density of ui. Default is normal.
+    """
+    Large = 1
+    Big = 0
+    Normal = -1
+    Small = -2
+    Tiny = -3
 
-#     default = 220
-#     default_dark = 130
-
+    default = -1
+    
 
 class TaskState(IntEnum):
     """
@@ -182,36 +167,6 @@ class LogLevel(IntEnum):
     ERROR = logging.ERROR
     CRITICAL = logging.CRITICAL
     FATAL = logging.FATAL
-
-
-
-
-
-# class UIMode(Enum):
-#     '''
-#     The theme of ui. Default is light.
-#     '''
-#     Light = 1
-#     Dark = 2
-
-#     Default = 1
-
-# class UIColor(Enum):
-#     '''
-#     The color of ui. Default is blue.
-#     '''
-#     Amber = 1
-#     Blue = 2
-#     Cyan = 3
-#     LightGreen = 4
-#     Pink = 5
-#     Purple = 6
-#     Red = 7
-#     Teal = 8
-#     Yellow = 9
-
-#     Default = 1
-#     CustomColor = 10
 
 
 

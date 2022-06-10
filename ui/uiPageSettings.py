@@ -56,6 +56,11 @@ class Ui_Form(object):
 
         self.verticalLayout_7.addWidget(self.label_2)
 
+        self.label_8 = QLabel(self.groupBox_3)
+        self.label_8.setObjectName(u"label_8")
+
+        self.verticalLayout_7.addWidget(self.label_8)
+
 
         self.horizontalLayout_5.addLayout(self.verticalLayout_7)
 
@@ -98,6 +103,17 @@ class Ui_Form(object):
         self.comboBox_theme_color.setObjectName(u"comboBox_theme_color")
 
         self.verticalLayout_6.addWidget(self.comboBox_theme_color)
+
+        self.comboBox_theme_density = QComboBox(self.groupBox_3)
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.setObjectName(u"comboBox_theme_density")
+
+        self.verticalLayout_6.addWidget(self.comboBox_theme_density)
 
 
         self.horizontalLayout_5.addLayout(self.verticalLayout_6)
@@ -205,6 +221,10 @@ class Ui_Form(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_3)
+
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.pushButton_use_default_path = QPushButton(self.groupBox_2)
@@ -225,10 +245,6 @@ class Ui_Form(object):
 
         self.horizontalLayout_3.addLayout(self.verticalLayout_3)
 
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_3.addItem(self.horizontalSpacer_4)
-
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
 
@@ -246,7 +262,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -258,6 +274,7 @@ class Ui_Form(object):
         self.label_7.setText(QCoreApplication.translate("Form", u"Select Theme Mode and Color", None))
         self.label.setText(QCoreApplication.translate("Form", u"Theme Mode", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"Theme Color", None))
+        self.label_8.setText(QCoreApplication.translate("Form", u"Theme Density", None))
         self.comboBox_theme_mode.setItemText(0, QCoreApplication.translate("Form", u"default", None))
         self.comboBox_theme_mode.setItemText(1, QCoreApplication.translate("Form", u"Light", None))
         self.comboBox_theme_mode.setItemText(2, QCoreApplication.translate("Form", u"Dark", None))
@@ -283,6 +300,13 @@ class Ui_Form(object):
         self.comboBox_theme_color.setItemText(17, QCoreApplication.translate("Form", u"Red", None))
         self.comboBox_theme_color.setItemText(18, QCoreApplication.translate("Form", u"Teal", None))
         self.comboBox_theme_color.setItemText(19, QCoreApplication.translate("Form", u"Yellow", None))
+
+        self.comboBox_theme_density.setItemText(0, QCoreApplication.translate("Form", u"default", None))
+        self.comboBox_theme_density.setItemText(1, QCoreApplication.translate("Form", u"Large", None))
+        self.comboBox_theme_density.setItemText(2, QCoreApplication.translate("Form", u"Big", None))
+        self.comboBox_theme_density.setItemText(3, QCoreApplication.translate("Form", u"Normal", None))
+        self.comboBox_theme_density.setItemText(4, QCoreApplication.translate("Form", u"Small", None))
+        self.comboBox_theme_density.setItemText(5, QCoreApplication.translate("Form", u"Tiny", None))
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_theme), QCoreApplication.translate("Form", u"Display", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Log Filter", None))
