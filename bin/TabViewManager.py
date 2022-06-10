@@ -36,7 +36,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QVBoxLayout,
 )
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, Qt
 
 from bin.Widgets.PageHome import PageHome
 
@@ -51,7 +51,7 @@ class TabViewManager(QObject):
         self._tabWidget_view = None
         self._page_home = PageHome(self.parent())   # parent is MainWindow
         self._tab_history = []
-        self._tab_history_max = 100
+        self._tab_history_max = 0
 
 
     @property
@@ -101,7 +101,10 @@ class TabViewManager(QObject):
 
         Will automatically open the home page if there is no tabs remain.
         """
+        tab = self.tabWidget_view.widget(tab_index)
         self.tabWidget_view.removeTab(tab_index)
+        tab.close()
+        tab.deleteLater()
         if self.tabWidget_view.count() == 0:
             self.openTab(self.page_home)
 
@@ -138,13 +141,13 @@ class TabViewManager(QObject):
             if page is self.getTab(ii):
                 raise RuntimeError('Tab has been opened.')
         
-        if not page is self._page_home:
-            if len(self._tab_history) > self._tab_history_max:
-                self._tab_history.pop(0)
-            self._tab_history.append(page)
+        # if not page is self._page_home:
+        #     if len(self._tab_history) > self._tab_history_max:
+        #         self._tab_history.pop(0)
+        #     self._tab_history.append(page)
 
         scroll_area = self._encapsulatePageToScrollArea(page)
-
+        scroll_area.setAttribute(Qt.WA_DeleteOnClose)
         new_tab_index = self.tabWidget_view.addTab(
             scroll_area,
             page.windowIcon(),
@@ -168,7 +171,7 @@ class TabViewManager(QObject):
         """
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.scrollAreaWidgetContents = QWidget()
+        scroll_area.scrollAreaWidgetContents = QWidget(scroll_area)
         scroll_area.setWidget(scroll_area.scrollAreaWidgetContents)
         scroll_area.verticalLayout = QVBoxLayout(
             scroll_area.scrollAreaWidgetContents
