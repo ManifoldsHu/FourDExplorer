@@ -118,7 +118,7 @@ class UIThemeColor(IntEnum):
     Teal = 1170
     Yellow = 1180
 
-    default = 1090
+    default = 1020
 
 class UIThemeMode(IntEnum):
     """
