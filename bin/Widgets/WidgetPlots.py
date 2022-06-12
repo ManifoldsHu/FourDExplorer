@@ -49,7 +49,7 @@ class WidgetPlotHist(WidgetPlotBase):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.setToolBarVisible(False)
+        self.setToolbarVisible(False)
         self._initHist()
 
     @property
@@ -193,7 +193,7 @@ class WidgetPlotPreview(WidgetPlotBase):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.setToolBarVisible(False)
+        self.setToolbarVisible(False)
 
 class WidgetPlotBackground(WidgetPlotBase):
     """
@@ -203,7 +203,7 @@ class WidgetPlotBackground(WidgetPlotBase):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.setToolBarVisible(False)
+        self.setToolbarVisible(False)
 
 class WidgetPlotQuiver(WidgetPlotBase):
     """

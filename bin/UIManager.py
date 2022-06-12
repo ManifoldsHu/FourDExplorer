@@ -256,11 +256,12 @@ class ThemeHandler(QObject):
                 UIThemeDensity.default,
             )
 
-        
-
     def iconProvider(self, icon_rc: str):
         """
-        Get icons from resources.
+        Get icons from resource path.
+
+        This function will automatically provide the icon with different 
+        colors (black or white) in different theme colors.
 
         arguments:
             icon_rc: (str) like ':/HDFItem/icons/cube.png'
@@ -279,13 +280,35 @@ class ThemeHandler(QObject):
             icon.addFile(icon_light_rc, mode = QIcon.Normal)
         else:
             icon.addFile(icon_rc, mode = QIcon.Normal)
-            if self.getIconDarkness():
+            if self._getIconDarkness():
                 icon.addFile(icon_light_rc, mode = QIcon.Selected)
             else:
                 icon.addFile(icon_rc, mode = QIcon.Selected)
         return icon 
 
-    def getIconDarkness(self) -> bool:
+    icon_be_white_in_light = {              # if True, the icon will be white
+        UIThemeColor.Red: True,             # if the current theme mode is 
+        UIThemeColor.Pink: True,            # light (when it is selected). 
+        UIThemeColor.Purple: True,
+        UIThemeColor.DeepPurple: True,
+        UIThemeColor.Indigo: True,
+        UIThemeColor.Blue: True,
+        UIThemeColor.LightBlue: True,
+        UIThemeColor.Cyan: True,
+        UIThemeColor.Teal: True,
+        UIThemeColor.Green: True,
+        UIThemeColor.LightGreen: False,
+        UIThemeColor.Lime: False,
+        UIThemeColor.Yellow: False,
+        UIThemeColor.Amber: False,
+        UIThemeColor.Orange: False,
+        UIThemeColor.DeepOrange: False,
+        UIThemeColor.Brown: True,
+        UIThemeColor.Gray: True,
+        UIThemeColor.BlueGray: True,
+    }
+
+    def _getIconDarkness(self) -> bool:
         """
         Get the color of icons should be displayed.
 
@@ -296,31 +319,10 @@ class ThemeHandler(QObject):
         returns:
             (bool) whether icon should be white.
         """
-        light = {
-            UIThemeColor.Red: True,
-            UIThemeColor.Pink: True,
-            UIThemeColor.Purple: True,
-            UIThemeColor.DeepPurple: True,
-            UIThemeColor.Indigo: True,
-            UIThemeColor.Blue: True,
-            UIThemeColor.LightBlue: True,
-            UIThemeColor.Cyan: True,
-            UIThemeColor.Teal: True,
-            UIThemeColor.Green: True,
-            UIThemeColor.LightGreen: False,
-            UIThemeColor.Lime: False,
-            UIThemeColor.Yellow: False,
-            UIThemeColor.Amber: False,
-            UIThemeColor.Orange: False,
-            UIThemeColor.DeepOrange: False,
-            UIThemeColor.Brown: True,
-            UIThemeColor.Gray: True,
-            UIThemeColor.BlueGray: True,
-        }
         if self.theme_mode == UIThemeMode.Classical:
             return False 
         elif self.theme_mode == UIThemeMode.Light:
-            return light[self.theme_color]
+            return self.icon_be_white_in_light[self.theme_color]
         elif self.theme_mode == UIThemeMode.Dark:
             return False
 

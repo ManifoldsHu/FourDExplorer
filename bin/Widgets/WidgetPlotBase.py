@@ -23,6 +23,7 @@ from matplotlib.figure import Figure
 import numpy as np
 
 from bin.BlitManager import BlitManager
+from bin.UIManager import ThemeHandler
 
 class WidgetPlotBase(QWidget):
     """
@@ -30,6 +31,21 @@ class WidgetPlotBase(QWidget):
 
     Base widget to plot items by matplotlib.
     """
+    # This is where icons is saved in the resource system of qt.
+    icon_resource = u':/MatplotlibNavigation/icons/'
+    
+    # The icon's name of the corresponding actions.
+    toolicon = {
+            'Home': 'home',
+            'Back': 'back',
+            'Forward': 'forward',
+            'Pan': 'move',
+            'Zoom': 'zoom_to_rect',
+            'Subplots': 'subplots',
+            'Customize': 'qt4_editor_options',
+            'Save': 'filesave',
+    }
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
@@ -38,8 +54,9 @@ class WidgetPlotBase(QWidget):
         self._blit_manager = BlitManager(self._canvas)
         
         self.vertical_layout = QVBoxLayout()
-        self._navigation_tool_bar = NavigationToolbar(self._canvas, self)
-        self.vertical_layout.addWidget(self._navigation_tool_bar)
+        self._navigation_toolbar = NavigationToolbar(self._canvas, self)
+        self._setToolbarIcons()
+        self.vertical_layout.addWidget(self._navigation_toolbar)
         self.vertical_layout.addWidget(self._canvas)
         self.setLayout(self.vertical_layout)
         
@@ -55,7 +72,12 @@ class WidgetPlotBase(QWidget):
     def blit_manager(self) -> BlitManager:
         return self._blit_manager
 
-    def setToolBarVisible(self, visible: bool = True):
+    @property
+    def theme_handler(self) -> ThemeHandler:
+        global qApp
+        return qApp.theme_handler
+
+    def setToolbarVisible(self, visible: bool = True):
         """
         Set whether the navigation tool bar of matplotlib to hide.
 
@@ -65,5 +87,20 @@ class WidgetPlotBase(QWidget):
         arguments:
             visible: (bool)
         """
-        self._navigation_tool_bar.setVisible(visible)
+        self._navigation_toolbar.setVisible(visible)
     
+    def _setToolbarIcons(self):
+        """
+        Set the icons of actions in the navigation tool bar.
+
+        The original icons are invisible in dark theme. So here we provide 
+        the different icons when dark theme mode is used.
+        """
+        for tool_action in self._navigation_toolbar.actions():
+            action_text = tool_action.text()
+            print(action_text)
+            if action_text in self.toolicon:
+                icon = self.theme_handler.iconProvider(
+                    self.icon_resource + self.toolicon[action_text] + '.png'
+                )
+                tool_action.setIcon(icon)

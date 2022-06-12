@@ -57,7 +57,8 @@ def imageProvider(dir_path: str):
     for name in os.listdir(dir_path):
         path = os.path.join(dir_path, name)
         if os.path.isfile(path):
-            if os.path.splitext(path)[1] == '.png':
+            _path, ext = os.path.splitext(path)
+            if ext == '.png' and _path.endswith('_light'):
                 yield name, plt.imread(path)
 
 if __name__ == '__main__':

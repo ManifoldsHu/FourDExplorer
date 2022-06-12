@@ -18,4 +18,24 @@
     <file>icons/cube.png</file>
     <file>icons/database.png</file>
   </qresource>
+  <qresource prefix="MatplotlibNavigation">
+    <file>icons/back.png</file>
+    <file>icons/back_light.png</file>
+    <file>icons/filesave.png</file>
+    <file>icons/filesave_light.png</file>
+    <file>icons/forward.png</file>
+    <file>icons/forward_light.png</file>
+    <file>icons/help.png</file>
+    <file>icons/help_light.png</file>
+    <file>icons/home.png</file>
+    <file>icons/home_light.png</file>
+    <file>icons/move.png</file>
+    <file>icons/move_light.png</file>
+    <file>icons/qt4_editor_options.png</file>
+    <file>icons/qt4_editor_options_light.png</file>
+    <file>icons/subplots.png</file>
+    <file>icons/subplots_light.png</file>
+    <file>icons/zoom_to_rect.png</file>
+    <file>icons/zoom_to_rect_light.png</file>
+  </qresource>
 </RCC>
