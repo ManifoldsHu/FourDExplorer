@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>913</width>
-    <height>617</height>
+    <height>744</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -111,7 +111,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,1">
@@ -137,7 +137,14 @@
           </layout>
          </item>
          <item>
-          <widget class="WidgetPlotQuiver" name="widget_vector_field" native="true"/>
+          <widget class="WidgetPlotQuiver" name="widget_vector_field" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>400</height>
+            </size>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
