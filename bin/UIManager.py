@@ -18,7 +18,7 @@ from configparser import ConfigParser
 from logging import Logger
 import os
 
-from PySide6.QtCore import QObject, QSize, Qt
+from PySide6.QtCore import QObject, QSize, Qt, Signal
 from PySide6.QtGui import QIcon, QPixmap
 from qt_material import apply_stylesheet
 from matplotlib.style import use as useMatplotlibStyle
@@ -29,7 +29,7 @@ from Constants import ROOT_PATH
 from Constants import UIThemeColor
 from Constants import UIThemeMode
 from Constants import UIThemeDensity
-from ui.resources import icon_rc
+from ui import icon_rc
 
 class ThemeHandler(QObject):
     """
@@ -53,6 +53,8 @@ class ThemeHandler(QObject):
     attributes:
         theme: (UITheme) The current theme applied to 4D-Explorer
     """
+
+    theme_changed = Signal()
 
     def __init__(self, parent: QObject = None):
         """
@@ -129,6 +131,8 @@ class ThemeHandler(QObject):
             config['UI']['ThemeColor'] = theme_color.name 
             config.write(f)
 
+        self.theme_changed.emit()
+
     def applyThemeMode(self, theme_mode: str|UIThemeMode = None):
         """
         Applying theme mode.
@@ -150,6 +154,8 @@ class ThemeHandler(QObject):
         with open(CONFIG_PATH, 'w', encoding = 'UTF-8') as f:
             config['UI']['ThemeMode'] = theme_mode.name 
             config.write(f)
+
+        self.theme_changed.emit()
 
     def applyThemeDensity(self, theme_density: str|UIThemeDensity = None):
         """
@@ -220,6 +226,8 @@ class ThemeHandler(QObject):
         elif theme_mode == UIThemeMode.Classical:
             self._app.setStyleSheet('')     # Not recommended
             useMatplotlibStyle('default')
+
+        
         
 
     def initTheme(self):
@@ -256,7 +264,7 @@ class ThemeHandler(QObject):
                 UIThemeDensity.default,
             )
 
-    def iconProvider(self, icon_rc: str):
+    def iconProvider(self, icon_rc: str) -> QIcon:
         """
         Get icons from resource path.
 
@@ -273,7 +281,7 @@ class ThemeHandler(QObject):
             raise TypeError('icon_rc must be a str, not '
                 '{0}'.format(type(icon_rc).__name__))
 
-        icon_light_rc = icon_rc.rstrip('.png') + '_light.png'
+        icon_light_rc = os.path.splitext(icon_rc)[0] + '_light.png'
         icon = QIcon()
         if self.theme_mode == UIThemeMode.Dark :
             icon.addFile(icon_rc, mode = QIcon.Selected)
@@ -325,4 +333,5 @@ class ThemeHandler(QObject):
             return self.icon_be_white_in_light[self.theme_color]
         elif self.theme_mode == UIThemeMode.Dark:
             return False
+
 

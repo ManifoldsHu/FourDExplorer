@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1207</width>
-    <height>665</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QSplitter" name="splitter_2">
       <property name="orientation">
@@ -23,321 +23,22 @@
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="QTabWidget" name="tabWidget_control">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="tabPosition">
-        <enum>QTabWidget::West</enum>
-       </property>
+      <widget class="QStackedWidget" name="stackedWidget_control">
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <property name="elideMode">
-        <enum>Qt::ElideLeft</enum>
-       </property>
-       <property name="documentMode">
-        <bool>false</bool>
-       </property>
-       <property name="tabsClosable">
-        <bool>false</bool>
-       </property>
-       <property name="movable">
-        <bool>false</bool>
-       </property>
-       <property name="tabBarAutoHide">
-        <bool>false</bool>
-       </property>
-       <widget class="WidgetFile" name="tab_File">
-        <attribute name="title">
-         <string>File</string>
-        </attribute>
-       </widget>
-       <widget class="WidgetTask" name="tab_Task">
-        <attribute name="title">
-         <string>Task</string>
-        </attribute>
-       </widget>
-       <widget class="QWidget" name="tab_Calibration">
-        <attribute name="title">
-         <string>Calibration</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_29">
-         <item>
-          <widget class="QScrollArea" name="scrollArea_3">
-           <property name="widgetResizable">
-            <bool>true</bool>
-           </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents_3">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>992</width>
-              <height>944</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_28">
-             <item>
-              <widget class="QGroupBox" name="groupBox_4">
-               <property name="title">
-                <string>Experimental Parameters</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_22">
-                <item>
-                 <widget class="QTableView" name="tableView_parameters">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>400</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_9">
-                  <item>
-                   <widget class="QPushButton" name="pushButton_change_meta_manually">
-                    <property name="text">
-                     <string>Change Value</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pushButton_flush_meta">
-                    <property name="text">
-                     <string>Flush</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_6">
-               <property name="title">
-                <string>Background Subtraction</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_26">
-                <item>
-                 <widget class="QLabel" name="label_12">
-                  <property name="text">
-                   <string>Background Pattern in HDF5 File</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_background_in_hdf5"/>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_4">
-                  <property name="text">
-                   <string>Choose a Background Matrix...</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_5">
-               <property name="title">
-                <string>Diffraction Disk Alignment</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_25">
-                <item>
-                 <widget class="QLabel" name="label_9">
-                  <property name="text">
-                   <string>Moving Patterns to...</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_8">
-                  <item>
-                   <layout class="QVBoxLayout" name="verticalLayout_24">
-                    <item>
-                     <widget class="QLabel" name="label_10">
-                      <property name="text">
-                       <string>Right (in pixels):</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLabel" name="label_11">
-                      <property name="text">
-                       <string>Down (in pixels):</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_7">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <layout class="QVBoxLayout" name="verticalLayout_23">
-                    <item>
-                     <widget class="QLineEdit" name="lineEdit">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QLineEdit" name="lineEdit_2">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_align_change_manually">
-                  <property name="text">
-                   <string>Change Manually...</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_align_visual">
-                  <property name="text">
-                   <string>Alignment by Visual Method...</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_7">
-               <property name="title">
-                <string>Angular Offset Correction</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_27">
-                <item>
-                 <widget class="QLabel" name="label_13">
-                  <property name="text">
-                   <string>Rotation Angle (in degrees):</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_rotation_angle"/>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_change_angle_manually">
-                  <property name="text">
-                   <string>Change Manually...</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_angle_defocused">
-                  <property name="text">
-                   <string>Correct by Defocused Reference...</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_angle_DPC">
-                  <property name="text">
-                   <string>Correct by DPC...</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tab_Image">
-        <attribute name="title">
-         <string>Image</string>
-        </attribute>
-       </widget>
+       <widget class="WidgetFile" name="tab_file"/>
+       <widget class="WidgetPages" name="tab_pages"/>
+       <widget class="WidgetTaskManager" name="tab_task"/>
+       <widget class="WidgetSystemInfo" name="tab_system_info"/>
+       <widget class="WidgetEMServer" name="tab_server"/>
       </widget>
       <widget class="QSplitter" name="splitter">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <property name="childrenCollapsible">
-        <bool>true</bool>
-       </property>
-       <widget class="QTabWidget" name="tabWidget_view">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="tabPosition">
-         <enum>QTabWidget::North</enum>
-        </property>
-        <property name="tabShape">
-         <enum>QTabWidget::Rounded</enum>
-        </property>
-        <property name="elideMode">
-         <enum>Qt::ElideLeft</enum>
-        </property>
-        <property name="documentMode">
-         <bool>false</bool>
-        </property>
-        <property name="tabsClosable">
-         <bool>true</bool>
-        </property>
-        <property name="movable">
-         <bool>true</bool>
-        </property>
-        <property name="tabBarAutoHide">
-         <bool>false</bool>
-        </property>
-       </widget>
-       <widget class="WidgetLog" name="widget_log" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+       <widget class="QTabWidget" name="tabWidget_view"/>
+       <widget class="WidgetLog" name="widget_log" native="true"/>
       </widget>
      </widget>
     </item>
@@ -348,102 +49,62 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1207</width>
+     <width>800</width>
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menuFile_F">
     <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionNew"/>
-    <addaction name="actionOpen"/>
-    <addaction name="actionClose"/>
-    <addaction name="separator"/>
-    <addaction name="actionImport_Data"/>
-    <addaction name="actionExport_Data"/>
-    <addaction name="separator"/>
-    <addaction name="actionQuit"/>
-   </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
+     <string>File(&amp;F)</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuTask">
+   <widget class="QMenu" name="menuEdit_E">
     <property name="title">
-     <string>Task</string>
+     <string>Edit(&amp;E)</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuCalibrate">
+   <widget class="QMenu" name="menuTask_T">
     <property name="title">
-     <string>Calibrate</string>
+     <string>Task(&amp;T)</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuImage">
+   <widget class="QMenu" name="menuView_V">
     <property name="title">
-     <string>Image</string>
+     <string>View(&amp;V)</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuView">
+   <widget class="QMenu" name="menuDataset_D">
     <property name="title">
-     <string>View</string>
+     <string>Dataset(&amp;D)</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuConfigure">
+   <widget class="QMenu" name="menuSettings_S">
     <property name="title">
-     <string>Configure</string>
-    </property>
-    <addaction name="actionSettings"/>
-   </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="title">
-     <string>Help</string>
+     <string>Settings(&amp;S)</string>
     </property>
    </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
-   <addaction name="menuTask"/>
-   <addaction name="menuCalibrate"/>
-   <addaction name="menuImage"/>
-   <addaction name="menuView"/>
-   <addaction name="menuConfigure"/>
-   <addaction name="menuHelp"/>
+   <widget class="QMenu" name="menuHelp_H">
+    <property name="title">
+     <string>Help(&amp;H)</string>
+    </property>
+   </widget>
+   <addaction name="menuFile_F"/>
+   <addaction name="menuEdit_E"/>
+   <addaction name="menuTask_T"/>
+   <addaction name="menuView_V"/>
+   <addaction name="menuDataset_D"/>
+   <addaction name="menuSettings_S"/>
+   <addaction name="menuHelp_H"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionNew">
+  <action name="actionNew_HDF5">
    <property name="text">
-    <string>New</string>
+    <string>New HDF5...</string>
    </property>
   </action>
-  <action name="actionOpen">
+  <action name="actionOpen_HDF5">
    <property name="text">
-    <string>Open</string>
-   </property>
-  </action>
-  <action name="actionClose">
-   <property name="text">
-    <string>Close</string>
-   </property>
-  </action>
-  <action name="actionImport_Data">
-   <property name="text">
-    <string>Import Data</string>
-   </property>
-  </action>
-  <action name="actionExport_Data">
-   <property name="text">
-    <string>Export Data</string>
-   </property>
-  </action>
-  <action name="actionQuit">
-   <property name="text">
-    <string>Quit</string>
-   </property>
-  </action>
-  <action name="actionSettings">
-   <property name="text">
-    <string>Settings</string>
+    <string>Open HDF5...</string>
    </property>
   </action>
  </widget>
@@ -455,15 +116,33 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetTask</class>
-   <extends>QWidget</extends>
-   <header>bin.Widgets.WidgetTask.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>WidgetLog</class>
    <extends>QWidget</extends>
    <header>bin.Widgets.WidgetLog.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetPages</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetPages.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetTaskManager</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetTaskManager.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetSystemInfo</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetSystemInfo.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetEMServer</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetEMServer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

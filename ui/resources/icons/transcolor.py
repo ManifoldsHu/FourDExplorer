@@ -44,7 +44,7 @@ def convertColor(image_rgba: np.ndarray) -> np.ndarray:
     returns:
         (np.ndarray)
     """
-    image_rgba[image_rgba[:,:,3] > 1e-6] = 1
+    image_rgba[image_rgba[:,:,3] > 1e-6] = 240/256
     return image_rgba
 
 def imageProvider(dir_path: str):
@@ -58,7 +58,7 @@ def imageProvider(dir_path: str):
         path = os.path.join(dir_path, name)
         if os.path.isfile(path):
             _path, ext = os.path.splitext(path)
-            if ext == '.png' and _path.endswith('_light'):
+            if ext == '.png' and not _path.endswith('_light'):
                 yield name, plt.imread(path)
 
 if __name__ == '__main__':
