@@ -10,18 +10,16 @@
 This module includes actions towards left control tabs in the MainWindow.
 
 author:         Hu Yiming
-date:           Apr 13, 2022
+date:           Jun 13, 2022
 *--------------------------- ControlActions.py -------------------------------*
 """
 
 from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QWidget, QStackedWidget
-from PySide6.QtGui import QActionGroup, QAction, QIcon
-from bin.TabViewManager import TabViewManager
+from PySide6.QtGui import QActionGroup, QAction
 
 from bin.UIManager import ThemeHandler
 from bin.Widgets.PageSettings import PageSettings
-# from ui import icon_rc
 
 class ControlActionGroup(QActionGroup):
     """

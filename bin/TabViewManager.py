@@ -124,7 +124,6 @@ class TabViewManager(QObject):
         scroll_area = self.tabWidget_view.widget(index)
         return scroll_area.page
         
-        
 
     def openTab(self, page: QWidget):
         """

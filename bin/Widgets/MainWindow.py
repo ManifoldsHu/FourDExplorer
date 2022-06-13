@@ -18,7 +18,13 @@ date:               Feb 24, 2022
 import sys
 import os
 
-from PySide6.QtWidgets import QMainWindow, QToolBar, QWidget, QToolButton, QSpacerItem, QSizePolicy
+from PySide6.QtWidgets import (
+    QMainWindow, 
+    QToolBar, 
+    QWidget, 
+    QToolButton, 
+    QSizePolicy,
+)
 from PySide6.QtCore import Qt, QSize
 # from PySide6.QtGui import 
 
