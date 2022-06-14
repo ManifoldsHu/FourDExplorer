@@ -14,6 +14,8 @@
    <string>Form</string>
   </property>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icon.qrc"/>
+ </resources>
  <connections/>
 </ui>

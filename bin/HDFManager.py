@@ -247,6 +247,8 @@ class HDFHandler(QObject):
 
     file_state_changed = Signal()   # When file is opened or closed, 
                                     # this signal is emitted.
+    file_about_to_close = Signal()
+    file_opened = Signal()
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
@@ -399,11 +401,12 @@ class HDFHandler(QObject):
             if not self.isFileOpened():
                 # Read/write, file must exist
                 self.file = h5py.File(self.file_path, mode='r+')
+                self.file_opened.emit()
                 self.file_state_changed.emit()
         except OSError as e:
             self.logger.error('{0}'.format(e), exc_info = True)
             return None
-        self.logger.debug('Open file: {0}'.format(self.file_path))
+        self.logger.info('Open file: {0}'.format(self.file_path))
         return self.file
 
 
@@ -417,9 +420,10 @@ class HDFHandler(QObject):
             - the application is exit
         """
         if self.isFileOpened():
+            self.file_about_to_close.emit()
             self.file.close()
             self.file_state_changed.emit()
-            self.logger.debug('Close file.')
+            self.logger.info('Close file: {0}'.format(self.file_path))
         self.file = None
           
 
@@ -1670,6 +1674,19 @@ class HDFTreeModel(QAbstractItemModel):
         """
         return 1
 
+    item_icons = {
+        HDFType.Root: 'database',
+        HDFType.Data: 'file',
+        HDFType.Group: 'folder',
+        HDFType.Image: 'picture',
+        HDFType.Line: 'line',
+        HDFType.VectorField: 'particle',
+        HDFType.FourDSTEM: 'cube',
+        HDFType.Item: 'file',
+        HDFType.String: 'file',
+        HDFType.Reference: 'share',
+    }
+
     def data(self, index: QModelIndex, role: int):
         """
         Get the practical data from the internal data structure.
@@ -1723,38 +1740,10 @@ class HDFTreeModel(QAbstractItemModel):
         elif role == self.DataRoles.HDFTypeRole:
             return node.hdf_type
         elif role == self.DataRoles.DecorationRole:
-            if (node.hdf_type == HDFType.Root
-                    and self.hdf_handler.isFileOpened()):
-                return self.theme_handler.iconProvider(
-                    u':/HDFItem/icons/database.png'
-                )
-            elif node.hdf_type == HDFType.Group:
-                return self.theme_handler.iconProvider(
-                    u':/HDFItem/icons/folder.png'
-                )
-            elif node.hdf_type == HDFType.Image:
-                return self.theme_handler.iconProvider(
-                    u':/HDFItem/icons/image.png'
-                )
-            elif node.hdf_type == HDFType.FourDSTEM:
-                return self.theme_handler.iconProvider(
-                    u':/HDFItem/icons/cube.png'
-                )
-            elif node.hdf_type == HDFType.Line:
-                return self.theme_handler.iconProvider(
-                    u':/HDFItem/icons/line.png'
-                )
-            elif node.hdf_type == HDFType.VectorField:
-                return self.theme_handler.iconProvider(
-                    u':/HDFItem/icons/compass.png'
-                )
-            elif node.hdf_type == HDFType.Data:
-                return self.theme_handler.iconProvider(
-                    u':/HDFItem/icons/squares.png'
-                )
-                # icon = QIcon()
-                # icon.addFile(u':/HDFItem/icons/database.png', QSize(), QIcon.Normal, QIcon.Off)
-                # return icon
+            _path = ':/HDFItem/resources/icons/'
+            icon_name = self.item_icons[node.hdf_type] + '.png'
+            return self.theme_handler.iconProvider(_path + icon_name)
+            
         else:
             return None
 

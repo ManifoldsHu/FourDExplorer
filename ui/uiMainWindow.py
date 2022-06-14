@@ -43,6 +43,7 @@ class Ui_MainWindow(object):
         self.splitter_2 = QSplitter(self.centralwidget)
         self.splitter_2.setObjectName(u"splitter_2")
         self.splitter_2.setOrientation(Qt.Horizontal)
+        self.splitter_2.setChildrenCollapsible(False)
         self.stackedWidget_control = QStackedWidget(self.splitter_2)
         self.stackedWidget_control.setObjectName(u"stackedWidget_control")
         self.tab_file = WidgetFile()
