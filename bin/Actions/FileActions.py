@@ -26,7 +26,7 @@ class ActionFileBase(QAction):
     """
     The base action for opening or closing an HDF5 file.
     """
-    def __init__(self, parent: QObject):
+    def __init__(self, parent: QObject = None):
         super().__init__(parent)
 
     @property
@@ -39,9 +39,10 @@ class ActionOpenFile(ActionFileBase):
     """
     The action to open an HDF5 file.
     """
-    def __init__(self, parent: QObject):
+    def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.triggered.connect(self.openFile)
+        self.setText('Open File')
     
     def openFile(self):
         """
@@ -65,9 +66,14 @@ class ActionCloseFile(ActionFileBase):
     """
     The action to close an HDF5 file.
     """
-    def __init__(self, parent: QObject):
+    def __init__(self, parent: QObject = None):
         super().__init__(parent)
+        self.setText('Close File')
         self.triggered.connect(self.closeFile)
+        self.setEnabled(self.hdf_handler.isFileOpened())
+        self.hdf_handler.file_opened.connect(self.setState)
+        self.hdf_handler.file_closed.connect(self.setState)
+        
 
     def closeFile(self):
         """
@@ -75,12 +81,20 @@ class ActionCloseFile(ActionFileBase):
         """
         self.hdf_handler.closeFile()
 
+    def setState(self):
+        """
+        When there is no files, this action will be forbidden.
+        """
+        self.setEnabled(self.hdf_handler.isFileOpened())
+        
+
 class ActionNewFile(ActionFileBase):
     """
     The action to create a new HDF5 file.
     """
-    def __init__(self, parent: QObject):
+    def __init__(self, parent: QObject = None):
         super().__init__(parent)
+        self.setText('New File')
         self.triggered.connect(self.newFile)
 
     def newFile(self):
@@ -103,4 +117,16 @@ class ActionNewFile(ActionFileBase):
         action_open_file = ActionOpenFile(self)
         action_open_file.trigger()
 
+class ActionQuit(ActionFileBase):
+    """
+    The action to quit 4D-Explorer
+    """
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self.setText('Quit')
+        self.triggered.connect(self.closeMainWindow)
 
+    def closeMainWindow(self):
+        global qApp 
+        main_window = qApp.main_window 
+        main_window.close()

@@ -245,10 +245,10 @@ class HDFHandler(QObject):
         file_state_changed: When file is opened or closed, this signal emits.
     """
 
-    file_state_changed = Signal()   # When file is opened or closed, 
-                                    # this signal is emitted.
     file_about_to_close = Signal()
+    file_closed = Signal()
     file_opened = Signal()
+    model_created = Signal()
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
@@ -257,6 +257,7 @@ class HDFHandler(QObject):
         self._lock = threading.Lock()   # read/write lock
         self._root_node = HDFRootNode()
         self._createModel()
+        self._keep_file_opened = []
     
     @property
     def logger(self) -> Logger:
@@ -401,28 +402,74 @@ class HDFHandler(QObject):
             if not self.isFileOpened():
                 # Read/write, file must exist
                 self.file = h5py.File(self.file_path, mode='r+')
+                self.buildHDFTree()
                 self.file_opened.emit()
-                self.file_state_changed.emit()
+                
         except OSError as e:
             self.logger.error('{0}'.format(e), exc_info = True)
             return None
         self.logger.info('Open file: {0}'.format(self.file_path))
         return self.file
 
+    def registerKeepFileOpen(self) -> int:
+        """
+        This function will keep a list to ask whether other objects need to 
+        keep the file opened. (They may collapse if the file is suddenly 
+        closed.) 
+
+        The returned int is the id of the variable that indicates whether the
+        file can be closed. Only when all of the variables are False, the file
+        can be closed.
+
+        The object that call this function should keep the returned id. Also, 
+        they should connect hdf_handler.file_about_to_close signal to their 
+        some functions to estimate if it is suitable to close the file. If it 
+        is not suitable, that function should call hdf_handler.holdFile() to 
+        let the hdf_handler know.
+        """
+        index = len(self._keep_file_opened)
+        self._keep_file_opened.append(False)
+        return index 
+
+    def holdFile(self, index: int):
+        """
+        When hdf_handler.file_about_to_close signal emits, there is a chance 
+        for some object to call this function. It can prevent to close the 
+        current HDF5 file.
+
+        arguments:
+            index: (int)
+        """
+        self._keep_file_opened[index] = True 
+
 
     def closeFile(self):
         """
-        Close the h5 file. 
+        Try to close the h5 file. 
         
         The file must be closed before:
             - the file_path is changed
             - the file is deleted
             - the application is exit
+
+        When the file is about to close, self.file_about_to_close is emitted to 
+        inform other objects. Before that, hdf_handler._keep_file_opened list 
+        will be set to all False, and wait for the answers from the registered 
+        objects. If some object want to keep the file opened, it can call the 
+        function hdf_handler.holdFile() to modify the list. After that, if this
+        function find that all of the items in the list is False, it will close 
+        the file. 
         """
         if self.isFileOpened():
-            self.file_about_to_close.emit()
+            self.file_about_to_close.emit()     
+            # When file is about to close, this signal is emitted to inform 
+            # Tabview Manager and Task Manager. 
+            for is_file_held in self._keep_file_opened:
+                if is_file_held:
+                    return False 
+            
             self.file.close()
-            self.file_state_changed.emit()
+            self.file_closed.emit()
             self.logger.info('Close file: {0}'.format(self.file_path))
         self.file = None
           
@@ -471,6 +518,7 @@ class HDFHandler(QObject):
                 HDF5 file. 
         """
         self._model = HDFTreeModel(self)
+        self.model_created.emit()
         
 
     @property
@@ -487,6 +535,7 @@ class HDFHandler(QObject):
             self._root_node = self.addChildDeepFirst(HDFRootNode())
         else:
             self._root_node = HDFRootNode()
+        self._createModel()
             
     def addChildDeepFirst(self, parent: 'HDFGroupNode'):
         """
@@ -1388,20 +1437,29 @@ class HDFDataNode(HDFTreeNode):
                 ' i.e. one of these:\n {0}'.format(Datatypes)))
         self._hdf_type = new_type 
 
+    ext_to_type = {
+        '4dstem': HDFType.FourDSTEM,
+        'line': HDFType.Line,
+        'img': HDFType.Image,
+        'vec': HDFType.VectorField,
+    }
+
+    type_to_ext = {
+            HDFType.Data: '',
+            HDFType.Line: 'line',
+            HDFType.Image: 'img',
+            HDFType.VectorField: 'vec',
+            HDFType.FourDSTEM: '4dstem',
+        }
+
     def _updateTypeByExtension(self):
         """
         Update HDF type according to the extension.
         """
         if '.' in self.name:
             ext = self.name.split('.').pop()
-            if ext == '4dstem':
-                self.hdf_type = HDFType.FourDSTEM
-            elif ext == 'line':
-                self.hdf_type = HDFType.Line 
-            elif ext == 'img':
-                self.hdf_type = HDFType.Image
-            elif ext == 'vec':
-                self.hdf_type = HDFType.VectorField
+            if ext in self.ext_to_type:
+                self.hdf_type = self.ext_to_type[ext]
             else:
                 self.hdf_type = HDFType.Data
         else:
@@ -1728,8 +1786,6 @@ class HDFTreeModel(QAbstractItemModel):
                 HDFType.FourDSTEM, 
                 HDFType.Data,
             ):
-                # self.logger.debug('{0}'.format(node.hdf_type))
-                # type_str = '{0}'.format(node.hdf_type.name).split('.')[1]
                 type_str = '{0}'.format(node.hdf_type.name)
                 return '<{0}> shape: {1}, dtype: {2}'.format(
                     type_str,
@@ -1740,9 +1796,10 @@ class HDFTreeModel(QAbstractItemModel):
         elif role == self.DataRoles.HDFTypeRole:
             return node.hdf_type
         elif role == self.DataRoles.DecorationRole:
-            _path = ':/HDFItem/resources/icons/'
-            icon_name = self.item_icons[node.hdf_type] + '.png'
-            return self.theme_handler.iconProvider(_path + icon_name)
+            if self.hdf_handler.isFileOpened():
+                _path = ':/HDFItem/resources/icons/'
+                icon_name = self.item_icons[node.hdf_type]
+                return self.theme_handler.iconProvider(_path + icon_name)
             
         else:
             return None

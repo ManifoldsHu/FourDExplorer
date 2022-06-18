@@ -17,6 +17,7 @@ date:           Apr 29, 2021
 from logging import Logger
 import os
 from typing import Iterable, Mapping, Tuple  
+from PIL import Image
 
 from PySide6.QtCore import QObject, Signal 
 import h5py
@@ -350,5 +351,94 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
 #     )
 
     
+class TaskLoadTiff(TaskBaseLoadData):
+    """
+    把外部 Tiff 图片中加载进 HDF5 文件中的任务。
 
-    
+    Task to load tiff image into the HDF5 file.
+    """
+    def __init__(self,
+        file_path: str,
+        item_parent_path: str,
+        item_name: str,
+        parent: QObject = None,
+        **meta,
+    ):
+        """
+        arguments:
+            file_path: (str) The absolute path of the ouside raw file.
+
+            item_parent_path: (str) The path of the parent group of the Dataset 
+                item in the HDF file.
+
+            item_name: (str) The name of the new Dataset item in the HDF file.
+
+            parent: (QObject)
+
+            **meta: (key word arguments) other meta data that should be stored
+                in the attrs of HDF5 object.
+        """
+        super().__init__(
+            (1,), 
+            file_path, 
+            item_parent_path, 
+            item_name, 
+            parent, 
+            **meta
+        )
+        self.name = 'Load TIFF data'
+        self.comment = (
+            'Load TIFF data\n'
+            'Data File path: {0}\n'
+            'To Dataset Object: {1}\n'.format(
+                self._file_path, self._item_name 
+            )
+        )
+        self.setPrepare(self._createDataset)
+        self.addSubtaskFunc(
+            'Copy Data',
+            self.copyFromTiff,
+            file_path = self._file_path,
+            item_path = self.item_path,
+        )
+
+    def _createDataset(self):
+        """
+        Will create a dataset in HDF5 file according to the item_path.
+
+        This function works as the preparing function that will be called
+        just before the task is submitted.
+        """
+        with Image.open(self._file_path) as im:
+            self.setShape((im.height, im.width))
+
+        self.hdf_handler.addNewData(
+            self._item_parent_path,
+            self._item_name,
+            self._shape,
+        )
+
+        for key, value in self._meta.items():
+            self.hdf_handler.file[self.item_path].attrs[key] = value 
+
+    def copyFromTiff(self, file_path: str, item_path: str):
+        """
+        Do the actual copy-data work.
+
+        arguments:
+            file_path: (str) the image's path in the file system.
+
+            item_path: (str) the loaded image's path in HDF5 file.
+        """
+        with Image.open(file_path) as im:
+            dataset = self.hdf_handler.file[item_path]
+            dataset[:] = np.asarray(im) 
+
+    def _showImage(self):
+        """
+        Will open the 4D-STEM dataset in the HDF5 object.
+
+        This function works as the following function that will be called
+        just after the task is completed.
+        """
+        self.logger.debug('Task {0} completed.'.format(self.name))

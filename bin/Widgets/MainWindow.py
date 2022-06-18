@@ -26,6 +26,7 @@ from PySide6.QtWidgets import (
     QSizePolicy,
 )
 from PySide6.QtCore import Qt, QSize
+from bin.Actions.FileActions import ActionCloseFile, ActionNewFile, ActionOpenFile, ActionQuit
 # from PySide6.QtGui import 
 
 from bin.TabViewManager import TabViewManager
@@ -83,26 +84,26 @@ class MainWindow(QMainWindow):
             self.control_tool_bar.action_group.actions()
         )
 
-        
-
     def _initFile(self):
-        pass
-        # self.ui.actionNew.triggered.connect(
-        #     self.ui.tab_File.newFile
-        # )
-        # self.ui.actionOpen.triggered.connect(
-        #     self.ui.tab_File.openFile
-        # )
-        # self.ui.actionClose.triggered.connect(
-        #     self.ui.tab_File.closeFile
-        # )
+        """
+        Initialize the file menu.
+        """
+        self._action_new_file = ActionNewFile(self)
+        self._action_open_file = ActionOpenFile(self)
+        self._action_close_file = ActionCloseFile(self)
+        self._action_quit = ActionQuit(self)
+        self.ui.menuFile_F.addAction(self._action_new_file)
+        self.ui.menuFile_F.addAction(self._action_open_file)
+        self.ui.menuFile_F.addAction(self._action_close_file)
+        self.ui.menuFile_F.addSeparator()
+        self.ui.menuFile_F.addAction(self._action_quit)
         
     def _initSettings(self):
-        pass
-        # self.ui.actionSettings.triggered.connect(
-        #     lambda: self.tabview_manager.openTab(PageSettings(self))
-        # )
-
+        """
+        Initialize the settings menu.
+        """
+        self._action_settings = self.control_tool_bar._action_settings
+        self.ui.menuSettings_S.addAction(self._action_settings)
 
     def _initTask(self):
         pass
@@ -143,10 +144,18 @@ class ControlToolBar(QToolBar):
             "ControlToolBar::separator{                 "
             "    width: 0px;                            "
             "}                                          "
+            "ControlToolBar QToolButton{                "
+            "    padding: 0;                            "
+            "    margin: 0;                             "
+            "    height: 54px;                          "
+            "    width: 44px;                           "
+            "}"
         )
         self._action_group = ControlActionGroup(self)
         self._action_settings = ActionSettings(self)
         self.setMovable(False)
+        self.setContentsMargins(0,0,0,0)
+        self.layout().setContentsMargins(0,0,0,0)
         self.setOrientation(Qt.Vertical)
         self.setIconSize(QSize(32, 32))
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -154,6 +163,10 @@ class ControlToolBar(QToolBar):
     @property
     def action_group(self) -> ControlActionGroup:
         return self._action_group
+
+    @property
+    def action_settings(self) -> ActionSettings:
+        return self._action_settings
 
     @property 
     def theme_handler(self) -> ThemeHandler:

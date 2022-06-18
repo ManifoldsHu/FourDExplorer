@@ -15,9 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QGroupBox, QLineEdit, QListView,
-    QPushButton, QScrollArea, QSizePolicy, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QApplication, QLineEdit, QListView, QSizePolicy,
+    QToolBox, QVBoxLayout, QWidget)
 
 from bin.Widgets.WidgetHDFViewer import WidgetHDFViewer
 
@@ -25,103 +24,49 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(346, 892)
-        self.verticalLayout_4 = QVBoxLayout(Form)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.scrollArea = QScrollArea(Form)
-        self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setMinimumSize(QSize(0, 0))
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 309, 1384))
-        self.verticalLayout_3 = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.groupBox = QGroupBox(self.scrollAreaWidgetContents)
-        self.groupBox.setObjectName(u"groupBox")
-        self.groupBox.setMinimumSize(QSize(0, 720))
-        self.verticalLayout_2 = QVBoxLayout(self.groupBox)
+        Form.resize(253, 892)
+        self.verticalLayout_2 = QVBoxLayout(Form)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.widget_HDFTreeView = WidgetHDFViewer(self.groupBox)
-        self.widget_HDFTreeView.setObjectName(u"widget_HDFTreeView")
-        sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.widget_HDFTreeView.sizePolicy().hasHeightForWidth())
-        self.widget_HDFTreeView.setSizePolicy(sizePolicy)
-
-        self.verticalLayout_2.addWidget(self.widget_HDFTreeView)
-
-        self.widget = QWidget(self.groupBox)
-        self.widget.setObjectName(u"widget")
-        self.verticalLayout = QVBoxLayout(self.widget)
+        self.verticalLayout_2.setContentsMargins(9, 0, 9, 2)
+        self.toolBox_file = QToolBox(Form)
+        self.toolBox_file.setObjectName(u"toolBox_file")
+        self.page_hdf_viewer = WidgetHDFViewer()
+        self.page_hdf_viewer.setObjectName(u"page_hdf_viewer")
+        self.page_hdf_viewer.setGeometry(QRect(0, 0, 235, 830))
+        self.toolBox_file.addItem(self.page_hdf_viewer, u"Hierarchy Data Format")
+        self.page_working_directory = QWidget()
+        self.page_working_directory.setObjectName(u"page_working_directory")
+        self.page_working_directory.setGeometry(QRect(0, 0, 235, 823))
+        self.verticalLayout = QVBoxLayout(self.page_working_directory)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.pushButton_new_file = QPushButton(self.widget)
-        self.pushButton_new_file.setObjectName(u"pushButton_new_file")
-
-        self.verticalLayout.addWidget(self.pushButton_new_file)
-
-        self.pushButton_close_file = QPushButton(self.widget)
-        self.pushButton_close_file.setObjectName(u"pushButton_close_file")
-
-        self.verticalLayout.addWidget(self.pushButton_close_file)
-
-        self.pushButton_import_data = QPushButton(self.widget)
-        self.pushButton_import_data.setObjectName(u"pushButton_import_data")
-
-        self.verticalLayout.addWidget(self.pushButton_import_data)
-
-        self.pushButton_export_data = QPushButton(self.widget)
-        self.pushButton_export_data.setObjectName(u"pushButton_export_data")
-
-        self.verticalLayout.addWidget(self.pushButton_export_data)
-
-
-        self.verticalLayout_2.addWidget(self.widget)
-
-
-        self.verticalLayout_3.addWidget(self.groupBox)
-
-        self.groupBox_2 = QGroupBox(self.scrollAreaWidgetContents)
-        self.groupBox_2.setObjectName(u"groupBox_2")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
-        self.groupBox_2.setSizePolicy(sizePolicy1)
-        self.groupBox_2.setMinimumSize(QSize(0, 640))
-        self.verticalLayout_5 = QVBoxLayout(self.groupBox_2)
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.lineEdit_working_directory = QLineEdit(self.groupBox_2)
+        self.verticalLayout.setContentsMargins(0, -1, 0, -1)
+        self.lineEdit_working_directory = QLineEdit(self.page_working_directory)
         self.lineEdit_working_directory.setObjectName(u"lineEdit_working_directory")
 
-        self.verticalLayout_5.addWidget(self.lineEdit_working_directory)
+        self.verticalLayout.addWidget(self.lineEdit_working_directory)
 
-        self.listView_working_directory = QListView(self.groupBox_2)
+        self.listView_working_directory = QListView(self.page_working_directory)
         self.listView_working_directory.setObjectName(u"listView_working_directory")
 
-        self.verticalLayout_5.addWidget(self.listView_working_directory)
+        self.verticalLayout.addWidget(self.listView_working_directory)
 
+        self.toolBox_file.addItem(self.page_working_directory, u"Working Directory")
 
-        self.verticalLayout_3.addWidget(self.groupBox_2)
-
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-
-        self.verticalLayout_4.addWidget(self.scrollArea)
+        self.verticalLayout_2.addWidget(self.toolBox_file)
 
 
         self.retranslateUi(Form)
+
+        self.toolBox_file.setCurrentIndex(0)
+        self.toolBox_file.layout().setSpacing(6)
+
 
         QMetaObject.connectSlotsByName(Form)
     # setupUi
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.groupBox.setTitle(QCoreApplication.translate("Form", u"HDF Hierarchy", None))
-        self.pushButton_new_file.setText(QCoreApplication.translate("Form", u"New H5 File", None))
-        self.pushButton_close_file.setText(QCoreApplication.translate("Form", u"Close H5 File", None))
-        self.pushButton_import_data.setText(QCoreApplication.translate("Form", u"Import Data", None))
-        self.pushButton_export_data.setText(QCoreApplication.translate("Form", u"Export Data", None))
-        self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Working Directory", None))
+        self.toolBox_file.setItemText(self.toolBox_file.indexOf(self.page_hdf_viewer), QCoreApplication.translate("Form", u"Hierarchy Data Format", None))
+        self.toolBox_file.setItemText(self.toolBox_file.indexOf(self.page_working_directory), QCoreApplication.translate("Form", u"Working Directory", None))
     # retranslateUi
 

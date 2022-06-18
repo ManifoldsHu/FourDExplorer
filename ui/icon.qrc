@@ -29,4 +29,28 @@
     <file>resources/icons/particle_tracking.png</file>
     <file>resources/icons/particle_tracking_light.png</file>
   </qresource>
+  <qresource prefix="HDFEdit">
+    <file>resources/icons/layers.png</file>
+    <file>resources/icons/layers_light.png</file>
+    <file>resources/icons/edit.png</file>
+    <file>resources/icons/edit_light.png</file>
+    <file>resources/icons/search.png</file>
+    <file>resources/icons/search_light.png</file>
+    <file>resources/icons/refresh.png</file>
+    <file>resources/icons/refresh_light.png</file>
+    <file>resources/icons/copy.png</file>
+    <file>resources/icons/copy_light.png</file>
+    <file>resources/icons/file_add.png</file>
+    <file>resources/icons/file_add_light.png</file>
+    <file>resources/icons/file_delete.png</file>
+    <file>resources/icons/file_delete_light.png</file>
+    <file>resources/icons/switch.png</file>
+    <file>resources/icons/switch_light.png</file>
+    <file>resources/icons/export.png</file>
+    <file>resources/icons/export_light.png</file>
+    <file>resources/icons/import.png</file>
+    <file>resources/icons/import_light.png</file>
+    <file>resources/icons/adjust.png</file>
+    <file>resources/icons/adjust_light.png</file>
+  </qresource>
 </RCC>

@@ -42,6 +42,7 @@ class WidgetLog(QWidget):
         self.ui.pushButton_open_log_directory.clicked.connect(
             self.openLogDir
         )
+        self.ui.pushButton_open_log_directory.setVisible(False)
         self.ui.pushButton_clear_log.clicked.connect(self.clearLog)
     
     @property

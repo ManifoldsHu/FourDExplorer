@@ -25,7 +25,9 @@ class Ui_Form(object):
             Form.setObjectName(u"Form")
         Form.resize(400, 213)
         self.verticalLayout = QVBoxLayout(Form)
+        self.verticalLayout.setSpacing(6)
         self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 0, -1, 2)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.label = QLabel(Form)
@@ -39,11 +41,13 @@ class Ui_Form(object):
 
         self.pushButton_clear_log = QPushButton(Form)
         self.pushButton_clear_log.setObjectName(u"pushButton_clear_log")
+        self.pushButton_clear_log.setFlat(True)
 
         self.horizontalLayout.addWidget(self.pushButton_clear_log)
 
         self.pushButton_open_log_directory = QPushButton(Form)
         self.pushButton_open_log_directory.setObjectName(u"pushButton_open_log_directory")
+        self.pushButton_open_log_directory.setFlat(True)
 
         self.horizontalLayout.addWidget(self.pushButton_open_log_directory)
 
@@ -65,6 +69,6 @@ class Ui_Form(object):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"Messages and Logs", None))
         self.pushButton_clear_log.setText(QCoreApplication.translate("Form", u"Clear", None))
-        self.pushButton_open_log_directory.setText(QCoreApplication.translate("Form", u"Open Log Directory", None))
+        self.pushButton_open_log_directory.setText(QCoreApplication.translate("Form", u"Open Log Folder", None))
     # retranslateUi
 

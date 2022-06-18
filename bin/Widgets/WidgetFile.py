@@ -90,11 +90,11 @@ class WidgetFile(QWidget):
         """
         Initialize HDF file views.
         """
-        self._hdf_handler.file_state_changed.connect(
-            self.changeStateByFileState)
-        self.ui.pushButton_new_file.clicked.connect(self.newFile)
-        self.ui.pushButton_close_file.clicked.connect(self.closeFile)
-        self.changeStateByFileState()
+        # self._hdf_handler.file_state_changed.connect(
+            # self.changeStateByFileState)
+        # self.ui.pushButton_new_file.clicked.connect(self.newFile)
+        # self.ui.pushButton_close_file.clicked.connect(self.closeFile)
+        # self.changeStateByFileState()
         # self.ui.widget_HDFTreeView.setReadOnly(False)
 
     def newFile(self):
