@@ -61,12 +61,12 @@
         <widget class="QComboBox" name="comboBox_scalar_type">
          <item>
           <property name="text">
-           <string>integer</string>
+           <string>unsigned integer</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>usigned integer</string>
+           <string>integer</string>
           </property>
          </item>
          <item>

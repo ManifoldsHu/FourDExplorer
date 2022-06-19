@@ -98,7 +98,6 @@ class WidgetPlotBase(QWidget):
         """
         for tool_action in self._navigation_toolbar.actions():
             action_text = tool_action.text()
-            print(action_text)
             if action_text in self.toolicon:
                 icon = self.theme_handler.iconProvider(
                     self.icon_resource + self.toolicon[action_text] + '.png'

@@ -194,8 +194,8 @@ class Ui_Form(object):
         self.pushButton_browse.setText(QCoreApplication.translate("Form", u"Browse...", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"Scalar Type", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"Scalar Size", None))
-        self.comboBox_scalar_type.setItemText(0, QCoreApplication.translate("Form", u"integer", None))
-        self.comboBox_scalar_type.setItemText(1, QCoreApplication.translate("Form", u"usigned integer", None))
+        self.comboBox_scalar_type.setItemText(0, QCoreApplication.translate("Form", u"unsigned integer", None))
+        self.comboBox_scalar_type.setItemText(1, QCoreApplication.translate("Form", u"integer", None))
         self.comboBox_scalar_type.setItemText(2, QCoreApplication.translate("Form", u"float", None))
 
         self.comboBox_scalar_size.setItemText(0, QCoreApplication.translate("Form", u"8 bit", None))
