@@ -42,7 +42,7 @@ class ActionOpenFile(ActionFileBase):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.triggered.connect(self.openFile)
-        self.setText('Open File')
+        self.setText('Open HDF5 File')
     
     def openFile(self):
         """
@@ -94,7 +94,7 @@ class ActionNewFile(ActionFileBase):
     """
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('New File')
+        self.setText('New HDF5 File')
         self.triggered.connect(self.newFile)
 
     def newFile(self):

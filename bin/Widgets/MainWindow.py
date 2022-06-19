@@ -18,24 +18,52 @@ date:               Feb 24, 2022
 import sys
 import os
 
-from PySide6.QtWidgets import (
-    QMainWindow, 
-    QToolBar, 
-    QWidget, 
-    QToolButton, 
-    QSizePolicy,
-)
+
+from PySide6.QtWidgets import QMainWindow 
+from PySide6.QtWidgets import QToolBar
+from PySide6.QtWidgets import QWidget 
+from PySide6.QtWidgets import QToolButton 
+from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtCore import Qt, QSize
-from bin.Actions.FileActions import ActionCloseFile, ActionNewFile, ActionOpenFile, ActionQuit
+
+from bin.Actions.ControlActions import ActionSettings
+from bin.Actions.ControlActions import ControlActionGroup
+
+from bin.Actions.DataActions import ActionOpenDataAs
+from bin.Actions.DataActions import ActionOpenLine
+from bin.Actions.DataActions import ActionOpenImage 
+from bin.Actions.DataActions import ActionOpenVectorField
+from bin.Actions.DataActions import ActionOpenFourDSTEM
+
+from bin.Actions.EditActions import ActionAttributes
+from bin.Actions.EditActions import ActionChangeHDFType
+from bin.Actions.EditActions import ActionCopy
+from bin.Actions.EditActions import ActionDelete
+from bin.Actions.EditActions import ActionImportFourDSTEM
+from bin.Actions.EditActions import ActionImportImage
+from bin.Actions.EditActions import ActionMove
+from bin.Actions.EditActions import ActionNew
+from bin.Actions.EditActions import ActionRename
+
+from bin.Actions.FileActions import ActionCloseFile
+from bin.Actions.FileActions import ActionNewFile
+from bin.Actions.FileActions import ActionOpenFile
+from bin.Actions.FileActions import ActionQuit
+
+from bin.Actions.FourDSTEMActions import ActionAlign
+from bin.Actions.FourDSTEMActions import ActionBackground
+from bin.Actions.FourDSTEMActions import ActionCenterOfMass
+from bin.Actions.FourDSTEMActions import ActionRotate
+from bin.Actions.FourDSTEMActions import ActionVirtualImage
 # from PySide6.QtGui import 
 
 from bin.TabViewManager import TabViewManager
-from bin.Actions.ControlActions import ActionSettings, ControlActionGroup
 from bin.UIManager import ThemeHandler
+from bin.Widgets.PageHome import PageHome
 from bin.Widgets.PageSettings import PageSettings
 from ui.uiMainWindow import Ui_MainWindow
 from ui import icon_rc
-from bin.Widgets.PageHome import PageHome
+
 
 
 
@@ -63,8 +91,11 @@ class MainWindow(QMainWindow):
         self._initControlPanel()
 
         self._initFile()
+        self._initEdit()
+        
         self._initTask()
-        self._initCalibration()
+        self._initDataset()
+        # self._initCalibration()
         self._initImage()
         self._initTabViewers()
         self._initSettings()
@@ -72,6 +103,11 @@ class MainWindow(QMainWindow):
     @property
     def tabview_manager(self) -> TabViewManager:
         return self._tabview_manager
+
+    @property
+    def theme_handler(self) -> ThemeHandler:
+        global qApp 
+        return qApp.theme_handler
         
     def _initControlPanel(self):
         """
@@ -91,13 +127,44 @@ class MainWindow(QMainWindow):
         self._action_new_file = ActionNewFile(self)
         self._action_open_file = ActionOpenFile(self)
         self._action_close_file = ActionCloseFile(self)
+        
         self._action_quit = ActionQuit(self)
         self.ui.menuFile_F.addAction(self._action_new_file)
         self.ui.menuFile_F.addAction(self._action_open_file)
         self.ui.menuFile_F.addAction(self._action_close_file)
         self.ui.menuFile_F.addSeparator()
+        
         self.ui.menuFile_F.addAction(self._action_quit)
         
+    def _initEdit(self):
+        """
+        Initialize the edit menu.
+        """
+        self._action_new = ActionNew(self)
+        self._action_import_fourdstem = ActionImportFourDSTEM(self)
+        self._action_import_image = ActionImportImage(self)
+        self._action_move = ActionMove(self)
+        self._action_copy = ActionCopy(self)
+        self._action_delete = ActionDelete()
+        self._action_rename = ActionRename(self)
+        self._action_attributes = ActionAttributes(self)
+        self._action_change = ActionChangeHDFType(self)
+
+        self.ui.menuEdit_E.addActions([
+            self._action_new,
+            self._action_change,
+            self._action_import_fourdstem,
+            self._action_import_image,
+            self._action_move,
+            self._action_copy,
+            self._action_delete,
+            self._action_rename,
+            self._action_attributes,
+        ])
+        self.ui.menuEdit_E.insertSeparator(self._action_change)
+        self.ui.menuEdit_E.insertSeparator(self._action_move)
+        self.ui.menuEdit_E.insertSeparator(self._action_attributes)
+
     def _initSettings(self):
         """
         Initialize the settings menu.
@@ -108,6 +175,68 @@ class MainWindow(QMainWindow):
     def _initTask(self):
         pass
 
+    def _initDataset(self):
+        """
+        Initialize the dataset menu.
+        """
+        self._action_open_data_as = ActionOpenDataAs(self)
+        self.ui.menuDataset_D.addAction(self._action_open_data_as)
+        self.ui.menuDataset_D.addAction(self._action_change)
+        self.ui.menuDataset_D.addSeparator()
+
+        self._menu_line = self.ui.menuDataset_D.addMenu('Line')
+        self._menu_image = self.ui.menuDataset_D.addMenu('Image')
+        self._menu_vector_field = self.ui.menuDataset_D.addMenu('Vector Field')
+        self._menu_fourdstem = self.ui.menuDataset_D.addMenu('4D-STEM')
+
+        self._action_open_line = ActionOpenLine(self)
+        self._menu_line.addAction(self._action_open_line)
+
+        self._action_open_image = ActionOpenImage(self)
+        self._menu_image.addAction(self._action_open_image)
+        self._menu_image.addAction(self._action_import_image)
+
+        self._action_open_vector_field = ActionOpenVectorField(self)
+        self._menu_vector_field.addAction(self._action_open_vector_field)
+
+        self._action_open_fourdstem = ActionOpenFourDSTEM(self)
+        self._action_virtual_image = ActionVirtualImage(self)
+        self._action_center_of_mass = ActionCenterOfMass(self)
+        self._action_background = ActionBackground(self)
+        self._action_align = ActionAlign(self)
+        self._action_rotate = ActionRotate(self)
+        self._menu_fourdstem.addAction(self._action_open_fourdstem)
+        self._menu_fourdstem.addAction(self._action_import_fourdstem)
+        self._menu_fourdstem.addSeparator()
+        self._menu_fourdstem.addAction(self._action_virtual_image)
+        self._menu_fourdstem.addAction(self._action_center_of_mass)
+        self._menu_fourdstem.addSeparator()
+        self._menu_fourdstem.addAction(self._action_background)
+        self._menu_fourdstem.addAction(self._action_align)
+        self._menu_fourdstem.addAction(self._action_rotate)
+        
+        
+        
+    # def _initDatasetSubmenus(self):
+    #     """
+    #     Initialize the submenus in the Dataset menu.
+    #     """
+        
+
+        # self._dataset_submenu_rc = ':/HDFItems/resources/icons/'
+        # icon_line = self.theme_handler.iconProvider(
+        #     self._dataset_submenu_rc + 'line.png'
+        # )
+
+
+    # def _updateSubMenuIcons(self, rc_path: str):
+    #     """
+    #     Update the icons using resource path.
+
+    #     arguments:
+    #         rc_path: (str) the icon's resource path
+    #     """
+    #     icon = self.theme_handler.iconProvider(rc_path)
 
 
     def _initCalibration(self):
@@ -126,6 +255,7 @@ class MainWindow(QMainWindow):
         self._tabview_manager = TabViewManager(self)
         self._tabview_manager.setTabWidget(self.ui.tabWidget_view)
         self._tabview_manager.initializeTabView()
+
 
 
 class ControlToolBar(QToolBar):

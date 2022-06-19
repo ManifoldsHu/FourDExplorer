@@ -51,6 +51,18 @@ class ActionDataManipulateBase(ActionEditBase):
         global qApp 
         return qApp.tabview_manager
 
+    def initIconResources(self, icon_name: str):
+        """
+        Initialize the resource of icons.
+
+        arguments:
+            icon_name: (str) the name of icon.
+        """
+        _path = ':/HDFItem/resources/icons/' + icon_name
+        icon = self.theme_handler.iconProvider(_path)
+        self._icon_name = icon_name 
+        self.setIcon(icon)
+
 
 class ActionOpenData(ActionDataManipulateBase):
     """
@@ -159,111 +171,97 @@ class ActionOpenDataAs(ActionOpenData):
         return hdf_type 
 
 
-class ActionVirtualImage(ActionOpenData):
+class ActionOpenLine(ActionOpenData):
     """
-    计算 4D-STEM 虚拟成像的 Action。
+    指定打开线的数据。
 
-    Action to calculate 4D-STEM virtual images.
+    Try opening a line data.
     """
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Virtual Image')
+        self.setText('Open Line')
+        self.initIconResources('line')
 
-    def openAs(self, hdf_type: HDFType = None) -> PageVirtualImage:
+    def openAs(self, hdf_type: HDFType = None) -> PageViewLine:
         """
-        Use the virtual image method to open the Dataset.
+        Use the line viewing method to open the line.
 
         arguments:
             hdf_type: (HDFType) (does not work)
         """
-        page = PageVirtualImage()
-        page.setFourDSTEM(self.item_path)
-        return page  
+        page = PageViewLine()
+        if self.item_path not in ('', '/'):
+            page.addLine(self.item_path)
+        return page
 
 
-class ActionCenterOfMass(ActionOpenData):
+class ActionOpenImage(ActionOpenData):
     """
-    计算 4D-STEM 质心法差分相位衬度的 Action。
+    指定使用打开二维图像的方法打开数据。
 
-    Action to calculate differentiated phase contrast (CoM).
+    Try opening an image.
     """
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Center of Mass')
+        self.setText('Open Image')
+        self.initIconResources('picture')
 
-    def openAs(self, hdf_type: HDFType = None) -> PageCenterOfMass:
+    def openAs(self, hdf_type: HDFType = None) -> PageViewImage:
         """
-        Use the center of mass method to open the Dataset.
+        Use the image viewing method to open the data.
 
         arguments:
             hdf_type: (HDFType) (does not work)
         """
-        page = PageVirtualImage()
-        page.setFourDSTEM(self.item_path)
+        page = PageViewImage()
+        if self.item_path not in ('', '/'):
+            page.setImage(self.item_path)
         return page 
 
 
-class ActionAlign(ActionOpenData):
+class ActionOpenVectorField(ActionOpenData):
     """
-    对 4D-STEM 数据集进行平移合轴的 Action。
+    指定使用打开矢量场的方法来打开数据。
 
-    Action to align 4D-STEM dataset.
+    Try opening a vector field.
     """
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Diffraction Alignment')
+        self.setText('Open Vector Field')
+        self.initIconResources('particle_tracking')
 
-    def openAs(self, hdf_type: HDFType = None) -> PageAlignFourDSTEM:
+    def openAs(self, hdf_type: HDFType = None) -> PageViewVectorField:
         """
-        Use the diffraction alignment method to open the Dataset.
+        Use the vector field method to open the data.
 
         arguments:
-            hdf_type: (HDFType) 
+            hdf_type: (HDFType) (does not work)
         """
-        page = PageAlignFourDSTEM()
-        page.setFourDSTEM(self.item_path)
+        page = PageViewVectorField()
+        if self.item_path not in ('', '/'):
+            page.setVectorField(self.item_path)
         return page 
 
 
-class ActionBackground(ActionOpenData):
+class ActionOpenFourDSTEM(ActionOpenData):
     """
-    对 4D-STEM 数据进行抠背底操作的 Action。
+    指定使用打开 4D-STEM 数据集的方法来打开数据。
 
-    Action to subtract 4D-STEM's background.
-    """
-    def __init__(self, parent: QObject = None):
-        super().__init__(parent)
-        self.setText('Background Subtraction')
-
-    def openAs(self, hdf_type: HDFType = None) -> PageBkgrdFourDSTEM:
-        """
-        Use the background subtraction method to open the Dataset.
-
-        arguments:
-            hdf_type: (HDFType)
-        """
-        page = PageBkgrdFourDSTEM()
-        page.setFourDSTEM(self.item_path)
-        return page 
-
-
-class ActionRotate(ActionOpenData):
-    """
-    对 4D-STEM 数据进行旋转操作的 Action。
-
-    Action to rotate 4D-STEM's diffraction pattern.
+    Try opening a 4D-STEM dataset.
     """
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Diffraction Rotation')
+        self.setText('Open 4D-STEM')
+        self.initIconResources('cube')
 
-    def openAs(self, hdf_type: HDFType = None) -> PageRotateFourDSTEM:
+    def openAs(self, hdf_type: HDFType = None) -> PageViewFourDSTEM:
         """
-        Use the diffraction rotation method to open the Dataset.
+        Use the 4D-STEM method to open the data.
 
         arguments:
-            hdf_type: (HDFType)
+            hdf_type: (HDFType) (does not work)
         """
-        page = PageRotateFourDSTEM()
-        page.setFourDSTEM(self.item_path)
+        page = PageViewFourDSTEM()
+        if self.item_path not in ('', '/'):
+            page.setFourDSTEM(self.item_path)
         return page 

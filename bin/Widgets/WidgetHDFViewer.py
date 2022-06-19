@@ -22,25 +22,20 @@ This widget is used in the main window, and hence have CRUD methods.
 author:         Hu Yiming
 date:           Feb 18, 2022
 *------------------------- WidgetBaseHDFViewer.py ----------------------------*
-
 """
 
 from logging import Logger
-import sys
-import os
-import configparser
 
 from PySide6.QtCore import QModelIndex, Qt, QPoint
 from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog, QWidgetAction
 from PySide6.QtGui import QActionGroup
-from bin.Actions.DataActions import ActionAlign
-from bin.Actions.DataActions import ActionBackground
-from bin.Actions.DataActions import ActionCenterOfMass
+
+
 from bin.Actions.DataActions import ActionOpenData
 from bin.Actions.DataActions import ActionOpenDataAs
-from bin.Actions.DataActions import ActionRotate
-from bin.Actions.DataActions import ActionVirtualImage
-from bin.Actions.EditActions import ActionAttributes, ActionImportFourDSTEM, ActionImportImage
+from bin.Actions.EditActions import ActionAttributes
+from bin.Actions.EditActions import ActionImportFourDSTEM
+from bin.Actions.EditActions import ActionImportImage
 from bin.Actions.EditActions import ActionChangeHDFType
 from bin.Actions.EditActions import ActionCopy
 from bin.Actions.EditActions import ActionDelete
@@ -49,35 +44,15 @@ from bin.Actions.EditActions import ActionNew
 from bin.Actions.EditActions import ActionRename
 from bin.Actions.FileActions import ActionCloseFile, ActionNewFile
 from bin.Actions.FileActions import ActionOpenFile
-
+from bin.Actions.FourDSTEMActions import ActionAlign
+from bin.Actions.FourDSTEMActions import ActionBackground
+from bin.Actions.FourDSTEMActions import ActionCenterOfMass
+from bin.Actions.FourDSTEMActions import ActionRotate
+from bin.Actions.FourDSTEMActions import ActionVirtualImage
 from bin.UIManager import ThemeHandler
 from bin.Widgets.WidgetBaseHDFViewer import HDFToolBar
-# from PySide6.QtGui import QRegularExpressionValidator
-
 from bin.TabViewManager import TabViewManager
-# from bin.ItemActions import (
-#     ActionAlign,
-#     ActionCenterOfMass,
-#     ActionCreate,
-#     ActionMove,
-#     ActionRename,
-#     ActionCopy,
-#     ActionDelete,
-#     ActionAttributes,
-#     ActionChangeDataType,
-#     ActionRotate,
-#     ActionShowData,
-#     ActionShowLine,
-#     ActionShowImage,
-#     ActionShowVectorField,
-#     ActionShowFourDSTEM,
-#     ActionVirtualImage,
-#     ActionBkgrd,
-# )
-
 from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
-
-
 from Constants import HDFType, ItemDataRoles
 
 class WidgetHDFViewer(WidgetBaseHDFViewer):

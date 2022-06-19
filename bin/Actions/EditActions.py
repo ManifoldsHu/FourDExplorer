@@ -14,7 +14,7 @@ date:           Jun 14, 2022
 *---------------------------- EditActions.py ---------------------------------*
 """
 
-import functools
+
 from logging import Logger
 
 from PySide6.QtCore import QObject, QModelIndex
@@ -158,26 +158,6 @@ def failLogging(func):
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec()
     return wrapper 
-
-# def setItemPathWhenTriggered(action: ActionEditBase):
-#     """
-#     Try to set the item_path when the action is triggered.
-
-#     This is a decorator, used for these actions on-triggered functions. A
-#     typical circumstance is that when the user triggers this action after 
-#     he has selected an item in the HDFTree view, he would expect to set 
-#     that item as the target item.
-
-#     Will do nothing if there is no treeview set.
-#     """
-#     def decorator(func):
-#         @functools.wraps(func)
-#         def wrapper(self: ActionEditBase, *args, **kw):
-#             if self._treeview is not None:
-#                 self.setItemPathFromIndex(self._treeview.currentIndex())
-#             func(*args, **kw)
-#         return wrapper
-#     return decorator
 
 
 class ActionNew(ActionEditBase):
@@ -369,7 +349,8 @@ class ActionChangeHDFType(ActionEditBase):
         if self._treeview is not None:
             self.setItemPathFromIndex(self._treeview.currentIndex())
         dialog_change = DialogChangeDataType()
-        dialog_change.setItemPath(self.item_path)
+        if self.item_path:
+            dialog_change.setItemPath(self.item_path)
         dialog_code = dialog_change.exec()
         if not dialog_code == dialog_change.Accepted:
             return 
@@ -437,7 +418,8 @@ class ActionImportFourDSTEM(ActionEditBase):
         if self._treeview is not None:
             self.setItemPathFromIndex(self._treeview.currentIndex())
         dialog_import = DialogImportFourDSTEM()
-        dialog_import.setParentPath(self.item_path)
+        if self.item_path:
+            dialog_import.setParentPath(self.item_path)
         dialog_code = dialog_import.exec()
         if not dialog_code == dialog_import.Accepted:
             return 
@@ -500,7 +482,8 @@ class ActionImportImage(ActionEditBase):
         if self._treeview is not None:
             self.setItemPathFromIndex(self._treeview.currentIndex())
         dialog_import = DialogImportImage()
-        dialog_import.setParentPath(self.item_path)
+        if self.item_path:
+            dialog_import.setParentPath(self.item_path)
         dialog_code = dialog_import.exec()
         if not dialog_code == dialog_import.Accepted:
             return 
