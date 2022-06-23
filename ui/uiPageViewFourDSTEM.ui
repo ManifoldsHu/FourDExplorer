@@ -13,14 +13,14 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_7">
+  <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1,0">
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,0">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
@@ -37,38 +37,6 @@
           <widget class="QPushButton" name="pushButton_browse">
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QPushButton" name="pushButton_adjust_axis">
-           <property name="text">
-            <string>Adjust Axis...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_analyze">
-           <property name="text">
-            <string>Analyze...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_processing">
-           <property name="text">
-            <string>Processing...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_calibrate">
-           <property name="text">
-            <string>Calibrate...</string>
            </property>
           </widget>
          </item>
@@ -112,7 +80,7 @@
       </layout>
      </widget>
      <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,1,0,0,0">
+      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1,0">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
@@ -138,128 +106,106 @@
         <widget class="WidgetPlotPreview" name="widget_preview" native="true"/>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_calculate_preview">
-         <property name="text">
-          <string>Calculate Preview</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_attributes">
-         <property name="text">
-          <string>4D-STEM attributes...</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <item>
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Brightness</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Contrast</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Norm</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>Color map</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Brightness</string>
+           </property>
+          </widget>
          </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item row="0" column="1">
+          <widget class="QSlider" name="horizontalSlider_brightness">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Contrast</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSlider" name="horizontalSlider_contrast">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>Norm</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="comboBox_normalize">
            <item>
-            <widget class="QSlider" name="horizontalSlider_brightness">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
+            <property name="text">
+             <string>Linear</string>
+            </property>
            </item>
            <item>
-            <widget class="QSlider" name="horizontalSlider_contrast">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-            </widget>
+            <property name="text">
+             <string>Logarithm</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Color map</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="comboBox_colormap">
+           <item>
+            <property name="text">
+             <string>viridis</string>
+            </property>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox_normalize">
-             <item>
-              <property name="text">
-               <string>Linear</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Logarithm</string>
-              </property>
-             </item>
-            </widget>
+            <property name="text">
+             <string>plasma</string>
+            </property>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox_colormap">
-             <item>
-              <property name="text">
-               <string>viridis</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>plasma</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>gray</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>RdYlBu</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>twilight</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>hsv</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>jet</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Others</string>
-              </property>
-             </item>
-            </widget>
+            <property name="text">
+             <string>gray</string>
+            </property>
            </item>
-          </layout>
+           <item>
+            <property name="text">
+             <string>RdYlBu</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>twilight</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>hsv</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>jet</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Others</string>
+            </property>
+           </item>
+          </widget>
          </item>
         </layout>
        </item>

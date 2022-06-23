@@ -100,6 +100,7 @@ class Ui_Form(object):
         self.comboBox_theme_color.addItem("")
         self.comboBox_theme_color.addItem("")
         self.comboBox_theme_color.addItem("")
+        self.comboBox_theme_color.addItem("")
         self.comboBox_theme_color.setObjectName(u"comboBox_theme_color")
 
         self.verticalLayout_6.addWidget(self.comboBox_theme_color)
@@ -297,9 +298,10 @@ class Ui_Form(object):
         self.comboBox_theme_color.setItemText(14, QCoreApplication.translate("Form", u"Orange", None))
         self.comboBox_theme_color.setItemText(15, QCoreApplication.translate("Form", u"Pink", None))
         self.comboBox_theme_color.setItemText(16, QCoreApplication.translate("Form", u"Purple", None))
-        self.comboBox_theme_color.setItemText(17, QCoreApplication.translate("Form", u"Red", None))
-        self.comboBox_theme_color.setItemText(18, QCoreApplication.translate("Form", u"Teal", None))
-        self.comboBox_theme_color.setItemText(19, QCoreApplication.translate("Form", u"Yellow", None))
+        self.comboBox_theme_color.setItemText(17, QCoreApplication.translate("Form", u"PurpleNJU", None))
+        self.comboBox_theme_color.setItemText(18, QCoreApplication.translate("Form", u"Red", None))
+        self.comboBox_theme_color.setItemText(19, QCoreApplication.translate("Form", u"Teal", None))
+        self.comboBox_theme_color.setItemText(20, QCoreApplication.translate("Form", u"Yellow", None))
 
         self.comboBox_theme_density.setItemText(0, QCoreApplication.translate("Form", u"default", None))
         self.comboBox_theme_density.setItemText(1, QCoreApplication.translate("Form", u"Large", None))

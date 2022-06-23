@@ -13,6 +13,26 @@
     <file>resources/icons/work.png</file>
     <file>resources/icons/work_light.png</file>
   </qresource>
+  <qresource prefix="Navigation">
+    <file>resources/icons/home.png</file>
+    <file>resources/icons/home_light.png</file>
+    <file>resources/icons/backward.png</file>
+    <file>resources/icons/backward_light.png</file>
+    <file>resources/icons/forward.png</file>
+    <file>resources/icons/forward_light.png</file>
+    <file>resources/icons/search.png</file>
+    <file>resources/icons/search_light.png</file>
+    <file>resources/icons/layout.png</file>
+    <file>resources/icons/layout_light.png</file>
+    <file>resources/icons/move.png</file>
+    <file>resources/icons/move_light.png</file>
+    <file>resources/icons/adjust.png</file>
+    <file>resources/icons/adjust_light.png</file>
+    <file>resources/icons/save.png</file>
+    <file>resources/icons/save_light.png</file>
+    <file>resources/icons/attributes.png</file>
+    <file>resources/icons/attributes_light.png</file>
+  </qresource>
   <qresource prefix="HDFItem">
     <file>resources/icons/file.png</file>
     <file>resources/icons/file_light.png</file>
@@ -30,6 +50,8 @@
     <file>resources/icons/particle_tracking_light.png</file>
   </qresource>
   <qresource prefix="HDFEdit">
+    <file>resources/icons/attributes.png</file>
+    <file>resources/icons/attributes_light.png</file>
     <file>resources/icons/layers.png</file>
     <file>resources/icons/layers_light.png</file>
     <file>resources/icons/edit.png</file>

@@ -22,10 +22,11 @@ All rights reserved.
 """
 
 import sys
-from time import time
+from time import sleep
 
 from Constants import ROOT_PATH
-from bin.Widgets.MainWindow import MainWindow
+from bin.Widgets.SplashScreenStart import SplashScreenStart
+
 from bin.app import App 
 
         
@@ -33,22 +34,28 @@ if __name__ == '__main__':
     if not ROOT_PATH in sys.path:
         sys.path.append(ROOT_PATH)
 
+    ''' start app '''
     app = App(sys.argv)
-    
-    ''' Initialize Log'''
-    logger = app.logger
-    
-    ''' Initialize Clean-up code'''
-    app.aboutToQuit.connect(app.cleanResources)
 
-    ''' Initialize UI theme'''
+    ''' start loading screen '''
+    loading_screen = SplashScreenStart()
+    loading_screen.show()
+    sleep(10)
+    app.processEvents()
+
+    ''' start backend managers '''
+    app.startBackEnds()
+    logger = app.logger
+    app.aboutToQuit.connect(app.cleanResources)
     app.theme_handler.initTheme() 
 
-    window = MainWindow()
-    app.main_window = window
-    window.show()
+    ''' start main window '''
+    from bin.Widgets.MainWindow import MainWindow
+    main_window = MainWindow()
+    app.main_window = main_window
+    main_window.show()
+    loading_screen.finish(main_window)
     
-    logger.info('4D-Explorer is launched.')
     quit = app.exec()
     logger.info('4D-Explorer exits.')
     sys.exit(quit)

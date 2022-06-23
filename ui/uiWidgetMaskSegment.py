@@ -26,6 +26,7 @@ class Ui_Form(object):
         Form.resize(494, 409)
         self.verticalLayout_3 = QVBoxLayout(Form)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.label_segment_parameter = QLabel(Form)
         self.label_segment_parameter.setObjectName(u"label_segment_parameter")
 

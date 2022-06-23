@@ -13,14 +13,14 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_10" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1,0">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1,0">
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,0">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
@@ -37,38 +37,6 @@
           <widget class="QPushButton" name="pushButton_browse">
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QPushButton" name="pushButton_adjust_axis">
-           <property name="text">
-            <string>Adjust Axis...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_analyze">
-           <property name="text">
-            <string>Analyze...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_processing">
-           <property name="text">
-            <string>Processing...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_calibrate">
-           <property name="text">
-            <string>Calibrate...</string>
            </property>
           </widget>
          </item>
@@ -112,124 +80,86 @@
       </layout>
      </widget>
      <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,0,0">
+      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1,0">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Select Mode (Integration Domain)</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBox_mode">
-             <item>
-              <property name="text">
-               <string>Circle (Bright Field)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Ring (Annular Dark Field)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Wedge</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Rectangle</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Ellipse</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Polygon</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Segmented Ring</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Domain Shape</string>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QScrollArea" name="scrollArea">
-           <property name="widgetResizable">
-            <bool>true</bool>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>511</width>
-              <height>409</height>
-             </rect>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_mode">
+           <item>
+            <property name="text">
+             <string>Circle (Bright Field)</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item>
-              <widget class="QStackedWidget" name="stackedWidget_masks">
-               <property name="currentIndex">
-                <number>5</number>
-               </property>
-               <widget class="WidgetMaskCircle" name="page_circle"/>
-               <widget class="WidgetMaskRing" name="page_ring"/>
-               <widget class="WidgetMaskWedge" name="page_wedge"/>
-               <widget class="WidgetMaskRectangle" name="page_rectangle"/>
-               <widget class="WidgetMaskEllipse" name="page_ellipse"/>
-               <widget class="WidgetMaskPolygon" name="page_polygon"/>
-               <widget class="WidgetMaskSegment" name="page_segment_ring"/>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+           </item>
+           <item>
+            <property name="text">
+             <string>Ring (Annular Dark Field)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Wedge</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Rectangle</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Ellipse</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Polygon</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Segmented Ring</string>
+            </property>
+           </item>
           </widget>
          </item>
         </layout>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <item>
-          <widget class="QPushButton" name="pushButton_view_parameters">
-           <property name="text">
-            <string>View Mask Parameters in Physical Units</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_attributes">
-           <property name="text">
-            <string>4D-STEM attributes...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QStackedWidget" name="stackedWidget_masks">
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="WidgetMaskCircle" name="page_circle"/>
+         <widget class="WidgetMaskRing" name="page_ring"/>
+         <widget class="WidgetMaskWedge" name="page_wedge"/>
+         <widget class="WidgetMaskRectangle" name="page_rectangle"/>
+         <widget class="WidgetMaskEllipse" name="page_ellipse"/>
+         <widget class="WidgetMaskPolygon" name="page_polygon"/>
+         <widget class="WidgetMaskSegment" name="page_segment_ring"/>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">

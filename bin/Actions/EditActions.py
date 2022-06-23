@@ -384,7 +384,7 @@ class ActionAttributes(ActionEditBase):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.setText('Attributes')
-        self.initIconResources('adjust')
+        self.initIconResources('attributes')
         self.triggered.connect(lambda: self.viewAttributes(self))
 
     @failLogging
@@ -394,7 +394,16 @@ class ActionAttributes(ActionEditBase):
         """
         if self._treeview is not None:
             self.setItemPathFromIndex(self._treeview.currentIndex())
-        dialog_attr = DialogAttrViewer()
+        # Here we must bind the dialog to the main window. Otherwise,
+        # the lifetime of the dialog will be ended just after this 
+        # function is ended. 
+
+        # This problem occurs only when we use dialog.show() method,
+        # which will keep the dialog showing while let the code continue.
+        # If we use dialog.exec(), the code will stop and wait for that 
+        # function returning, which keeps the lifetime of the dialog.
+        global qApp 
+        dialog_attr = DialogAttrViewer(qApp.main_window)
         dialog_attr.setItemPath(self.item_path)
         dialog_attr.show()
 

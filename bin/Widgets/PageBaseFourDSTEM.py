@@ -28,7 +28,7 @@ date:           Apr 8, 2022
 
 from logging import Logger
 
-from PySide6.QtWidgets import QWidget, QMessageBox
+from PySide6.QtWidgets import QWidget, QMessageBox, QToolButton, QMenu
 
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg as FigureCanvas)
@@ -42,8 +42,15 @@ from matplotlib.axis import Axis
 import numpy as np
 import h5py
 
+# from bin.Actions.DataActions import ActionOpenFourDSTEM
+# from bin.Actions.FourDSTEMActions import ActionAlign
+# from bin.Actions.FourDSTEMActions import ActionBackground
+# from bin.Actions.FourDSTEMActions import ActionCenterOfMass
+# from bin.Actions.FourDSTEMActions import ActionRotate
+# from bin.Actions.FourDSTEMActions import ActionVirtualImage
 from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFDataNode, HDFGroupNode, HDFHandler
+from bin.UIManager import ThemeHandler
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from ui import uiPageBaseFourDSTEM
 
@@ -119,6 +126,8 @@ class PageBaseFourDSTEM(QWidget):
         self._colorbar_object = None
         self._scan_ii = 0
         self._scan_jj = 0
+        
+        
 
         # self._initBaseUi()
         
@@ -127,6 +136,11 @@ class PageBaseFourDSTEM(QWidget):
     def hdf_handler(self) -> HDFHandler:
         global qApp
         return qApp.hdf_handler
+
+    @property
+    def theme_handler(self) -> ThemeHandler:
+        global qApp 
+        return qApp.theme_handler
 
     @property
     def data_object(self) -> h5py.Dataset:
@@ -208,6 +222,59 @@ class PageBaseFourDSTEM(QWidget):
         )
         
         self.ui.pushButton_browse.clicked.connect(self._browse)
+        self._initFourDSTEMProcessing()
+
+    def _initFourDSTEMProcessing(self):
+        """
+        Initialize the toolbutton for the 4D-STEM processes.
+
+        This toolbutton will be added to the toolbar of the figure canvas.
+        """
+        self.ui.widget_dp.setProcessingActionItemPath(self.data_path)
+
+        # self.toolButton_processing = QToolButton(self)
+        # self.toolButton_processing.setPopupMode(QToolButton.InstantPopup)
+        # self.toolButton_processing_rc = ':/HDFItem/resources/icons/cube'
+        # self.toolButton_processing.setIcon(
+        #     self.theme_handler
+        # )
+        # self.menu_processing = QMenu(self)
+
+        # self.action_open = ActionOpenFourDSTEM(self)
+        # self.action_virtual_image = ActionVirtualImage(self)
+        # self.action_center_of_mass = ActionCenterOfMass(self)
+        # self.action_align = ActionAlign(self)
+        # self.action_background = ActionBackground(self)
+        # self.action_rotate = ActionRotate(self)
+
+        # self._process_actions = {
+        #     'open': self.action_open,
+        #     'virtual_image': self.action_virtual_image,
+        #     'center_of_mass': self.action_center_of_mass,
+        #     'background': self.action_background,
+        #     'align': self.action_align,
+        #     'rotate': self.action_rotate,
+        # }
+
+        # for action in self._process_actions.values():
+        #     self.menu_process.addAction(action)
+
+        # self.menu_process.insertSeparator(self.action_virtual_image)
+        # self.menu_process.insertSeparator(self.action_background)
+
+        # self.menu_process.addAction(self.action_open)
+        # self.menu_process.addSeparator()
+        # self.menu_process.addAction(self.action_virtual_image)
+        # self.menu_process.addAction(self.action_center_of_mass)
+        # self.menu_process.addSeparator()
+        # self.menu_process.addAction(self.action_background)
+        # self.menu_process.addAction(self.action_align)
+        # self.menu_process.addAction(self.action_rotate)
+        
+        # self.toolButton_process.setMenu(self.menu_process)
+        # self.toolButton_process.setPopupMode(QToolButton.InstantPopup)
+
+        # self.ui.widget_dp.addCustomizedWidget
 
 
     def setFourDSTEM(self, data_path: str):

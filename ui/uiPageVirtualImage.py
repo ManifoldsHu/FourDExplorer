@@ -16,9 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QScrollArea, QSizePolicy,
-    QSlider, QSpacerItem, QSpinBox, QSplitter,
-    QStackedWidget, QVBoxLayout, QWidget)
+    QLineEdit, QPushButton, QSizePolicy, QSlider,
+    QSpacerItem, QSpinBox, QSplitter, QStackedWidget,
+    QVBoxLayout, QWidget)
 
 from bin.Widgets.WidgetMasks import (WidgetMaskCircle, WidgetMaskEllipse, WidgetMaskPolygon, WidgetMaskRectangle,
     WidgetMaskRing, WidgetMaskSegment, WidgetMaskWedge)
@@ -29,8 +29,8 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(939, 673)
-        self.verticalLayout_10 = QVBoxLayout(Form)
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.verticalLayout_5 = QVBoxLayout(Form)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.splitter = QSplitter(Form)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
@@ -58,31 +58,6 @@ class Ui_Form(object):
 
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
-
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.pushButton_adjust_axis = QPushButton(self.widget)
-        self.pushButton_adjust_axis.setObjectName(u"pushButton_adjust_axis")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_adjust_axis)
-
-        self.pushButton_analyze = QPushButton(self.widget)
-        self.pushButton_analyze.setObjectName(u"pushButton_analyze")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_analyze)
-
-        self.pushButton_processing = QPushButton(self.widget)
-        self.pushButton_processing.setObjectName(u"pushButton_processing")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_processing)
-
-        self.pushButton_calibrate = QPushButton(self.widget)
-        self.pushButton_calibrate.setObjectName(u"pushButton_calibrate")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_calibrate)
-
-
-        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
 
         self.widget_dp = WidgetPlotDP(self.widget)
         self.widget_dp.setObjectName(u"widget_dp")
@@ -124,15 +99,13 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
 
-        self.verticalLayout_3.setStretch(2, 1)
+        self.verticalLayout_3.setStretch(1, 1)
         self.splitter.addWidget(self.widget)
         self.widget1 = QWidget(self.splitter)
         self.widget1.setObjectName(u"widget1")
-        self.verticalLayout_9 = QVBoxLayout(self.widget1)
-        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
-        self.verticalLayout_9.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_5 = QVBoxLayout()
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_4 = QVBoxLayout(self.widget1)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.label_4 = QLabel(self.widget1)
@@ -157,18 +130,11 @@ class Ui_Form(object):
         self.horizontalLayout_4.addWidget(self.comboBox_mode)
 
 
-        self.verticalLayout_5.addLayout(self.horizontalLayout_4)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_4)
 
-        self.scrollArea = QScrollArea(self.widget1)
-        self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 511, 409))
-        self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.stackedWidget_masks = QStackedWidget(self.scrollAreaWidgetContents)
+        self.stackedWidget_masks = QStackedWidget(self.widget1)
         self.stackedWidget_masks.setObjectName(u"stackedWidget_masks")
+        self.stackedWidget_masks.setLineWidth(0)
         self.page_circle = WidgetMaskCircle()
         self.page_circle.setObjectName(u"page_circle")
         self.stackedWidget_masks.addWidget(self.page_circle)
@@ -192,28 +158,6 @@ class Ui_Form(object):
         self.stackedWidget_masks.addWidget(self.page_segment_ring)
 
         self.verticalLayout_4.addWidget(self.stackedWidget_masks)
-
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-
-        self.verticalLayout_5.addWidget(self.scrollArea)
-
-
-        self.verticalLayout_9.addLayout(self.verticalLayout_5)
-
-        self.verticalLayout_8 = QVBoxLayout()
-        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
-        self.pushButton_view_parameters = QPushButton(self.widget1)
-        self.pushButton_view_parameters.setObjectName(u"pushButton_view_parameters")
-
-        self.verticalLayout_8.addWidget(self.pushButton_view_parameters)
-
-        self.pushButton_attributes = QPushButton(self.widget1)
-        self.pushButton_attributes.setObjectName(u"pushButton_attributes")
-
-        self.verticalLayout_8.addWidget(self.pushButton_attributes)
-
-
-        self.verticalLayout_9.addLayout(self.verticalLayout_8)
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
@@ -280,12 +224,12 @@ class Ui_Form(object):
         self.horizontalLayout_5.addLayout(self.verticalLayout_7)
 
 
-        self.verticalLayout_9.addLayout(self.horizontalLayout_5)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_5)
 
-        self.verticalLayout_9.setStretch(0, 1)
+        self.verticalLayout_4.setStretch(1, 1)
         self.splitter.addWidget(self.widget1)
 
-        self.verticalLayout_10.addWidget(self.splitter)
+        self.verticalLayout_5.addWidget(self.splitter)
 
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
@@ -299,13 +243,13 @@ class Ui_Form(object):
         self.horizontalLayout_6.addWidget(self.pushButton_start)
 
 
-        self.verticalLayout_10.addLayout(self.horizontalLayout_6)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_6)
 
-        self.verticalLayout_10.setStretch(0, 1)
+        self.verticalLayout_5.setStretch(0, 1)
 
         self.retranslateUi(Form)
 
-        self.stackedWidget_masks.setCurrentIndex(5)
+        self.stackedWidget_masks.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Form)
@@ -315,13 +259,9 @@ class Ui_Form(object):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"4D-STEM data path", None))
         self.pushButton_browse.setText(QCoreApplication.translate("Form", u"Browse", None))
-        self.pushButton_adjust_axis.setText(QCoreApplication.translate("Form", u"Adjust Axis...", None))
-        self.pushButton_analyze.setText(QCoreApplication.translate("Form", u"Analyze...", None))
-        self.pushButton_processing.setText(QCoreApplication.translate("Form", u"Processing...", None))
-        self.pushButton_calibrate.setText(QCoreApplication.translate("Form", u"Calibrate...", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"DPi index (rows of location)", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"DPj index (columns of location)", None))
-        self.label_4.setText(QCoreApplication.translate("Form", u"Select Mode (Integration Domain)", None))
+        self.label_4.setText(QCoreApplication.translate("Form", u"Domain Shape", None))
         self.comboBox_mode.setItemText(0, QCoreApplication.translate("Form", u"Circle (Bright Field)", None))
         self.comboBox_mode.setItemText(1, QCoreApplication.translate("Form", u"Ring (Annular Dark Field)", None))
         self.comboBox_mode.setItemText(2, QCoreApplication.translate("Form", u"Wedge", None))
@@ -330,8 +270,6 @@ class Ui_Form(object):
         self.comboBox_mode.setItemText(5, QCoreApplication.translate("Form", u"Polygon", None))
         self.comboBox_mode.setItemText(6, QCoreApplication.translate("Form", u"Segmented Ring", None))
 
-        self.pushButton_view_parameters.setText(QCoreApplication.translate("Form", u"View Mask Parameters in Physical Units", None))
-        self.pushButton_attributes.setText(QCoreApplication.translate("Form", u"4D-STEM attributes...", None))
         self.label_9.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_10.setText(QCoreApplication.translate("Form", u"Contrast", None))
         self.label_11.setText(QCoreApplication.translate("Form", u"Norm", None))

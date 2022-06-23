@@ -195,6 +195,11 @@
                 </item>
                 <item>
                  <property name="text">
+                  <string>PurpleNJU</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Red</string>
                  </property>
                 </item>

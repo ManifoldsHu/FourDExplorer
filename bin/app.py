@@ -32,13 +32,7 @@ date:           Feb 26, 2022
 """
 
 from logging import Logger
-from PySide6.QtWidgets import QApplication, QTabWidget, QMainWindow
-
-from bin.HDFManager import HDFHandler
-from bin.TabViewManager import TabViewManager
-from bin.UIManager import ThemeHandler
-from bin.TaskManager import TaskManager
-from bin.Log import LogUtil
+from PySide6.QtWidgets import QApplication
 
 class App(QApplication):
     """
@@ -85,23 +79,31 @@ class App(QApplication):
             argv: (list) usually be sys.argv
         """
         super().__init__(argv)
+        self._main_window = None
+
+    def startBackEnds(self):
+        """
+        This function must be called after QApplication is initialized.
+        """
+        from bin.HDFManager import HDFHandler
+        from bin.UIManager import ThemeHandler
+        from bin.TaskManager import TaskManager
+        from bin.Log import LogUtil
         self._hdf_handler = HDFHandler(self)
         self._theme_handler = ThemeHandler(self)
         self._task_manager = TaskManager(self)
         self._log_util = LogUtil(self)
-        self._main_window = None
-
 
     @property
-    def hdf_handler(self) -> HDFHandler:
+    def hdf_handler(self):
         return self._hdf_handler
 
     @property
-    def theme_handler(self) -> ThemeHandler:
+    def theme_handler(self):
         return self._theme_handler
 
     @property
-    def task_manager(self) -> TaskManager:
+    def task_manager(self):
         return self._task_manager
 
     @property
@@ -109,11 +111,11 @@ class App(QApplication):
         return self._log_util.logger
 
     @property
-    def log_util(self) -> LogUtil:
+    def log_util(self):
         return self._log_util
 
     @property
-    def main_window(self) -> QMainWindow:
+    def main_window(self):
         return self._main_window
 
     @main_window.setter
@@ -128,7 +130,7 @@ class App(QApplication):
     #     return self._main_window.ui.tabWidget_view
 
     @property
-    def tabview_manager(self) -> TabViewManager:
+    def tabview_manager(self):
         return self._main_window.tabview_manager
 
     def cleanResources(self):

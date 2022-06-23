@@ -95,25 +95,39 @@ class HDFToolBar(QToolBar):
         super().__init__(parent)
         self.setMovable(False)
         self.setFloatable(False)
-        # self.setContentsMargins(0,0,0,0)
-        # self.layout().setContentsMargins(0,0,0,0)
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
 
-        self.setStyleSheet(
-            "HDFToolBar{                    "
-            "    border: none;              "
-            "    padding: 0px;              "
-            "}                              "
-            "HDFToolBar::separator{         "
-            "   width: 0px;                 "
-            "}                              "
-            "HDFToolBar QToolButton{        "
-            "   padding: 0;                 "
-            "   margin: 0px;                "
-            "   height: 35px;               "
-            "   width: 15px;                "
-            "}                              "
-        )
+        qss = self.theme_handler.getToolBarStyleSheet(self)
+        self.setStyleSheet(qss)
+        self.theme_handler.theme_changed.connect(self._update_style_sheet)
+
+    @property
+    def theme_handler(self) -> ThemeHandler:
+        global qApp
+        return qApp.theme_handler
+
+    def _update_style_sheet(self):
+        """
+        When theme is changed, the style sheet must be updated.
+        """
+        qss = self.theme_handler.getToolBarStyleSheet(self)
+        self.setStyleSheet(qss)
+
+        # self.setStyleSheet(
+        #     "HDFToolBar{                    "
+        #     "    border: none;              "
+        #     "    padding: 0px;              "
+        #     "}                              "
+        #     "HDFToolBar::separator{         "
+        #     "   width: 0px;                 "
+        #     "}                              "
+        #     "HDFToolBar QToolButton{        "
+        #     "   padding: 0;                 "
+        #     "   margin: 0px;                "
+        #     "   height: 35px;               "
+        #     "   width: 15px;                "
+        #     "}                              "
+        # )
         
 
 

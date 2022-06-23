@@ -12,11 +12,13 @@ date:           Mar 28, 2022
 *------------------------------ WidgetPlots.py -------------------------------*
 """
 
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QToolButton, QMenu
+from PySide6.QtGui import QAction
 from matplotlib.axes import Axes
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 import numpy as np
+
 
 from bin.Widgets.WidgetPlotBase import WidgetPlotBase
 
@@ -183,6 +185,75 @@ class WidgetPlotDP(WidgetPlotBase):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
+        self._initFourDSTEMProcessingActions()
+        self._initFourDSTEMProcessingButton()
+
+    def _initFourDSTEMProcessingButton(self):
+        """
+        Will add a tool button (menu) in the toolbar.
+        """
+        self.toolButton_processing = QToolButton(self)
+        self.toolButton_processing.setPopupMode(QToolButton.MenuButtonPopup)
+        self.toolButton_processing_rc = ':/HDFItem/resources/icons/cube'
+        self.toolButton_processing.setIcon(
+            self.theme_handler.iconProvider(self.toolButton_processing_rc)
+        )
+        self.theme_handler.theme_changed.connect(
+            lambda: self.toolButton_processing.setIcon(
+                self.theme_handler.iconProvider(
+                    self.toolButton_processing_rc
+                )
+            )
+        )
+        self.addCustomizedToolButton(self.toolButton_processing)
+        self.toolButton_processing.setMenu(self.menu_processing)
+        self.toolButton_processing.clicked.connect(
+            lambda: self._processing_actions['open'].trigger()
+        )
+        self.toolButton_processing.setText(
+            self._processing_actions['open'].text()
+        )
+
+    def _initFourDSTEMProcessingActions(self):
+        """
+        Initialize the actions (menu) for 4D-STEM processing.
+        """
+        from bin.Actions.DataActions import ActionOpenFourDSTEM
+        from bin.Actions.FourDSTEMActions import ActionAlign
+        from bin.Actions.FourDSTEMActions import ActionBackground
+        from bin.Actions.FourDSTEMActions import ActionCenterOfMass
+        from bin.Actions.FourDSTEMActions import ActionRotate
+        from bin.Actions.FourDSTEMActions import ActionVirtualImage
+        self.menu_processing = QMenu(self)
+        self._processing_actions: dict[str,QAction] = {
+            'open': ActionOpenFourDSTEM(self),
+            'virtual_image': ActionVirtualImage(self),
+            'center_of_mass': ActionCenterOfMass(self),
+            'align': ActionAlign(self),
+            'background': ActionBackground(self),
+            'rotate': ActionRotate(self),
+        }
+        for action in self._processing_actions.values():
+            self.menu_processing.addAction(action)
+        self.menu_processing.insertSeparator(
+            self._processing_actions['virtual_image']
+        )
+        self.menu_processing.insertSeparator(
+            self._processing_actions['align']
+        )
+
+    def setProcessingActionItemPath(self, item_path: str):
+        """
+        Will update the item path of the processing actions.
+
+        This method should be called when the parent window change the its 
+        current item path.
+
+        arguments:
+            item_path: (str) the item's path of the current 4D-STEM dataset.
+        """
+        for action in self._processing_actions.values():
+            action.setItemPath(item_path)
 
 
 class WidgetPlotPreview(WidgetPlotBase):

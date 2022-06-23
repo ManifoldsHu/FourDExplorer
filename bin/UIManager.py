@@ -20,6 +20,7 @@ import os
 
 from PySide6.QtCore import QObject, QSize, Qt, Signal
 from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import QToolBar
 from qt_material import apply_stylesheet
 from matplotlib.style import use as useMatplotlibStyle
 
@@ -187,6 +188,8 @@ class ThemeHandler(QObject):
         with open(CONFIG_PATH, 'w', encoding = 'UTF-8') as f:
             config['UI']['ThemeDensity'] = theme_density.name 
             config.write(f)
+
+        self.theme_changed.emit()
     
     def _applyTheme(self, 
         theme_mode: UIThemeMode, 
@@ -288,6 +291,7 @@ class ThemeHandler(QObject):
             icon.addFile(icon_light_rc, mode = QIcon.Normal)
         else:
             icon.addFile(icon_rc, mode = QIcon.Normal)
+            # self.logger.debug(icon_rc)
             if self._getIconDarkness():
                 icon.addFile(icon_light_rc, mode = QIcon.Selected)
             else:
@@ -298,6 +302,7 @@ class ThemeHandler(QObject):
         UIThemeColor.Red: True,             # if the current theme mode is 
         UIThemeColor.Pink: True,            # light (when it is selected). 
         UIThemeColor.Purple: True,
+        UIThemeColor.PurpleNJU: True,
         UIThemeColor.DeepPurple: True,
         UIThemeColor.Indigo: True,
         UIThemeColor.Blue: True,
@@ -334,4 +339,67 @@ class ThemeHandler(QObject):
         elif self.theme_mode == UIThemeMode.Dark:
             return False
 
+    _density_to_tool_width = {
+        UIThemeDensity.Large: 27,
+        UIThemeDensity.Big: 24,
+        UIThemeDensity.Normal: 21,
+        UIThemeDensity.Small: 18,
+        UIThemeDensity.Tiny: 15,
+    }
 
+    _density_to_tool_height = {
+        UIThemeDensity.Large: 47,
+        UIThemeDensity.Big: 44,
+        UIThemeDensity.Normal: 41,
+        UIThemeDensity.Small: 38,
+        UIThemeDensity.Tiny: 35,
+    }
+
+    def getToolBarStyleSheet(self, toolbar: QToolBar = None) -> str:
+        """
+        This function will return the style sheet of toolbars according to the 
+        current theme density.
+
+        The toolbar has no separators. Call 
+            toolbar.setStyleSheet(qss) 
+        to apply the stylesheet for those toolbars.
+
+        arguments:
+            toolbar_cls: (QToolBar)
+
+        returns:
+            (str) the style sheet (qss) of the toolbar to be set.
+        """
+        if toolbar is not None:
+            if not isinstance(toolbar, QToolBar):
+                raise TypeError('toolbar must be a QToolBar, not '
+                    '{0}'.format(type(toolbar).__name__))
+            _name = type(toolbar).__name__ 
+        else:
+            _name = QToolBar.__name__ 
+        
+        width_toolbutton = self._density_to_tool_width[self.theme_density]
+        height_toolbutton = self._density_to_tool_height[self.theme_density]
+        toolbar_qss = (
+            "{0}{{border: none; padding: 0px;}}"
+            "{0}::separator{{width: 0px;}}"
+            "{0} QToolButton{{padding: 0; margin: 0px; width: {1}px; height: {2}px;}}"
+            "".format(_name, width_toolbutton, height_toolbutton)
+        )
+        return toolbar_qss 
+
+    # def getMatplotlibStyle(self) -> str:
+    #     """
+    #     This function will return the style that matplotlib canvas should 
+    #     follow. 
+
+    #     An example for use this function is:
+    #     >>> from matplotlib.style import use as useMatplotlibStyle
+    #     >>> global qApp
+    #     >>> mpl_style = qApp.theme_handler.getMatplotlibStyle()
+    #     >>> useMatplotlibStyle(mpl_style)
+    #     """
+    #     if self.theme_mode in (UIThemeMode.Light, UIThemeMode.Classical):
+    #         return 'default'
+    #     elif self.theme_mode in (UIThemeMode.Dark):
+    #         return 'dark_background'

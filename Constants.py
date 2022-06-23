@@ -117,6 +117,7 @@ class UIThemeColor(IntEnum):
     Red = 1160
     Teal = 1170
     Yellow = 1180
+    PurpleNJU = 2000
 
     default = 1020
 

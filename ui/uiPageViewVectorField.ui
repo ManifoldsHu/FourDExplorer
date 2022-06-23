@@ -20,7 +20,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1">
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
@@ -43,43 +43,11 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QPushButton" name="pushButton_adjust_axis">
-           <property name="text">
-            <string>Adjust Axis...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_analyze">
-           <property name="text">
-            <string>Analyze...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_vector_processing">
-           <property name="text">
-            <string>Vector Field Processing...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_calibrate">
-           <property name="text">
-            <string>Calibrate...</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
         <widget class="WidgetPlotQuiver" name="widget_quiver" native="true"/>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -111,13 +79,6 @@
           <widget class="QCheckBox" name="checkBox_background_visible">
            <property name="text">
             <string>Background Image Visible</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_attributes">
-           <property name="text">
-            <string>Vector Field Attributes...</string>
            </property>
           </widget>
          </item>

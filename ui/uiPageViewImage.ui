@@ -13,90 +13,51 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,1">
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Image Path</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEdit_image_path"/>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_browse">
-       <property name="text">
-        <string>Browse</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="childrenCollapsible">
-      <bool>false</bool>
-     </property>
-     <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout_6">
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,1">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <widget class="QPushButton" name="pushButton_adjust_axis">
-             <property name="text">
-              <string>Adjust Axis...</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_analysis">
-             <property name="text">
-              <string>Analyze...</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_image_processing">
-             <property name="text">
-              <string>Image Processing...</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_calibrate">
-             <property name="text">
-              <string>Calibrate...</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Image Path</string>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="WidgetPlotImage" name="widget_image" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+          <widget class="QLineEdit" name="lineEdit_image_path"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_browse">
+           <property name="text">
+            <string>Browse</string>
            </property>
           </widget>
          </item>
         </layout>
        </item>
+       <item>
+        <widget class="WidgetPlotImage" name="widget_image" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout_7">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4">
+        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">
          <item>
           <widget class="QLabel" name="label_4">
            <property name="sizePolicy">
@@ -123,125 +84,106 @@
         </layout>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
-         <item>
-          <widget class="QPushButton" name="pushButton_image_attributes">
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
            <property name="text">
-            <string>Image Attributes...</string>
+            <string>Brightness</string>
            </property>
           </widget>
          </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item row="0" column="1">
+          <widget class="QSlider" name="horizontalSlider_brightness">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Contrast</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSlider" name="horizontalSlider_contrast">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Norm</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="comboBox_normalize">
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Brightness</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_2">
-               <property name="text">
-                <string>Contrast</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>Norm</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>Colormap</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <property name="text">
+             <string>Linear</string>
+            </property>
            </item>
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <widget class="QSlider" name="horizontalSlider_brightness">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="horizontalSlider_contrast">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="comboBox_normalize">
-               <item>
-                <property name="text">
-                 <string>Linear</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Logrithm</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="comboBox_colormap">
-               <item>
-                <property name="text">
-                 <string>viridis</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>plasma</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>gray</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>RdYlBu</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>twilight</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>hsv</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>jet</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Others</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
+            <property name="text">
+             <string>Logrithm</string>
+            </property>
            </item>
-          </layout>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Colormap</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="comboBox_colormap">
+           <item>
+            <property name="text">
+             <string>viridis</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>plasma</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>gray</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>RdYlBu</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>twilight</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>hsv</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>jet</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Others</string>
+            </property>
+           </item>
+          </widget>
          </item>
         </layout>
        </item>
@@ -253,13 +195,13 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>WidgetPlotImage</class>
+   <class>WidgetPlotHist</class>
    <extends>QWidget</extends>
    <header>bin.Widgets.WidgetPlots.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WidgetPlotHist</class>
+   <class>WidgetPlotImage</class>
    <extends>QWidget</extends>
    <header>bin.Widgets.WidgetPlots.h</header>
    <container>1</container>

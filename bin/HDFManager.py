@@ -1738,7 +1738,7 @@ class HDFTreeModel(QAbstractItemModel):
         HDFType.Group: 'folder',
         HDFType.Image: 'picture',
         HDFType.Line: 'line',
-        HDFType.VectorField: 'particle',
+        HDFType.VectorField: 'particle_tracking',
         HDFType.FourDSTEM: 'cube',
         HDFType.Item: 'file',
         HDFType.String: 'file',

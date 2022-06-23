@@ -15,9 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
-    QLineEdit, QPushButton, QSizePolicy, QSlider,
-    QSpinBox, QSplitter, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QGridLayout, QHBoxLayout,
+    QLabel, QLineEdit, QPushButton, QSizePolicy,
+    QSlider, QSpinBox, QSplitter, QVBoxLayout,
+    QWidget)
 
 from bin.Widgets.WidgetPlots import (WidgetPlotDP, WidgetPlotPreview)
 
@@ -26,8 +27,8 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(924, 575)
-        self.verticalLayout_7 = QVBoxLayout(Form)
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.verticalLayout_5 = QVBoxLayout(Form)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.splitter = QSplitter(Form)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
@@ -55,31 +56,6 @@ class Ui_Form(object):
 
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
-
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.pushButton_adjust_axis = QPushButton(self.layoutWidget)
-        self.pushButton_adjust_axis.setObjectName(u"pushButton_adjust_axis")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_adjust_axis)
-
-        self.pushButton_analyze = QPushButton(self.layoutWidget)
-        self.pushButton_analyze.setObjectName(u"pushButton_analyze")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_analyze)
-
-        self.pushButton_processing = QPushButton(self.layoutWidget)
-        self.pushButton_processing.setObjectName(u"pushButton_processing")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_processing)
-
-        self.pushButton_calibrate = QPushButton(self.layoutWidget)
-        self.pushButton_calibrate.setObjectName(u"pushButton_calibrate")
-
-        self.horizontalLayout_2.addWidget(self.pushButton_calibrate)
-
-
-        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
 
         self.widget_dp = WidgetPlotDP(self.layoutWidget)
         self.widget_dp.setObjectName(u"widget_dp")
@@ -121,13 +97,13 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
 
-        self.verticalLayout_3.setStretch(2, 1)
+        self.verticalLayout_3.setStretch(1, 1)
         self.splitter.addWidget(self.layoutWidget)
         self.widget = QWidget(self.splitter)
         self.widget.setObjectName(u"widget")
-        self.verticalLayout_6 = QVBoxLayout(self.widget)
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_4 = QVBoxLayout(self.widget)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.label_4 = QLabel(self.widget)
@@ -146,70 +122,53 @@ class Ui_Form(object):
         self.horizontalLayout_4.addWidget(self.pushButton_browse_preview)
 
 
-        self.verticalLayout_6.addLayout(self.horizontalLayout_4)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_4)
 
         self.widget_preview = WidgetPlotPreview(self.widget)
         self.widget_preview.setObjectName(u"widget_preview")
 
-        self.verticalLayout_6.addWidget(self.widget_preview)
+        self.verticalLayout_4.addWidget(self.widget_preview)
 
-        self.pushButton_calculate_preview = QPushButton(self.widget)
-        self.pushButton_calculate_preview.setObjectName(u"pushButton_calculate_preview")
-
-        self.verticalLayout_6.addWidget(self.pushButton_calculate_preview)
-
-        self.pushButton_attributes = QPushButton(self.widget)
-        self.pushButton_attributes.setObjectName(u"pushButton_attributes")
-
-        self.verticalLayout_6.addWidget(self.pushButton_attributes)
-
-        self.horizontalLayout_5 = QHBoxLayout()
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
         self.label_5 = QLabel(self.widget)
         self.label_5.setObjectName(u"label_5")
 
-        self.verticalLayout_4.addWidget(self.label_5)
+        self.gridLayout.addWidget(self.label_5, 0, 0, 1, 1)
 
-        self.label_6 = QLabel(self.widget)
-        self.label_6.setObjectName(u"label_6")
-
-        self.verticalLayout_4.addWidget(self.label_6)
-
-        self.label_7 = QLabel(self.widget)
-        self.label_7.setObjectName(u"label_7")
-
-        self.verticalLayout_4.addWidget(self.label_7)
-
-        self.label_8 = QLabel(self.widget)
-        self.label_8.setObjectName(u"label_8")
-
-        self.verticalLayout_4.addWidget(self.label_8)
-
-
-        self.horizontalLayout_5.addLayout(self.verticalLayout_4)
-
-        self.verticalLayout_5 = QVBoxLayout()
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.horizontalSlider_brightness = QSlider(self.widget)
         self.horizontalSlider_brightness.setObjectName(u"horizontalSlider_brightness")
         self.horizontalSlider_brightness.setOrientation(Qt.Horizontal)
 
-        self.verticalLayout_5.addWidget(self.horizontalSlider_brightness)
+        self.gridLayout.addWidget(self.horizontalSlider_brightness, 0, 1, 1, 1)
+
+        self.label_6 = QLabel(self.widget)
+        self.label_6.setObjectName(u"label_6")
+
+        self.gridLayout.addWidget(self.label_6, 1, 0, 1, 1)
 
         self.horizontalSlider_contrast = QSlider(self.widget)
         self.horizontalSlider_contrast.setObjectName(u"horizontalSlider_contrast")
         self.horizontalSlider_contrast.setOrientation(Qt.Horizontal)
 
-        self.verticalLayout_5.addWidget(self.horizontalSlider_contrast)
+        self.gridLayout.addWidget(self.horizontalSlider_contrast, 1, 1, 1, 1)
+
+        self.label_7 = QLabel(self.widget)
+        self.label_7.setObjectName(u"label_7")
+
+        self.gridLayout.addWidget(self.label_7, 2, 0, 1, 1)
 
         self.comboBox_normalize = QComboBox(self.widget)
         self.comboBox_normalize.addItem("")
         self.comboBox_normalize.addItem("")
         self.comboBox_normalize.setObjectName(u"comboBox_normalize")
 
-        self.verticalLayout_5.addWidget(self.comboBox_normalize)
+        self.gridLayout.addWidget(self.comboBox_normalize, 2, 1, 1, 1)
+
+        self.label_8 = QLabel(self.widget)
+        self.label_8.setObjectName(u"label_8")
+
+        self.gridLayout.addWidget(self.label_8, 3, 0, 1, 1)
 
         self.comboBox_colormap = QComboBox(self.widget)
         self.comboBox_colormap.addItem("")
@@ -222,18 +181,15 @@ class Ui_Form(object):
         self.comboBox_colormap.addItem("")
         self.comboBox_colormap.setObjectName(u"comboBox_colormap")
 
-        self.verticalLayout_5.addWidget(self.comboBox_colormap)
+        self.gridLayout.addWidget(self.comboBox_colormap, 3, 1, 1, 1)
 
 
-        self.horizontalLayout_5.addLayout(self.verticalLayout_5)
+        self.verticalLayout_4.addLayout(self.gridLayout)
 
-
-        self.verticalLayout_6.addLayout(self.horizontalLayout_5)
-
-        self.verticalLayout_6.setStretch(1, 1)
+        self.verticalLayout_4.setStretch(1, 1)
         self.splitter.addWidget(self.widget)
 
-        self.verticalLayout_7.addWidget(self.splitter)
+        self.verticalLayout_5.addWidget(self.splitter)
 
 
         self.retranslateUi(Form)
@@ -245,23 +201,17 @@ class Ui_Form(object):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"4D-STEM data path", None))
         self.pushButton_browse.setText(QCoreApplication.translate("Form", u"Browse", None))
-        self.pushButton_adjust_axis.setText(QCoreApplication.translate("Form", u"Adjust Axis...", None))
-        self.pushButton_analyze.setText(QCoreApplication.translate("Form", u"Analyze...", None))
-        self.pushButton_processing.setText(QCoreApplication.translate("Form", u"Processing...", None))
-        self.pushButton_calibrate.setText(QCoreApplication.translate("Form", u"Calibrate...", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"DPi index (rows of location)", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"DPj index (columns of location)", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"Preview Path", None))
         self.pushButton_browse_preview.setText(QCoreApplication.translate("Form", u"Browse Preview", None))
-        self.pushButton_calculate_preview.setText(QCoreApplication.translate("Form", u"Calculate Preview", None))
-        self.pushButton_attributes.setText(QCoreApplication.translate("Form", u"4D-STEM attributes...", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Contrast", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"Norm", None))
-        self.label_8.setText(QCoreApplication.translate("Form", u"Color map", None))
         self.comboBox_normalize.setItemText(0, QCoreApplication.translate("Form", u"Linear", None))
         self.comboBox_normalize.setItemText(1, QCoreApplication.translate("Form", u"Logarithm", None))
 
+        self.label_8.setText(QCoreApplication.translate("Form", u"Color map", None))
         self.comboBox_colormap.setItemText(0, QCoreApplication.translate("Form", u"viridis", None))
         self.comboBox_colormap.setItemText(1, QCoreApplication.translate("Form", u"plasma", None))
         self.comboBox_colormap.setItemText(2, QCoreApplication.translate("Form", u"gray", None))

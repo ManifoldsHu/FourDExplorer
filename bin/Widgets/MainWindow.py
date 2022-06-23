@@ -25,6 +25,7 @@ from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QToolButton 
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtCore import Qt, QSize
+from Constants import UIThemeDensity
 
 from bin.Actions.ControlActions import ActionSettings
 from bin.Actions.ControlActions import ControlActionGroup
@@ -89,7 +90,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('4D-Explorer')
 
         self._initControlPanel()
-
+        
         self._initFile()
         self._initEdit()
         
@@ -266,29 +267,17 @@ class ControlToolBar(QToolBar):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.setStyleSheet(
-            "ControlToolBar{                            "
-            "    border: none;                          "
-            "    padding: 0px;                          "
-            "}                                          "
-            "ControlToolBar::separator{                 "
-            "    width: 0px;                            "
-            "}                                          "
-            "ControlToolBar QToolButton{                "
-            "    padding: 0;                            "
-            "    margin: 0;                             "
-            "    height: 54px;                          "
-            "    width: 44px;                           "
-            "}"
-        )
+        
         self._action_group = ControlActionGroup(self)
         self._action_settings = ActionSettings(self)
         self.setMovable(False)
         self.setContentsMargins(0,0,0,0)
         self.layout().setContentsMargins(0,0,0,0)
         self.setOrientation(Qt.Vertical)
-        self.setIconSize(QSize(32, 32))
+        
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
+        self._updateStyle()
+        self.theme_handler.theme_changed.connect(self._updateStyle)
 
     @property
     def action_group(self) -> ControlActionGroup:
@@ -334,6 +323,31 @@ class ControlToolBar(QToolBar):
             )
         )
         
+    density_to_button_width = {
+        UIThemeDensity.Large: 36,
+        UIThemeDensity.Big: 33,
+        UIThemeDensity.Normal: 30,
+        UIThemeDensity.Small: 27,
+        UIThemeDensity.Tiny: 24,
+    }
+
+    def _updateStyle(self):
+        """
+        Update the style according to the current theme.
+        """
+        _width = self.density_to_button_width[
+            self.theme_handler.theme_density
+        ]
+        _height = _width + 20
+        
+        self.setStyleSheet(
+            "ControlToolBar{{border: none; padding: 0px;}}"
+            "ControlToolBar::separator{{width: 0px;}}"
+            "ControlToolBar QToolButton{{padding: 0; margin: 0;}}"
+            "ControlToolBar QToolButton{{height: {0}px; width: {1}px;}}"
+            "".format(_height, _width)
+        )
+        self.setIconSize(QSize(_width - 5, _width - 5))
 
 
     

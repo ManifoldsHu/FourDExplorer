@@ -19,8 +19,8 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1,0">
+     <widget class="QWidget" name="">
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,0">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
@@ -37,38 +37,6 @@
           <widget class="QPushButton" name="pushButton_browse">
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QPushButton" name="pushButton_adjust_axis">
-           <property name="text">
-            <string>Adjust Axis...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_analyze">
-           <property name="text">
-            <string>Analyze...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_processing">
-           <property name="text">
-            <string>Processing...</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_calibrate">
-           <property name="text">
-            <string>Calibrate...</string>
            </property>
           </widget>
          </item>
@@ -111,8 +79,8 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout_7">
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,0">
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
@@ -128,13 +96,6 @@
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_6">
-         <item>
-          <widget class="QPushButton" name="pushButton">
-           <property name="text">
-            <string>4D-STEM attributes...</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
