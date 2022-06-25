@@ -229,6 +229,8 @@ class PageViewVectorField(QWidget):
         
         self.image_canvas.draw()
         self.image_canvas.flush_events()
+
+        self.ui.widget_quiver.setProcessingActionItemPath(self.data_path)
         
 
 
@@ -417,9 +419,9 @@ class PageViewVectorField(QWidget):
         self.ui.pushButton_browse_background.clicked.connect(
             self._browseBackground
         )
-        self.ui.pushButton_vector_processing.clicked.connect(
-            self._vectorProcessing
-        )
+        # self.ui.pushButton_vector_processing.clicked.connect(
+        #     self._vectorProcessing
+        # )
         self.ui.pushButton_adjust_effects.clicked.connect(
             self._adjustEffects
         )

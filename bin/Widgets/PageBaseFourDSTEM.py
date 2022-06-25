@@ -226,7 +226,7 @@ class PageBaseFourDSTEM(QWidget):
 
     def _initFourDSTEMProcessing(self):
         """
-        Initialize the toolbutton for the 4D-STEM processes.
+        Initialize the toolbutton for the 4D-STEM processing.
 
         This toolbutton will be added to the toolbar of the figure canvas.
         """
@@ -316,6 +316,8 @@ class PageBaseFourDSTEM(QWidget):
 
         self.dp_canvas.draw()
         self.dp_canvas.flush_events()
+
+        self.ui.widget_dp.setProcessingActionItemPath(self.data_path)
 
 
     def _createAxes(self):

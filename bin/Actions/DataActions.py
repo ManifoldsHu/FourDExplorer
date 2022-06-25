@@ -26,15 +26,10 @@ from bin.HDFManager import HDFDataNode, HDFHandler
 from bin.UIManager import ThemeHandler
 from bin.Widgets.DialogChangeDataType import DialogChangeDataType
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
-from bin.Widgets.PageAlignFourDSTEM import PageAlignFourDSTEM
-from bin.Widgets.PageBkgrdFourDSTEM import PageBkgrdFourDSTEM
-from bin.Widgets.PageCenterOfMass import PageCenterOfMass
-from bin.Widgets.PageRotateFourDSTEM import PageRotateFourDSTEM
 from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
 from bin.Widgets.PageViewImage import PageViewImage
 from bin.Widgets.PageViewLine import PageViewLine
 from bin.Widgets.PageViewVectorField import PageViewVectorField
-from bin.Widgets.PageVirtualImage import PageVirtualImage
 
 
 class ActionDataManipulateBase(ActionEditBase):

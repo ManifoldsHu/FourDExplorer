@@ -31,8 +31,59 @@ class WidgetPlotImage(WidgetPlotBase):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
+        self._initImageProcessingActions()
+        self._initImageProcessingButton()
 
+    def _initImageProcessingActions(self):
+        """
+        Initialize image processing actions (and its menu).
+        """
+        from bin.Actions.DataActions import ActionOpenImage
+        self.menu_processing = QMenu(self)
+        self._processing_actions: dict[str,QAction] = {
+            'open': ActionOpenImage(self)
+        }
+        for action in self._processing_actions.values():
+            self.menu_processing.addAction(action)
+        
+    def _initImageProcessingButton(self):
+        """
+        Will add a tool button (menu) in the toolbar.
+        """
+        self.toolButton_processing = QToolButton(self)
+        self.toolButton_processing.setPopupMode(QToolButton.MenuButtonPopup)
+        self.toolButton_processing_rc = ':/HDFItem/resources/icons/picture'
+        self.toolButton_processing.setIcon(
+            self.theme_handler.iconProvider(self.toolButton_processing_rc)
+        )
+        self.theme_handler.theme_changed.connect(
+            lambda: self.toolButton_processing.setIcon(
+                self.theme_handler.iconProvider(
+                    self.toolButton_processing_rc
+                )
+            )
+        )
+        self.addCustomizedToolButton(self.toolButton_processing)
+        self.toolButton_processing.setMenu(self.menu_processing)
+        self.toolButton_processing.clicked.connect(
+            lambda: self._processing_actions['open'].trigger()
+        )
+        self.toolButton_processing.setText(
+            self._processing_actions['open'].text()
+        )
 
+    def setProcessingActionItemPath(self, item_path: str):
+        """
+        Will update the item path of the processing actions.
+
+        This method should be called when the parent window change the its 
+        current item path.
+
+        arguments:
+            item_path: (str) the item's path of the current 4D-STEM dataset.
+        """
+        for action in self._processing_actions.values():
+            action.setItemPath(item_path)
 
 class WidgetPlotHist(WidgetPlotBase):
     """
@@ -284,5 +335,79 @@ class WidgetPlotQuiver(WidgetPlotBase):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        
+        self._initVectorFieldProcessingActions()
+        self._initVectorFieldProcessingButton()
 
+    def _initVectorFieldProcessingButton(self):
+        """
+        Will add a tool button (menu) in the toolbar.
+        """
+        self.toolButton_processing = QToolButton(self)
+        self.toolButton_processing.setPopupMode(QToolButton.MenuButtonPopup)
+        self.toolButton_processing_rc = (
+            ':/HDFItem/resources/icons/particle_tracking')
+        self.toolButton_processing.setIcon(
+            self.theme_handler.iconProvider(self.toolButton_processing_rc)
+        )
+        self.theme_handler.theme_changed.connect(
+            lambda: self.toolButton_processing.setIcon(
+                self.theme_handler.iconProvider(
+                    self.toolButton_processing_rc
+                )
+            )
+        )
+        self.addCustomizedToolButton(self.toolButton_processing)
+        self.toolButton_processing.setMenu(self.menu_processing)
+        self.toolButton_processing.clicked.connect(
+            lambda: self._processing_actions['open'].trigger()
+        )
+        self.toolButton_processing.setText(
+            self._processing_actions['open'].text()
+        )
+
+    def _initVectorFieldProcessingActions(self):
+        """
+        Initialize the actions (menu) for vector field processing.
+        """
+        from bin.Actions.DataActions import ActionOpenVectorField
+        from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
+        from bin.Actions.VectorFieldActions import ActionRotateVector
+        from bin.Actions.VectorFieldActions import ActionFlipComponents
+        from bin.Actions.VectorFieldActions import ActionPotential
+        from bin.Actions.VectorFieldActions import ActionDivergence
+        from bin.Actions.VectorFieldActions import ActionCurl
+        from bin.Actions.VectorFieldActions import ActionSliceI
+        from bin.Actions.VectorFieldActions import ActionSliceJ
+        self.menu_processing = QMenu(self)
+        self._processing_actions: dict[str,QAction] = {
+            'open': ActionOpenVectorField(self),
+            'subtract': ActionSubtractMeanVector(self),
+            'rotate': ActionRotateVector(self),
+            'flip': ActionFlipComponents(self),
+            'potential': ActionPotential(self),
+            'divergence': ActionDivergence(self),
+            'curl': ActionCurl(self),
+            'slice_i': ActionSliceI(self),
+            'slice_j': ActionSliceJ(self),
+        }
+        for action in self._processing_actions.values():
+            self.menu_processing.addAction(action)
+        self.menu_processing.insertSeparator(
+            self._processing_actions['subtract']
+        )
+        self.menu_processing.insertSeparator(
+            self._processing_actions['potential']
+        )
+
+    def setProcessingActionItemPath(self, item_path: str):
+        """
+        Will update the item path of the processing actions.
+
+        This method should be called when the parent window change the its 
+        current item path.
+
+        arguments:
+            item_path: (str) the item's path of the current 4D-STEM dataset.
+        """
+        for action in self._processing_actions.values():
+            action.setItemPath(item_path)

@@ -22,7 +22,6 @@ All rights reserved.
 """
 
 import sys
-from time import sleep
 
 from Constants import ROOT_PATH
 from bin.Widgets.SplashScreenStart import SplashScreenStart
@@ -40,13 +39,11 @@ if __name__ == '__main__':
     ''' start loading screen '''
     loading_screen = SplashScreenStart()
     loading_screen.show()
-    sleep(10)
     app.processEvents()
 
     ''' start backend managers '''
     app.startBackEnds()
     logger = app.logger
-    app.aboutToQuit.connect(app.cleanResources)
     app.theme_handler.initTheme() 
 
     ''' start main window '''

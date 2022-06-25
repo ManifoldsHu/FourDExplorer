@@ -257,6 +257,10 @@ class MainWindow(QMainWindow):
         self._tabview_manager.setTabWidget(self.ui.tabWidget_view)
         self._tabview_manager.initializeTabView()
 
+    def close(self) -> bool:
+        self._app.cleanResources()
+        super(MainWindow, self).close()
+
 
 
 class ControlToolBar(QToolBar):

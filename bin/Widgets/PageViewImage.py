@@ -208,10 +208,10 @@ class PageViewImage(QWidget):
         self._createImage()
         self._createColorbar()
 
-
         self.image_canvas.draw()
         self.image_canvas.flush_events()
 
+        self.ui.widget_image.setProcessingActionItemPath(self.data_path)
 
     def _createAxes(self):
         """
@@ -295,6 +295,15 @@ class PageViewImage(QWidget):
         self.ui.pushButton_browse.clicked.connect(
             self._browse
         )
+        self._initImageProcessing()
+
+    def _initImageProcessing(self):
+        """
+        Initialize the toolbutton for the image processing.
+
+        This toolbutton will be added to the toolbar of the figure canvas.
+        """
+        self.ui.widget_image.setProcessingActionItemPath(self.data_path)
 
     def _updateBrightness(self, brightness: int):
         """
