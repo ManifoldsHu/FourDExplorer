@@ -20,9 +20,13 @@ date:           Mar 10, 2022
 *-------------------------- WidgetSystemInfo.py ------------------------------*
 """
 
+from logging import Logger
 import os
+import psutil
+# import sys 
 
 from PySide6.QtWidgets import QWidget 
+from PySide6.QtCore import QTimer
 
 from ui import uiWidgetSystemInfo
 from bin.HDFManager import HDFHandler
@@ -42,4 +46,102 @@ class WidgetSystemInfo(QWidget):
         super().__init__(parent)
         self.ui = uiWidgetSystemInfo.Ui_Form()
         self.ui.setupUi(self)
+        self._process = psutil.Process()
+        self._interval = 1000   # msec
+        self._setupTimer()
+        self._last_app_read_bytes = 0
+        self._last_app_write_bytes = 0
+
+    @property
+    def logger(self) -> Logger:
+        global qApp 
+        return qApp.logger
         
+    def _setupTimer(self):
+        """
+        This function will set up a timer to update the 
+        system info periodically.
+        """
+        self._timer = QTimer(self)
+        self._timer.start(self._interval)
+        self._timer.timeout.connect(self._updateCPU)
+        self._timer.timeout.connect(self._updateMemory)
+        self._timer.timeout.connect(self._updateDiskIO)
+        
+
+    def _updateCPU(self):
+        """
+        Update CPU information.
+        """
+        # _process = psutil.Process()
+
+        cpu_percent = psutil.cpu_percent()
+        self.ui.label_cpu_percent.setText(
+            str(cpu_percent)+'%'
+        )
+        cpu_count = psutil.cpu_count()
+        self.ui.label_cpu_count.setText(
+            str(cpu_count)
+        )
+        app_cpu_percent = self._process.cpu_percent()
+        self.ui.label_app_cpu_percent.setText(str(app_cpu_percent)+'%')
+        self.ui.progressBar_cpu_percent.setValue(cpu_percent)
+        # self.logger.info('_updateCPU() is called')
+
+    def _updateMemory(self):
+        """
+        Update memory information.
+        """
+        memory = psutil.virtual_memory()
+        # memory.total
+        # memory.used
+        # memory.free
+        self.ui.label_memory_total.setText(
+            '{0:.2f}'.format(memory.total/2**20)+' MiB'
+        )
+        self.ui.label_memory_available.setText(
+            '{0:.2f}'.format(memory.free/2**20)+' MiB'
+        )
+        self.ui.progressBar_memory_percent.setValue(
+            memory.used/memory.total*100
+        )
+        app_memory = self._process.memory_info()
+        self.ui.label_app_memory.setText(
+            '{0:.2f}'.format(app_memory.rss/2**20) + 'MiB'
+        )
+        
+
+    def _updateDiskIO(self):
+        """
+        Update the disk IO information.
+        """
+        disk_usage = psutil.disk_usage(os.getcwd())
+        self.ui.label_disk_total.setText(
+            '{0:.2f}'.format(disk_usage.total/2**30)+' GiB'
+        )
+        self.ui.label_disk_available.setText(
+            '{0:.2f}'.format(disk_usage.free/2**30)+' GiB'
+        )
+        self.ui.progressBar_disk_percent.setValue(
+            disk_usage.percent
+        )
+        app_disk_io = self._process.io_counters()
+        app_read_rate = (
+            (app_disk_io.read_bytes - self._last_app_read_bytes)
+                /self._interval * 1000 / 2**20
+        )
+        app_write_rate = (
+            (app_disk_io.write_bytes - self._last_app_write_bytes)
+                /self._interval * 1000 / 2**20
+        )
+        self.ui.label_app_disk_read.setText(
+            '{0:.2f}'.format(app_read_rate) + ' MiB/s'
+        )
+        self.ui.label_app_disk_write.setText(
+            '{0:.2f}'.format(app_write_rate) + ' MiB/s'
+        )
+        self._last_app_read_bytes = app_disk_io.read_bytes
+        self._last_app_write_bytes = app_disk_io.write_bytes
+
+
+

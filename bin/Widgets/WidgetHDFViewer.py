@@ -30,7 +30,6 @@ from PySide6.QtCore import QModelIndex, Qt, QPoint
 from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog, QWidgetAction
 from PySide6.QtGui import QActionGroup
 
-
 from bin.Actions.DataActions import ActionOpenData
 from bin.Actions.DataActions import ActionOpenDataAs
 from bin.Actions.EditActions import ActionAttributes
@@ -42,13 +41,25 @@ from bin.Actions.EditActions import ActionDelete
 from bin.Actions.EditActions import ActionMove
 from bin.Actions.EditActions import ActionNew
 from bin.Actions.EditActions import ActionRename
+
 from bin.Actions.FileActions import ActionCloseFile, ActionNewFile
 from bin.Actions.FileActions import ActionOpenFile
+
 from bin.Actions.FourDSTEMActions import ActionAlign
 from bin.Actions.FourDSTEMActions import ActionBackground
 from bin.Actions.FourDSTEMActions import ActionCenterOfMass
 from bin.Actions.FourDSTEMActions import ActionRotate
 from bin.Actions.FourDSTEMActions import ActionVirtualImage
+
+from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
+from bin.Actions.VectorFieldActions import ActionRotateVector
+from bin.Actions.VectorFieldActions import ActionFlipComponents
+from bin.Actions.VectorFieldActions import ActionPotential
+from bin.Actions.VectorFieldActions import ActionDivergence
+from bin.Actions.VectorFieldActions import ActionCurl
+from bin.Actions.VectorFieldActions import ActionSliceI
+from bin.Actions.VectorFieldActions import ActionSliceJ
+
 from bin.UIManager import ThemeHandler
 from bin.Widgets.WidgetBaseHDFViewer import HDFToolBar
 from bin.TabViewManager import TabViewManager
@@ -73,11 +84,13 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
             self.showContextMenu
         )
 
-        self._initCalibrationActions()
+        
         self._initDataActions()
         self._initEditActions()
         self._initFileActions()
+        self._initCalibrationActions()
         self._initReconstructionActions()
+        self._initVectorFieldActions()
 
         
         
@@ -123,6 +136,10 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
     @property
     def action_group_file(self) -> QActionGroup:
         return self._action_group_file
+
+    @property
+    def action_group_vector(self) -> QActionGroup:
+        return self._action_group_vector
 
     def _initEditActions(self):
         """
@@ -232,6 +249,50 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._action_group_file.addAction(self._action_new_file)
         self._action_group_file.addAction(self._action_open_file)
         self._action_group_file.addAction(self._action_close_file)
+
+    def _initVectorFieldActions(self):
+        """
+        Initialize Vector Field Processing Actions.
+        """
+        self._action_subtract_mean_vector = ActionSubtractMeanVector(self)
+        self._action_rotate_vector = ActionRotateVector(self)
+        self._action_flip_vector = ActionFlipComponents(self)
+        self._action_potential = ActionPotential(self)
+        self._action_divergence = ActionDivergence(self)
+        self._action_curl = ActionCurl(self)
+        self._action_slice_i = ActionSliceI(self)
+        self._action_slice_j = ActionSliceJ(self)
+
+        self._action_group_vector = QActionGroup(self)
+        self._action_group_vector.addAction(
+            self._action_subtract_mean_vector
+        )
+        self._action_group_vector.addAction(
+            self._action_rotate_vector
+        )
+        self._action_group_vector.addAction(
+            self._action_flip_vector
+        )
+        self._action_group_vector.addAction(
+            self._action_potential
+        )
+        self._action_group_vector.addAction(
+            self._action_divergence
+        )
+        self._action_group_vector.addAction(
+            self._action_curl
+        )
+        self._action_group_vector.addAction(
+            self._action_slice_i
+        )
+        self._action_group_vector.addAction(
+            self._action_slice_j
+        )
+
+        for action in self._action_group_vector.actions():
+            action.setLinkedTreeView(self.ui.treeView_HDF)
+
+
 
     def showContextMenu(self, pos: QPoint):
         """
@@ -404,9 +465,19 @@ class HDFImageMenu(HDFDataMenu):
         super().__init__(parent)
 
 
-class HDFVectorFieldMenu(HDFDataMenu):
+class HDFVectorFieldMenu(HDFViewerMenuBase):
     def __init__(self, parent: WidgetHDFViewer):
         super().__init__(parent)
+        self.setLinkedHDFViewer(parent)
+        self.addActionGroup(self.hdf_viewer.action_group_open)
+        self.addSeparator()
+        menu = self.addActionGroupAsSubMenu(
+            self.hdf_viewer.action_group_vector,
+            name = 'Vector Field Processing',
+        )
+        menu.insertSeparator(self.hdf_viewer._action_potential)
+        self.addActionGroup(self.hdf_viewer.action_group_edit)
+        self.addActionGroup(self.hdf_viewer.action_group_attr)
 
 
 class HDFFourDSTEMMenu(HDFViewerMenuBase):

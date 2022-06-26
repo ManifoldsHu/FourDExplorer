@@ -15,56 +15,64 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHBoxLayout, QLabel, QProgressBar,
+from PySide6.QtWidgets import (QApplication, QGridLayout, QLabel, QProgressBar,
     QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(325, 427)
-        Form.setMinimumSize(QSize(0, 300))
-        Form.setMaximumSize(QSize(16777215, 500))
+        Form.resize(325, 652)
+        Form.setMinimumSize(QSize(0, 0))
+        Form.setMaximumSize(QSize(16777215, 16777215))
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.horizontalLayout_3 = QHBoxLayout()
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.verticalLayout_8 = QVBoxLayout()
-        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
         self.label = QLabel(Form)
         self.label.setObjectName(u"label")
 
-        self.verticalLayout_8.addWidget(self.label)
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout.addItem(self.horizontalSpacer, 0, 1, 1, 1)
+
+        self.label_cpu_count = QLabel(Form)
+        self.label_cpu_count.setObjectName(u"label_cpu_count")
+
+        self.gridLayout.addWidget(self.label_cpu_count, 0, 2, 1, 1)
 
         self.label_3 = QLabel(Form)
         self.label_3.setObjectName(u"label_3")
 
-        self.verticalLayout_8.addWidget(self.label_3)
-
-
-        self.horizontalLayout_3.addLayout(self.verticalLayout_8)
+        self.gridLayout.addWidget(self.label_3, 1, 0, 1, 1)
 
         self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
-
-        self.verticalLayout_5 = QVBoxLayout()
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.label_cpu_count = QLabel(Form)
-        self.label_cpu_count.setObjectName(u"label_cpu_count")
-
-        self.verticalLayout_5.addWidget(self.label_cpu_count)
+        self.gridLayout.addItem(self.horizontalSpacer_2, 1, 1, 1, 1)
 
         self.label_cpu_percent = QLabel(Form)
         self.label_cpu_percent.setObjectName(u"label_cpu_percent")
 
-        self.verticalLayout_5.addWidget(self.label_cpu_percent)
+        self.gridLayout.addWidget(self.label_cpu_percent, 1, 2, 1, 1)
+
+        self.label_2 = QLabel(Form)
+        self.label_2.setObjectName(u"label_2")
+
+        self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout.addItem(self.horizontalSpacer_3, 2, 1, 1, 1)
+
+        self.label_app_cpu_percent = QLabel(Form)
+        self.label_app_cpu_percent.setObjectName(u"label_app_cpu_percent")
+
+        self.gridLayout.addWidget(self.label_app_cpu_percent, 2, 2, 1, 1)
 
 
-        self.horizontalLayout_3.addLayout(self.verticalLayout_5)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_3)
+        self.verticalLayout.addLayout(self.gridLayout)
 
         self.progressBar_cpu_percent = QProgressBar(Form)
         self.progressBar_cpu_percent.setObjectName(u"progressBar_cpu_percent")
@@ -76,44 +84,52 @@ class Ui_Form(object):
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
-        self.horizontalLayout_4 = QHBoxLayout()
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.verticalLayout_9 = QVBoxLayout()
-        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.gridLayout_2 = QGridLayout()
+        self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.label_4 = QLabel(Form)
         self.label_4.setObjectName(u"label_4")
 
-        self.verticalLayout_9.addWidget(self.label_4)
+        self.gridLayout_2.addWidget(self.label_4, 0, 0, 1, 1)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_2.addItem(self.horizontalSpacer_4, 0, 1, 1, 1)
+
+        self.label_memory_total = QLabel(Form)
+        self.label_memory_total.setObjectName(u"label_memory_total")
+
+        self.gridLayout_2.addWidget(self.label_memory_total, 0, 2, 1, 1)
 
         self.label_5 = QLabel(Form)
         self.label_5.setObjectName(u"label_5")
 
-        self.verticalLayout_9.addWidget(self.label_5)
+        self.gridLayout_2.addWidget(self.label_5, 1, 0, 1, 1)
 
+        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout_4.addLayout(self.verticalLayout_9)
-
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_4.addItem(self.horizontalSpacer_3)
-
-        self.verticalLayout_6 = QVBoxLayout()
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.label_memory_total = QLabel(Form)
-        self.label_memory_total.setObjectName(u"label_memory_total")
-
-        self.verticalLayout_6.addWidget(self.label_memory_total)
+        self.gridLayout_2.addItem(self.horizontalSpacer_5, 1, 1, 1, 1)
 
         self.label_memory_available = QLabel(Form)
         self.label_memory_available.setObjectName(u"label_memory_available")
 
-        self.verticalLayout_6.addWidget(self.label_memory_available)
+        self.gridLayout_2.addWidget(self.label_memory_available, 1, 2, 1, 1)
+
+        self.label_9 = QLabel(Form)
+        self.label_9.setObjectName(u"label_9")
+
+        self.gridLayout_2.addWidget(self.label_9, 2, 0, 1, 1)
+
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_2.addItem(self.horizontalSpacer_6, 2, 1, 1, 1)
+
+        self.label_app_memory = QLabel(Form)
+        self.label_app_memory.setObjectName(u"label_app_memory")
+
+        self.gridLayout_2.addWidget(self.label_app_memory, 2, 2, 1, 1)
 
 
-        self.horizontalLayout_4.addLayout(self.verticalLayout_6)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_4)
+        self.verticalLayout.addLayout(self.gridLayout_2)
 
         self.progressBar_memory_percent = QProgressBar(Form)
         self.progressBar_memory_percent.setObjectName(u"progressBar_memory_percent")
@@ -125,79 +141,72 @@ class Ui_Form(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
 
-        self.horizontalLayout_5 = QHBoxLayout()
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.verticalLayout_10 = QVBoxLayout()
-        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
-        self.label_14 = QLabel(Form)
-        self.label_14.setObjectName(u"label_14")
+        self.gridLayout_3 = QGridLayout()
+        self.gridLayout_3.setObjectName(u"gridLayout_3")
+        self.horizontalSpacer_8 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.verticalLayout_10.addWidget(self.label_14)
-
-        self.label_6 = QLabel(Form)
-        self.label_6.setObjectName(u"label_6")
-
-        self.verticalLayout_10.addWidget(self.label_6)
-
-        self.label_7 = QLabel(Form)
-        self.label_7.setObjectName(u"label_7")
-
-        self.verticalLayout_10.addWidget(self.label_7)
-
-
-        self.horizontalLayout_5.addLayout(self.verticalLayout_10)
-
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_5.addItem(self.horizontalSpacer_4)
-
-        self.verticalLayout_7 = QVBoxLayout()
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.label_disk_partition = QLabel(Form)
-        self.label_disk_partition.setObjectName(u"label_disk_partition")
-
-        self.verticalLayout_7.addWidget(self.label_disk_partition)
+        self.gridLayout_3.addItem(self.horizontalSpacer_8, 0, 1, 1, 1)
 
         self.label_disk_total = QLabel(Form)
         self.label_disk_total.setObjectName(u"label_disk_total")
 
-        self.verticalLayout_7.addWidget(self.label_disk_total)
+        self.gridLayout_3.addWidget(self.label_disk_total, 0, 2, 1, 1)
+
+        self.label_7 = QLabel(Form)
+        self.label_7.setObjectName(u"label_7")
+
+        self.gridLayout_3.addWidget(self.label_7, 1, 0, 1, 1)
+
+        self.horizontalSpacer_10 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_3.addItem(self.horizontalSpacer_10, 2, 1, 1, 1)
+
+        self.label_app_disk_read = QLabel(Form)
+        self.label_app_disk_read.setObjectName(u"label_app_disk_read")
+
+        self.gridLayout_3.addWidget(self.label_app_disk_read, 2, 2, 1, 1)
+
+        self.horizontalSpacer_9 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_3.addItem(self.horizontalSpacer_9, 1, 1, 1, 1)
+
+        self.label_8 = QLabel(Form)
+        self.label_8.setObjectName(u"label_8")
+
+        self.gridLayout_3.addWidget(self.label_8, 2, 0, 1, 1)
+
+        self.label_6 = QLabel(Form)
+        self.label_6.setObjectName(u"label_6")
+
+        self.gridLayout_3.addWidget(self.label_6, 0, 0, 1, 1)
 
         self.label_disk_available = QLabel(Form)
         self.label_disk_available.setObjectName(u"label_disk_available")
 
-        self.verticalLayout_7.addWidget(self.label_disk_available)
+        self.gridLayout_3.addWidget(self.label_disk_available, 1, 2, 1, 1)
+
+        self.label_10 = QLabel(Form)
+        self.label_10.setObjectName(u"label_10")
+
+        self.gridLayout_3.addWidget(self.label_10, 3, 0, 1, 1)
+
+        self.label_app_disk_write = QLabel(Form)
+        self.label_app_disk_write.setObjectName(u"label_app_disk_write")
+
+        self.gridLayout_3.addWidget(self.label_app_disk_write, 3, 2, 1, 1)
+
+        self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.gridLayout_3.addItem(self.horizontalSpacer_7, 3, 1, 1, 1)
 
 
-        self.horizontalLayout_5.addLayout(self.verticalLayout_7)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_5)
+        self.verticalLayout.addLayout(self.gridLayout_3)
 
         self.progressBar_disk_percent = QProgressBar(Form)
         self.progressBar_disk_percent.setObjectName(u"progressBar_disk_percent")
         self.progressBar_disk_percent.setValue(24)
 
         self.verticalLayout.addWidget(self.progressBar_disk_percent)
-
-        self.horizontalLayout_6 = QHBoxLayout()
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.label_8 = QLabel(Form)
-        self.label_8.setObjectName(u"label_8")
-
-        self.horizontalLayout_6.addWidget(self.label_8)
-
-        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_6.addItem(self.horizontalSpacer_5)
-
-        self.label_process_io = QLabel(Form)
-        self.label_process_io.setObjectName(u"label_process_io")
-
-        self.horizontalLayout_6.addWidget(self.label_process_io)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_6)
 
 
         self.retranslateUi(Form)
@@ -208,20 +217,24 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.label.setText(QCoreApplication.translate("Form", u"CPU count", None))
-        self.label_3.setText(QCoreApplication.translate("Form", u"CPU percent", None))
         self.label_cpu_count.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_3.setText(QCoreApplication.translate("Form", u"CPU percent", None))
         self.label_cpu_percent.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_2.setText(QCoreApplication.translate("Form", u"4D-Explorer CPU percent", None))
+        self.label_app_cpu_percent.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"Memory Total", None))
-        self.label_5.setText(QCoreApplication.translate("Form", u"Memory Available", None))
         self.label_memory_total.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_5.setText(QCoreApplication.translate("Form", u"Memory Available", None))
         self.label_memory_available.setText(QCoreApplication.translate("Form", u"TextLabel", None))
-        self.label_14.setText(QCoreApplication.translate("Form", u"Disk Partition", None))
-        self.label_6.setText(QCoreApplication.translate("Form", u"Disk Total", None))
-        self.label_7.setText(QCoreApplication.translate("Form", u"Disk Available", None))
-        self.label_disk_partition.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_9.setText(QCoreApplication.translate("Form", u"4D-Explorer Memory Usage", None))
+        self.label_app_memory.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.label_disk_total.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_7.setText(QCoreApplication.translate("Form", u"Disk Available", None))
+        self.label_app_disk_read.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_8.setText(QCoreApplication.translate("Form", u"4D-Explorer Disk Read", None))
+        self.label_6.setText(QCoreApplication.translate("Form", u"Disk Total", None))
         self.label_disk_available.setText(QCoreApplication.translate("Form", u"TextLabel", None))
-        self.label_8.setText(QCoreApplication.translate("Form", u"Process IO", None))
-        self.label_process_io.setText(QCoreApplication.translate("Form", u"TextLabel", None))
+        self.label_10.setText(QCoreApplication.translate("Form", u"4D-Explorer Disk Write", None))
+        self.label_app_disk_write.setText(QCoreApplication.translate("Form", u"TextLabel", None))
     # retranslateUi
 
