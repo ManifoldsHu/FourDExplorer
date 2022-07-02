@@ -364,6 +364,7 @@ class ActionSliceI(ActionVectorFieldProcessingBase):
         self.setText('Slice i-Components')
         self.triggered.connect(lambda: self.sliceIComponent(self))
 
+    @failLogging
     def sliceIComponent(self):
         """
         Open a dialog to slice i-component of the vectors.
@@ -391,6 +392,7 @@ class ActionSliceJ(ActionVectorFieldProcessingBase):
         self.setText('Slice j-Components')
         self.triggered.connect(lambda: self.sliceJComponent(self))
 
+    @failLogging
     def sliceJComponent(self):
         """
         Open a dialog to slice i-component of the vectors.

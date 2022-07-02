@@ -68,7 +68,7 @@ class ActionCenterOfMass(ActionOpenData):
         arguments:
             hdf_type: (HDFType) (does not work)
         """
-        page = PageVirtualImage()
+        page = PageCenterOfMass()
         page.setFourDSTEM(self.item_path)
         return page 
 
