@@ -134,6 +134,12 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self.ui.pushButton_left.clicked.connect(self._translateLeft)
         self.ui.pushButton_right.clicked.connect(self._translateRight)
 
+        self.ui.comboBox_fine_tuning_mode.setCurrentIndex(0)
+        self.ui.stackedWidget_align_mode.setCurrentIndex(0)
+        self.ui.comboBox_fine_tuning_mode.currentIndexChanged.connect(
+            self.ui.stackedWidget_align_mode.setCurrentIndex
+        )
+
         
 
     def _createPatches(self):

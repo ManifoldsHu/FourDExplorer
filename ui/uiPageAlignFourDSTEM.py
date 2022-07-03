@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiPageAlignFourDSTEM.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -101,12 +101,12 @@ class Ui_Form(object):
 
         self.verticalLayout_3.setStretch(1, 1)
         self.splitter.addWidget(self.layoutWidget)
-        self.widget = QWidget(self.splitter)
-        self.widget.setObjectName(u"widget")
-        self.verticalLayout_9 = QVBoxLayout(self.widget)
+        self.layoutWidget1 = QWidget(self.splitter)
+        self.layoutWidget1.setObjectName(u"layoutWidget1")
+        self.verticalLayout_9 = QVBoxLayout(self.layoutWidget1)
         self.verticalLayout_9.setObjectName(u"verticalLayout_9")
         self.verticalLayout_9.setContentsMargins(0, 0, 0, 0)
-        self.tabWidget = QTabWidget(self.widget)
+        self.tabWidget = QTabWidget(self.layoutWidget1)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tab_alignment = QWidget()
         self.tab_alignment.setObjectName(u"tab_alignment")
@@ -121,8 +121,8 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addWidget(self.comboBox_fine_tuning_mode)
 
-        self.stackedWidget = QStackedWidget(self.tab_alignment)
-        self.stackedWidget.setObjectName(u"stackedWidget")
+        self.stackedWidget_align_mode = QStackedWidget(self.tab_alignment)
+        self.stackedWidget_align_mode.setObjectName(u"stackedWidget_align_mode")
         self.page_simple = QWidget()
         self.page_simple.setObjectName(u"page_simple")
         self.verticalLayout_6 = QVBoxLayout(self.page_simple)
@@ -208,7 +208,7 @@ class Ui_Form(object):
 
         self.verticalLayout_6.addLayout(self.gridLayout)
 
-        self.stackedWidget.addWidget(self.page_simple)
+        self.stackedWidget_align_mode.addWidget(self.page_simple)
         self.page_reference = QWidget()
         self.page_reference.setObjectName(u"page_reference")
         self.verticalLayout_7 = QVBoxLayout(self.page_reference)
@@ -250,7 +250,7 @@ class Ui_Form(object):
 
         self.verticalLayout_7.addItem(self.verticalSpacer_4)
 
-        self.stackedWidget.addWidget(self.page_reference)
+        self.stackedWidget_align_mode.addWidget(self.page_reference)
         self.page_anchors = QWidget()
         self.page_anchors.setObjectName(u"page_anchors")
         self.verticalLayout_8 = QVBoxLayout(self.page_anchors)
@@ -266,9 +266,9 @@ class Ui_Form(object):
 
         self.verticalLayout_8.addWidget(self.tableView_anchors)
 
-        self.stackedWidget.addWidget(self.page_anchors)
+        self.stackedWidget_align_mode.addWidget(self.page_anchors)
 
-        self.verticalLayout_4.addWidget(self.stackedWidget)
+        self.verticalLayout_4.addWidget(self.stackedWidget_align_mode)
 
         self.tabWidget.addTab(self.tab_alignment, "")
         self.tab_display_effect = QWidget()
@@ -287,46 +287,46 @@ class Ui_Form(object):
 
         self.gridLayout_2 = QGridLayout()
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.label_5 = QLabel(self.widget)
+        self.label_5 = QLabel(self.layoutWidget1)
         self.label_5.setObjectName(u"label_5")
 
         self.gridLayout_2.addWidget(self.label_5, 0, 0, 1, 1)
 
-        self.horizontalSlider_brightness = QSlider(self.widget)
+        self.horizontalSlider_brightness = QSlider(self.layoutWidget1)
         self.horizontalSlider_brightness.setObjectName(u"horizontalSlider_brightness")
         self.horizontalSlider_brightness.setOrientation(Qt.Horizontal)
 
         self.gridLayout_2.addWidget(self.horizontalSlider_brightness, 0, 1, 1, 1)
 
-        self.label_6 = QLabel(self.widget)
+        self.label_6 = QLabel(self.layoutWidget1)
         self.label_6.setObjectName(u"label_6")
 
         self.gridLayout_2.addWidget(self.label_6, 1, 0, 1, 1)
 
-        self.horizontalSlider_contrast = QSlider(self.widget)
+        self.horizontalSlider_contrast = QSlider(self.layoutWidget1)
         self.horizontalSlider_contrast.setObjectName(u"horizontalSlider_contrast")
         self.horizontalSlider_contrast.setOrientation(Qt.Horizontal)
 
         self.gridLayout_2.addWidget(self.horizontalSlider_contrast, 1, 1, 1, 1)
 
-        self.label_7 = QLabel(self.widget)
+        self.label_7 = QLabel(self.layoutWidget1)
         self.label_7.setObjectName(u"label_7")
 
         self.gridLayout_2.addWidget(self.label_7, 2, 0, 1, 1)
 
-        self.comboBox_normalize = QComboBox(self.widget)
+        self.comboBox_normalize = QComboBox(self.layoutWidget1)
         self.comboBox_normalize.addItem("")
         self.comboBox_normalize.addItem("")
         self.comboBox_normalize.setObjectName(u"comboBox_normalize")
 
         self.gridLayout_2.addWidget(self.comboBox_normalize, 2, 1, 1, 1)
 
-        self.label_8 = QLabel(self.widget)
+        self.label_8 = QLabel(self.layoutWidget1)
         self.label_8.setObjectName(u"label_8")
 
         self.gridLayout_2.addWidget(self.label_8, 3, 0, 1, 1)
 
-        self.comboBox_colormap = QComboBox(self.widget)
+        self.comboBox_colormap = QComboBox(self.layoutWidget1)
         self.comboBox_colormap.addItem("")
         self.comboBox_colormap.addItem("")
         self.comboBox_colormap.addItem("")
@@ -342,7 +342,7 @@ class Ui_Form(object):
 
         self.verticalLayout_9.addLayout(self.gridLayout_2)
 
-        self.splitter.addWidget(self.widget)
+        self.splitter.addWidget(self.layoutWidget1)
 
         self.verticalLayout_10.addWidget(self.splitter)
 
@@ -365,7 +365,7 @@ class Ui_Form(object):
         self.retranslateUi(Form)
 
         self.tabWidget.setCurrentIndex(0)
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget_align_mode.setCurrentIndex(2)
         self.pushButton_right.setDefault(False)
 
 

@@ -79,14 +79,14 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
         <widget class="QTabWidget" name="tabWidget">
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="QWidget" name="tab_alignment" native="true">
+         <widget class="QWidget" name="tab_alignment">
           <attribute name="title">
            <string>Alignment</string>
           </attribute>
@@ -123,7 +123,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QStackedWidget" name="stackedWidget">
+            <widget class="QStackedWidget" name="stackedWidget_align_mode">
              <property name="currentIndex">
               <number>2</number>
              </property>
@@ -360,7 +360,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_display_effect" native="true">
+         <widget class="QWidget" name="tab_display_effect">
           <attribute name="title">
            <string>Displaying Effect</string>
           </attribute>
