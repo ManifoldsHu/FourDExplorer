@@ -85,7 +85,7 @@ class WidgetBaseHDFViewer(QWidget):
         Update to the newest model when it is changed.
         """
         self.ui.treeView_HDF.setModel(self.hdf_handler.model)
-        self.ui.treeView_HDF.expandToDepth(1)
+        self.ui.treeView_HDF.expandToDepth(0)
 
 class HDFToolBar(QToolBar):
     """
