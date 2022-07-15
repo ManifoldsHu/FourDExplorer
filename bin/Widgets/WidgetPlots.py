@@ -20,6 +20,7 @@ from matplotlib.patches import PathPatch
 import numpy as np
 
 
+
 from bin.Widgets.WidgetPlotBase import WidgetPlotBase
 
 
@@ -371,6 +372,7 @@ class WidgetPlotQuiver(WidgetPlotBase):
         """
         from bin.Actions.DataActions import ActionOpenVectorField
         from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
+        from bin.Actions.VectorFieldActions import ActionSubtractReferenceVector
         from bin.Actions.VectorFieldActions import ActionRotateVector
         from bin.Actions.VectorFieldActions import ActionFlipComponents
         from bin.Actions.VectorFieldActions import ActionPotential
@@ -381,7 +383,8 @@ class WidgetPlotQuiver(WidgetPlotBase):
         self.menu_processing = QMenu(self)
         self._processing_actions: dict[str,QAction] = {
             'open': ActionOpenVectorField(self),
-            'subtract': ActionSubtractMeanVector(self),
+            'subtract_offset': ActionSubtractMeanVector(self),
+            'subtract_reference': ActionSubtractReferenceVector(self),
             'rotate': ActionRotateVector(self),
             'flip': ActionFlipComponents(self),
             'potential': ActionPotential(self),
@@ -393,7 +396,7 @@ class WidgetPlotQuiver(WidgetPlotBase):
         for action in self._processing_actions.values():
             self.menu_processing.addAction(action)
         self.menu_processing.insertSeparator(
-            self._processing_actions['subtract']
+            self._processing_actions['subtract_offset']
         )
         self.menu_processing.insertSeparator(
             self._processing_actions['potential']

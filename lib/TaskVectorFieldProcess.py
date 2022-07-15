@@ -238,7 +238,85 @@ class TaskSubtractVectorOffset(TaskBaseVectorToVector):
         new_image[0, :, :] = new_vec_i 
         new_image[1, :, :] = new_vec_j
         return new_image
+
+
+class TaskSubtractVectorField(TaskBaseVectorToVector):
+    """
+    将矢量场与另一个矢量场相减。
+
+    Subtract a vector field with another vector field.
+    """
+    def __init__(
+        self,
+        item_path,
+        subtrahend_path,
+        image_parent_path, 
+        image_name,
+        parent, 
+        **meta,
+    ):
+        """
+        arguments:
+            item_path: (str) the Vector Field dataset path, as the minuend.
+
+            subtrahend_path: (str) the Vector Field dataset path, as the subtrahend.
+
+            image_parent_path: (str) the parent group's path of the new vector
+                field.
+
+            image_name: (str) the reconstructed vector field's name.
+
+            angle: (float) the rotation angle. Unit: degree.
+
+            parent: (QObject)
+
+            **meta: (key word arguments) other meta data that should be stored
+                in the attrs of reconstructed HDF5 object
+        """
+        super().__init__(
+            item_path, 
+            image_parent_path, 
+            image_name, 
+            parent, 
+            **meta
+        )
+        self.name = 'Subtract Vector Field'
+        self._subtrahend_path = subtrahend_path
+        self.comment = (
+            'Difference between two vector field.\n'
+            'Minuend vector field path: {0}\n'
+            'Subtrahend vector field path: {1}\n'
+            'Result is saved in {2}\n'.format(
+                self._item_path, self._subtrahend_path, self._image_name,
+            )
+        )
+
+        self.addSubtaskFunc(
+            'Calculating Subtraction',
+            self._calculateSubtraction,
+        )
         
+    def _calculateSubtraction(self):
+        """
+        returns:
+            (h5py.Dataset)
+        """
+        data_object = self.hdf_handler.file[self.source_path]
+        vec_i = data_object[0, :, :]
+        vec_j = data_object[1, :, :]
+
+        subtrahend_object = self.hdf_handler.file[self._subtrahend_path]
+        subtraend_vec_i = subtrahend_object[0, :, :]
+        subtraend_vec_j = subtrahend_object[1, :, :]
+
+        new_vec_i = vec_i - subtraend_vec_i
+        new_vec_j = vec_j - subtraend_vec_j
+        new_image = self.hdf_handler.file[self.image_path]
+        new_image[0, :, :] = new_vec_i 
+        new_image[1, :, :] = new_vec_j
+        return new_image
+
+
 
 class TaskFlipVectorField(TaskBaseVectorToVector):
     """

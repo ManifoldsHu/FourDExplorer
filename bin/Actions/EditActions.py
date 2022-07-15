@@ -49,12 +49,19 @@ class ActionEditBase(QAction):
             self._updateIcon
         )
         self.setEnabled(self.hdf_handler.isFileOpened())
+        # self.hdf_handler.file_opened.connect(
+        #     lambda: self.setEnabled(True)
+        # )
+        # self.hdf_handler.file_closed.connect(
+        #     lambda: self.setEnabled(False)
+        # )
         self.hdf_handler.file_opened.connect(
-            lambda: self.setEnabled(True)
+            self._onFileOpened
         )
         self.hdf_handler.file_closed.connect(
-            lambda: self.setEnabled(False)
+            self._onFileClosed
         )
+
         self._treeview = None 
     
     @property
@@ -138,6 +145,17 @@ class ActionEditBase(QAction):
                 '{0}'.format(type(treeview).__name__))
         self._treeview = treeview 
 
+    def _onFileOpened(self):
+        """
+        When file is opened, this action should be enabled.
+        """
+        self.setEnabled(True)
+
+    def _onFileClosed(self):
+        """
+        When file is closed, this action should be disabled.
+        """
+        self.setEnabled(False)
 
 def failLogging(func):
     """

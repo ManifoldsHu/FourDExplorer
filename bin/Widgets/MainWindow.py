@@ -56,7 +56,14 @@ from bin.Actions.FourDSTEMActions import ActionBackground
 from bin.Actions.FourDSTEMActions import ActionCenterOfMass
 from bin.Actions.FourDSTEMActions import ActionRotate
 from bin.Actions.FourDSTEMActions import ActionVirtualImage
-from bin.Actions.VectorFieldActions import ActionCurl, ActionFlipComponents, ActionPotential, ActionRotateVector, ActionSliceI, ActionSliceJ, ActionSubtractMeanVector
+from bin.Actions.VectorFieldActions import ActionCurl
+from bin.Actions.VectorFieldActions import ActionFlipComponents
+from bin.Actions.VectorFieldActions import ActionPotential
+from bin.Actions.VectorFieldActions import ActionRotateVector
+from bin.Actions.VectorFieldActions import ActionSliceI
+from bin.Actions.VectorFieldActions import ActionSliceJ
+from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
+from bin.Actions.VectorFieldActions import ActionSubtractReferenceVector
 # from PySide6.QtGui import 
 
 from bin.TabViewManager import TabViewManager
@@ -201,6 +208,7 @@ class MainWindow(QMainWindow):
         self._action_open_vector_field = ActionOpenVectorField(self)
         self._action_rotate_vector = ActionRotateVector(self)
         self._action_subtract_mean_vector = ActionSubtractMeanVector(self)
+        self._action_subtract_reference_vector = ActionSubtractReferenceVector(self)
         self._action_flip_components = ActionFlipComponents(self)
         self._action_potential = ActionPotential(self)
         self._action_curl = ActionCurl(self)
@@ -208,8 +216,9 @@ class MainWindow(QMainWindow):
         self._action_slice_j = ActionSliceJ(self)
         self._menu_vector_field.addAction(self._action_open_vector_field)
         self._menu_vector_field.addSeparator()
-        self._menu_vector_field.addAction(self._action_rotate_vector)
         self._menu_vector_field.addAction(self._action_subtract_mean_vector)
+        self._menu_vector_field.addAction(self._action_subtract_reference_vector)
+        self._menu_vector_field.addAction(self._action_rotate_vector)
         self._menu_vector_field.addAction(self._action_flip_components)
         self._menu_vector_field.addSeparator()
         self._menu_vector_field.addAction(self._action_potential)

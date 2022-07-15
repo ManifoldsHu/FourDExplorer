@@ -52,6 +52,7 @@ from bin.Actions.FourDSTEMActions import ActionRotate
 from bin.Actions.FourDSTEMActions import ActionVirtualImage
 
 from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
+from bin.Actions.VectorFieldActions import ActionSubtractReferenceVector
 from bin.Actions.VectorFieldActions import ActionRotateVector
 from bin.Actions.VectorFieldActions import ActionFlipComponents
 from bin.Actions.VectorFieldActions import ActionPotential
@@ -257,6 +258,7 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._action_subtract_mean_vector = ActionSubtractMeanVector(self)
         self._action_rotate_vector = ActionRotateVector(self)
         self._action_flip_vector = ActionFlipComponents(self)
+        self._action_subtract_reference_vector = ActionSubtractReferenceVector(self)
         self._action_potential = ActionPotential(self)
         self._action_divergence = ActionDivergence(self)
         self._action_curl = ActionCurl(self)
@@ -266,6 +268,9 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._action_group_vector = QActionGroup(self)
         self._action_group_vector.addAction(
             self._action_subtract_mean_vector
+        )
+        self._action_group_vector.addAction(
+            self._action_subtract_reference_vector
         )
         self._action_group_vector.addAction(
             self._action_rotate_vector

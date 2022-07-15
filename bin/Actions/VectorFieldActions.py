@@ -21,9 +21,18 @@ from bin.Actions.EditActions import ActionEditBase
 from bin.Actions.EditActions import failLogging
 from bin.HDFManager import HDFType
 from bin.TaskManager import TaskManager
+from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.PageViewVectorField import DialogSaveVectorField
 from bin.Widgets.PageVirtualImage import DialogSaveImage
-from lib.TaskVectorFieldProcess import TaskCurl, TaskDivergence, TaskFlipVectorField, TaskPotential, TaskRotateVectorAngle, TaskSliceI, TaskSliceJ, TaskSubtractVectorOffset
+from lib.TaskVectorFieldProcess import TaskCurl
+from lib.TaskVectorFieldProcess import TaskDivergence
+from lib.TaskVectorFieldProcess import TaskFlipVectorField
+from lib.TaskVectorFieldProcess import TaskPotential
+from lib.TaskVectorFieldProcess import TaskRotateVectorAngle
+from lib.TaskVectorFieldProcess import TaskSliceI
+from lib.TaskVectorFieldProcess import TaskSliceJ
+from lib.TaskVectorFieldProcess import TaskSubtractVectorOffset
+from lib.TaskVectorFieldProcess import TaskSubtractVectorField
 
 
 class ActionVectorFieldProcessingBase(ActionEditBase):
@@ -263,6 +272,38 @@ class ActionFlipComponents(ActionVectorFieldProcessingBase):
         )
         self.task_manager.addTask(self.task)
 
+
+class ActionSubtractReferenceVector(ActionVectorFieldProcessingBase):
+    """
+    让矢量场减去参考/背景的矢量场。
+
+    Subtract a reference/background vector field.
+    """
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self.setText('Subtract Reference')
+        self.triggered.connect(lambda: self.subtractReference(self))
+
+    @failLogging 
+    def subtractReference(self):
+        """
+        Open a dialog to subtract the reference.
+        """
+        dialog = DialogHDFChoose()
+        dialog_code = dialog.exec()
+        if dialog_code == dialog.Accepted:
+            reference_path = dialog.getCurrentPath()
+        image_parent_path, image_name = self.getResultPath(HDFType.VectorField)
+        meta = self.hdf_handler.file[self.item_path].attrs 
+        self.task = TaskSubtractVectorField(
+            self.item_path,
+            reference_path,
+            image_parent_path,
+            image_name,
+            parent = self,
+            **meta,
+        )
+        self.task_manager.addTask(self.task)
 
 class ActionPotential(ActionVectorFieldProcessingBase):
     """
