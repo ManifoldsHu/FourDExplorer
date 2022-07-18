@@ -143,7 +143,7 @@ class ActionRotateVector(ActionVectorFieldProcessingBase):
             parent = self,
             **meta
         )
-        self.task_manager
+        self.task_manager.addTask(self.task)
 
 
 class ActionSubtractMeanVector(ActionVectorFieldProcessingBase):
@@ -176,6 +176,7 @@ class ActionSubtractMeanVector(ActionVectorFieldProcessingBase):
             parent = self,
             **meta,
         )
+        self.task_manager.addTask(self.task)
 
 
 class ActionFlipComponents(ActionVectorFieldProcessingBase):
