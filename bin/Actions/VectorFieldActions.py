@@ -117,6 +117,9 @@ class ActionRotateVector(ActionVectorFieldProcessingBase):
         """
         Open a dialog to rotate an angle for every vector.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         angle, is_accpeted = QInputDialog.getDouble(
             None,
             'Input rotation angle',
@@ -167,6 +170,9 @@ class ActionSubtractMeanVector(ActionVectorFieldProcessingBase):
         """
         Open a dialog to subtract vectors by their mean vector.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         image_parent_path, image_name = self.getResultPath(HDFType.VectorField)
         meta = self.hdf_handler.file[self.item_path].attrs 
         self.task = TaskSubtractVectorOffset(
@@ -262,6 +268,9 @@ class ActionFlipComponents(ActionVectorFieldProcessingBase):
         """
         Open a dialog to flip the components of vector fields.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         image_parent_path, image_name = self.getResultPath(HDFType.VectorField)
         meta = self.hdf_handler.file[self.item_path].attrs 
         self.task = TaskFlipVectorField(
@@ -290,6 +299,9 @@ class ActionSubtractReferenceVector(ActionVectorFieldProcessingBase):
         """
         Open a dialog to subtract the reference.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         dialog = DialogHDFChoose()
         dialog_code = dialog.exec()
         if dialog_code == dialog.Accepted:
@@ -327,6 +339,9 @@ class ActionPotential(ActionVectorFieldProcessingBase):
         """
         Open a dialog to calculate potential.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
         meta = self.hdf_handler.file[self.item_path].attrs 
         self.task = TaskPotential(
@@ -355,6 +370,9 @@ class ActionDivergence(ActionVectorFieldProcessingBase):
         """
         Open a dialog to calculate divergence.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
         meta = self.hdf_handler.file[self.item_path].attrs 
         self.task = TaskDivergence(
@@ -383,6 +401,9 @@ class ActionCurl(ActionVectorFieldProcessingBase):
         """
         Open a dialog to calculate the curl of the vector fields.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
         meta = self.hdf_handler.file[self.item_path].attrs 
         self.task = TaskCurl(
@@ -411,6 +432,9 @@ class ActionSliceI(ActionVectorFieldProcessingBase):
         """
         Open a dialog to slice i-component of the vectors.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
         meta = self.hdf_handler.file[self.item_path].attrs 
         self.task = TaskSliceI(
@@ -439,6 +463,9 @@ class ActionSliceJ(ActionVectorFieldProcessingBase):
         """
         Open a dialog to slice i-component of the vectors.
         """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
         meta = self.hdf_handler.file[self.item_path].attrs 
         self.task = TaskSliceJ(
