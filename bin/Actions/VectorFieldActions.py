@@ -118,7 +118,7 @@ class ActionRotateVector(ActionVectorFieldProcessingBase):
         Open a dialog to rotate an angle for every vector.
         """
         angle, is_accpeted = QInputDialog.getDouble(
-            self,
+            None,
             'Input rotation angle',
             'Here input a rotation angle for every vector. Unit: deg',
             0,
