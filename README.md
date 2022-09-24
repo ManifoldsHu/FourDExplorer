@@ -5,7 +5,7 @@
 
 The software is still being constructed. Coming soon.
 
-![Image text](https://github.com/ManifoldsHu/FourDExplorer/blob/master/MainWindow.png)
+[![Main Window of 4D-Explorer](https://iili.io/sRI8Ob.md.png)](https://freeimage.host/i/sRI8Ob)
 
 Hu Yiming
 Apr 20, 2022
