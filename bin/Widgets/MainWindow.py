@@ -65,6 +65,8 @@ from bin.Actions.VectorFieldActions import ActionSliceI
 from bin.Actions.VectorFieldActions import ActionSliceJ
 from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
 from bin.Actions.VectorFieldActions import ActionSubtractReferenceVector
+
+from bin.Actions.HelpActions import ActionAbout
 # from PySide6.QtGui import 
 
 from bin.TabViewManager import TabViewManager
@@ -113,6 +115,7 @@ class MainWindow(QMainWindow):
         self._initImage()
         self._initTabViewers()
         self._initSettings()
+        self._initHelp()
     
     @property
     def tabview_manager(self) -> TabViewManager:
@@ -246,39 +249,21 @@ class MainWindow(QMainWindow):
         self._menu_fourdstem.addAction(self._action_background)
         self._menu_fourdstem.addAction(self._action_align)
         self._menu_fourdstem.addAction(self._action_rotate)
-        
-        
-        
-    # def _initDatasetSubmenus(self):
-    #     """
-    #     Initialize the submenus in the Dataset menu.
-    #     """
-        
-
-        # self._dataset_submenu_rc = ':/HDFItems/resources/icons/'
-        # icon_line = self.theme_handler.iconProvider(
-        #     self._dataset_submenu_rc + 'line.png'
-        # )
-
-
-    # def _updateSubMenuIcons(self, rc_path: str):
-    #     """
-    #     Update the icons using resource path.
-
-    #     arguments:
-    #         rc_path: (str) the icon's resource path
-    #     """
-    #     icon = self.theme_handler.iconProvider(rc_path)
 
 
     def _initCalibration(self):
         pass
 
 
-
     def _initImage(self):
         pass
 
+    def _initHelp(self):
+        """
+        Initialize the help menu.
+        """
+        self._action_about = ActionAbout(self)
+        self.ui.menuHelp_H.addAction(self._action_about)
 
     def _initTabViewers(self):
         """
@@ -384,33 +369,4 @@ class ControlToolBar(QToolBar):
         )
         self.setIconSize(QSize(_width - 5, _width - 5))
 
-
-    
-
-
-
-
-
-
-# class MainWindow(QMainWindow, QtStyleTools):
-#     def __init__(self):
-#         super().__init__()
-#         self.ui = QUiLoader().load('uiMainWindow.ui', self)
-#         self.apply_stylesheet(self.ui, theme = 'light_blue.xml')
-
-
-# if __name__ == '__main__':
-    
-#     # dirname = os.path.dirname(PySide6.__file__)
-#     # plugin_path = os.path.join(dirname, 'plugins', 'platforms')
-#     # os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
-
-
-#     app = QApplication(sys.argv)
-#     window = MainWindow()
-#     window.show()
-#     # apply_stylesheet(app, theme='light_blue.xml')
-#     # apply_stylesheet(app, theme='dark_blue.xml')
-#     # apply_stylesheet(app, theme = 'dark_amber.xml')
-#     sys.exit(app.exec())
 

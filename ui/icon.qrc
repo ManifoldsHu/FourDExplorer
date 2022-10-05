@@ -13,6 +13,10 @@
     <file>resources/icons/work.png</file>
     <file>resources/icons/work_light.png</file>
   </qresource>
+  <qresource prefix="WindowIcon">
+    <file>resources/icons/4D.png</file>
+    <file>resources/icons/4D.ico</file>
+  </qresource>
   <qresource prefix="Navigation">
     <file>resources/icons/home.png</file>
     <file>resources/icons/home_light.png</file>
