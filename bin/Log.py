@@ -35,7 +35,7 @@ except BaseException as e:      # Or any other exception
 '''
 
 import logging
-import os.path
+import os
 import time
 
 from configparser import ConfigParser
@@ -360,6 +360,8 @@ class LogUtil(QObject):
         Use the default log path if no path availabe.
         """
         default_path = os.path.join(ROOT_PATH, 'logs')
+        if not os.path.exists(default_path):
+            os.mkdir(default_path)
         self.log_dir_path = default_path
 
     def _useDefaultLevel(self, handler_level_name: str):

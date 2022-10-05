@@ -25,6 +25,7 @@ from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QToolButton 
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QIcon
 from Constants import UIThemeDensity
 
 from bin.Actions.ControlActions import ActionSettings
@@ -96,6 +97,8 @@ class MainWindow(QMainWindow):
         self._app = qApp
 
         self.setWindowTitle('4D-Explorer')
+        icon = QIcon()
+        self.setWindowIcon()
 
         self._initControlPanel()
         
