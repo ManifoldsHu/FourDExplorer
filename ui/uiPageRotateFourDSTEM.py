@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiPageRotateFourDSTEM.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -18,7 +18,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QComboBox, QDoubleSpinBox, QGridLayout,
     QHBoxLayout, QLabel, QLineEdit, QPushButton,
     QSizePolicy, QSlider, QSpacerItem, QSpinBox,
-    QSplitter, QVBoxLayout, QWidget)
+    QSplitter, QToolButton, QVBoxLayout, QWidget)
 
 from bin.Widgets.WidgetPlots import (WidgetPlotDP, WidgetPlotQuiver)
 
@@ -32,24 +32,24 @@ class Ui_Form(object):
         self.splitter = QSplitter(Form)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
-        self.widget = QWidget(self.splitter)
-        self.widget.setObjectName(u"widget")
-        self.verticalLayout_3 = QVBoxLayout(self.widget)
+        self.layoutWidget = QWidget(self.splitter)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.verticalLayout_3 = QVBoxLayout(self.layoutWidget)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.label = QLabel(self.widget)
+        self.label = QLabel(self.layoutWidget)
         self.label.setObjectName(u"label")
 
         self.horizontalLayout.addWidget(self.label)
 
-        self.lineEdit_data_path = QLineEdit(self.widget)
+        self.lineEdit_data_path = QLineEdit(self.layoutWidget)
         self.lineEdit_data_path.setObjectName(u"lineEdit_data_path")
 
         self.horizontalLayout.addWidget(self.lineEdit_data_path)
 
-        self.pushButton_browse = QPushButton(self.widget)
+        self.pushButton_browse = QPushButton(self.layoutWidget)
         self.pushButton_browse.setObjectName(u"pushButton_browse")
 
         self.horizontalLayout.addWidget(self.pushButton_browse)
@@ -57,7 +57,7 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
-        self.widget_dp = WidgetPlotDP(self.widget)
+        self.widget_dp = WidgetPlotDP(self.layoutWidget)
         self.widget_dp.setObjectName(u"widget_dp")
 
         self.verticalLayout_3.addWidget(self.widget_dp)
@@ -66,12 +66,12 @@ class Ui_Form(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.label_2 = QLabel(self.widget)
+        self.label_2 = QLabel(self.layoutWidget)
         self.label_2.setObjectName(u"label_2")
 
         self.verticalLayout.addWidget(self.label_2)
 
-        self.label_3 = QLabel(self.widget)
+        self.label_3 = QLabel(self.layoutWidget)
         self.label_3.setObjectName(u"label_3")
 
         self.verticalLayout.addWidget(self.label_3)
@@ -81,12 +81,12 @@ class Ui_Form(object):
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.spinBox_scan_ii = QSpinBox(self.widget)
+        self.spinBox_scan_ii = QSpinBox(self.layoutWidget)
         self.spinBox_scan_ii.setObjectName(u"spinBox_scan_ii")
 
         self.verticalLayout_2.addWidget(self.spinBox_scan_ii)
 
-        self.spinBox_scan_jj = QSpinBox(self.widget)
+        self.spinBox_scan_jj = QSpinBox(self.layoutWidget)
         self.spinBox_scan_jj.setObjectName(u"spinBox_scan_jj")
 
         self.verticalLayout_2.addWidget(self.spinBox_scan_jj)
@@ -98,25 +98,25 @@ class Ui_Form(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
 
         self.verticalLayout_3.setStretch(1, 1)
-        self.splitter.addWidget(self.widget)
-        self.widget1 = QWidget(self.splitter)
-        self.widget1.setObjectName(u"widget1")
-        self.verticalLayout_4 = QVBoxLayout(self.widget1)
+        self.splitter.addWidget(self.layoutWidget)
+        self.layoutWidget1 = QWidget(self.splitter)
+        self.layoutWidget1.setObjectName(u"layoutWidget1")
+        self.verticalLayout_4 = QVBoxLayout(self.layoutWidget1)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.label_4 = QLabel(self.widget1)
+        self.label_4 = QLabel(self.layoutWidget1)
         self.label_4.setObjectName(u"label_4")
 
         self.horizontalLayout_6.addWidget(self.label_4)
 
-        self.lineEdit_vector_field_path = QLineEdit(self.widget1)
+        self.lineEdit_vector_field_path = QLineEdit(self.layoutWidget1)
         self.lineEdit_vector_field_path.setObjectName(u"lineEdit_vector_field_path")
 
         self.horizontalLayout_6.addWidget(self.lineEdit_vector_field_path)
 
-        self.pushButton_browse_vector_field = QPushButton(self.widget1)
+        self.pushButton_browse_vector_field = QPushButton(self.layoutWidget1)
         self.pushButton_browse_vector_field.setObjectName(u"pushButton_browse_vector_field")
 
         self.horizontalLayout_6.addWidget(self.pushButton_browse_vector_field)
@@ -124,7 +124,7 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_6)
 
-        self.widget_vector_field = WidgetPlotQuiver(self.widget1)
+        self.widget_vector_field = WidgetPlotQuiver(self.layoutWidget1)
         self.widget_vector_field.setObjectName(u"widget_vector_field")
         self.widget_vector_field.setMinimumSize(QSize(0, 400))
 
@@ -132,7 +132,7 @@ class Ui_Form(object):
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.label_9 = QLabel(self.widget1)
+        self.label_9 = QLabel(self.layoutWidget1)
         self.label_9.setObjectName(u"label_9")
 
         self.horizontalLayout_4.addWidget(self.label_9)
@@ -141,66 +141,71 @@ class Ui_Form(object):
 
         self.horizontalLayout_4.addItem(self.horizontalSpacer)
 
-        self.doubleSpinBox_rotation_angle = QDoubleSpinBox(self.widget1)
+        self.doubleSpinBox_rotation_angle = QDoubleSpinBox(self.layoutWidget1)
         self.doubleSpinBox_rotation_angle.setObjectName(u"doubleSpinBox_rotation_angle")
 
         self.horizontalLayout_4.addWidget(self.doubleSpinBox_rotation_angle)
 
+        self.toolButton_refresh_quiver = QToolButton(self.layoutWidget1)
+        self.toolButton_refresh_quiver.setObjectName(u"toolButton_refresh_quiver")
+
+        self.horizontalLayout_4.addWidget(self.toolButton_refresh_quiver)
+
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_4)
 
-        self.pushButton_calculate_rotation_angle = QPushButton(self.widget1)
+        self.pushButton_calculate_rotation_angle = QPushButton(self.layoutWidget1)
         self.pushButton_calculate_rotation_angle.setObjectName(u"pushButton_calculate_rotation_angle")
 
         self.verticalLayout_4.addWidget(self.pushButton_calculate_rotation_angle)
 
-        self.pushButton_adjust_quiver_effects = QPushButton(self.widget1)
+        self.pushButton_adjust_quiver_effects = QPushButton(self.layoutWidget1)
         self.pushButton_adjust_quiver_effects.setObjectName(u"pushButton_adjust_quiver_effects")
 
         self.verticalLayout_4.addWidget(self.pushButton_adjust_quiver_effects)
 
         self.gridLayout = QGridLayout()
         self.gridLayout.setObjectName(u"gridLayout")
-        self.label_5 = QLabel(self.widget1)
+        self.label_5 = QLabel(self.layoutWidget1)
         self.label_5.setObjectName(u"label_5")
 
         self.gridLayout.addWidget(self.label_5, 0, 0, 1, 1)
 
-        self.horizontalSlider_brightness = QSlider(self.widget1)
+        self.horizontalSlider_brightness = QSlider(self.layoutWidget1)
         self.horizontalSlider_brightness.setObjectName(u"horizontalSlider_brightness")
         self.horizontalSlider_brightness.setOrientation(Qt.Horizontal)
 
         self.gridLayout.addWidget(self.horizontalSlider_brightness, 0, 1, 1, 1)
 
-        self.label_6 = QLabel(self.widget1)
+        self.label_6 = QLabel(self.layoutWidget1)
         self.label_6.setObjectName(u"label_6")
 
         self.gridLayout.addWidget(self.label_6, 1, 0, 1, 1)
 
-        self.horizontalSlider_contrast = QSlider(self.widget1)
+        self.horizontalSlider_contrast = QSlider(self.layoutWidget1)
         self.horizontalSlider_contrast.setObjectName(u"horizontalSlider_contrast")
         self.horizontalSlider_contrast.setOrientation(Qt.Horizontal)
 
         self.gridLayout.addWidget(self.horizontalSlider_contrast, 1, 1, 1, 1)
 
-        self.label_7 = QLabel(self.widget1)
+        self.label_7 = QLabel(self.layoutWidget1)
         self.label_7.setObjectName(u"label_7")
 
         self.gridLayout.addWidget(self.label_7, 2, 0, 1, 1)
 
-        self.comboBox_normalize = QComboBox(self.widget1)
+        self.comboBox_normalize = QComboBox(self.layoutWidget1)
         self.comboBox_normalize.addItem("")
         self.comboBox_normalize.addItem("")
         self.comboBox_normalize.setObjectName(u"comboBox_normalize")
 
         self.gridLayout.addWidget(self.comboBox_normalize, 2, 1, 1, 1)
 
-        self.label_8 = QLabel(self.widget1)
+        self.label_8 = QLabel(self.layoutWidget1)
         self.label_8.setObjectName(u"label_8")
 
         self.gridLayout.addWidget(self.label_8, 3, 0, 1, 1)
 
-        self.comboBox_colormap = QComboBox(self.widget1)
+        self.comboBox_colormap = QComboBox(self.layoutWidget1)
         self.comboBox_colormap.addItem("")
         self.comboBox_colormap.addItem("")
         self.comboBox_colormap.addItem("")
@@ -217,7 +222,7 @@ class Ui_Form(object):
         self.verticalLayout_4.addLayout(self.gridLayout)
 
         self.verticalLayout_4.setStretch(1, 1)
-        self.splitter.addWidget(self.widget1)
+        self.splitter.addWidget(self.layoutWidget1)
 
         self.verticalLayout_5.addWidget(self.splitter)
 
@@ -251,6 +256,7 @@ class Ui_Form(object):
         self.label_4.setText(QCoreApplication.translate("Form", u"Vector Field Path", None))
         self.pushButton_browse_vector_field.setText(QCoreApplication.translate("Form", u"Browse", None))
         self.label_9.setText(QCoreApplication.translate("Form", u"Rotation Angle", None))
+        self.toolButton_refresh_quiver.setText("")
         self.pushButton_calculate_rotation_angle.setText(QCoreApplication.translate("Form", u"Calculate Rotation Angle", None))
         self.pushButton_adjust_quiver_effects.setText(QCoreApplication.translate("Form", u"Adjust Quiver Effects", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Brightness", None))

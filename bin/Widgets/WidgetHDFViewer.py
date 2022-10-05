@@ -93,7 +93,9 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._initReconstructionActions()
         self._initVectorFieldActions()
 
-        
+        self.hdf_handler.file_closed.connect(
+            self.refreshTreeView
+        )
         
     @property
     def logger(self) -> Logger:
@@ -297,7 +299,12 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         for action in self._action_group_vector.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
 
-
+    def refreshTreeView(self):
+        """
+        Refresh the treeview of HDF file.
+        """
+        self.hdf_handler.buildHDFTree()
+        self.ui.treeView_HDF.setModel(self.hdf_handler.model)
 
     def showContextMenu(self, pos: QPoint):
         """

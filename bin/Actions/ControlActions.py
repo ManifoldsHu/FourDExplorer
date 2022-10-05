@@ -33,7 +33,7 @@ class ControlActionGroup(QActionGroup):
             ActionPages(self),
             ActionTask(self),
             ActionComputer(self),
-            ActionEMServer(self),
+            # ActionEMServer(self),
         ]
         for action in self._control_actions:
             self.addAction(action)

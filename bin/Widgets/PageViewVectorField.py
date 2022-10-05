@@ -426,6 +426,9 @@ class PageViewVectorField(QWidget):
             self._adjustEffects
         )
 
+        self.ui.pushButton_show_color_wheel.setVisible(False)   # TODO
+        self.ui.pushButton_show_color_wheel.setVisible(False)   # TODO
+
     def _adjustEffects(self):
         """
         Open a dialog to adjust quiver display effects.

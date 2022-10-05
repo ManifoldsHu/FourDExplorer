@@ -45,6 +45,7 @@ from scipy.ndimage import rotate
 from bin.BlitManager import BlitManager 
 from bin.TaskManager import TaskManager 
 from bin.HDFManager import HDFDataNode
+from bin.UIManager import ThemeHandler
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.DialogFindRotationAngle import DialogFindRotationAngle
 from bin.Widgets.DialogSaveFourDSTEM import DialogSaveFourDSTEM
@@ -92,6 +93,11 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         global qApp 
         return qApp.task_manager 
     
+    @property
+    def theme_handler(self) -> ThemeHandler:
+        global qApp 
+        return qApp.theme_handler
+
     @property
     def quiver_canvas(self) -> FigureCanvas:
         return self.ui.widget_vector_field.canvas 
@@ -169,13 +175,20 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         self.ui.doubleSpinBox_rotation_angle.valueChanged.connect(
             self._updateDP 
         )
-        self.ui.pushButton_refresh_quiver.clicked.connect(
+        self.ui.toolButton_refresh_quiver.clicked.connect(
             self._changeQuiverAngle 
         )
+        self._updateRefreshIcon()
+        self.theme_handler.theme_changed.connect(self._updateRefreshIcon)
         self.ui.doubleSpinBox_rotation_angle.setRange(-360, 720)
         
         self.ui.pushButton_start.clicked.connect(self.startCalculation)
         self.ui.pushButton_start.setProperty('class', 'danger')
+
+    def _updateRefreshIcon(self):
+        _refresh_quiver_icon_path = ':/HDFEdit/resources/icons/refresh'
+        refresh_icon=self.theme_handler.iconProvider(_refresh_quiver_icon_path)
+        self.ui.toolButton_refresh_quiver.setIcon(refresh_icon)
 
     def setVectorField(self, vec_path: str = '', read_attr: bool = False):
         """
@@ -251,7 +264,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         coord_i, coord_j = np.meshgrid(array_i, array_j, indexing = 'ij')
         vec_i, vec_j = self.vec_data 
 
-        X, Y = coord_i, coord_j 
+        X, Y = coord_j, coord_i 
         U, V = vec_j, vec_i 
 
         self._quiver_object = self.quiver_ax.quiver(

@@ -36,7 +36,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QVBoxLayout,
 )
-from PySide6.QtCore import QObject, Qt
+from PySide6.QtCore import QObject, Qt, Signal
 
 from bin.Widgets.PageHome import PageHome
 
@@ -46,12 +46,18 @@ class TabViewManager(QObject):
 
     Managers of tabs.
     """
+    signal_tab_opened = Signal(str)
+    signal_tab_closed = Signal(str)
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self._tabWidget_view = None
         self._page_home = PageHome(self.parent())   # parent is MainWindow
         self._tab_history = []
         self._tab_history_max = 0
+        self.hdf_handler.file_about_to_close.connect(
+            self.pageWaitForFileClose
+        )
 
 
     @property
@@ -77,6 +83,11 @@ class TabViewManager(QObject):
     def logger(self) -> Logger:
         global qApp
         return qApp.logger
+
+    @property 
+    def hdf_handler(self):
+        global qApp 
+        return qApp.hdf_handler
 
     def setTabWidget(self, tabview: QTabWidget):
         """
@@ -104,9 +115,11 @@ class TabViewManager(QObject):
         tab = self.tabWidget_view.widget(tab_index)
         self.tabWidget_view.removeTab(tab_index)
         tab.close()
+        self.signal_tab_closed.emit(tab.windowTitle())
         tab.deleteLater()
         if self.tabWidget_view.count() == 0:
             self.openTab(self.page_home)
+        
 
     def getTab(self, index: int):
         """
@@ -154,7 +167,9 @@ class TabViewManager(QObject):
         )
         
         self.tabWidget_view.setCurrentIndex(new_tab_index)
+        self.signal_tab_opened.emit(page.windowTitle())
         self.logger.debug('Open a new page: {0}'.format(page.windowTitle()))
+
 
     def _encapsulatePageToScrollArea(self, page: QWidget) -> QScrollArea:
         """
@@ -180,7 +195,11 @@ class TabViewManager(QObject):
         page.setParent(scroll_area.scrollAreaWidgetContents)
         return scroll_area
 
-
+    def pageWaitForFileClose(self):
+        """
+        Ask user to close the pages before closing the file.
+        """
+        pass 
         
 
 

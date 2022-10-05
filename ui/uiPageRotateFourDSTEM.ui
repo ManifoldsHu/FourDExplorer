@@ -19,7 +19,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,0">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -79,7 +79,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1,0,0,0,0">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -136,6 +136,13 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="doubleSpinBox_rotation_angle"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolButton_refresh_quiver">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

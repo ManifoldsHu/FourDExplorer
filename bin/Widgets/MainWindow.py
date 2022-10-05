@@ -116,6 +116,10 @@ class MainWindow(QMainWindow):
         self._initTabViewers()
         self._initSettings()
         self._initHelp()
+
+        self.ui.tab_pages.initModel()
+        self.tabview_manager.signal_tab_closed.connect(self.ui.tab_pages.initModel)
+        self.tabview_manager.signal_tab_opened.connect(self.ui.tab_pages.initModel)
     
     @property
     def tabview_manager(self) -> TabViewManager:
