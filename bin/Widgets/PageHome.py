@@ -16,7 +16,13 @@ date:           Mar 25, 2022
 
 from PySide6.QtWidgets import QWidget
 from bin.TaskManager import TaskManager
-from bin.ItemActions import ActionImportFourDSTEM
+# from bin.ItemActions import ActionImportFourDSTEM
+
+from bin.Actions.EditActions import ActionImportFourDSTEM 
+from bin.Actions.EditActions import ActionImportImage
+from bin.Actions.FileActions import ActionNewFile 
+from bin.Actions.FileActions import ActionOpenFile 
+
 from ui import uiPageHome
 from example.ExampleTask import ExampleSleepWithoutProgress, ExampleSleep
 
@@ -44,6 +50,16 @@ class PageHome(QWidget):
         self.ui.pushButton_import_fourDSTEM.clicked.connect(
             self._importFourDSTEM
         )
+        self.ui.pushButton_new_file.clicked.connect(
+            self._newFile
+        )
+        self.ui.pushButton_calibration.setVisible(False)        # TODO
+        self.ui.pushButton_import_fourDSTEM.setVisible(False)   # TODO 
+        self.ui.pushButton_import_image.setVisible(False)       # TODO 
+        self.ui.pushButton_new_file.setVisible(False)           # TODO
+        self.ui.pushButton_open_file.setVisible(False)          # TODO
+        self.ui.commandLinkButton_tutorials.setVisible(False)   # TODO
+        self.ui.commandLinkButton_work.setVisible(False)        # TODO
 
     @property
     def task_manager(self) -> TaskManager:
@@ -59,5 +75,18 @@ class PageHome(QWidget):
         self.task_manager.addTask(task)
 
     def _importFourDSTEM(self):
-        self.import_action = ActionImportFourDSTEM()
+        self.import_action = ActionImportFourDSTEM(self)
         self.import_action.trigger()
+
+    def _newFile(self):
+        self.new_file_action = ActionNewFile(self)
+        self.new_file_action.trigger()
+
+    def _openFile(self):
+        self.open_file_action = ActionOpenFile(self)
+        self.open_file_action.trigger()
+
+    def _importImage(self):
+        self.import_image_action = ActionImportImage(self)
+        self.import_image_action.trigger()
+
