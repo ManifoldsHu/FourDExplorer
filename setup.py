@@ -32,18 +32,12 @@ REQUIRED = [
     'qt-material >= 2.12',
     'scikit-image >= 0.18',
     'scipy >= 1.8',
-    # 'requests', 'maya', 'records',
 ]
 
 # What packages are optional?
 EXTRAS = {
-    # 'fancy feature': ['django'],
+    # 'GPU enabling': ['cupy'],
 }
-
-# The rest you shouldn't have to touch too much :)
-# ------------------------------------------------
-# Except, perhaps the License and Trove Classifiers!
-# If you do change the License, remember to change the Trove Classifier for that!
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -102,7 +96,7 @@ class UploadCommand(Command):
         sys.exit()
 
 
-# Where the magic happens:
+# The setup function do the actual work.
 setup(
     name=NAME,
     version=about['__version__'],
@@ -120,16 +114,9 @@ setup(
         "logs", 
         "*.log",
     ]),
-    # If your package is a single module, use this instead of 'packages':
-    # py_modules=['mypackage'],
-
-    # entry_points={
-    #     'console_scripts': ['mycli=mymodule:cli'],
-    # },
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
-    # data_files = DATAFILES,
     license='GPLv3',
     classifiers=[
         # Trove classifiers
@@ -145,7 +132,6 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Topic :: Scientific/Engineering :: Physics',
         'Topic :: Scientific/Engineering :: Chemistry',
-
     ],
     # $ setup.py publish support.
     cmdclass={
