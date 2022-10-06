@@ -26,7 +26,7 @@ ROOT_PATH = os.path.dirname(__file__)
 
 # The version of the application
 global APP_VERSION 
-APP_VERSION = (0, 5, 0)
+APP_VERSION = (0, 5, 2)
 
 # The absolute path of the configuration file
 global CONFIG_PATH

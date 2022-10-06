@@ -1,0 +1,3 @@
+include .config README.md 
+recursive-include *.png *.ico *.xml
+prune dist *.egg-info build

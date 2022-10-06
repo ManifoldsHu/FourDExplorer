@@ -4,7 +4,6 @@
 block_cipher = None
 py_files = [
     'FourDExplorer.py',
-    'initial_config.py',
 ]
 
 add_files = [
