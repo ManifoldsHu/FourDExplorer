@@ -1,10 +1,28 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import platform 
+import sys
+import os 
+
+bits, _ = platform.architecture()   # '64-bit', 'WindowsPE'
+platform_os = sys.platform          # win32
 
 block_cipher = None
 py_files = [
     'FourDExplorer.py',
 ]
+
+# Read APP_VERSION variable from Constants.py file
+with open(os.path.join(os.getcwd(), 'Constants.py'), encoding='utf-8') as f:
+    try:
+        exec(f.read())
+    except NameError:
+        pass 
+    finally:
+        print('APP_VERSION: {0}'.format(APP_VERSION))
+version = '.'.join([str(v) for v in APP_VERSION])
+
+package_name = 'FourDExplorer-v{0}-{1}-{2}'.format(version, platform_os, bits)
 
 add_files = [
     ('ui\\resources\\icons\\*.png', 'ui\\resources\\icons'),
@@ -62,5 +80,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='4D-Explorer',
+    name=package_name,
 )

@@ -14,6 +14,10 @@ date:           Feb 19, 2022
 *------------------------------ Constants.py ---------------------------------*
 '''
 
+# The version of the application
+global APP_VERSION 
+APP_VERSION = (0, 5, 4)
+
 import logging
 import os
 import sys
@@ -23,10 +27,6 @@ from PySide6.QtCore import Qt
 # Absolutely path of FourDExplorer directory
 global ROOT_PATH
 ROOT_PATH = os.path.dirname(__file__)
-
-# The version of the application
-global APP_VERSION 
-APP_VERSION = (0, 5, 3)
 
 # The absolute path of the configuration file
 global CONFIG_PATH

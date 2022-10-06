@@ -28,8 +28,7 @@ from bin.Widgets.SplashScreenStart import SplashScreenStart
 
 from bin.app import App 
 
-        
-if __name__ == '__main__':
+def run():
     if not ROOT_PATH in sys.path:
         sys.path.append(ROOT_PATH)
 
@@ -56,3 +55,8 @@ if __name__ == '__main__':
     quit = app.exec()
     logger.info('4D-Explorer exits.')
     sys.exit(quit)
+
+
+if __name__ == '__main__':
+    run()
+
