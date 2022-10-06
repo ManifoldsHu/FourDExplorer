@@ -9,6 +9,7 @@ py_files = [
 
 add_files = [
     ('ui\\resources\\icons\\*.png', 'ui\\resources\\icons'),
+    ('ui\\resources\\icons\\*.ico', 'ui\\resources\\icons'),
     ('ui\\resources\\images\\*.png', 'ui\\resources\\images'),
     ('ui\\resources\\themes\\dark\\*.xml', 'ui\\resources\\themes\\dark'),
     ('ui\\resources\\themes\\light\\*.xml', 'ui\\resources\\themes\\light')
