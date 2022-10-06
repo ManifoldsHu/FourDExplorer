@@ -422,12 +422,12 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
             
             self.meta['scan_step_size_i'] = (
                 self.meta['full_scan_field_of_view_i'] * 
-                self.meta['scan_size'] / self.scan_i
+                self.meta['scan_size'] * 2 / self.scan_i
             )
 
             self.meta['scan_step_size_j'] = (
                 self.meta['full_scan_field_of_view_j'] * 
-                self.meta['scan_size'] / self.scan_j 
+                self.meta['scan_size'] * 2 / self.scan_j 
             )
         except BaseException as e:
             self.logger.error('Failed to parse scanning_step_size items.\n'
