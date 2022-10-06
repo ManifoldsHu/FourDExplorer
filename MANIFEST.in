@@ -1,0 +1,7 @@
+include .config README.md 
+include ui/resources/icons/*.ico  
+include ui/resources/icons/*.png
+include ui/resources/images/*.png
+include ui/resources/themes/dark/*.xml
+include ui/resources/themes/light/*.xmls
+prune dist *.egg-info build

@@ -40,20 +40,6 @@ EXTRAS = {
     # 'fancy feature': ['django'],
 }
 
-DATAFILES = [
-    ('ui\\resources\\icons\\*.png', 'ui\\resources\\icons'),
-    ('ui\\resources\\icons\\*.ico', 'ui\\resources\\icons'),
-    ('ui\\resources\\images\\*.png', 'ui\\resources\\images'),
-    ('ui\\resources\\themes\\dark\\*.xml', 'ui\\resources\\themes\\dark'),
-    ('ui\\resources\\themes\\light\\*.xml', 'ui\\resources\\themes\\light'),
-]
-
-# PACKAGEDATA = {
-#     'ui\\resources\\icons': 'ui\\resources\\icons\\*.png',
-#     'ui\\resources\\icons': 'ui\\resources\\icons\\*.ico',
-#     ''
-# }
-
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
 # Except, perhaps the License and Trove Classifiers!
@@ -143,7 +129,7 @@ setup(
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
-    data_files = DATAFILES,
+    # data_files = DATAFILES,
     license='GPLv3',
     classifiers=[
         # Trove classifiers
