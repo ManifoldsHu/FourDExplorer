@@ -3,5 +3,5 @@ include FourDExplorer/ui/resources/icons/*.ico
 include FourDExplorer/ui/resources/icons/*.png
 include FourDExplorer/ui/resources/images/*.png
 include FourDExplorer/ui/resources/themes/dark/*.xml
-include FourDExplorer/ui/resources/themes/light/*.xmls
+include FourDExplorer/ui/resources/themes/light/*.xml
 prune dist *.egg-info build
