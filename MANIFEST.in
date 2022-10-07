@@ -1,7 +1,7 @@
-include .config README.md 
-include ui/resources/icons/*.ico  
-include ui/resources/icons/*.png
-include ui/resources/images/*.png
-include ui/resources/themes/dark/*.xml
-include ui/resources/themes/light/*.xmls
+include README.md 
+include FourDExplorer/ui/resources/icons/*.ico  
+include FourDExplorer/ui/resources/icons/*.png
+include FourDExplorer/ui/resources/images/*.png
+include FourDExplorer/ui/resources/themes/dark/*.xml
+include FourDExplorer/ui/resources/themes/light/*.xmls
 prune dist *.egg-info build
