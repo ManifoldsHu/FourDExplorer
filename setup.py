@@ -10,7 +10,7 @@ import sys
 from shutil import rmtree
 
 from setuptools import find_packages, setup, Command
-from Constants import APP_VERSION
+from FourDExplorer.Constants import APP_VERSION
 
 # Package meta-data.
 NAME = 'FourDExplorer'
@@ -109,7 +109,6 @@ setup(
     url=URL,
     py_modules=[],
     packages=find_packages(
-        # include=['bin', 'example', 'lib', 'ui', 'FourDExplorer']
         exclude=[
         "test",
         "test*",
