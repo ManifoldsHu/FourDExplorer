@@ -107,7 +107,9 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
+    py_modules=[],
     packages=find_packages(
+        # include=['bin', 'example', 'lib', 'ui', 'FourDExplorer']
         exclude=[
         "test",
         "test*",
