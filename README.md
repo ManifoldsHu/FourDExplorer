@@ -22,7 +22,7 @@ conda activate FourDExplorer
 pip install --upgrade FourDExplorer
 ```
 
-Then, change the working directory to the source directory, and run python
+Then, run python
 ```
 python
 ```
@@ -50,6 +50,7 @@ There are three groups initialized:
 - Calibration
 - Reconstruction
 - temp
+
 which is shown on the 'File' page of the left control panel. In an HDF5 file, groups are like folders or directories, and datasets are like files, and they are editable just like what we do in our operating system. All of the groups and datasets in the HDF5 file will be displayed here. 
 
 [![Open H5](https://iili.io/Qkt9xp.png)](https://freeimage.host/i/Qkt9xp)
@@ -75,7 +76,7 @@ Now, suppose we have a raw file from the Electron Microscopy. There are abundant
 
 [![Import Raw Data](https://iili.io/QkZDJa.png)](https://freeimage.host/i/QkZDJa)
 
-Choose the 'General Raw Data' option as our Import File Type. Then, click the 'browse' button to choose the raw file we want to import. Then set correct parameters, including dataset size, data type, offset of the first image, gap between two images and whether it is little-endian. Next, name it in the bottom 'IMPORT TO' region. Here, we set the name of imported dataset to be 'mydataset'. When all is ready, click 'OK'.
+Choose the 'General Raw Data' option as our Import File Type. Then, click the 'browse' button to choose the raw file we want to import. Then set correct parameters, including dataset size, data type, offset of the first image, gap between two images and whether it is little-endian. Next, name it in the bottom 'IMPORT TO' region. Here, we set the name of imported dataset to be 'gold_particle'. When all is ready, click 'OK'.
 
 [![Import Raw Parameters](https://iili.io/QkZmOv.png)](https://freeimage.host/i/QkZmOv)
 
@@ -90,7 +91,7 @@ When we load the dataset, a task is created and executed in the 'Task' panel at 
 
 
 ### Dataset Extension
-We can see a new item in the HDF5 file control panel at the left of the main window. This item, with a 'mydataset.4dstem' as its name and a cube as its icon, is what we imported above. 4D-Explorer uses extension name to recognize what a dataset is, but this is not absolute, just like what we do in Linux system. There are several usual extensions:
+We can see a new item in the HDF5 file control panel at the left of the main window. This item, with a 'gold_particle.4dstem' as its name and a cube as its icon, is what we imported above. 4D-Explorer uses extension name to recognize what a dataset is, but this is not absolute, just like what we do in Linux system. There are several usual extensions:
 - .4dstem : This is a 4D-STEM dataset, with dimension 4.
 - .img : This is a gray-scale image, with dimension 2.
 - .vec : This is a vector field, with two components. Each component is a 2D-image.
@@ -98,7 +99,7 @@ We can see a new item in the HDF5 file control panel at the left of the main win
 
 ### View 4D-STEM dataset
 
-Double click the 4D-STEM dataset we imported above: 'mydataset.4dstem' at the left control panel. We will see an open page on the right side. 
+Double click the 4D-STEM dataset we imported above: 'gold_particle.4dstem' at the left control panel. We will see an open page on the right side. 
 
 [![View Dataset](https://iili.io/QktFgn.png)](https://freeimage.host/i/QktFgn)
 
@@ -135,18 +136,14 @@ After that, we can explore the 4D-STEM dataset in both real space and diffractio
 [![Explore Data](https://iili.io/QkZb5J.png)](https://freeimage.host/i/QkZb5J)
 
 
-## Further Topics
+## Document
 
-### Calibration 
 TODO
-
-### DPC 
-TODO 
 
 
 ## Performance 
 
-The speed of the 4D-STEM dataset loading and reconstruction is basically determined by the disk IO speed. For a typical 1 GB dataset stored on HDD hard disk with 100 MB/s read-out speed, it takes about 10 seconds for reconstruction. 
+The speed of the 4D-STEM dataset loading and reconstruction is basically determined by the disk IO speed. For a typical 4 GB dataset stored on HDD hard disk with 100 MB/s read-out speed, it takes about 40 seconds for reconstruction. 
 
 4D-Explorer never read the whole dataset into memory at once. It usually does not require large memory for computing. 
 
@@ -166,16 +163,6 @@ Our article is in preparation.
 4D-Explorer is under GPLv3 license. See LICENSE file in the repository. 
 
 
-
-
-
-
-
-
-
-
-[![Main Window of 4D-Explorer](https://iili.io/sRI8Ob.md.png)](https://freeimage.host/i/sRI8Ob)
-
 Hu Yiming
-Oct 6, 2022
+Oct 8, 2022
 Nanjing University
