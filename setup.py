@@ -23,15 +23,15 @@ VERSION = '.'.join([str(v) for v in APP_VERSION])
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'numpy >= 1.20',
-    'h5py >= 3.7',
-    'matplotlib >= 3.5',
-    'pyinstaller >= 5',
-    'psutil >= 5.9',
-    'pyside6 >= 6.2',
-    'qt-material >= 2.12',
-    'scikit-image >= 0.18',
-    'scipy >= 1.8',
+    'numpy >= 1.20, <= 1.23',
+    'h5py >= 3.7, <= 3.8',
+    'matplotlib >= 3.5, <= 3.6',
+    'pyinstaller >= 5.4, <= 5.5',
+    'psutil == 5.9',
+    'pyside6 >= 6.2, <= 6.3',
+    'qt-material == 2.12',
+    'scikit-image >= 0.18, <= 0.19',
+    'scipy >= 1.8, <= 1.9',
 ]
 
 # What packages are optional?
