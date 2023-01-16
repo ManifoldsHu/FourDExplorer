@@ -38,6 +38,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
+from matplotlib.patches import Annulus
 
 from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFDataNode
@@ -125,6 +126,7 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         self._preview_object = None
         self._preview_hcursor_object = None
         self._preview_vcursor_object = None
+        self._preview_rcursor_object = None 
         self._tracking = False
 
         self._initBaseUi()
@@ -160,6 +162,10 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
     @property
     def preview_vcursor_object(self) -> Line2D:
         return self._preview_vcursor_object
+
+    @property 
+    def preview_rcursor_object(self) -> Annulus:
+        return self._preview_rcursor_object
 
     @property
     def preview_blit_manager(self) -> BlitManager:
@@ -308,8 +314,9 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         if self.preview_hcursor_object is None:
             self._preview_hcursor_object = self.preview_ax.axhline(
                 y = self.scan_ii,
-                color = 'black',
+                color = 'white',
                 linewidth = 1,
+                linestyle = '--',
             )
             self.preview_blit_manager['preview_hcursor'] = (
                 self.preview_hcursor_object)    # Here is not a tuple
@@ -322,8 +329,9 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         if self.preview_vcursor_object is None:
             self._preview_vcursor_object = self.preview_ax.axvline(
                 x = self.scan_jj,
-                color = 'black',
+                color = 'white',
                 linewidth = 1,
+                linestyle = '--',
             )
             self.preview_blit_manager['preview_vcursor'] = (
                 self.preview_vcursor_object)    # Here is not a tuple
@@ -334,7 +342,22 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
             )
             self.preview_blit_manager.update()
 
-        
+        if self.preview_rcursor_object is None:
+            self._preview_rcursor_object = self.preview_ax.add_patch(Annulus(
+                xy = (self.scan_jj, self.scan_ii),
+                r = min(self.data_object.shape[0:2])/20,
+                width = min(self.data_object.shape[0:2])/40,
+                color = 'white',
+                linewidth = 1,
+                fill = False,
+            ))
+            self.preview_blit_manager['preview_rcursor'] = (
+                self.preview_rcursor_object)    # Here is not a tuple
+        else:
+            self.preview_rcursor_object.set_center(
+                xy = (self.scan_jj, self.scan_ii)
+            )
+            self.preview_blit_manager.update()
 
     def _updateDP(self):
         """
@@ -347,6 +370,7 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         scan_jj = max(0, min(scan_j, self.scan_jj))
         self.preview_hcursor_object.set_ydata(scan_ii)
         self.preview_vcursor_object.set_xdata(scan_jj)
+        self.preview_rcursor_object.set_center((scan_jj, scan_ii))
         self.preview_blit_manager.update()
 
     def _updateDPByMouseMotion(self, event: MouseEvent):
