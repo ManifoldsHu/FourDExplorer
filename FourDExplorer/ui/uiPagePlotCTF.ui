@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
-    <height>759</height>
+    <width>1216</width>
+    <height>1044</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,12 +19,12 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Optical Configuration (CTF Curve) Path</string>
+        <string>Optical Configuration (CTF) Path</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="lineEdit_config_path"/>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_browse_probe">
@@ -46,7 +46,7 @@
       </property>
       <widget class="QTabWidget" name="tabWidget_2">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_3">
         <attribute name="title">
@@ -64,7 +64,7 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_9">
          <item>
-          <widget class="WidgetPlotImage" name="widget_plot_probe_real" native="true"/>
+          <widget class="WidgetPlotImage" name="widget_plot_probe_abs" native="true"/>
          </item>
         </layout>
        </widget>
@@ -74,14 +74,14 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_12">
          <item>
-          <widget class="WidgetPlotImage" name="widget_plot_probe_phase" native="true"/>
+          <widget class="WidgetPlotImage" name="widget_plot_probe_angle" native="true"/>
          </item>
         </layout>
        </widget>
       </widget>
       <widget class="QTabWidget" name="tabWidget_3">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab_9">
         <attribute name="title">
@@ -107,7 +107,7 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -550,7 +550,7 @@
             <item>
              <widget class="QStackedWidget" name="stackedWidget">
               <property name="currentIndex">
-               <number>1</number>
+               <number>0</number>
               </property>
               <widget class="QWidget" name="page_virtual_detector">
                <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -676,7 +676,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushButton_save_config_path">
        <property name="text">
         <string>Save Optical Configuration (CTF Curve)</string>
        </property>
