@@ -136,6 +136,10 @@ TODO
 
 4D-Explorer 不会一次性把整个数据集读进内存里，所以一般其内存占用不会很高，可以运行在个人电脑上。
 
+## 引用
+
+我们撰写的关于 4D-Explorer 的文章，请参考 [Arxiv](https://arxiv.org/abs/2306.08365)
+
 ## 协同开发
 
 欢迎开源开发者协同开发~ Github 仓库地址是 (https://github.com/ManifoldsHu/FourDExplorer)

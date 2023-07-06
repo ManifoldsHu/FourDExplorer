@@ -147,6 +147,9 @@ The speed of the 4D-STEM dataset loading and reconstruction is basically determi
 
 4D-Explorer never read the whole dataset into memory at once. It usually does not require large memory for computing. 
 
+## Cite
+
+Our article about this software can be found in [Arxiv](https://arxiv.org/abs/2306.08365)
 
 ## Contribution 
 
