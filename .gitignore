@@ -11,6 +11,7 @@ Desktop.ini
 *.egg-info
 dist
 build
+release
 .qt_for_python
 
 #Log:
