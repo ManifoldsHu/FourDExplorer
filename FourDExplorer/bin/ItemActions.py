@@ -4,10 +4,14 @@
 *----------------------------- ItemActions.py --------------------------------*
 针对 HDF5 文件中的各个 Object 的各个 Actions。
 
+已废弃
+
 作者:           胡一鸣
 创建日期:       2022年4月11日
 
 This module includes actions towards objects of HDF5.
+
+DEPRECATED
 
 author:         Hu Yiming
 date:           Apr 11, 2022
