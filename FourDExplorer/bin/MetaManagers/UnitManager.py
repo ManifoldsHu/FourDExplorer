@@ -27,9 +27,9 @@ class UnitManager(QObject):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self._ureg = pint.UnitRegistry()
-        self._register_standard_units() 
+        self._registerStandardUnits() 
 
-    def _register_standard_units(self):
+    def _registerStandardUnits(self):
         """
         Register standard units and our own units.
         """
@@ -69,7 +69,7 @@ class UnitManager(QObject):
         # 添加埃（Ångström）
         self._ureg.define('angstrom = 1e-10 * meter')  # 埃
 
-    def register_unit(self, definition: str):
+    def registerUnit(self, definition: str):
         """
         Register new unit and its convert relationship between existing units.
 
@@ -111,7 +111,7 @@ class UnitManager(QObject):
         quantity = self._ureg.Quantity(value, from_unit)
         return quantity.to(to_unit).magnitude 
     
-    def format_unit(self, unit_str: str, context = "general") -> str:
+    def formatUnit(self, unit_str: str, context = "general") -> str:
         """
         Return a specific format of the unit.
 
@@ -132,13 +132,13 @@ class UnitManager(QObject):
         if context == "general":
             return "{0:~}".format(unit)
         elif context in ("html", "HTML"):
-            return self._format_unit_html(unit)
+            return self._formatUnitHtml(unit)
         elif context in ("tex", "TeX", "TEX", "LaTeX", "LATEX", "latex"):
-            return self._format_unit_tex(unit)
+            return self._formatUnitTex(unit)
         else:
             raise ValueError("Invalid context for unit formatting")
         
-    def _format_unit_html(self, unit: pint.Unit) -> str:
+    def _formatUnitHtml(self, unit: pint.Unit) -> str:
         """
         Format unit to html, for displaying in QLable
 
@@ -158,7 +158,7 @@ class UnitManager(QObject):
         }
         return html_mappings.get(unit_str, unit_str) 
     
-    def _format_unit_tex(self, unit: pint.Unit) -> str:
+    def _formatUnitTex(self, unit: pint.Unit) -> str:
         """
         Format unit to TeX, for displaying in matplotlib widgets.
 
