@@ -58,7 +58,7 @@ class MetaManagerFourDSTEM(QObject):
     time                    str         creation time in ISO 8601, 13:29:10
     date                    str         creation date in ISO 8601, 2018-01-28
     time_zone               str         supported by the python-dateutil library, the same as the system
-    doi                     str         
+    doi                     str         Digital Object Unique Identifier (DOI)
 
     FileIO/
     fourd_explorer_version  str         e.g. 0.5.2
@@ -367,3 +367,5 @@ class MetaManagerFourDSTEM(QObject):
             description='stage z position',
             parent=self,
         )
+
+        # Metadata for 

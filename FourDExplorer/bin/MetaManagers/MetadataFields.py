@@ -11,18 +11,32 @@
 *---------------------------- MetadataFields.py ----------------------------*
 """
 
-from PySide6.QtCore import (
-    QObject,
-)
+from typing import Any
+from PySide6.QtCore import QObject
+
 
 class MetadataFieldBase(QObject):
     """
     各种元数据项共有的性质，主要是备注。
     """
-    def __init__(self, value, description = "", parent: QObject = None):
+    def __init__(self, title: str, value: Any, description: str = "", parent: QObject = None):
+        """
+        Initialize a metadata field object.
+
+        arguments:
+            title: (str) the title of the attribute (for displaying)
+
+            value: (Any) the value of the attribute
+
+            description: (str) the description of the attribute
+
+            parent: (QObject) the parent QObject of the field
+        """
         super().__init__(parent)
+        self._title = title
         self._value = value 
         self._description = description 
+
 
     @property 
     def value(self):
@@ -43,13 +57,14 @@ class FloatField(MetadataFieldBase):
     """
     def __init__(
         self, 
+        title: str,
         value: float, 
-        unit = None, 
-        display_unit = None, 
-        description = "", 
-        parent = None
+        unit: str = None, 
+        display_unit: str = None, 
+        description: str = "", 
+        parent: QObject = None
     ):
-        super().__init__(value, description, parent)
+        super().__init__(title, value, description, parent)
         self._unit = unit 
         self._display_unit = display_unit 
         # TODO: Add unit converting 
@@ -77,7 +92,15 @@ class IntField(MetadataFieldBase):
     """
     整数字段类，目前不需要额外的属性或方法，但保留扩展的可能性 
     """
-    pass 
+    def __init__(
+        self,
+        title: str,
+        value: int,
+        description: str = "",
+        parent: QObject = None,
+    ):
+        super().__init__(title, value, description, parent)
+        
 
 
 class StringField(MetadataFieldBase):
