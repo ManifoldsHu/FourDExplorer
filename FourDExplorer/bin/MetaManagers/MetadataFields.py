@@ -90,18 +90,39 @@ class FloatField(MetadataFieldBase):
 
 class IntField(MetadataFieldBase):
     """
-    整数字段类，目前不需要额外的属性或方法，但保留扩展的可能性 
+    整数字段类，目前和浮点数类一致，但大多数情况下它们都不需要单位
     """
     def __init__(
         self,
         title: str,
         value: int,
+        unit: str = None,
+        display_unit: str = None,
         description: str = "",
         parent: QObject = None,
     ):
         super().__init__(title, value, description, parent)
-        
+        self._unit = unit 
+        self._display_unit = display_unit 
+        # TODO: Add unit converting 
 
+    @property 
+    def unit(self) -> str:
+        return self._unit 
+    
+    @unit.setter 
+    def unit(self, unt: str):
+        # TODO: detect unit's alias name 
+        self._unit = unt 
+    
+    @property
+    def display_unit(self) -> str:
+        return self._display_unit
+
+    @display_unit.setter 
+    def display_unit(self, dsp_unt: str):
+        # TODO: detect unit's alias name 
+        self._display_unit = dsp_unt 
 
 class StringField(MetadataFieldBase):
     """

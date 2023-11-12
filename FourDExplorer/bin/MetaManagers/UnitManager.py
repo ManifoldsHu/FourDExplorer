@@ -5,9 +5,12 @@
 使用 pint 管理元数据的单位
 
 作者：          胡一鸣
-创建时间：      2023年10月31日
+创建日期：      2023年10月31日
 
+Use pint to manage units of metadata.
 
+author:         Hu Yiming
+date:           Oct 31, 2023
 *---------------------------- MetadataFields.py ----------------------------*
 """
 

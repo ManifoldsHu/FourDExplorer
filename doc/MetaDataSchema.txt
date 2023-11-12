@@ -94,13 +94,13 @@ AcquisitionInstrument/Camera/
 
 AcquisitionInstrument/Stage/
     (Not Implemented)
-    tilt_alpha              float       mrad    deg         tilt angle α (X)
+    tilt_alpha              float       rad     deg         tilt angle α (X)
     the tilt angle α/X of the specimen
 
-    tilt_beta               float       mrad    deg         tilt angle β (Y)
+    tilt_beta               float       rad     deg         tilt angle β (Y)
     the tilt angle β/Y of the specimen 
 
-    rotation                float       mrad    deg         rotation angle 
+    rotation                float       rad     deg         rotation angle 
     the rotational offset angle of the specimen
 
     x                       float       m       mm          stage coordinate x 
@@ -147,10 +147,10 @@ Calibration/RotationalOffsetCorrection/
     the rotation angle between scanning coordinates and camera coordinates
 
 Calibration/DiffractionAlignment/
-    alignment_pixel_i       int         translation pixel of diffraction pattern (i-direction)
+    alignment_pixel_i       int                             translation pixel of diffraction pattern (i-direction)
     translation pixel of diffraction pattern in i-direction (-y direction) to centering the diffraction pattern
 
-    alignment_pixel_j       int         translation pixel of diffraction pattern (j-direction)
+    alignment_pixel_j       int                             translation pixel of diffraction pattern (j-direction)
     translation pixel of diffraction pattern in j-direction (x direction) to centering the diffraction pattern
 
     alignment_moving_path   str         path of alignment translation vectors
@@ -197,6 +197,7 @@ Aberration/
 Quantify/
     display_vmin            float                           minimum displaying value
     minimum displaying value of the diffraction patterns
+    
     display_vmax            float                           maximum displaying value 
     maximum displaying value of the diffraction patterns 
 
@@ -366,7 +367,8 @@ FourDSTEM/General/
     Copy from Image:
       
 )
-
+Background/General/
+    background_path         str         the path of the background img 
 
 (Deprecated)
 
