@@ -19,14 +19,12 @@ class MetadataFieldBase(QObject):
     """
     各种元数据项共有的性质，主要是备注。
     """
-    def __init__(self, title: str, value: Any, description: str = "", parent: QObject = None):
+    def __init__(self, title: str, description: str = "", parent: QObject = None):
         """
         Initialize a metadata field object.
 
         arguments:
             title: (str) the title of the attribute (for displaying)
-
-            value: (Any) the value of the attribute
 
             description: (str) the description of the attribute
 
@@ -34,13 +32,7 @@ class MetadataFieldBase(QObject):
         """
         super().__init__(parent)
         self._title = title
-        self._value = value 
         self._description = description 
-
-
-    @property 
-    def value(self):
-        return self._value 
     
     @property
     def description(self) -> str:
@@ -58,13 +50,12 @@ class FloatField(MetadataFieldBase):
     def __init__(
         self, 
         title: str,
-        value: float, 
         unit: str = None, 
         display_unit: str = None, 
         description: str = "", 
         parent: QObject = None
     ):
-        super().__init__(title, value, description, parent)
+        super().__init__(title, description, parent)
         self._unit = unit 
         self._display_unit = display_unit 
         # TODO: Add unit converting 
@@ -95,13 +86,12 @@ class IntField(MetadataFieldBase):
     def __init__(
         self,
         title: str,
-        value: int,
         unit: str = None,
         display_unit: str = None,
         description: str = "",
         parent: QObject = None,
     ):
-        super().__init__(title, value, description, parent)
+        super().__init__(title, description, parent)
         self._unit = unit 
         self._display_unit = display_unit 
         # TODO: Add unit converting 

@@ -36,14 +36,14 @@ date:           Oct 31, 2023
 """
 
 from logging import Logger 
-from typing import Type 
+import os 
+import json
 
 from PySide6.QtCore import QObject
 
-from Constants import HDFType 
+from Constants import ROOT_PATH
 from bin.HDFManager import HDFHandler 
 from bin.MetaManagers.MetadataFields import FloatField, IntField, StringField
-from bin.MetaManagers.UnitManager import UnitManager
 
 class MetaManagerFourDSTEM(QObject):
     """
@@ -52,13 +52,11 @@ class MetaManagerFourDSTEM(QObject):
     The class that manages metadata of .4dstem datasets.
     """
 
-
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        # 需要在这里将所有涉及到的 attribute 进行初始化。例如，
-        self._initializeMetadata()
-        self._meta = {}
-    
+        self._schema = {}
+        self._initializeSchema()
+
     @property
     def hdf_handler(self) -> HDFHandler:
         global qApp 
@@ -69,8 +67,83 @@ class MetaManagerFourDSTEM(QObject):
         global qApp 
         return qApp.logger
     
-    def _initializeMetadata(self):
+    @property
+    def schema_json_path(self) -> str:
+        return os.path.join(ROOT_PATH, 'schema', 'MetaStructures', '4dstem.json')
+
+    def _initializeSchema(self):
         """
         Initialize all of the metadata. All values will be set to None.
         """
-        pass
+        with open(self.schema_json_path, 'r', encoding='utf-8') as f:
+            json_data = json.load(f)
+        
+        self._parseSchema(parent_key = '/', definitions = json_data)
+
+    def _parseSchema(self, parent_key: str, definitions: dict):
+        """
+        Recursively parse definitions to handle nested structures.
+
+        arguments:
+            definitions: (dict) The current definition (maybe branch or leaf) 
+                in the attribute tree
+
+            parent_key: (str) The parent key of the current definition
+
+        returns:
+            (dict) the current metadata
+        """
+        # meta = self._schema
+        for key, value in definitions.items():
+            full_key = f"{parent_key}/{key}"
+            if isinstance(value, dict) and 'type' in value:
+                # Assuming that if 'type' is in the dictionary, it is a metadata field
+                self._createFieldInstance(full_key, value)
+            elif isinstance(value, dict):
+                # It is a nested structure, so we need to go deeper
+                self._parseSchema(parent_key, value)
+            else:
+                raise ValueError(f"Invalid format for metadata schema at {full_key}")
+        # return meta 
+    
+    def _createFieldInstance(self, full_key: str, field_instance: dict):
+        """
+        Create field instances depending on field type.
+
+        arguments:
+            full_key: (str) The full key of the attribute. 
+
+            field_instance: (dict) the field definition dict parsed from json file
+        """
+        if field_instance['type'] == 'str':
+            field = StringField(
+                field_instance.get('title'), 
+                field_instance.get('description'),
+                parent = self,
+            )
+            self._schema[full_key] = field
+        elif field_instance['type'] == 'int':
+            field = IntField(
+                field_instance.get('title'),
+                field_instance.get('unit'),
+                field_instance.get('display_unit'),
+                field_instance.get('description'),
+                parent = self,
+            )
+            self._schema[full_key] = field
+        elif field_instance['type'] == 'float':
+            field = FloatField(
+                field_instance.get('title'),
+                field_instance.get('unit'),
+                field_instance.get('display_unit'),
+                field_instance.get('description'),
+                parent = self,
+            )
+            self._schema[full_key] = field
+        else:
+            raise TypeError(
+                f"Invalid type {field_instance['type']} of the field: {full_key}"
+            )
+            
+
+    
