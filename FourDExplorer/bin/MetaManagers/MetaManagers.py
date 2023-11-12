@@ -45,9 +45,9 @@ from Constants import ROOT_PATH
 from bin.HDFManager import HDFHandler 
 from bin.MetaManagers.MetadataFields import FloatField, IntField, StringField
 
-class MetaManagerFourDSTEM(QObject):
+class MetaManagerBase(QObject):
     """
-    管理 .4dstem 数据集元数据的封装类。
+    管理 4D-Explorer 预定义类型的 HDF5 数据集元数据的基类。
 
     The class that manages metadata of .4dstem datasets.
     """
@@ -69,7 +69,9 @@ class MetaManagerFourDSTEM(QObject):
     
     @property
     def schema_json_path(self) -> str:
-        return os.path.join(ROOT_PATH, 'schema', 'MetaStructures', '4dstem.json')
+        raise NotImplementedError(
+            "No schema_json_path assigned. "
+            "You should success MetaManagerBase and define the path of the json file.")
 
     def _initializeSchema(self):
         """
@@ -146,4 +148,36 @@ class MetaManagerFourDSTEM(QObject):
             )
             
 
+class MetaManagerFourDSTEM(MetaManagerBase):
+    """
+    管理 .4dstem 数据集的元数据的类 
+
+    The meta manager of .4dstem datasets.
+    """
+    @property
+    def schema_json_path(self) -> str:
+        return os.path.join(ROOT_PATH, 'schema', 'MetaStructures', '4dstem.json')
+    
+
+class MetaManagerImg(MetaManagerBase):
+    """
+    管理 .img 数据集的元数据的类
+
+    The meta manager of .img datasets.
+    """
+    @property
+    def schema_json_path(self) -> str:
+        return os.path.join(ROOT_PATH, 'schema', 'MetaStructures', 'img.json')
+    
+
+class MetaManagerVec(MetaManagerBase):
+    """
+    管理 .vec 数据集的元数据的类
+
+    The meta manager of .vec datasets.
+    """
+    @property
+    def schema_json_path(self) -> str:
+        return os.path.join(ROOT_PATH, 'schema', 'MetaStructure', 'vec.json')
+    
     
