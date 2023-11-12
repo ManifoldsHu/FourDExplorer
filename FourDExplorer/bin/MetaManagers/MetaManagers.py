@@ -106,7 +106,6 @@ class MetaManagerBase(QObject):
                 self._parseSchema(parent_key, value)
             else:
                 raise ValueError(f"Invalid format for metadata schema at {full_key}")
-        # return meta 
     
     def _createFieldInstance(self, full_key: str, field_instance: dict):
         """
@@ -179,5 +178,3 @@ class MetaManagerVec(MetaManagerBase):
     @property
     def schema_json_path(self) -> str:
         return os.path.join(ROOT_PATH, 'schema', 'MetaStructure', 'vec.json')
-    
-    
