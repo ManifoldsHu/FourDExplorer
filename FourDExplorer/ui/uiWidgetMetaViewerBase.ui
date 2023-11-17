@@ -15,18 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <widget class="QWidget" name="tab_base">
-      <attribute name="title">
-       <string>Base</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QTreeView" name="treeView"/>
-       </item>
-      </layout>
-     </widget>
-    </widget>
+    <widget class="QTabWidget" name="tabWidget"/>
    </item>
   </layout>
  </widget>
