@@ -35,7 +35,6 @@ General/
     doi                     str         DOI                     
     Digital Object Unique Identifier (DOI)
 
-FileIO/
     fourd_explorer_version  str         4D-Explorer Version     
     the version of 4D-Explorer
 
@@ -219,8 +218,6 @@ General/
     date                    str         creation date in ISO 8601, 2018-01-28
     time_zone               str         supported by the python-dateutil library, the same as the system
     doi                     str         
-
-FileIO/
     fourd_explorer_version  str         e.g. 0.5.2
 
 Calibration/Space/
@@ -332,8 +329,6 @@ General/
     date                    str         creation date in ISO 8601, 2018-01-28
     time_zone               str         supported by the python-dateutil library, the same as the system
     doi                     str         
-
-FileIO/
     fourd_explorer_version  str         e.g. 0.5.2
 
 Calibration/Space/
