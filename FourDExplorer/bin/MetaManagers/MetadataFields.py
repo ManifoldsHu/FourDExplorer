@@ -46,6 +46,14 @@ class MetadataFieldBase(QObject):
     def description(self, desc: str):
         self._description = desc 
 
+    @property
+    def title(self) -> str:
+        return self._title 
+    
+    @title.setter 
+    def title(self, tt: str):
+        self._title = tt
+
 
 class FloatField(MetadataFieldBase):
     """

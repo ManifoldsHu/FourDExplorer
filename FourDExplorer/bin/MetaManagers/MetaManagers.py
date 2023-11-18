@@ -44,7 +44,10 @@ from PySide6.QtCore import QObject
 
 from Constants import ROOT_PATH
 from bin.HDFManager import HDFHandler 
-from bin.MetaManagers.MetadataFields import FloatField, IntField, StringField
+from bin.MetaManagers.MetadataFields import FloatField
+from bin.MetaManagers.MetadataFields import IntField
+from bin.MetaManagers.MetadataFields import StringField
+from bin.MetaManagers.MetadataFields import MetadataFieldBase
 
 class MetaManagerBase(QObject):
     """
@@ -147,11 +150,40 @@ class MetaManagerBase(QObject):
                 f"Invalid type {field_instance['type']} of the field: {full_key}"
             )
             
+<<<<<<< HEAD
     def getField(self, key: str):
         return self._schema[key]
     
     def listKeys(self) -> Iterable:
         return self._schema.keys()
+=======
+    def getSchemaKeys(self):
+        return self._schema.keys()
+    
+    def _getSchemaFields(self, key: str) -> MetadataFieldBase:
+        return self._schema[key]
+    
+    def getSchemaDescription(self, key: str) -> str:
+        return self._getSchemaFields(key).description
+    
+    def getSchemaUnit(self, key: str) -> str:
+        field = self._getSchemaFields(key)
+        if isinstance(field, (IntField, FloatField)):
+            return field.unit
+        else:
+            return None 
+        
+    def getSchemaDisplayUnit(self, key: str) -> str:
+        field = self._getSchemaFields(key)
+        if isinstance(field, (IntField, FloatField)):
+            return field.display_unit 
+        else:
+            return None 
+
+    def getSchemaTitle(self, key: str) -> str:
+        return self._getSchemaFields(key).title
+
+>>>>>>> 7c9632433b5f7f39a8f55a4440769b0f48f135be
 
 class MetaManagerFourDSTEM(MetaManagerBase):
     """
@@ -184,3 +216,4 @@ class MetaManagerVec(MetaManagerBase):
     @property
     def schema_json_path(self) -> str:
         return os.path.join(ROOT_PATH, 'schema', 'MetaStructure', 'vec.json')
+    
