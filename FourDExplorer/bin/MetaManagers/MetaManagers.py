@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 
 """
-*-------------------------- MetaManagerFourDSTEM.py --------------------------*
+*------------------------------ MetaManagers.py ------------------------------*
 管理 .4dstem 数据集的元数据。
 
 注意，只有那些基本的量会被存储，而其他参数将被实时计算。例如，加速电压会被存储，而波长
@@ -32,12 +32,13 @@ ive work.
 
 author:         Hu Yiming
 date:           Oct 31, 2023
-*-------------------------- MetaManagerFourDSTEM.py --------------------------*
+*------------------------------ MetaManagers.py ------------------------------*
 """
 
 from logging import Logger 
 import os 
 import json
+from typing import Iterable
 
 from PySide6.QtCore import QObject
 
@@ -146,6 +147,11 @@ class MetaManagerBase(QObject):
                 f"Invalid type {field_instance['type']} of the field: {full_key}"
             )
             
+    def getField(self, key: str):
+        return self._schema[key]
+    
+    def listKeys(self) -> Iterable:
+        return self._schema.keys()
 
 class MetaManagerFourDSTEM(MetaManagerBase):
     """

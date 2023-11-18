@@ -7,7 +7,11 @@
 作者：          胡一鸣
 创建时间：      2023年10月31日
 
+Define the properties of the predefined metadata items, including types, uni-
+ts, displaying units and descriptions.
 
+author:         Hu Yiming
+date:           Oct 31, 2023
 *---------------------------- MetadataFields.py ----------------------------*
 """
 

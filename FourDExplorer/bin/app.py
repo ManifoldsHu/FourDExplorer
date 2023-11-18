@@ -124,7 +124,7 @@ class App(QApplication):
     @property
     def unit_manager(self):
         return self._unit_manager
-
+    
     @main_window.setter
     def main_window(self, _main_window):
         if self._main_window is None:

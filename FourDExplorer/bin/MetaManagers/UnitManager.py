@@ -60,14 +60,14 @@ class UnitManager(QObject):
         self._ureg.define('ms = 1e-3 * s')  # 毫秒
 
         # 定义电场强度单位
-        self._ureg.define('N/C = newton / coulomb')  # 牛顿每库仑
-        self._ureg.define('V/m = volt / meter')  # 伏特每米
+        # self._ureg.define('N/C = newton / coulomb')  # 牛顿每库仑
+        # self._ureg.define('V/m = volt / meter')  # 伏特每米
 
         # 定义能量单位
         self._ureg.define('eV = electron_volt')  # 电子伏
 
         # 定义空间频率单位
-        self._ureg.define('m^-1 = 1 / meter')  # 每米
+        # self._ureg.define('m^-1 = 1 / meter')  # 每米
 
         # 添加埃（Ångström）
         self._ureg.define('angstrom = 1e-10 * meter')  # 埃

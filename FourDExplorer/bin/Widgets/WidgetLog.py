@@ -20,6 +20,7 @@ date:           Mar 24, 2022
 
 import os
 from PySide6.QtWidgets import QWidget 
+from PySide6.QtGui import QTextCursor
 from bin.Log import LogUtil
 from ui import uiWidgetLog
 
@@ -66,7 +67,7 @@ class WidgetLog(QWidget):
             string: str
         """
         cursor = self.ui.textBrowser_log.textCursor()
-        self.ui.textBrowser_log.moveCursor(cursor.End)
+        self.ui.textBrowser_log.moveCursor(cursor.MoveOperation.End)
         cursor.insertText(string)
         self.ui.textBrowser_log.setTextCursor(cursor)
         self.ui.textBrowser_log.ensureCursorVisible()
