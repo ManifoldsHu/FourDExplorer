@@ -150,13 +150,11 @@ class MetaManagerBase(QObject):
                 f"Invalid type {field_instance['type']} of the field: {full_key}"
             )
             
-<<<<<<< HEAD
     def getField(self, key: str):
         return self._schema[key]
     
     def listKeys(self) -> Iterable:
         return self._schema.keys()
-=======
     def getSchemaKeys(self):
         return self._schema.keys()
     
@@ -183,7 +181,6 @@ class MetaManagerBase(QObject):
     def getSchemaTitle(self, key: str) -> str:
         return self._getSchemaFields(key).title
 
->>>>>>> 7c9632433b5f7f39a8f55a4440769b0f48f135be
 
 class MetaManagerFourDSTEM(MetaManagerBase):
     """

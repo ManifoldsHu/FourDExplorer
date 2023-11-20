@@ -140,7 +140,7 @@ class UnitManager(QObject):
             return self._formatUnitTex(unit)
         else:
             raise ValueError("Invalid context for unit formatting")
-        
+         
     def _formatUnitHtml(self, unit: pint.Unit) -> str:
         """
         Format unit to html, for displaying in QLable

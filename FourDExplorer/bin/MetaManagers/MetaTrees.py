@@ -33,9 +33,10 @@ from typing import Iterable, Iterator
 from collections.abc import Mapping
 import re 
 
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, QAbstractItemModel, QModelIndex, Qt 
 
 from bin.HDFManager import HDFHandler
+from Constants import APP_VERSION, ItemDataRoles
 
 reValidMetaName = re.compile(
     r'[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
@@ -241,6 +242,10 @@ class SchemaTree(QObject):
     def logger(self) -> Logger:
         global qApp 
         return qApp.logger
+    
+    @property
+    def root(self) -> MetaRootNode:
+        return self._root 
 
     def _buildTree(self, schema_keys: Iterable[str]) -> MetaRootNode:
         """
@@ -325,17 +330,73 @@ class SchemaTree(QObject):
 
 
 class ValueTree(QObject):
-    def __init__(self, dataset_path, parent: QObject = None):
+    def __init__(self, item_path: str, parent: QObject = None):
         super().__init__(parent)
-        self._dataset_path = dataset_path 
+        self._item_path = item_path 
+        self._root = MetaRootNode()
+        self._undefined_attributes = {}
+        self._buildTree 
 
     @property
     def hdf_handler(self) -> HDFHandler:
         global qApp 
         return qApp.hdf_handler
     
+    @property
+    def attributes(self) -> Mapping:
+        return self.hdf_handler.file[self._item_path].attrs
+
+    @property
+    def undefined_attributes(self) -> Mapping:
+        return self._undefined_attributes
+    
+    @property
+    def root(self) -> MetaRootNode:
+        return self._root 
+
     def _buildTree(self):
-        pass 
+        for key, value in self.attributes.items():
+            if self.isValidPath(key):
+                self._addAttributeToTree(self._root, key, value)
+            else:
+                self._undefined_attributes[key] = value
+
+    def isValidPath(self, path: str) -> bool:
+        """
+        Check if the given path is a valid schema path.
+
+        arguments:
+            path: (str) The path to be checked.
+
+        returns:
+            (bool) 
+        """
+        if path == '/':
+            return True 
+        elif not path.startswith('/'):
+            return False 
+        elif '//' in path:
+            return False 
+        elif path.endswith('/'):
+            return False 
+        else:
+            return True     
+        
+    def _addAttributeToTree(self, root: MetaRootNode, path: str, value):
+        """
+        Add an attribute to the tree, creating nodes as necessary.
+
+        arguments
+            path: (str) the path of the attribute
+
+            value: (Any) the value of the attribute
+        """
+        current_node = root
+        path_parts = path.split('/')[1:]    # split the path and ignore the first
+        for part in path_parts:
+            if part not in current_node:
+                new_node = MetaRootNode(part, current_node)
+                current_node.addChild(new_node)
 
 
 class DisplayTree(QObject):
@@ -348,13 +409,233 @@ class DisplayTree(QObject):
         super().__init__(parent)
         self._schema_tree = schema_tree 
         self._value_tree = value_tree 
+        self._root = self._buildDisplayTree()
+
+    @property
+    def root(self) -> MetaRootNode:
+        return self._root 
     
-    def _buildTree(self):
-        pass 
+    def _buildDisplayTree(self) -> MetaRootNode:
+        """
+        Build the display tree by combining schema and value trees.
 
-    def updateDisplay(self, updated_attributes):
-        pass 
+        returns:
+            (MetaRootNode)
+        """
+        root = MetaRootNode()
+        self._addSchemaBranches(root, self._schema_tree.root)
+        self._addUndefinedAttributes(root)
+        return root 
+    
+    def _addSchemaBranches(self, display_root: MetaTreeNode, schema_root: MetaTreeNode):
+        """
+        Recursively add branches from the schema tree to the display tree.
+
+        arguments:
+            display_root: (MetaTreeNode) The root of the display tree 
+
+            schema_root: (MetaTreeNode) The root of the schema tree
+        """
+        for child_name, child_node in schema_root.items():
+            new_node = MetaTreeNode(child_name, display_root)
+            display_root.addChild(new_node)
+            self._addSchemaBranches(new_node, child_node)
+
+    def _addUndefinedAttributes(self, display_root: MetaTreeNode):
+        """
+        Add undefined attributes from the value tree to the display tree.
+
+        arguments:
+            display_root: (MetaTreeNode) The root of the display tree
+        """
+        undefined_node = MetaTreeNode("Undefined", display_root)
+        display_root.addChild(undefined_node)
+        for key, value in self._value_tree.undefined_attributes:
+            new_node = MetaTreeNode(key, undefined_node)
+            undefined_node.addChild(new_node)
+
+    def getNodeByRow(self, parent_node: MetaTreeNode, row: int) -> MetaTreeNode:
+        """
+        Given a parent node and a row number, return the corresponding child node.
+
+        arguments:
+            parent_node: (MetaTreeNode) The parent node
+
+            row: (int) The row number of the child node
+
+        returns:
+            (MetaTreeNode) the child node at the given row under the parent node
+        """
+        if parent_node is None or not isinstance(parent_node, MetaTreeNode):
+            raise TypeError("parent_node must be a MetaTreeNode")
+        elif row < 0 or row >= len(parent_node):
+            raise ValueError("row must be between 0 and len(parent_node)")
+        return list(parent_node.values())[row]
+    
+    def getRowOfNode(self, node: MetaTreeNode) -> int:
+        """
+        Given a node, return its row number under its parent.
+
+        arguments:
+            node: (MetaTreeNode) The node to find the row number for.
+
+        returns:
+            (int) The row number of the node under its parent.
+        """
+        if node.parent is None:
+            raise ValueError("root node does not have row index")   # or returns 0?
+        return list(node.parent.values()).index(node)
+
+    # def rowCount(self, parent_node: MetaTreeNode) -> int:
+    #     return len(parent_node)
+    
+    # def columnCount(self, parent_node: MetaTreeNode) -> int:
+    #     return 1
+
+    # def updateDisplay(self, updated_attributes):
+    #     pass 
 
 
+class DisplayTreeModel(QAbstractItemModel):
+    """
+    DisplayTreeModel 用于在 QTreeView 控件中展示 DisplayTree 数据。
 
+    本模型类继承自 QAbstractItemModel，提供了与 DisplayTree 数据交互所需的界面，使
+    得 DisplayTree 中的数据可以在 QTreeView 控件中被正确显示和管理。
 
+    DisplayTreeModel 主要处理节点数据的检索、节点层次关系的定义，以及如何在视图中呈现
+    这些数据。
+
+    注意：该模型假设 DisplayTree 的节点对象 (MetaTreeNode) 具有 name 属性作为显示名
+    称，并且已经实现了 getNodeByRow 和 getRowOfNode 方法。
+
+    DisplayTreeModel is designed for displaying DisplayTree data in a QTreeView
+    widget.
+
+    This model class, inheriting from QAbstractItemModel, provides the necessary 
+    interface to interact with the DisplayTree data, ensuring that the data from 
+    the DisplayTree can be correctly displayed and managed within a QTreeView 
+    widget.
+
+    DisplayTreeModel mainly deals with retrieving node data, defining the hier-
+    archical relationship of nodes, and how to present these data in the view.
+
+    Note: The model assumes that the node object of DisplayTree (MetaTreeNode) 
+    has a name attribute for display and that the methods getNodeByRow and 
+    getRowOfNode are already implemented.
+    """
+    def __init__(self, display_tree: DisplayTree, parent: QObject = None):
+        """
+        Initialize the display tree model.
+
+        arguments:
+            display_tree: (DisplayTree) the backend display_tree of the model
+
+            parent: (QObject)
+        """
+        super(DisplayTreeModel, self).__init__(parent)
+        self._display_tree = display_tree
+        self._root_node = display_tree.root 
+
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """
+        Returns the number of rows under the given parent. When the parent is valid,
+        rowCount() returns the number of children of parent. When the parent is 
+        QModelIndex(), rowCount() returns the number of top-level items.
+
+        arguments:
+            parent: (QModelIndex) The parent index.
+
+        Returns:
+            (int) The number of rows under the given parent.
+        """
+        if not parent.isValid():
+            parent_node = self._root_node 
+        else:
+            parent_node = parent.internalPointer()
+        return len(parent_node)
+    
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """
+        Returns the number of columns for the children of the given parent.
+        In most subclasses, the number of columns is independent of the parent.
+
+        arguments:
+            parent: (QModelIndex) The parent index.
+
+        returns:
+            (int) The number of columns for the given parent.
+        """
+        return 1
+    
+    def data(self, index: QModelIndex, role: int = ItemDataRoles.DisplayRole):
+        """
+        Returns the data stored under the given role for the item referred to by the index.
+
+        arguments:
+            index: (QModelIndex) The index of the item.
+
+            role: (int) The role for which data is requested.
+
+        returns:
+            (Any) The data stored under the given role for the item referred to by the index.
+        """
+        
+        if not index.isValid():
+            return None 
+        node = index.internalPointer()
+        if role == ItemDataRoles.DisplayRole:
+            return node.name
+        
+    def index(
+        self, 
+        row: int, 
+        column: int, 
+        parent: QModelIndex = QModelIndex()
+    ) -> QModelIndex:
+        """
+        Returns the index of the item in the model specified by the given row, column, and parent index.
+
+        arguments:
+            row: (int) The row number of the item.
+
+            column: (int) The column number of the item.
+
+            parent: (QModelIndex) The parent index of the item.
+
+        returns:
+            (QModelIndex) The index of the specified item.
+        """
+        if not parent.isValid():
+            parent_node = self._root_node
+        else:
+            parent_node = parent.internalPointer()
+
+        child_node = self._display_tree.getNodeByRow(row)
+        if row >= 0 and row < len(parent_node):
+            self.createIndex(row, column, child_node)
+        else:
+            return QModelIndex()
+        
+    def parent(self, index: QModelIndex) -> QModelIndex:
+        """
+        Returns the parent of the model item with the given index. If the item
+        has no parent, an invalid QModelIndex is returned.
+
+        arguments:
+            index: (QModelIndex) The index of the item.
+
+        Returns:
+            (QModelIndex) The parent index of the specified item.
+        """
+        if not index.isValid():
+            return QModelIndex()
+        
+        child_node = index.internalPointer()
+        parent_node = child_node.parent
+
+        if parent_node is self._root_node:
+            return QModelIndex()
+        
+        return self.createIndex(self._display_tree.getRowOfNode(child_node), 0, parent_node)
+        
