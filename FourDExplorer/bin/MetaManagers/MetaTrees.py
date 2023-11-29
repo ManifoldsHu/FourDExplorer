@@ -233,7 +233,7 @@ class MetaRootNode(MetaTreeNode):
 
 
 class SchemaTree(QObject):
-    def __init__(self, schema_keys: Iterable[str], parent: QObject = None):
+    def __init__(self, schema_keys: Mapping, parent: QObject = None):
         super().__init__(parent)
         self._schema_keys = schema_keys 
         self._root = self._buildTree()
@@ -246,8 +246,12 @@ class SchemaTree(QObject):
     @property
     def root(self) -> MetaRootNode:
         return self._root 
+    
+    @property
+    def schema_keys(self) -> Mapping:
+        return self._schema_keys
 
-    def _buildTree(self, schema_keys: Iterable[str]) -> MetaRootNode:
+    def _buildTree(self, schema_keys: Mapping) -> MetaRootNode:
         """
         Build the tree structure from the predefined schema keys.
 
@@ -335,7 +339,7 @@ class ValueTree(QObject):
         self._item_path = item_path 
         self._root = MetaRootNode()
         self._undefined_attributes = {}
-        self._buildTree 
+        self._buildTree() 
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -450,10 +454,11 @@ class DisplayTree(QObject):
         """
         undefined_node = MetaTreeNode("Undefined", display_root)
         display_root.addChild(undefined_node)
-        for key, value in self._value_tree.undefined_attributes:
-            new_node = MetaTreeNode(key, undefined_node)
-            undefined_node.addChild(new_node)
-
+        for key in self._value_tree.attributes:
+            if key not in self._schema_tree.schema_keys:
+                new_node = MetaTreeNode(key, undefined_node)
+                undefined_node.addChild(new_node)
+ 
     def getNodeByRow(self, parent_node: MetaTreeNode, row: int) -> MetaTreeNode:
         """
         Given a parent node and a row number, return the corresponding child node.
@@ -494,6 +499,12 @@ class DisplayTree(QObject):
 
     # def updateDisplay(self, updated_attributes):
     #     pass 
+
+    # def getAttributeValue(self, key: str):
+    #     return self._value_tree.attributes[key]
+    
+    # def getAttributeTitle(self, key: str):
+    #     return self._schema_tree.
 
 
 class DisplayTreeModel(QAbstractItemModel):
@@ -583,8 +594,10 @@ class DisplayTreeModel(QAbstractItemModel):
         
         if not index.isValid():
             return None 
-        node = index.internalPointer()
+        node: MetaTreeNode = index.internalPointer()
         if role == ItemDataRoles.DisplayRole:
+            if node.path in self._display_tree._schema_tree.schema_keys:
+                return self._display_tree._schema_tree.
             return node.name
         
     def index(
@@ -639,3 +652,4 @@ class DisplayTreeModel(QAbstractItemModel):
         
         return self.createIndex(self._display_tree.getRowOfNode(child_node), 0, parent_node)
         
+   
