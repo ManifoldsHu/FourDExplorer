@@ -820,7 +820,6 @@ class DisplayTreeModel(QAbstractItemModel):
     has a name attribute for display and that the methods getNodeByRow and 
     getRowOfNode are already implemented.
     """
-    # def __init__(self, display_tree: DisplayTree, meta, parent: QObject = None):
     def __init__(self, meta_manager: MetaManager, parent: QObject = None):
         """
         Initialize the display tree model.
@@ -831,10 +830,6 @@ class DisplayTreeModel(QAbstractItemModel):
             parent: (QObject)
         """
         super(DisplayTreeModel, self).__init__(parent)
-        # self._display_tree = display_tree
-        # self._root_node = display_tree.root
-        # self._meta_manager = None 
-
         self._meta_manager = meta_manager  
         
     
@@ -901,12 +896,18 @@ class DisplayTreeModel(QAbstractItemModel):
         if not index.isValid():
             return None 
         node: MetaTreeNode = index.internalPointer()
-        if role == ItemDataRoles.DisplayRole:
+        if role == ItemDataRoles.DisplayRole and index.column() == 0:
             # if node.path in self.display_tree.schema_tree.schema_keys:
             if node.path in self.meta_manager.getSchemaKeys():
                 return self.meta_manager.getSchemaTitle(node.path)
             return node.name
-        
+        elif role == ItemDataRoles.DisplayRole and index.column() == 1:
+            if node.path in self.meta_manager.getSchemaKeys():
+                if isinstance(self.meta_manager.getSchemaField(), (IntField, FloatField)):
+                    # display_str = self.hdf_handler[]
+                    # display_str = self.hdf_handler[self]
+                    # 这里我们需要构造 display_str，通过实际的值，与 Schema 中记录的展示单位。
+                    pass # TODO
     def index(
         self, 
         row: int, 
@@ -931,7 +932,7 @@ class DisplayTreeModel(QAbstractItemModel):
         else:
             parent_node = parent.internalPointer()
 
-        child_node = self._display_tree.getNodeByRow(row)
+        child_node = self.display_tree.getNodeByRow(row)
         if row >= 0 and row < len(parent_node):
             self.createIndex(row, column, child_node)
         else:
@@ -957,6 +958,6 @@ class DisplayTreeModel(QAbstractItemModel):
         if parent_node is self.root_node:
             return QModelIndex()
         
-        return self.createIndex(self._display_tree.getRowOfNode(child_node), 0, parent_node)
+        return self.createIndex(self.display_tree.getRowOfNode(child_node), 0, parent_node)
         
-   
+    
