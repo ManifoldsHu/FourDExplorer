@@ -849,6 +849,10 @@ class DisplayTreeModel(QAbstractItemModel):
     @property
     def display_tree(self) -> DisplayTree:
         return self._meta_manager._display_tree
+    
+    @property
+    def root_node(self) -> MetaRootNode:
+        return self._meta_manager.display_tree.root 
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
         """
@@ -863,7 +867,7 @@ class DisplayTreeModel(QAbstractItemModel):
             (int) The number of rows under the given parent.
         """
         if not parent.isValid():
-            parent_node = self._root_node 
+            parent_node = self.root_node 
         else:
             parent_node = parent.internalPointer()
         return len(parent_node)
@@ -923,7 +927,7 @@ class DisplayTreeModel(QAbstractItemModel):
             (QModelIndex) The index of the specified item.
         """
         if not parent.isValid():
-            parent_node = self._root_node
+            parent_node = self.root_node
         else:
             parent_node = parent.internalPointer()
 
@@ -950,7 +954,7 @@ class DisplayTreeModel(QAbstractItemModel):
         child_node = index.internalPointer()
         parent_node = child_node.parent
 
-        if parent_node is self._root_node:
+        if parent_node is self.root_node:
             return QModelIndex()
         
         return self.createIndex(self._display_tree.getRowOfNode(child_node), 0, parent_node)
