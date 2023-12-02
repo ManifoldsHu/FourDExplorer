@@ -68,10 +68,7 @@ from Constants import APP_VERSION
 from Constants import ItemDataRoles
 from Constants import HDFType
 from bin.HDFManager import HDFHandler 
-from bin.MetaManagers.MetadataFields import FloatField
-from bin.MetaManagers.MetadataFields import IntField
-from bin.MetaManagers.MetadataFields import StringField
-from bin.MetaManagers.MetadataFields import MetadataFieldBase
+
 
 reValidMetaName = re.compile(
     r'[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
@@ -125,6 +122,10 @@ class MetaManager(QObject):
         #     "You should success MetaManagerBase and define the path of the json file.")
     
     # def initializeTreeStructures(self, )
+
+    @property
+    def item_path(self) -> str:
+        return self._item_path 
 
     @property
     def display_tree(self) -> "DisplayTree":
@@ -262,7 +263,7 @@ class MetaManager(QObject):
     def getSchemaKeys(self):
         return self._schema.keys()
     
-    def _getSchemaFields(self, key: str) -> MetadataFieldBase:
+    def _getSchemaFields(self, key: str) -> "MetadataFieldBase":
         return self._schema[key]
     
     def getSchemaDescription(self, key: str) -> str:
@@ -318,6 +319,122 @@ class MetaManager(QObject):
 #     def schema_json_path(self) -> str:
 #         return os.path.join(ROOT_PATH, 'schema', 'MetaStructure', 'vec.json')
     
+
+class MetadataFieldBase(QObject):
+    """
+    各种元数据项共有的性质，主要是备注。
+    """
+    def __init__(self, title: str, description: str = "", parent: QObject = None):
+        """
+        Initialize a metadata field object.
+
+        arguments:
+            title: (str) the title of the attribute (for displaying)
+
+            description: (str) the description of the attribute
+
+            parent: (QObject) the parent QObject of the field
+        """
+        super().__init__(parent)
+        self._title = title
+        self._description = description 
+    
+    @property
+    def description(self) -> str:
+        return self._description
+    
+    @description.setter
+    def description(self, desc: str):
+        self._description = desc 
+
+    @property
+    def title(self) -> str:
+        return self._title 
+    
+    @title.setter 
+    def title(self, tt: str):
+        self._title = tt
+
+
+class FloatField(MetadataFieldBase):
+    """
+    浮点数字段类，具有存储单位、显示单位以及单位转换。
+    """
+    def __init__(
+        self, 
+        title: str,
+        unit: str = None, 
+        display_unit: str = None, 
+        description: str = "", 
+        parent: QObject = None
+    ):
+        super().__init__(title, description, parent)
+        self._unit = unit 
+        self._display_unit = display_unit 
+        # TODO: Add unit converting 
+
+    @property 
+    def unit(self) -> str:
+        return self._unit 
+    
+    @unit.setter 
+    def unit(self, unt: str):
+        # TODO: detect unit's alias name 
+        self._unit = unt 
+    
+    @property
+    def display_unit(self) -> str:
+        return self._display_unit
+
+    @display_unit.setter 
+    def display_unit(self, dsp_unt: str):
+        # TODO: detect unit's alias name 
+        self._display_unit = dsp_unt 
+
+
+class IntField(MetadataFieldBase):
+    """
+    整数字段类，目前和浮点数类一致，但大多数情况下它们都不需要单位
+    """
+    def __init__(
+        self,
+        title: str,
+        unit: str = None,
+        display_unit: str = None,
+        description: str = "",
+        parent: QObject = None,
+    ):
+        super().__init__(title, description, parent)
+        self._unit = unit 
+        self._display_unit = display_unit 
+        # TODO: Add unit converting 
+
+    @property 
+    def unit(self) -> str:
+        return self._unit 
+    
+    @unit.setter 
+    def unit(self, unt: str):
+        # TODO: detect unit's alias name 
+        self._unit = unt 
+    
+    @property
+    def display_unit(self) -> str:
+        return self._display_unit
+
+    @display_unit.setter 
+    def display_unit(self, dsp_unt: str):
+        # TODO: detect unit's alias name 
+        self._display_unit = dsp_unt 
+
+class StringField(MetadataFieldBase):
+    """
+    字符串字段类，目前不需要额外的属性或方法，但保留扩展的可能性 
+    """
+    pass 
+
+
+
 
 class MetaTreeNode(Mapping):
     """
@@ -848,6 +965,11 @@ class DisplayTreeModel(QAbstractItemModel):
     @property
     def root_node(self) -> MetaRootNode:
         return self._meta_manager.display_tree.root 
+    
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler 
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
         """
@@ -904,10 +1026,15 @@ class DisplayTreeModel(QAbstractItemModel):
         elif role == ItemDataRoles.DisplayRole and index.column() == 1:
             if node.path in self.meta_manager.getSchemaKeys():
                 if isinstance(self.meta_manager.getSchemaField(), (IntField, FloatField)):
-                    # display_str = self.hdf_handler[]
-                    # display_str = self.hdf_handler[self]
+                    attrs = self.hdf_handler.file[self.meta_manager.item_path].attrs
+                    value = attrs[node.path]
                     # 这里我们需要构造 display_str，通过实际的值，与 Schema 中记录的展示单位。
-                    pass # TODO
+                    # TODO
+                    return value 
+                else:
+                    return -1   # TODO
+
+
     def index(
         self, 
         row: int, 
@@ -961,3 +1088,4 @@ class DisplayTreeModel(QAbstractItemModel):
         return self.createIndex(self.display_tree.getRowOfNode(child_node), 0, parent_node)
         
     
+
