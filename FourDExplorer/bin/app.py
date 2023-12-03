@@ -89,14 +89,14 @@ class App(QApplication):
         from bin.UIManager import ThemeHandler
         from bin.TaskManager import TaskManager
         from bin.Log import LogUtil
-        from bin.MetaManagers.UnitManager import UnitManager
+        from bin.UnitManager import UnitManager
 
         self._hdf_handler = HDFHandler(self)
         self._theme_handler = ThemeHandler(self)
         self._task_manager = TaskManager(self)
         self._log_util = LogUtil(self)
         self._unit_manager = UnitManager(self)
-
+ 
     @property
     def hdf_handler(self):
         return self._hdf_handler

@@ -285,7 +285,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
     #         raise TypeError('meta must be a dict, not '
     #             '{0}'.format(type(meta).__name__))
     #     self._meta = meta 
-
+   
     def _createDataset(self):
         """
         Will create a dataset in HDF5 file according to the item_path.

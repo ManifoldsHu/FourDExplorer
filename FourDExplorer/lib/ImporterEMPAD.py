@@ -30,6 +30,7 @@ import os
 from PySide6.QtCore import QObject
 
 from bin.TaskManager import TaskManager
+from bin.MetaManager import MetaManager
 from lib.TaskLoadData import TaskLoadFourDSTEMFromRaw 
 
 
@@ -75,15 +76,16 @@ class ImporterEMPAD(QObject):
         self.dp_j = 128
         self.gap_between_images = 2 * self.dp_j * self.scalar_size
 
-        self.meta = {
-            'data_mode': '4D-STEM',
-            'dp_i': 128,
-            'dp_j': 128,
-            'scalar_type': 'float',
-            'scalar_size': 4,
-            'little_endian': True,
-            'camera': 'EMPAD',
-        }
+        # self.meta = {
+        #     'data_mode': '4D-STEM',
+        #     'dp_i': 128,
+        #     'dp_j': 128,
+        #     'scalar_type': 'float',
+        #     'scalar_size': 4,
+        #     'little_endian': True,
+        #     'camera': 'EMPAD',
+        # }
+        
 
     @property
     def logger(self) -> Logger:

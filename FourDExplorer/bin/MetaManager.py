@@ -69,7 +69,7 @@ from Constants import ItemDataRoles
 from Constants import HDFType
 from bin.HDFManager import HDFHandler 
 
-
+ 
 reValidMetaName = re.compile(
     r'[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
 )
@@ -134,23 +134,24 @@ class MetaManager(QObject):
     @property
     def display_tree_model(self) -> "DisplayTreeModel":
         return self._display_tree_model
-
-    def initializeMetas(self, item_path: str):
+    
+    def setItemPath(self, item_path: str):
         """
-        Initialize schema, value and display trees, and its model.
+        Set the item path of the meta manager.
+
+        This function will also build the schema tree and value tree for the dataset.
 
         arguments:
             item_path: (str) the path of the attribute's dataset
         """
-        # hdf_type: HDFType = self.hdf_handler.getNode(item_path).hdf_type
         self._item_path = item_path 
 
         with open(self.schema_json_path, 'r', encoding='utf-8') as f:
             json_data = json.load(f)
 
         self._parseSchema(parent_key = '/', definitions = json_data)
-
         self._schema_tree = SchemaTree(self._schema, parent = self)
+
         self._value_tree = ValueTree(item_path, parent = self)
         self._display_tree = DisplayTree(
             self._schema_tree, 
@@ -159,7 +160,49 @@ class MetaManager(QObject):
         )
 
         self._display_tree_model = DisplayTreeModel(self._display_tree, self)
-        self._display_tree_model.meta_manager = self 
+        self._display_tree_model.meta_manager = self
+
+    def initializeSchema(self, hdf_type: HDFType):
+        """
+        Initialize meta manager according to the hdf_type.
+
+        arguments:
+            hdf_type: (HDFType) the type of the target dataset.
+        """
+        if hdf_type in self._hdf_meta_schema_file:
+            with open(self.schema_json_path, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+            self._parseSchema(parent_key = '/', definitions = json_data)
+            self._schema_tree = SchemaTree(self._schema, parent = self)
+        else:
+            raise ValueError(f"There is no predefined schema for the {hdf_type}")
+
+
+    # def initializeMetas(self, item_path: str):
+    #     """
+    #     Initialize schema, value and display trees, and its model.
+
+    #     arguments:
+    #         item_path: (str) the path of the attribute's dataset
+    #     """
+    #     # hdf_type: HDFType = self.hdf_handler.getNode(item_path).hdf_type
+    #     self._item_path = item_path 
+
+    #     with open(self.schema_json_path, 'r', encoding='utf-8') as f:
+    #         json_data = json.load(f)
+
+    #     self._parseSchema(parent_key = '/', definitions = json_data)
+
+    #     self._schema_tree = SchemaTree(self._schema, parent = self)
+    #     self._value_tree = ValueTree(item_path, parent = self)
+    #     self._display_tree = DisplayTree(
+    #         self._schema_tree, 
+    #         self._value_tree, 
+    #         parent = self,
+    #     )
+
+    #     self._display_tree_model = DisplayTreeModel(self._display_tree, self)
+    #     self._display_tree_model.meta_manager = self 
 
 
     # def createModel(self) -> "DisplayTreeModel":
@@ -432,8 +475,6 @@ class StringField(MetadataFieldBase):
     字符串字段类，目前不需要额外的属性或方法，但保留扩展的可能性 
     """
     pass 
-
-
 
 
 class MetaTreeNode(Mapping):
