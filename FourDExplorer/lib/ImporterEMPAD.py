@@ -26,12 +26,14 @@ date:               May 8, 2022
 from logging import Logger
 from xml.dom.minidom import Document, parse
 import os 
+import datetime
 
 from PySide6.QtCore import QObject
 
 from bin.TaskManager import TaskManager
 from bin.MetaManager import MetaManager
 from lib.TaskLoadData import TaskLoadFourDSTEMFromRaw 
+from Constants import APP_VERSION
 
 
 class ImporterEMPAD(QObject):
@@ -85,6 +87,18 @@ class ImporterEMPAD(QObject):
         #     'little_endian': True,
         #     'camera': 'EMPAD',
         # }
+
+        self.meta = {
+            '/General/fourd_explorer_version': '.'.join(APP_VERSION),
+            '/AcquisitionInstrument/Camera/name': 'EMPAD',
+            '/AcquisitionInstrument/Camera/manufacturer': 'Thermo Fisher',
+            '/AcquisitionInstrument/Camera/pixel_number_i': 128,
+            '/AcquisitionInstrument/Camera/pixel_number_j': 128,
+            '/AcquisitionInstrument/Camera/pixel_size_i': 150e-6,
+            '/AcquisitionInstrument/Camera/pixel_size_j': 150e-6,
+            '/Calibration/Space/dp_i': 128,
+            '/Calibration/Space/dp_j': 128,
+        }
         
 
     @property
@@ -107,7 +121,10 @@ class ImporterEMPAD(QObject):
         dom_tree = parse(xml_path)
         root: Document = dom_tree.documentElement
         self.xml_path = xml_path 
-        self.meta['header_file'] = xml_path
+        # self.meta['header_file'] = xml_path
+        self.meta['/General/original_path'] = xml_path 
+        self.meta['/General/original_name'] = os.path.splitext(os.path.split(xml_path)[1])[0]
+        
 
         self._parseLoadingData(root)
         self._parseCalibrateData(root)
@@ -132,25 +149,26 @@ class ImporterEMPAD(QObject):
         """
         if root.getElementsByTagName('pix_x'):
             self.scan_j = int(self._getData(root, 'pix_x'))
-            self.meta['scan_j'] = self.scan_j
+            # self.meta['scan_j'] = self.scan_j
+            self.meta['/Calibration/Space/scan_j'] = self.scan_j 
         else:
             for mode in root.getElementsByTagName('scan_parameters'):
                 if mode.getAttribute('mode') == 'acquire':
                     self.scan_j = int(
                         self._getData(mode, 'scan_resolution_x')
                     )
-                    self.meta['scan_j'] = self.scan_j
+                    self.meta['/Calibration/Space/scan_j'] = self.scan_j 
 
         if root.getElementsByTagName('pix_y'):
             self.scan_i = int(self._getData(root, 'pix_y'))
-            self.meta['scan_i'] = self.scan_i 
+            self.meta['/Calibration/Space/scan_i'] = self.scan_i 
         else:
             for mode in root.getElementsByTagName('scan_parameters'):
                 if mode.getAttribute('mode') == 'acquire':
                     self.scan_i = int(
                         self._getData(mode, 'scan_resolution_y')
                     )
-                    self.meta['scan_i'] = self.scan_i 
+                    self.meta['/Calibration/Space/scan_i'] = self.scan_i 
         
         dir_name = os.path.dirname(self.xml_path)
 
@@ -199,9 +217,10 @@ class ImporterEMPAD(QObject):
         try:
             for mode in root.getElementsByTagName('scan_parameters'):
                 if mode.getAttribute('mode') == 'acquire':
-                    self.meta['scan_size'] = float(
-                        self._getData(mode, 'scan_size')
-                    )
+                    # self.meta['scan_size'] = float(
+                    #     self._getData(mode, 'scan_size')
+                    # )
+                    self.scan_size = float(self._getData(mode, 'scan_size'))
         except BaseException as e:
             self.logger.error('Failed to parse scan_size item.\n'
                 '{0}'.format(e), exc_info = True)
@@ -209,15 +228,25 @@ class ImporterEMPAD(QObject):
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             full = iom.getElementsByTagName('full_scan_field_of_view')[0]
-            self.meta['full_scan_field_of_view_j'] = float(
-                self._getData(full, 'x')
+            self.full_scan_field_of_view_j = float(self._getData(full, 'x'))
+            self.full_scan_field_of_view_i = float(self._getData(full, 'y'))
+            self.scale_factor = float(self._getData(full, 'scale_factor'))
+
+            self.meta['/Calibrate/Space/scan_dr_i'] = (
+                self.full_scan_field_of_view_i * self.scale_factor * self.scan_size / self.scan_i 
             )
-            self.meta['full_scan_field_of_view_i'] = float(
-                self._getData(full, 'y')
+            self.meta['/Calibrate/Space/scan_dr_j'] = (
+                self.full_scan_field_of_view_j * self.scale_factor * self.scan_size / self.scan_j 
             )
-            self.meta['scale_factor'] = float(
-                self._getData(full, 'scale_factor')
-            )
+            # self.meta['full_scan_field_of_view_j'] = float(
+            #     self._getData(full, 'x')
+            # )
+            # self.meta['full_scan_field_of_view_i'] = float(
+            #     self._getData(full, 'y')
+            # )
+            # self.meta['scale_factor'] = float(
+            #     self._getData(full, 'scale_factor')
+            # )
 
             # NOTE: I do not know what this 'scale_factor' means, and how to 
             # calibrate the physical step size with it. Here, I use 
@@ -230,24 +259,27 @@ class ImporterEMPAD(QObject):
             # 
             # If the formula is wrong, please raise an issue on GitHub.
             
-            self.meta['scan_step_size_i'] = (
-                self.meta['full_scan_field_of_view_i'] * 
-                self.meta['scale_factor'] * 
-                self.meta['scan_size'] / self.scan_i
-            )
+            # self.meta['scan_step_size_i'] = (
+            #     self.meta['full_scan_field_of_view_i'] * 
+            #     self.meta['scale_factor'] * 
+            #     self.meta['scan_size'] / self.scan_i
+            # )
 
-            self.meta['scan_step_size_j'] = (
-                self.meta['full_scan_field_of_view_j'] *
-                self.meta['scale_factor'] * 
-                self.meta['scan_size'] / self.scan_j 
-            )
+            # self.meta['scan_step_size_j'] = (
+            #     self.meta['full_scan_field_of_view_j'] *
+            #     self.meta['scale_factor'] * 
+            #     self.meta['scan_size'] / self.scan_j 
+            # )
         except BaseException as e:
             self.logger.error('Failed to parse scanning_step_size items.\n'
                 '{0}'.format(e), exc_info = True)
         
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            self.meta['camera_length'] = float(
+            # self.meta['camera_length'] = float(
+            #     self._getData(iom, 'nominal_camera_length')
+            # )
+            self.meta['/AcquisitionInstrument/Microscope/camera_length'] = float(
                 self._getData(iom, 'nominal_camera_length')
             )
         except BaseException as e:
@@ -256,7 +288,10 @@ class ImporterEMPAD(QObject):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            self.meta['voltage'] = float(
+            # self.meta['voltage'] = float(
+            #     self._getData(iom, 'high_voltage')
+            # )
+            self.meta['/AcquisitionInstrument/Microscope/accelerate_voltage'] = float(
                 self._getData(iom, 'high_voltage')
             )
         except BaseException as e:
@@ -265,7 +300,10 @@ class ImporterEMPAD(QObject):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            self.meta['scan_rotation'] = float(
+            # self.meta['scan_rotation'] = float(
+            #     self._getData(iom, 'scan_rotation')
+            # )
+            self.meta['/Calibration/RotationalOffsetCorrection/scan_rotation'] = float(
                 self._getData(iom, 'scan_rotation')
             )
         except BaseException as e:
@@ -274,7 +312,10 @@ class ImporterEMPAD(QObject):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            self.meta['screen_current'] = float(
+            # self.meta['screen_current'] = float(
+            #     self._getData(iom, 'screen_current')
+            # )
+            self.meta['/AcquisitionInstrument/Microscope/beam_current'] = float(
                 self._getData(iom, 'screen_current')
             )
         except BaseException as e:
@@ -293,7 +334,9 @@ class ImporterEMPAD(QObject):
         """
         try:
             time_node = root.getElementsByTagName('timestamp')[0]
-            self.meta['acquire_datetime'] = time_node.getAttribute('isoformat')
+            # self.meta['acquire_datetime'] = time_node.getAttribute('isoformat')
+            self.meta['/General/time'] = time_node.getAttribute('isoformat')        # TODO: Change to correct isoformat time
+            self.meta['/General/date'] = time_node.getAttribute('isoformat')        # TODO: Change to correct isoformat date 
         except BaseException as e:
             self.logger.error('Failed to parse acquire_datetime item.\n'
                 '{0}'.format(e), exc_info = True)
