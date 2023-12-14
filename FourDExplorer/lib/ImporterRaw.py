@@ -53,8 +53,8 @@ class ImporterRawFourDSTEM(QObject):
         """
         super().__init__(parent)
         
-        self.item_name = item_name 
-        self.item_parent_path = item_parent_path
+        self._item_name = item_name 
+        self._item_parent_path = item_parent_path
 
         self.meta = {}
 
@@ -66,19 +66,50 @@ class ImporterRawFourDSTEM(QObject):
     def setMeta(self, **kw):
         self.meta.update(kw)
 
+    def setReadParameters(
+        self,
+        raw_path: str,
+        scalar_type: str,
+        scalar_size: int,
+        dp_i: int,
+        dp_j: int,
+        scan_i: int,
+        scan_j: int,
+        offset_to_first_image: int,
+        gap_between_images: int,
+        little_endian: bool,
+    ):
+        self._raw_path = raw_path 
+        self._scalar_type = scalar_type
+        self._scalar_size = scalar_size 
+        self._dp_i = dp_i 
+        self._dp_j = dp_j 
+        self._scan_i = scan_i 
+        self._scan_j = scan_j 
+        self._offset_to_first_images = offset_to_first_image
+        self._gap_between_images = gap_between_images
+        self._little_endian = little_endian
+
     def loadData(self):
-        # shape = (self.scan_i, self.scan_j, self.dp_i, self.dp_j)
-        shape = (
-            self.meta['scan_i'], 
-            self.meta['scan_j'], 
-            self.meta['dp_i'], 
-            self.meta['dp_j'],
-        )
+        shape = (self._scan_i, self._scan_j, self._dp_i, self._dp_j)
+        # shape = (
+        #     self.meta['scan_i'], 
+        #     self.meta['scan_j'], 
+        #     self.meta['dp_i'], 
+        #     self.meta['dp_j'],
+        # )
         self.task = TaskLoadFourDSTEMFromRaw(
             shape = shape,
-            file_path = self.meta['raw_path'],
-            item_parent_path = self.item_parent_path,
-            item_name = self.item_name,
+            file_path = self._raw_path,
+            item_parent_path = self._item_parent_path,
+            item_name = self._item_name,
+            offset_to_first_image = self._offset_to_first_images,
+            gap_between_images = self._gap_between_images,
+            scalar_type = self._scalar_type,
+            scalar_size = self._scalar_size,
+            little_endian = self._little_endianm,
+            is_flipped = False,
+            rotate90 = 0,
             parent = self, 
             **self.meta,
         )

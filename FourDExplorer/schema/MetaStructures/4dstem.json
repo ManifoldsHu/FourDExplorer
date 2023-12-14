@@ -144,6 +144,30 @@
                 "unit": "m",
                 "display_unit": "nm",
                 "description": "The step size in the j direction (x direction)."
+            },
+            "acquisition_time": {
+                "type": "str",
+                "title": "acquisition time",
+                "value": null,
+                "description": "The time when the data is acquired."
+            },
+            "acquisition_date": {
+                "type": "str",
+                "title": "acquisition date",
+                "value": null,
+                "description": "The date when the data is acquired."
+            },
+            "acquisition_location": {
+                "type": "str",
+                "title": "acquisition location",
+                "value": null,
+                "description": "The location/institute/lab where the data is acquired."
+            },
+            "acquisition_timezone": {
+                "type": "str",
+                "title": "acquisition timezone",
+                "value": null,
+                "description": "The time zone where the data is acquired."
             }
         },
         "Camera": {

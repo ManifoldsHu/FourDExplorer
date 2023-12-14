@@ -72,6 +72,18 @@ AcquisitionInstrument/Microscope/
     step_size_j             float       m       nm          step size (j-direction)
     the step size in the j direction (x direction)
 
+    acquisition_time        str         experiment time 
+    The time when the data is acquired
+
+    acquisition_date        str         experiment date 
+    The date when the data is acquired
+
+    acquisition_location    str         experiment location 
+    The location where the data is acquired 
+
+    acquisition_timezone    str         experiment time zone
+    The time zone where the data is acquired
+
 AcquisitionInstrument/Camera/
     name                    str         name of camera 
     the name of the pixelated electron camera or direct electron detector

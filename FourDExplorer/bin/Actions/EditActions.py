@@ -16,11 +16,14 @@ date:           Jun 14, 2022
 
 
 from logging import Logger
+import os 
+import datetime
+import time 
 
 from PySide6.QtCore import QObject, QModelIndex
 from PySide6.QtWidgets import QMessageBox, QInputDialog, QTreeView
 from PySide6.QtGui import QAction
-from Constants import ItemDataRoles, HDFType
+from Constants import ItemDataRoles, HDFType, APP_VERSION
 
 from bin.HDFManager import HDFHandler
 from bin.UIManager import ThemeHandler
@@ -469,18 +472,44 @@ class ActionImportFourDSTEM(ActionEditBase):
 
         elif mode == 3:
             importer = ImporterRawFourDSTEM(new_name, parent_path)
+            importer.setReadParameters(
+                raw_path = page.getRawPath(),
+                scalar_type = page.getScalarType(),
+                scalar_size = page.getScalarSize(),
+                dp_i = page.getDp_i(),
+                dp_j = page.getDp_j(),
+                scan_i = page.getScan_i(),
+                scan_j = page.getScan_j(),
+                offset_to_first_image = page.getOffsetToFirstImage(),
+                gap_between_images = page.getGapBetweenImages(),
+                little_endian = page.getLittleEndian(),
+            )
             meta = {
-                'raw_path': page.getRawPath(),
-                'scalar_type': page.getScalarType(),
-                'scalar_size': page.getScalarSize(),
-                'dp_i': page.getDp_i(),
-                'dp_j': page.getDp_j(),
-                'scan_i': page.getScan_i(),
-                'scan_j': page.getScan_j(),
-                'offset_to_first_image': page.getOffsetToFirstImage(),
-                'gap_between_images': page.getGapBetweenImages(),
-                'little_endian': page.getLittleEndian(),
+                '/General/original_path': page.getRawPath(),
+                '/General/original_name': os.path.splitext(
+                    os.path.split(page.getRawPath())[1]
+                )[0],
+                '/General/fourd_explorer_version': '.'.join(APP_VERSION),
+                '/General/time': datetime.datetime.now().time().strftime('%H:%M:%S'),
+                '/General/date': datetime.datetime.now().date().strftime('%Y-%m-%d'),
+                '/General/time_zone': time.strftime('%Z'),
+                '/Calibration/Space/dp_i': page.getDp_i(),
+                '/Calibration/Space/dp_j': page.getDp_j(),
+                '/Calibration/Space/scan_i': page.getScan_i(),
+                '/Calibration/Space/scan_j': page.getScan_j(),
             }
+            # meta = {
+            #     'raw_path': page.getRawPath(),
+            #     'scalar_type': page.getScalarType(),
+            #     'scalar_size': page.getScalarSize(),
+            #     'dp_i': page.getDp_i(),
+            #     'dp_j': page.getDp_j(),
+            #     'scan_i': page.getScan_i(),
+            #     'scan_j': page.getScan_j(),
+            #     'offset_to_first_image': page.getOffsetToFirstImage(),
+            #     'gap_between_images': page.getGapBetweenImages(),
+            #     'little_endian': page.getLittleEndian(),
+            # }
             importer.setMeta(**meta)
             importer.loadData()
         

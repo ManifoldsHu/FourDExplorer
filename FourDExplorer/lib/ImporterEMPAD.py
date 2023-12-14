@@ -79,6 +79,9 @@ class ImporterEMPAD(QObject):
         self.dp_j = 128
         self.gap_between_images = 2 * self.dp_j * self.scalar_size
 
+        self.is_flipped = True 
+        self.rotate90 = 1
+
         # self.meta = {
         #     'data_mode': '4D-STEM',
         #     'dp_i': 128,
@@ -387,6 +390,8 @@ class ImporterEMPAD(QObject):
             item_name = self.item_name,
             offset_to_first_image = self.offset_to_first_image,
             gap_between_images = self.gap_between_images,
+            is_flipped = self.is_flipped,
+            rotate90 = self.rotate90,
             parent = self, 
             **self.meta,
         )
@@ -409,7 +414,7 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
             ...
 
     This importer corresponds to the EMPAD installed in Nanjing University.
-    """ 
+    """  
 
     def _parseCalibrateData(self, root: Document):
         """
@@ -445,6 +450,9 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
 
         # self.meta['rotate90'] = 1       # When loading the dataset, every image
                                         # should be rotated 90°.
+
+        self.is_flipped = True 
+        self.rotate90 = 1
 
         try:
             for mode in root.getElementsByTagName('scan_parameters'):
@@ -575,16 +583,20 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
         """
         try:
             time_node = root.getElementsByTagName('timestamp')[0]
-            self.meta['acquire_datetime'] = time_node.getAttribute('isoformat') 
+            # self.meta['acquire_datetime'] = time_node.getAttribute('isoformat') 
+            self.meta['/General/time'] = time_node.getAttribute('isoformat')        # TODO: Change to correct isoformat time
+            self.meta['/General/date'] = time_node.getAttribute('isoformat')        # TODO: Change to correct isoformat date 
         except BaseException as e:
             self.logger.error('Failed to parse acquire_datetime item.\n'
                 '{0}'.format(e), exc_info = True)
 
         try:
-            self.meta['empad_version'] = str(
-                self._getData(root, 'software_version')
-            )
-            version = self.meta['empad_version'].split(' ')[0]
+            # self.meta['empad_version'] = str(
+            #     self._getData(root, 'software_version')
+            # )
+            # version = self.meta['empad_version'].split(' ')[0]
+            version = str(self._getData(root, 'software_version')).split(' ')[0]
+            self.meta['/AcquisitionInstrument/Camera/name'] += ('_v' + version)
             if version != '0.51':
                 self.logger.warning(
                     'The parser is designed to parse 4D-STEM header file from '
