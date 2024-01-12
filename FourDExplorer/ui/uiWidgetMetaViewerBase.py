@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiWidgetMetaViewerBase.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,8 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHeaderView, QSizePolicy, QTabWidget,
-    QTreeView, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QHeaderView, QSizePolicy, QTreeView,
+    QVBoxLayout, QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
@@ -25,20 +25,10 @@ class Ui_Form(object):
         Form.resize(400, 300)
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.tabWidget = QTabWidget(Form)
-        self.tabWidget.setObjectName(u"tabWidget")
-        self.tab_base = QWidget()
-        self.tab_base.setObjectName(u"tab_base")
-        self.verticalLayout_2 = QVBoxLayout(self.tab_base)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.treeView = QTreeView(self.tab_base)
+        self.treeView = QTreeView(Form)
         self.treeView.setObjectName(u"treeView")
 
-        self.verticalLayout_2.addWidget(self.treeView)
-
-        self.tabWidget.addTab(self.tab_base, "")
-
-        self.verticalLayout.addWidget(self.tabWidget)
+        self.verticalLayout.addWidget(self.treeView)
 
 
         self.retranslateUi(Form)
@@ -48,6 +38,5 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_base), QCoreApplication.translate("Form", u"Base", None))
     # retranslateUi
 

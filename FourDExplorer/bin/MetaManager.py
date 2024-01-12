@@ -68,6 +68,7 @@ from Constants import APP_VERSION
 from Constants import ItemDataRoles
 from Constants import HDFType
 from bin.HDFManager import HDFHandler 
+from bin.UnitManager import UnitManager
 
  
 reValidMetaName = re.compile(
@@ -135,6 +136,14 @@ class MetaManager(QObject):
     def display_tree_model(self) -> "DisplayTreeModel":
         return self._display_tree_model
     
+    @property
+    def value_tree(self) -> "ValueTree":
+        return self._value_tree 
+    
+    @property
+    def value_tree_model(self) -> "ValueTreeModel":
+        return self._value_tree_model 
+    
     def setItemPath(self, item_path: str):
         """
         Set the item path of the meta manager.
@@ -149,17 +158,19 @@ class MetaManager(QObject):
         with open(self.schema_json_path, 'r', encoding='utf-8') as f:
             json_data = json.load(f)
 
-        self._parseSchema(parent_key = '/', definitions = json_data)
+        self._parseSchema(parent_key = '', definitions = json_data)
         self._schema_tree = SchemaTree(self._schema, parent = self)
 
         self._value_tree = ValueTree(item_path, parent = self)
+        self._value_tree_model = ValueTreeModel(self)
         self._display_tree = DisplayTree(
             self._schema_tree, 
             self._value_tree, 
             parent = self,
         )
-
-        self._display_tree_model = DisplayTreeModel(self._display_tree, self)
+ 
+        # self._display_tree_model = DisplayTreeModel(self._display_tree, self)
+        self._display_tree_model = DisplayTreeModel(self)
         self._display_tree_model.meta_manager = self
 
     def initializeSchema(self, hdf_type: HDFType):
@@ -172,7 +183,7 @@ class MetaManager(QObject):
         if hdf_type in self._hdf_meta_schema_file:
             with open(self.schema_json_path, 'r', encoding='utf-8') as f:
                 json_data = json.load(f)
-            self._parseSchema(parent_key = '/', definitions = json_data)
+            self._parseSchema(parent_key = '', definitions = json_data)
             self._schema_tree = SchemaTree(self._schema, parent = self)
         else:
             raise ValueError(f"There is no predefined schema for the {hdf_type}")
@@ -213,15 +224,15 @@ class MetaManager(QObject):
     #     self._display_tree_model.meta_manager = self 
     #     return self._display_tree_model
 
-    def updateMetas(self) -> "DisplayTreeModel":
-        """
-        Update meta managers, along with its schema and models.
+    # def updateMetas(self) -> "DisplayTreeModel":
+    #     """
+    #     Update meta managers, along with its schema and models.
 
-        returns:
-            (DisplayTreeModel) the updated display tree model.
-        """
-        self.initializeMetas(self._item_path)
-        return self._display_tree_model
+    #     returns:
+    #         (DisplayTreeModel) the updated display tree model.
+    #     """
+    #     self.setItemPath(self._item_path)
+    #     return self._display_tree_model
 
 
     # def _initializeSchema(self):
@@ -254,7 +265,7 @@ class MetaManager(QObject):
                 self._createFieldInstance(full_key, value)
             elif isinstance(value, dict):
                 # It is a nested structure, so we need to go deeper
-                self._parseSchema(parent_key, value)
+                self._parseSchema(full_key, value)
             else:
                 raise ValueError(f"Invalid format for metadata schema at {full_key}")
     
@@ -292,6 +303,7 @@ class MetaManager(QObject):
                 parent = self,
             )
             self._schema[full_key] = field
+        
         else:
             raise TypeError(
                 f"Invalid type {field_instance['type']} of the field: {full_key}"
@@ -303,7 +315,7 @@ class MetaManager(QObject):
     def listKeys(self) -> Iterable:
         return self._schema.keys()
     
-    def getSchemaKeys(self):
+    def getSchemaKeys(self) -> Iterable:
         return self._schema.keys()
     
     def _getSchemaFields(self, key: str) -> "MetadataFieldBase":
@@ -318,7 +330,7 @@ class MetaManager(QObject):
             return field.unit
         else:
             return None 
-        
+           
     def getSchemaDisplayUnit(self, key: str) -> str:
         field = self._getSchemaFields(key)
         if isinstance(field, (IntField, FloatField)):
@@ -470,6 +482,7 @@ class IntField(MetadataFieldBase):
         # TODO: detect unit's alias name 
         self._display_unit = dsp_unt 
 
+
 class StringField(MetadataFieldBase):
     """
     字符串字段类，目前不需要额外的属性或方法，但保留扩展的可能性 
@@ -503,7 +516,7 @@ class MetaTreeNode(Mapping):
     are predefined in configure files and should not be changed in runtime. Ot-
     her attriubtes will be listed in Undefined list.
     """
-    def __init__(self, name: str, parent: 'MetaTreeNode'|None = None):
+    def __init__(self, name: str, parent: 'MetaTreeNode' = None):
         self._name = name 
         self._parent = parent 
         self._mapping = {}
@@ -570,7 +583,8 @@ class MetaTreeNode(Mapping):
             raise TypeError(
                 f"parent must be MetaTreeNode or NoneType, not {type(parent)}"
             )
-        elif self.isSubNode(parent):
+        # elif self.isSubNode(parent):
+        elif parent.isSubNode(self):
             raise RuntimeError("Loop in meta tree!")
         else:
             self._parent = parent 
@@ -671,7 +685,7 @@ class SchemaTree(QObject):
     def __init__(self, schema_keys: Mapping, parent: QObject = None):
         super().__init__(parent)
         self._schema_keys = schema_keys 
-        self._root = self._buildTree()
+        self._root = self._buildTree(self._schema_keys)
 
     @property
     def logger(self) -> Logger:
@@ -697,11 +711,11 @@ class SchemaTree(QObject):
             (MetaRootNode) The root node of the constructed schema tree.
         """
         root = MetaRootNode()
-
         for key in schema_keys:
-            if self.isValidPath():
-                self._addPathToTree(root, key)
-
+            if self.isValidPath(key):
+                path_parts = key.lstrip('/').split('/')
+                self._addPathToTree(root, path_parts)
+                # self._addPathToTree(root, key)
         return root 
     
     def isValidPath(self, path: str) -> bool:
@@ -724,22 +738,41 @@ class SchemaTree(QObject):
             return False 
         else:
             return True 
-
-    def _addPathToTree(self, root: MetaTreeNode, path: str):
+        
+    def _addPathToTree(self, parent: MetaTreeNode, path_parts: list[str]):
         """
-        Add a path to the schema tree, creating intermediate nodes as necessary.
+        Add an attribute to the tree, creating nodes as necessary.
 
         arguments:
-            root: (MetaTreeNode) the root of the schema tree 
-            
-            path: (str) the path to be added to the tree 
+            parent: (MetaTreeNode) The parent node to add child recursively.
+
+            path_parts: (list[str]) The paths of the attribute. 
+                e.g. ['Calibration', 'Space', 'dp_i']
         """
-        current_node = root 
-        path_parts = path.split('/')[1:]    # split the path and ignore the first
-        for part in path_parts:
-            if part not in current_node:
-                new_node = MetaRootNode(part, current_node)
-                current_node.addChild(new_node)
+        if len(path_parts) == 0:
+            return None 
+        
+        part = path_parts[0]
+        if part not in parent:
+            new_node = MetaTreeNode(part, parent)
+            parent.addChild(new_node)
+        self._addPathToTree(parent[part], path_parts[1:])
+
+    # def _addPathToTree(self, root: MetaTreeNode, path: str):
+    #     """
+    #     Add a path to the schema tree, creating intermediate nodes as necessary.
+
+    #     arguments:
+    #         root: (MetaTreeNode) the root of the schema tree 
+            
+    #         path: (str) the path to be added to the tree 
+    #     """
+    #     current_node = root 
+    #     path_parts = path.split('/')[1:]    # split the path and ignore the first
+    #     for part in path_parts:
+    #         if part not in current_node:
+    #             new_node = MetaRootNode(part, current_node)
+    #             current_node.addChild(new_node)
 
     # def _insertNode(self, current_node: dict, path_parts: list[str]):
     #     """
@@ -794,16 +827,20 @@ class ValueTree(QObject):
         return self._root 
 
     def _buildTree(self):
+        """
+        Recursively build the tree according to path lists.
+        """
         for key, value in self.attributes.items():
             if self.isValidPath(key):
-                self._addAttributeToTree(self._root, key, value)
+                path_parts = key.lstrip('/').split('/')
+                self._addAttributeToTree(self._root, path_parts)
             else:
                 self._undefined_attributes[key] = value
 
     def isValidPath(self, path: str) -> bool:
         """
         Check if the given path is a valid schema path.
-
+ 
         arguments:
             path: (str) The path to be checked.
 
@@ -821,24 +858,65 @@ class ValueTree(QObject):
         else:
             return True     
         
-    def _addAttributeToTree(self, root: MetaRootNode, path: str, value):
+    def _addAttributeToTree(self, parent: MetaTreeNode, path_parts: list[str]):
         """
         Add an attribute to the tree, creating nodes as necessary.
 
         arguments
-            path: (str) the path of the attribute
+            parent: (MetaTreeNode) The parent node to add child recursively.
 
-            value: (Any) the value of the attribute
+            path_parts: (list[str]) The paths of the attribute. 
+                e.g. ['Calibration', 'Space', 'dp_i']
         """
-        current_node = root
-        path_parts = path.split('/')[1:]    # split the path and ignore the first
-        for part in path_parts:
-            if part not in current_node:
-                new_node = MetaRootNode(part, current_node)
-                current_node.addChild(new_node)
+        if len(path_parts) == 0:
+            return None 
+        
+        part = path_parts[0]
+        if part not in parent:
+            new_node = MetaTreeNode(part, parent)
+            parent.addChild(new_node)
+        # Recursively add child nodes 
+        self._addAttributeToTree(parent[part], path_parts[1:])
+
+                
+
+    def getNodeByRow(self, parent_node: MetaTreeNode, row: int) -> MetaTreeNode:
+        """
+        Given a node, return its row number under its parent.
+
+        arguments:
+            node: (MetaTreeNode) The node to find the row number for.
+
+        returns:
+            (int) The row number of the node under its parent.
+        """
+        if parent_node is None or not isinstance(parent_node, MetaTreeNode):
+            raise TypeError("parent_node must be a MetaTreeNode")
+        elif row < 0 or row >= len(parent_node):
+            raise ValueError("row must be between 0 and len(parent_node)")
+        return list(parent_node.values())[row]
+    
+    def getRowOfNode(self, node: MetaTreeNode) -> int:
+        """
+        Given a node, return its row number under its parent.
+
+        arguments:
+            node: (MetaTreeNode) The node to find the row number for.
+
+        returns:
+            (int) The row number of the node under its parent.
+        """
+        if node.parent is None:
+            # In QAbstractModel, the row index of the root node should be 0
+            raise ValueError("root node does not have row index")   # or returns 0? 
+            
+        return list(node.parent.values()).index(node)
 
 
 class DisplayTree(QObject):
+    """
+    DEPRECATED
+    """
     def __init__(
         self, 
         schema_tree: SchemaTree, 
@@ -1021,7 +1099,7 @@ class DisplayTreeModel(QAbstractItemModel):
         arguments:
             parent: (QModelIndex) The parent index.
 
-        Returns:
+        returns:
             (int) The number of rows under the given parent.
         """
         if not parent.isValid():
@@ -1041,7 +1119,7 @@ class DisplayTreeModel(QAbstractItemModel):
         returns:
             (int) The number of columns for the given parent.
         """
-        return 1
+        return 2    # TODO: turns to actual item number.
     
     def data(self, index: QModelIndex, role: int = ItemDataRoles.DisplayRole):
         """
@@ -1066,13 +1144,13 @@ class DisplayTreeModel(QAbstractItemModel):
             return node.name
         elif role == ItemDataRoles.DisplayRole and index.column() == 1:
             if node.path in self.meta_manager.getSchemaKeys():
-                if isinstance(self.meta_manager.getSchemaField(), (IntField, FloatField)):
+                if isinstance(self.meta_manager.getSchemaField(node.path), (IntField, FloatField)):
                     attrs = self.hdf_handler.file[self.meta_manager.item_path].attrs
                     value = attrs[node.path]
                     # 这里我们需要构造 display_str，通过实际的值，与 Schema 中记录的展示单位。
                     # TODO
                     return value 
-                else:
+                else: 
                     return -1   # TODO
 
 
@@ -1099,9 +1177,8 @@ class DisplayTreeModel(QAbstractItemModel):
             parent_node = self.root_node
         else:
             parent_node = parent.internalPointer()
-
-        child_node = self.display_tree.getNodeByRow(row)
         if row >= 0 and row < len(parent_node):
+            child_node = self.display_tree.getNodeByRow(row)
             self.createIndex(row, column, child_node)
         else:
             return QModelIndex()
@@ -1130,3 +1207,233 @@ class DisplayTreeModel(QAbstractItemModel):
         
     
 
+class ValueTreeModel(QAbstractItemModel):
+    """
+    ValueTreeModel 用于在 QTreeView 控件中展示 ValueTree 的数据。
+
+    本模型类继承自 QAbstractModel，提供了与 ValueTree 数据交互所需的界面，使得
+    ValueTree 中的数据可以在 QTreeView 控件中被正确显示和管理。
+
+    ValueTreeModel 主要处理节点数据的检索、节点层次关系的定义，以及如何在视图中呈现
+    这些数据。
+
+    注意：对于那些定义于 schema 中的项，在显示时我们将给出其名字、单位和注释。
+
+    ValueTreeModel is designed for displaying ValueTree data in a QTreeView 
+    widget.
+
+    This model class, inheriting from QAbstractItemModel, provides the necessary
+    interface to interact with the ValueTree data, ensuring that the data from 
+    the ValueTree can be correctly displayed and managed within a QTreeView 
+    widget.
+
+    ValueTreeModel mainly deals with retrieving node data, defining the hierar-
+    chical relationship of nodes, and how to present these data in the view.
+
+    NOTE: For those items defined in the schema, we will display their name, 
+    unit and comments, despite their keys and values.
+    """
+    def __init__(self, meta_manager: MetaManager, parent: QObject = None):
+        """
+        Initialize the value tree model.
+
+        arguments:
+            meta_manager: (MetaManager) the meta manager of the attrs of the dataset
+
+            parent: (QObject)
+        """
+        super(ValueTreeModel, self).__init__(parent)
+        self._meta_manager = meta_manager 
+
+    @property
+    def meta_manager(self) -> MetaManager:
+        return self._meta_manager
+    
+    @meta_manager.setter 
+    def meta_manager(self, meta_mgr: MetaManager):
+        self._meta_manager = meta_mgr 
+
+    @property
+    def value_tree(self) -> ValueTree: 
+        return self._meta_manager.value_tree
+    
+    @property
+    def root_node(self) -> MetaRootNode:
+        return self._meta_manager.value_tree.root 
+    
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler 
+    
+    @property
+    def unit_manager(self) -> UnitManager:
+        global qApp 
+        return qApp.unit_manager
+    
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        """
+        Returns the number of rows under the given parent. When the parent is valid,
+        rowCount() returns the number of children of parent. When the parent is 
+        QModelIndex(), rowCount() returns the number of top-level items.
+
+        arguments:
+            parent: (QModelIndex) The parent index.
+
+        returns:
+            (int): The number of rows under the given parent.
+        """
+        if not parent.isValid():
+            parent_node = self.root_node 
+        else:
+            parent_node = parent.internalPointer()
+        return len(parent_node)
+    
+    def columnCount(self, parent: QModelIndex() = QModelIndex()) -> int:
+        """
+        Returns the number of columns for the children of the given parent. In 
+        most subclasses, the number of columns is independent of the parent.
+
+        arguments:
+            parent: (QModelIndex) The parent index.
+
+        returns:
+            (int) the number of columns for the given parent.
+        """
+        return 2
+    
+    def data(self, index: QModelIndex, role: int = ItemDataRoles.DisplayRole):
+        """
+        Returns the data stored under the given role for the item refered to by 
+        the index.
+
+        arguments:
+            index: (QModelIndex) The index of the item.
+
+            role: (int) The role for which data is requested.
+
+        returns:
+            (Any) The data stored under the given role for the item referred to 
+                by the index.
+        """
+        if not index.isValid():
+            return None 
+        node: MetaTreeNode = index.internalPointer()
+        schema_keys = self.meta_manager.getSchemaKeys()
+
+        if role == ItemDataRoles.DisplayRole and index.column() == 0:
+            if node.path in schema_keys:
+                return self.meta_manager.getSchemaTitle(node.path)
+            else:
+                return node.name 
+        elif role == ItemDataRoles.DisplayRole and index.column() == 1:
+            return self._makeDisplayValue(index)
+        elif role == ItemDataRoles.ToolTipRole:
+            if node.path in schema_keys:
+                return self.meta_manager.getSchemaDescription(node.path)
+        elif role == ItemDataRoles.NodeRole:
+            return node 
+        elif role == ItemDataRoles.PathRole:
+            return node.path 
+
+        return None 
+    
+
+    def index(
+        self,
+        row: int,
+        column: int,
+        parent: QModelIndex = QModelIndex()
+    ) -> QModelIndex:
+        """
+        Returns the index of the item in the model specified by the given row, 
+        column and parent index.
+
+        arguments:
+            row: (int) The row number of the item.
+
+            column: (int) The column number of the item.
+
+            parent: (QModelIndex) The parent index of the item.
+
+        returns:
+            (QModelIndex) The index of the specified item.
+        """
+        if not parent.isValid():
+            parent_node = self.root_node 
+        else:
+            parent_node = parent.internalPointer()
+        
+        if row >= 0 and row < len(parent_node):
+            child_node = self.value_tree.getNodeByRow(parent_node, row)
+            return self.createIndex(row, column, child_node)
+        else:
+            return QModelIndex()
+        
+
+    def parent(self, index: QModelIndex) -> QModelIndex:
+        """
+        Returns the parent of the model item with the given index. If the item 
+        has no parent, an invalid QModelIndex is returned.
+
+        arguments:
+            index: (QModelIndex) The index of the item.
+
+        returns:
+            (QModelIndex) The parent index of the specified item.
+        """
+        if not index.isValid():
+            return QModelIndex()
+        child_node = index.internalPointer()
+        parent_node = child_node.parent 
+        if parent_node is self.root_node:
+            return QModelIndex()
+        return self.createIndex(self.value_tree.getRowOfNode(child_node), 0, parent_node)
+    
+
+    def _makeDisplayValue(self, index: QModelIndex) -> str:
+        """
+        Returns the proper string according to the type of metadata value.
+
+        If the metadata item has predefined unit in schema, it will append the 
+        unit after the value.
+
+        argument:
+            index: (QModelIndex) the model index of the item.
+
+        returns:
+            (str) the displayed string of the value. 
+        """
+        node: MetaTreeNode = index.internalPointer()
+        schema_keys = self.meta_manager.getSchemaKeys()
+        attrs = self.hdf_handler.file[self.meta_manager.item_path].attrs 
+        value = attrs.get(node.path)
+        if value is None:
+            return ""
+        if node.path not in schema_keys:
+            return f"{value}"
+        
+        # The actual unit of the stored metadata value. (e.g. 'm')
+        real_unit = self.meta_manager.getSchemaUnit(node.path)    
+        if real_unit is None:
+            return f"{value}"
+        
+        # The displayed unit of the value. (e.g. 'nm')
+        display_unit = self.meta_manager.getSchemaDisplayUnit(node.path)
+        if display_unit is None:
+            # TODO: Format displaying with rich text
+            return f"{value:.4g} {real_unit}"  
+        try:
+            display_value = self.unit_manager.convert(value, real_unit, display_unit)
+        except ValueError:
+            return f"{value:.4g} {real_unit}"
+        else:
+            return f"{display_value:.4g} {display_unit}"    #TODO: Format displying with rich text.
+
+
+        
+        # if not self.meta_manager.getSchemaUnit(node.path) is None:
+        #     display_str = f"" 
+        #     # TODO: display as converted unit 
+        #     return display_str  
+        # return f"{value}"

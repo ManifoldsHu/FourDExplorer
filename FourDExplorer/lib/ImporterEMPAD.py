@@ -26,7 +26,7 @@ date:               May 8, 2022
 from logging import Logger
 from xml.dom.minidom import Document, parse
 import os 
-import datetime
+import datetime 
 
 from PySide6.QtCore import QObject
 
@@ -79,32 +79,28 @@ class ImporterEMPAD(QObject):
         self.dp_j = 128
         self.gap_between_images = 2 * self.dp_j * self.scalar_size
 
-        self.is_flipped = True 
-        self.rotate90 = 1
+        self.is_flipped = True  # When loading the dataset, every image
+                                # should be transposed.
+        self.rotate90 = 1       # When loading the dataset, every image
+                                # should be rotated 90°.
 
-        # self.meta = {
-        #     'data_mode': '4D-STEM',
-        #     'dp_i': 128,
-        #     'dp_j': 128,
-        #     'scalar_type': 'float',
-        #     'scalar_size': 4,
-        #     'little_endian': True,
-        #     'camera': 'EMPAD',
-        # }
+        self._updateCurrentDateTime()
 
         self.meta = {
-            '/General/fourd_explorer_version': '.'.join(APP_VERSION),
-            '/AcquisitionInstrument/Camera/name': 'EMPAD',
-            '/AcquisitionInstrument/Camera/manufacturer': 'Thermo Fisher',
-            '/AcquisitionInstrument/Camera/pixel_number_i': 128,
-            '/AcquisitionInstrument/Camera/pixel_number_j': 128,
-            '/AcquisitionInstrument/Camera/pixel_size_i': 150e-6,
-            '/AcquisitionInstrument/Camera/pixel_size_j': 150e-6,
+            '/General/fourd_explorer_version': '.'.join([str(i) for i in APP_VERSION]),
+            '/General/date': self._current_date,
+            '/General/time': self._current_time,
+            '/General/time_zone': self._utc_offset_str, 
+            '/Acquisition/Camera/name': 'EMPAD',
+            '/Acquisition/Camera/manufacturer': 'Thermo Fisher',
+            '/Acquisition/Camera/pixel_number_i': 128,
+            '/Acquisition/Camera/pixel_number_j': 128,
+            '/Acquisition/Camera/pixel_size_i': 150e-6,
+            '/Acquisition/Camera/pixel_size_j': 150e-6,
             '/Calibration/Space/dp_i': 128,
             '/Calibration/Space/dp_j': 128,
         }
         
-
     @property
     def logger(self) -> Logger:
         global qApp
@@ -125,16 +121,28 @@ class ImporterEMPAD(QObject):
         dom_tree = parse(xml_path)
         root: Document = dom_tree.documentElement
         self.xml_path = xml_path 
-        # self.meta['header_file'] = xml_path
-        self.meta['/General/original_path'] = xml_path 
-        self.meta['/General/original_name'] = os.path.splitext(os.path.split(xml_path)[1])[0]
-        
+        self.meta['/General/header_path'] = xml_path
 
         self._parseLoadingData(root)
         self._parseCalibrateData(root)
         self._parseOtherData(root)
         
         return self.meta
+    
+    def _updateCurrentDateTime(self):
+        """
+        Get current date, time and time zone, as strings like:
+        date: "2024-01-03"
+        time: "22:27:01"
+        timezone: "UTC+8"
+        """
+        now = datetime.datetime.now()
+        time_zone = now.astimezone().tzinfo
+        utc_offset = time_zone.utcoffset(now)
+        offset_hours = int(utc_offset.total_seconds() / 3600)
+        self._utc_offset_str = f"UTC{offset_hours:+d}"
+        self._current_date = now.strftime("%Y-%m-%d")
+        self._current_time = now.strftime("%H:%M:%S")
 
     def _parseLoadingData(self, root: Document):
         """
@@ -180,7 +188,7 @@ class ImporterEMPAD(QObject):
         raw_name = raw_name_node.getAttribute('filename')
         self.raw_path = os.path.join(dir_name, raw_name)
 
-        self.meta['raw_file'] = self.raw_path
+        self.meta['/General/data_path'] = self.raw_path
 
 
     def _parseCalibrateData(self, root: Document):
@@ -221,9 +229,6 @@ class ImporterEMPAD(QObject):
         try:
             for mode in root.getElementsByTagName('scan_parameters'):
                 if mode.getAttribute('mode') == 'acquire':
-                    # self.meta['scan_size'] = float(
-                    #     self._getData(mode, 'scan_size')
-                    # )
                     self.scan_size = float(self._getData(mode, 'scan_size'))
         except BaseException as e:
             self.logger.error('Failed to parse scan_size item.\n'
@@ -236,18 +241,14 @@ class ImporterEMPAD(QObject):
             self.full_scan_field_of_view_i = float(self._getData(full, 'y'))
             self.scale_factor = float(self._getData(full, 'scale_factor'))
 
-            self.meta['/Calibrate/Space/scan_dr_i'] = (
-                self.full_scan_field_of_view_i * self.scale_factor * self.scan_size / self.scan_i 
-            )
-            self.meta['/Calibrate/Space/scan_dr_j'] = (
-                self.full_scan_field_of_view_j * self.scale_factor * self.scan_size / self.scan_j 
-            )
-            # self.meta['full_scan_field_of_view_j'] = float(
-            #     self._getData(full, 'x')
-            # )
-            # self.meta['full_scan_field_of_view_i'] = float(
-            #     self._getData(full, 'y')
-            # )
+            step_size_i = self.full_scan_field_of_view_i * self.scale_factor * self.scan_size / self.scan_i 
+            step_size_j = self.full_scan_field_of_view_j * self.scale_factor * self.scan_size / self.scan_j 
+
+            self.meta['/Acquisition/Microscope/step_size_i'] = step_size_i 
+            self.meta['/Acquisition/Microscope/step_size_j'] = step_size_j 
+            self.meta['/Calibrate/Space/scan_dr_i'] = step_size_i 
+            self.meta['/Calibrate/Space/scan_dr_j'] = step_size_j
+
             # self.meta['scale_factor'] = float(
             #     self._getData(full, 'scale_factor')
             # )
@@ -263,27 +264,13 @@ class ImporterEMPAD(QObject):
             # 
             # If the formula is wrong, please raise an issue on GitHub.
             
-            # self.meta['scan_step_size_i'] = (
-            #     self.meta['full_scan_field_of_view_i'] * 
-            #     self.meta['scale_factor'] * 
-            #     self.meta['scan_size'] / self.scan_i
-            # )
-
-            # self.meta['scan_step_size_j'] = (
-            #     self.meta['full_scan_field_of_view_j'] *
-            #     self.meta['scale_factor'] * 
-            #     self.meta['scan_size'] / self.scan_j 
-            # )
         except BaseException as e:
             self.logger.error('Failed to parse scanning_step_size items.\n'
                 '{0}'.format(e), exc_info = True)
         
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            # self.meta['camera_length'] = float(
-            #     self._getData(iom, 'nominal_camera_length')
-            # )
-            self.meta['/AcquisitionInstrument/Microscope/camera_length'] = float(
+            self.meta['/Acquisition/Microscope/camera_length'] = float(
                 self._getData(iom, 'nominal_camera_length')
             )
         except BaseException as e:
@@ -292,10 +279,7 @@ class ImporterEMPAD(QObject):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            # self.meta['voltage'] = float(
-            #     self._getData(iom, 'high_voltage')
-            # )
-            self.meta['/AcquisitionInstrument/Microscope/accelerate_voltage'] = float(
+            self.meta['/Acquisition/Microscope/accelerate_voltage'] = float(
                 self._getData(iom, 'high_voltage')
             )
         except BaseException as e:
@@ -304,9 +288,6 @@ class ImporterEMPAD(QObject):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            # self.meta['scan_rotation'] = float(
-            #     self._getData(iom, 'scan_rotation')
-            # )
             self.meta['/Calibration/RotationalOffsetCorrection/scan_rotation'] = float(
                 self._getData(iom, 'scan_rotation')
             )
@@ -316,10 +297,7 @@ class ImporterEMPAD(QObject):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            # self.meta['screen_current'] = float(
-            #     self._getData(iom, 'screen_current')
-            # )
-            self.meta['/AcquisitionInstrument/Microscope/beam_current'] = float(
+            self.meta['/Acquisition/Microscope/beam_current'] = float(
                 self._getData(iom, 'screen_current')
             )
         except BaseException as e:
@@ -338,20 +316,17 @@ class ImporterEMPAD(QObject):
         """
         try:
             time_node = root.getElementsByTagName('timestamp')[0]
-            # self.meta['acquire_datetime'] = time_node.getAttribute('isoformat')
-            self.meta['/General/time'] = time_node.getAttribute('isoformat')        # TODO: Change to correct isoformat time
-            self.meta['/General/date'] = time_node.getAttribute('isoformat')        # TODO: Change to correct isoformat date 
+            iso_string = time_node.getAttribute('isoformat')
+            parsed_datetime = datetime.datetime.fromisoformat(iso_string)
+            self.meta['/Acquisition/acquisition_time'] = parsed_datetime.strftime("%H:%M:%S")   
+            self.meta['/Acquisition/acquisition_date'] = parsed_datetime.strftime("%Y-%m-%d")   
         except BaseException as e:
             self.logger.error('Failed to parse acquire_datetime item.\n'
                 '{0}'.format(e), exc_info = True)
 
         try:
-            # self.meta['empad_version'] = str(
-            #     self._getData(root, 'software_version')
-            # )
             version = str(self._getData(root, 'software_version')).split(' ')[0]
-            self.meta['/AcquisitionInstrument/Camera/name'] += ('_v' + version)
-            # version = self.meta['empad_version'].split(' ')[0]
+            self.meta['/Acquisition/Camera/name'] += ('_v' + version)
             if version != '1.0.0':
                 self.logger.warning(
                     'The parser is designed to parse 4D-STEM header file from '
@@ -445,21 +420,15 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
         arguments:
             root: (Document) The root of the dom tree.
         """
-        # self.meta['is_flipped'] = True  # When loading the dataset, every image
+
+        self.is_flipped = True          # When loading the dataset, every image
                                         # should be transposed.
-
-        # self.meta['rotate90'] = 1       # When loading the dataset, every image
+        self.rotate90 = 1               # When loading the dataset, every image
                                         # should be rotated 90°.
-
-        self.is_flipped = True 
-        self.rotate90 = 1
 
         try:
             for mode in root.getElementsByTagName('scan_parameters'):
                 if mode.getAttribute('mode') == 'acquire':
-                    # self.meta['scan_size'] = float(
-                    #     self._getData(mode, 'scan_size')
-                    # )
                     scan_size = float(self._getData(mode, 'scan_size'))
         except BaseException as e:
             self.logger.error('Failed to parse scan_size item.\n'
@@ -468,14 +437,6 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
             full = self._getData(iom, 'optics.get_full_scan_field_of_view')
-
-            # self.meta['full_scan_field_of_view_j'] = float(
-            #     full.split(', ')[0].lstrip('[')
-            # )
-            
-            # self.meta['full_scan_field_of_view_i'] = float(
-            #     full.split(', ')[1].rstrip(']')
-            # )
 
             full_scan_field_of_view_j = float(full.split(', ')[0].lstrip('['))
             full_scan_field_of_view_i = float(full.split(', ')[1].rstrip(']'))
@@ -486,28 +447,16 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
             self.meta['/Calibration/Space/scan_dr_j'] = (
                 full_scan_field_of_view_j * scan_size * 2 / self.scan_j
             )
-            self.meta['/Calibration/Space/step_size_i'] = self.meta['/Calibration/Space/scan_dr_i']
-            self.meta['/Calibration/Space/step_size_j'] = self.meta['/Calibration/Space/scan_dr_j']
-            
-            # self.meta['scan_step_size_i'] = (
-            #     self.meta['full_scan_field_of_view_i'] * 
-            #     self.meta['scan_size'] * 2 / self.scan_i
-            # )
+            self.meta['/Acquisition/Microscope/step_size_i'] = self.meta['/Calibration/Space/scan_dr_i']
+            self.meta['/Acquisition/Microscope/step_size_i'] = self.meta['/Calibration/Space/scan_dr_j']
 
-            # self.meta['scan_step_size_j'] = (
-            #     self.meta['full_scan_field_of_view_j'] * 
-            #     self.meta['scan_size'] * 2 / self.scan_j 
-            # )
         except BaseException as e:
             self.logger.error('Failed to parse scanning_step_size items.\n'
                 '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            # self.meta['camera_length'] = float(
-            #     self._getData(iom, 'optics.get_cameralength')
-            # )
-            self.meta['/AcquisitionInstrument/Microscope/camera_length'] = float(
+            self.meta['/Acquisition/Microscope/camera_length'] = float(
                 self._getData(iom, 'optics.get_cameralength')
             )
         except BaseException as e: 
@@ -516,10 +465,7 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            # self.meta['voltage'] = float(
-            #     self._getData(iom, 'source.get_voltage')
-            # )
-            self.meta['/AcquisitionInstrument/Microscope/accelerate_voltage'] = float(
+            self.meta['/Acquisition/Microscope/accelerate_voltage'] = float(
                 self._getData(iom, 'source.get_voltage')
             )
         except BaseException as e:
@@ -531,19 +477,13 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
             self.meta['/Calibration/RotationalOffsetCorrection/scan_rotation'] = float(
                 self._getData(iom, 'column.get_scanrotation')
             )
-            # self.meta['scan_rotation'] = float(
-            #     self._getData(iom, 'column.get_scanrotation')
-            # )
         except BaseException as e:
             self.logger.error('Failed to parse scan_rotation item.\n'
                 '{0}'.format(e), exc_info = True)
 
         try:
             iom = root.getElementsByTagName('iom_measurements')[0]
-            # self.meta['screen_current'] = float(
-            #     self._getData(iom, 'source.get_screencurrent')
-            # )
-            self.meta['/AcquisitionInstrument/Microscope/beam_current'] = float(
+            self.meta['/Acquisition/Microscope/beam_current'] = float(
                 self._getData(iom, 'source.get_screencurrent')
             )
         except BaseException as e:
@@ -556,17 +496,10 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
                 self._getData(iom, 'calibrated_diffraction_angle')
             )
             wave_length = Voltage2WaveLength(
-                self.meta['/AcquisitionInstrument/Microscope/accelerate_voltage']
+                self.meta['/Acquisition/Microscope/accelerate_voltage']
             )
             self.meta['/Calibration/Space/du_i'] = du_in_rad / wave_length 
             self.meta['/Calibration/Space/du_j'] = du_in_rad / wave_length 
-            # self.meta['dp_pixel_size_i'] = float(
-            #     self._getData(iom, 'calibrated_diffraction_angle')
-            # )
-            # self.meta['dp_pixel_size_j'] = float(
-            #     self._getData(iom, 'calibrated_diffraction_angle')
-            # )
-            # self.meta['dp_pixel_size_unit'] = 'rad'
         except BaseException as e:
             self.logger.error('Failed to parse reciprocal_pixel_size item.\n'
                 '{0}'.format(e), exc_info = True)
@@ -583,20 +516,17 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
         """
         try:
             time_node = root.getElementsByTagName('timestamp')[0]
-            # self.meta['acquire_datetime'] = time_node.getAttribute('isoformat') 
-            self.meta['/General/time'] = time_node.getAttribute('isoformat')        # TODO: Change to correct isoformat time
-            self.meta['/General/date'] = time_node.getAttribute('isoformat')        # TODO: Change to correct isoformat date 
+            iso_string = time_node.getAttribute('isoformat')
+            parsed_datetime = datetime.datetime.fromisoformat(iso_string)
+            self.meta['/Acquisition/acquisition_time'] = parsed_datetime.strftime("%H:%M:%S")   
+            self.meta['/Acquisition/acquisition_date'] = parsed_datetime.strftime("%Y-%m-%d")  
         except BaseException as e:
             self.logger.error('Failed to parse acquire_datetime item.\n'
                 '{0}'.format(e), exc_info = True)
 
         try:
-            # self.meta['empad_version'] = str(
-            #     self._getData(root, 'software_version')
-            # )
-            # version = self.meta['empad_version'].split(' ')[0]
             version = str(self._getData(root, 'software_version')).split(' ')[0]
-            self.meta['/AcquisitionInstrument/Camera/name'] += ('_v' + version)
+            self.meta['/Acquisition/Camera/name'] += ('_v' + version)
             if version != '0.51':
                 self.logger.warning(
                     'The parser is designed to parse 4D-STEM header file from '
@@ -606,4 +536,5 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
                 )
         except BaseException as e:
             self.logger.error('Failed to parse empad_version item.\n'
-                '{0}'.format(e), exc_info = True)
+                '{0}'.format(e), exc_info = True) 
+ 

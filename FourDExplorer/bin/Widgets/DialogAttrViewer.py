@@ -18,6 +18,7 @@ from PySide6.QtWidgets import QDialog, QWidget, QHeaderView
 from ui import uiDialogAttrViewer
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.HDFManager import HDFAttrModel
+from bin.MetaManager import MetaManager, ValueTree, ValueTreeModel
 
 class DialogAttrViewer(QDialog):
     """
@@ -41,7 +42,7 @@ class DialogAttrViewer(QDialog):
         # horizontal_header.setEnabled(True)
         # horizontal_header.setHidden(False)
         
-
+        
         
     
     @property
@@ -74,3 +75,14 @@ class DialogAttrViewer(QDialog):
         horizontal_header = self.ui.tableView_attr.horizontalHeader()
         horizontal_header.setSectionResizeMode(QHeaderView.Stretch)
         horizontal_header.setAlternatingRowColors(True)
+
+        self.setValueTree()
+
+
+    def setValueTree(self):
+        # Experimental
+        self._meta_manager = MetaManager(self)
+        self._meta_manager.setItemPath(self.item_path)
+        hdf_type = self._meta_manager.hdf_type 
+        self._meta_manager.initializeSchema(hdf_type)
+        self.ui.treeView.setModel(self._meta_manager.value_tree_model)

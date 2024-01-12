@@ -77,9 +77,13 @@ class ItemDataRoles(IntEnum):
     StatusTipRole = Qt.StatusTipRole
     WhatsThisRole = Qt.WhatsThisRole
     SizeHintRole = Qt.SizeHintRole 
-    NodeRole = Qt.UserRole          # Get the path node instance of the index
-    PathRole = Qt.UserRole + 1      # Get the absolute path of the index
-    HDFTypeRole = Qt.UserRole + 2    # Get the insider data's type of the index
+    NodeRole = Qt.UserRole                  # Get the path node instance of the index
+    PathRole = Qt.UserRole + 1              # Get the absolute path of the index
+    HDFTypeRole = Qt.UserRole + 2           # Get the insider data's type of the index
+    # MetaTitleRole = Qt.UserRole + 3         # Get the title of the metadata item
+    # MetaDescriptionRole = Qt.UserRole + 4   # Get the decription of the metadata item
+    # MetaUnitRole = Qt.UserRole + 5          # Get the unit of the metadata item
+    # MetaDisplayUnitRole = Qt.UserRole + 6   # Get the display unit of the metadata item
 
     # Roles describing appearance and meta data (with associated types)
     FontRole = Qt.FontRole 

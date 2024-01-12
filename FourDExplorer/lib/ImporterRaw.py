@@ -24,13 +24,16 @@ date:               May 8, 2022
 *---------------------------- ImporterEMPAD.py -------------------------------*
 """
 
-from logging import Logger
-from xml.dom.minidom import Document, parse
-import os 
+# from logging import Logger
+# from xml.dom.minidom import Document, parse
+# import os 
+import datetime
 
 from PySide6.QtCore import QObject
 
+from Constants import APP_VERSION
 from bin.TaskManager import TaskManager
+from bin.DateTimeManager import DateTimeManager
 from lib.TaskLoadData import TaskLoadFourDSTEMFromRaw 
 
 class ImporterRawFourDSTEM(QObject):
@@ -56,12 +59,17 @@ class ImporterRawFourDSTEM(QObject):
         self._item_name = item_name 
         self._item_parent_path = item_parent_path
 
-        self.meta = {}
+        self.meta = {}  
 
     @property
     def task_manager(self) -> TaskManager:
         global qApp
         return qApp.task_manager
+
+    @property
+    def datetime_manager(self) -> DateTimeManager:
+        global qApp 
+        return qApp.datetime_manager
 
     def setMeta(self, **kw):
         self.meta.update(kw)
@@ -90,14 +98,21 @@ class ImporterRawFourDSTEM(QObject):
         self._gap_between_images = gap_between_images
         self._little_endian = little_endian
 
+        self.meta['/General/fourd_explorer_version'] = '.'.join([str(i) for i in APP_VERSION])
+        self.meta['/General/date'] = self.datetime_manager.current_date
+        self.meta['/General/time'] = self.datetime_manager.current_time
+        self.meta['/General/time_zone'] = self.datetime_manager.current_timezone
+        self.meta['/General/data_path'] = raw_path 
+        self.meta['/Calibration/Space/dp_i'] = dp_i 
+        self.meta['/Calibration/Space/dp_j'] = dp_j 
+        self.meta['/Calibration/Space/scan_i'] = scan_i 
+        self.meta['/Calibration/Space/scan_j'] = scan_j 
+
+
+
+
     def loadData(self):
         shape = (self._scan_i, self._scan_j, self._dp_i, self._dp_j)
-        # shape = (
-        #     self.meta['scan_i'], 
-        #     self.meta['scan_j'], 
-        #     self.meta['dp_i'], 
-        #     self.meta['dp_j'],
-        # )
         self.task = TaskLoadFourDSTEMFromRaw(
             shape = shape,
             file_path = self._raw_path,
@@ -107,7 +122,7 @@ class ImporterRawFourDSTEM(QObject):
             gap_between_images = self._gap_between_images,
             scalar_type = self._scalar_type,
             scalar_size = self._scalar_size,
-            little_endian = self._little_endianm,
+            little_endian = self._little_endian,
             is_flipped = False,
             rotate90 = 0,
             parent = self, 

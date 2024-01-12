@@ -120,9 +120,10 @@ from PySide6.QtWidgets import QWidget, QMessageBox, QToolBar, QLineEdit, QTreeVi
 from PySide6.QtGui import QAction 
 from PySide6.QtCore import QObject, QModelIndex, Qt 
 
-from bin.MetaManagers.MetaManagers import MetaManagerFourDSTEM, MetaManagerImg, MetaManagerVec, MetaManagerBase
-from bin.MetaManagers.MetadataFields import IntField, FloatField, StringField
-from bin.MetaManagers.UnitManager import UnitManager
+# from bin.MetaManager import MetaManagerFourDSTEM, MetaManagerImg, MetaManagerVec, MetaManagerBase
+from bin.MetaManager import MetaManager, MetadataFieldBase, MetaRootNode, MetaTreeNode, ValueTree, ValueTreeModel, IntField, FloatField, StringField
+# from bin.MetaManagers.MetadataFields import IntField, FloatField, StringField
+# from bin.MetaManagers.UnitManager import UnitManager
 from bin.HDFManager import HDFHandler, ItemDataRoles
 from bin.UIManager import ThemeHandler
 
@@ -139,11 +140,37 @@ class WidgetMetaViewerBase(QWidget):
         
         # self._tabs = []
         self._meta_manager = None 
-
-    @property
-    def meta_manager(self) -> MetaManagerBase:
-        return self._meta_manager  
-
-    def _initTabs(self):
-        pass 
         
+    @property
+    def meta_manager(self) -> MetaManager:
+        return self._meta_manager  
+    
+    @property
+    def value_tree(self) -> ValueTree:
+        return self._meta_manager.value_tree
+    
+    @property
+    def value_tree_model(self) -> ValueTreeModel:
+        return self._meta_manager.value_tree_model
+    
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler
+        
+    def _initValueTreeView(self):
+        # self._value_tree_view = QTreeView(self)
+        # self._value_tree_view.setModel(self.value_tree_model)
+        self.ui.treeView.setModel(self.value_tree_model)
+
+    def _initMetaManager(self, item_path: str):
+        self._meta_manager = MetaManager(self)
+        self._meta_manager.setItemPath(item_path)
+        hdf_type = self._meta_manager.hdf_type
+        self._meta_manager.initializeSchema(hdf_type)
+
+    def initMetaViewer(self, item_path: str):
+        self._initMetaManager(item_path)
+        self._initValueTreeView()
+
+ 

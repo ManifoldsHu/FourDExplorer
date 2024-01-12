@@ -46,6 +46,7 @@ class UnitManager(QObject):
         self._ureg.define('kV = 1e3 * V')   # 千伏
         self._ureg.define('mm = 1e-3 * m')  # 毫米
         self._ureg.define('um = 1e-6 * m')  # 微米 (μm)
+        self._ureg.define('μm = 1e-6 * m')  # 微米
         self._ureg.define('nm = 1e-9 * m')  # 纳米
 
         # 对于更复杂的单位，如平方米，可以直接使用内置单位

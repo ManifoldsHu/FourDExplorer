@@ -11,11 +11,11 @@ General/
     title                   str         title                   
     title of the dataset. initialized by dataset name, but not necessarily the same
 
-    original_name           str         original filename       
-    original file name without extension
+    data_path               str         original data file path      
+    original file path storing raw data 
 
-    original_path           str         original file path      
-    original file path
+    header_path             str         original header file path 
+    original file path storing header of the data (metadata). It can be the same as data_path if the header is stored along with the raw data.
 
     authors                 str         authors                 
     in LaTeX format, i.e. Surname1, Name1 and Surname2, Name2 and ...
@@ -38,7 +38,7 @@ General/
     fourd_explorer_version  str         4D-Explorer Version     
     the version of 4D-Explorer
 
-AcquisitionInstrument/Microscope/
+Acquisition/Microscope/
     name                    str         name of microscope      
     the name of the TEM, e.g. Titan3 Cubed 60-300
 

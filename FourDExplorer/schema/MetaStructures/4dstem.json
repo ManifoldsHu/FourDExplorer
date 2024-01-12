@@ -6,17 +6,17 @@
             "value": null,
             "description": "Title of the dataset. Initialized by dataset name, but not necessarily the same."
         },
-        "original_name": {
+        "data_path": {
             "type": "str",
-            "title": "original filename",
+            "title": "original data file path",
             "value": null,
-            "description": "Original file name without extension."
+            "description": "Original file path storing raw data."
         },
-        "original_path": {
+        "header_path": {
             "type": "str",
-            "title": "original file path",
+            "title": "original header file path",
             "value": null,
-            "description": "Original file path."
+            "description": "Original file path storing header of the data (metadata). It can be the same as data_path if the header is stored along with the raw data."
         },
         "authors": {
             "type": "str",
@@ -61,7 +61,7 @@
             "description": "The version of 4D-Explorer."
         }
     },
-    "AcquisitionInstrument": {
+    "Acquisition": {
         "Microscope": {
             "name": {
                 "type": "str",
@@ -135,7 +135,7 @@
                 "value": null,
                 "unit": "m",
                 "display_unit": "nm",
-                "description": "The step size in the i direction (-y direction)."
+                "description": "Recorded step size in the i direction (-y direction)."
             },
             "step_size_j": {
                 "type": "float",
@@ -143,7 +143,7 @@
                 "value": null,
                 "unit": "m",
                 "display_unit": "nm",
-                "description": "The step size in the j direction (x direction)."
+                "description": "Recorded step size in the j direction (x direction)."
             },
             "acquisition_time": {
                 "type": "str",
@@ -161,9 +161,9 @@
                 "type": "str",
                 "title": "acquisition location",
                 "value": null,
-                "description": "The location/institute/lab where the data is acquired."
+                "description": "The location, institute and lab where the data is acquired."
             },
-            "acquisition_timezone": {
+            "acquisition_timezone": { 
                 "type": "str",
                 "title": "acquisition timezone",
                 "value": null,
@@ -200,7 +200,7 @@
                 "title": "pixel size (i-direction)",
                 "value": null,
                 "unit": "m",
-                "display_unit": "um",
+                "display_unit": "μm",
                 "description": "Sensor pixel size in i-direction (-y direction, height)."
             },
             "pixel_size_j": {
@@ -208,7 +208,7 @@
                 "title": "pixel size (j-direction)",
                 "value": null,
                 "unit": "m",
-                "display_unit": "um",
+                "display_unit": "μm",
                 "description": "Sensor pixel size in j-direction (x direction, width)."
             }
         },
@@ -271,7 +271,7 @@
                 "value": null,
                 "unit": "m^-1",
                 "display_unit": "nm^-1",
-                "description": "Pixel size of the diffraction space in i direction (-y direction), can be calibrated by alpha / wave_length / bright_field_disk_radius (in pixel). Note that dr_i and dr_j can be induced from du_i and du_j, and are not equal to scan_dr_i and scan_dr_j."
+                "description": "Pixel size of the diffraction (reciprocal) space in i direction (-y direction)."
             },
             "du_j": {
                 "type": "float",
@@ -279,7 +279,7 @@
                 "value": null,
                 "unit": "m^-1",
                 "display_unit": "nm^-1",
-                "description": "Pixel size of the diffraction space in j direction (x direction), can be calibrated by alpha / wave_length / bright_field_disk_radius(in pixel). Note that dr_i and dr_j can be induced from du_i and du_j, and are not equal to scan_dr_i and scan_dr_j."
+                "description": "Pixel size of the diffraction (reciprocal) space in j direction (x direction)."
             },
             "scan_dr_i": {
                 "type": "float",
@@ -287,7 +287,7 @@
                 "value": null,
                 "unit": "m",
                 "display_unit": "nm",
-                "description": "Scanning step size in i-direction (-y direction), equal to scan_step_size_i (only to be displayed)."
+                "description": "Calibrated scanning step size in i-direction (-y direction)."
             },
             "scan_dr_j": {
                 "type": "float",
@@ -295,7 +295,7 @@
                 "value": null,
                 "unit": "m",
                 "display_unit": "nm",
-                "description": "Scanning step size in j-direction (x direction), equal to scan_step_size_j (only to be displayed)."
+                "description": "Calibrated scanning step size in j-direction (x direction)."
             },
             "dr_i": {
                 "type": "float",
@@ -303,7 +303,7 @@
                 "value": null,
                 "unit": "m",
                 "display_unit": "nm",
-                "description": "Real space pixel size in i-direction (-y direction), equal to wave_length * bright_field_disk_radius (in pixel) / alpha / dp_i (only to be displayed)."
+                "description": "Real space pixel size in i-direction (-y direction)."
             },
             "dr_j": {
                 "type": "float",
@@ -311,31 +311,31 @@
                 "value": null,
                 "unit": "m",
                 "display_unit": "nm",
-                "description": "Real space pixel size in j-direction (x direction), equal to wave_length * bright_field_disk_radius (in pixel) / alpha / dp_j (only to be displayed)."
+                "description": "Real space pixel size in j-direction (x direction)."
             },
             "dp_i": {
                 "type": "int",
                 "title": "diffraction pattern pixel number (i-direction)",
                 "value": null,
-                "description": "Diffraction pattern pixel number in i-direction (-y direction, height) (only to be displayed)."
+                "description": "Diffraction pattern pixel number (height)."
             },
             "dp_j": {
                 "type": "int",
                 "title": "diffraction pattern pixel number (j-direction)",
                 "value": null,
-                "description": "Diffraction pattern pixel number in j-direction (x direction, width) (only to be displayed)."
+                "description": "Diffraction pattern pixel number (width)."
             },
             "scan_i": {
                 "type": "int",
                 "title": "scanning steps (i-direction)",
                 "value": null,
-                "description": "Scanning steps in i-direction (-y direction), determining height of virtual image (only to be displayed)."
+                "description": "Scanning step number in i-direction (-y direction)."
             },
             "scan_j": {
                 "type": "int",
                 "title": "scanning steps (j-direction)",
                 "value": null,
-                "description": "Scanning steps in j-direction (x direction), determining width of virtual image (only to be displayed)."
+                "description": "Scanning step number in j-direction (x direction)."
             }
         },
         "RotationalOffsetCorrection": {
@@ -407,7 +407,7 @@
             "title": "spherical aberration (C3)",
             "value": null,
             "unit": "m",
-            "display_unit": "um",
+            "display_unit": "μm",
             "description": "Spherical aberration (C3)."
         },
         "S3": {
@@ -415,7 +415,7 @@
             "title": "star aberration (S3)",
             "value": null,
             "unit": "m",
-            "display_unit": "um",
+            "display_unit": "μm",
             "description": "Star aberration (S3)."
         },
         "A3": {
@@ -423,7 +423,7 @@
             "title": "4-fold astigmatism (A3)",
             "value": null,
             "unit": "m",
-            "display_unit": "um",
+            "display_unit": "μm",
             "description": "4-fold astigmatism (A3)."
         },
         "B4": {
@@ -431,7 +431,7 @@
             "title": "axial coma (B4)",
             "value": null,
             "unit": "m",
-            "display_unit": "um",
+            "display_unit": "μm",
             "description": "Axial coma (B4)."
         },
         "D4": {
@@ -439,7 +439,7 @@
             "title": "3 lobe aberration (D4)",
             "value": null,
             "unit": "m",
-            "display_unit": "um",
+            "display_unit": "μm",
             "description": "3 lobe aberration (D4)."
         },
         "A4": {
@@ -447,7 +447,7 @@
             "title": "5-fold astigmatism (A4)",
             "value": null,
             "unit": "m",
-            "display_unit": "um",
+            "display_unit": "μm",
             "description": "5-fold astigmatism (A4)."
         },
         "C5": {

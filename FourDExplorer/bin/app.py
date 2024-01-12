@@ -90,12 +90,14 @@ class App(QApplication):
         from bin.TaskManager import TaskManager
         from bin.Log import LogUtil
         from bin.UnitManager import UnitManager
+        from bin.DateTimeManager import DateTimeManager
 
         self._hdf_handler = HDFHandler(self)
         self._theme_handler = ThemeHandler(self)
         self._task_manager = TaskManager(self)
         self._log_util = LogUtil(self)
         self._unit_manager = UnitManager(self)
+        self._datetime_manager = DateTimeManager(self)
  
     @property
     def hdf_handler(self):
@@ -124,6 +126,10 @@ class App(QApplication):
     @property
     def unit_manager(self):
         return self._unit_manager
+    
+    @property
+    def datetime_manager(self):
+        return self._datetime_manager
     
     @main_window.setter
     def main_window(self, _main_window):
