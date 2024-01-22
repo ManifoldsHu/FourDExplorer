@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiDialogImportFourDSTEM.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QGroupBox,
     QWidget)
 
 from bin.Widgets.WidgetImportEMPAD import (WidgetImportEMPAD, WidgetImportEMPAD_NJU)
+from bin.Widgets.WidgetImportMerlin import WidgetImportMerlin
 from bin.Widgets.WidgetImportRaw import WidgetImportRaw
 
 class Ui_Dialog(object):
@@ -75,7 +76,7 @@ class Ui_Dialog(object):
         self.page_empad_nju = WidgetImportEMPAD_NJU()
         self.page_empad_nju.setObjectName(u"page_empad_nju")
         self.stackedWidget.addWidget(self.page_empad_nju)
-        self.page_medipix = QWidget()
+        self.page_medipix = WidgetImportMerlin()
         self.page_medipix.setObjectName(u"page_medipix")
         self.stackedWidget.addWidget(self.page_medipix)
         self.page_raw = WidgetImportRaw()
@@ -175,6 +176,9 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
 
+        self.stackedWidget.setCurrentIndex(2)
+
+
         QMetaObject.connectSlotsByName(Dialog)
     # setupUi
 
@@ -185,12 +189,12 @@ class Ui_Dialog(object):
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Import File Type", None))
         self.comboBox_mode.setItemText(0, QCoreApplication.translate("Dialog", u"EMPAD v1.0", None))
         self.comboBox_mode.setItemText(1, QCoreApplication.translate("Dialog", u"EMPAD v0.51 (for NJU)", None))
-        self.comboBox_mode.setItemText(2, QCoreApplication.translate("Dialog", u"Medipix", None))
-        self.comboBox_mode.setItemText(3, QCoreApplication.translate("Dialog", u"General Raw Data", None))
-        self.comboBox_mode.setItemText(4, QCoreApplication.translate("Dialog", u"MATLAB 4D matrix (.mat)", None))
-        self.comboBox_mode.setItemText(5, QCoreApplication.translate("Dialog", u"MATLAB matrix sequence", None))
-        self.comboBox_mode.setItemText(6, QCoreApplication.translate("Dialog", u"Numpy 4D matrix (.npy)", None))
-        self.comboBox_mode.setItemText(7, QCoreApplication.translate("Dialog", u"Numpy matrix sequence", None))
+        self.comboBox_mode.setItemText(2, QCoreApplication.translate("Dialog", u"MerlinEM (.mib)", None))
+        self.comboBox_mode.setItemText(3, QCoreApplication.translate("Dialog", u"General Raw Data (Binary)", None))
+        self.comboBox_mode.setItemText(4, QCoreApplication.translate("Dialog", u"MATLAB 4D Matrix (.mat)", None))
+        self.comboBox_mode.setItemText(5, QCoreApplication.translate("Dialog", u"MATLAB Matrix Sequence", None))
+        self.comboBox_mode.setItemText(6, QCoreApplication.translate("Dialog", u"Numpy 4D Array (.npy)", None))
+        self.comboBox_mode.setItemText(7, QCoreApplication.translate("Dialog", u"Numpy Array Sequence", None))
         self.comboBox_mode.setItemText(8, QCoreApplication.translate("Dialog", u"Digital Micrograph (.dm4)", None))
 
         self.groupBox_2.setTitle(QCoreApplication.translate("Dialog", u"Import To", None))

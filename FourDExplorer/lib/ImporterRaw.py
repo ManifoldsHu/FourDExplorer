@@ -99,6 +99,7 @@ class ImporterRawFourDSTEM(QObject):
         self._little_endian = little_endian
 
         self.meta['/General/fourd_explorer_version'] = '.'.join([str(i) for i in APP_VERSION])
+        self.meta['/General/data_path'] = raw_path 
         self.meta['/General/date'] = self.datetime_manager.current_date
         self.meta['/General/time'] = self.datetime_manager.current_time
         self.meta['/General/time_zone'] = self.datetime_manager.current_timezone

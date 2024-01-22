@@ -41,18 +41,40 @@ class DateTimeManager(QObject):
 
     @property
     def current_time(self) -> str:
+        """
+        Returns current time of the computer.
+
+        returns:
+            (str) Current time. e.g. 21:08:32
+        """
         now = datetime.datetime.now()
         return now.strftime("%H:%M:%S")
     
     @property
     def current_date(self) -> str:
+        """
+        Returns current date of the computer.
+
+        returns:
+            (str) Current date. e.g. 2024-01-17
+        """
         now = datetime.datetime.now()
         return now.strftime("%Y-%m-%d")
     
     @property
     def current_timezone(self) -> str:
+        """
+        Returns local time zone of the computer.
+
+        returns:
+            (str) Time zone in ISO-8601 format. e.g. "UTC+08:00" or "UTC"
+        """
         now = datetime.datetime.now()
-        time_zone = now.astimezone().tzinfo
-        utc_offset = time_zone.utcoffset(now)
-        offset_hours = int(utc_offset.total_seconds() / 3600)
-        return offset_hours 
+        if now.tzinfo is not None and now.utcoffset() is not None:
+            time_zone = now.astimezone().tzinfo
+            utc_offset = time_zone.utcoffset(now)
+            offset_hours = int(utc_offset.total_seconds() / 3600)
+            offset_minutes = int((utc_offset.total_seconds() % 3600) // 60)
+            return f"UTC{offset_hours:+03d}:{offset_minutes:02d}"
+        else:
+            return "UTC"

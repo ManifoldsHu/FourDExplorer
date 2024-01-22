@@ -63,7 +63,7 @@
           </item>
           <item>
            <property name="text">
-            <string>Medipix</string>
+            <string>MerlinEM (.mib)</string>
            </property>
           </item>
           <item>
@@ -102,9 +102,12 @@
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
+        <property name="currentIndex">
+         <number>2</number>
+        </property>
         <widget class="WidgetImportEMPAD" name="page_empad"/>
         <widget class="WidgetImportEMPAD_NJU" name="page_empad_nju"/>
-        <widget class="QWidget" name="page_medipix"/>
+        <widget class="WidgetImportMerlin" name="page_medipix"/>
         <widget class="WidgetImportRaw" name="page_raw"/>
         <widget class="QWidget" name="page_mat"/>
         <widget class="QWidget" name="page_mat_folder"/>
@@ -227,6 +230,12 @@
    <class>WidgetImportRaw</class>
    <extends>QWidget</extends>
    <header>bin.Widgets.WidgetImportRaw.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetImportMerlin</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetImportMerlin.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

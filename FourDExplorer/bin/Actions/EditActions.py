@@ -34,8 +34,12 @@ from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.DialogCopyItem import DialogHDFCopy
 from bin.Widgets.DialogAttrViewer import DialogAttrViewer
 from bin.Widgets.DialogImportImage import DialogImportImage
+from bin.Widgets.WidgetImportEMPAD import WidgetImportEMPAD
+from bin.Widgets.WidgetImportMerlin import WidgetImportMerlin 
+from bin.Widgets.WidgetImportRaw import WidgetImportRaw 
 from lib.ImporterEMPAD import ImporterEMPAD, ImporterEMPAD_NJU
 from lib.ImporterRaw import ImporterRawFourDSTEM
+from lib.ImporterMIB import ImporterMIB
 from lib.TaskLoadData import TaskLoadTiff
 
 class ActionEditBase(QAction):
@@ -460,18 +464,34 @@ class ActionImportFourDSTEM(ActionEditBase):
 
         if mode == 0:
             importer = ImporterEMPAD(new_name, parent_path)
+            page: WidgetImportEMPAD
             xml_path = page.getHeaderPath()
             importer.parseHead(xml_path)
             importer.loadData()
         
         elif mode == 1:
             importer = ImporterEMPAD_NJU(new_name, parent_path)
+            page: WidgetImportEMPAD
             xml_path = page.getHeaderPath()
             importer.parseHead(xml_path)
             importer.loadData()
 
+        elif mode == 2:
+            importer = ImporterMIB(new_name, parent_path)
+            page: WidgetImportMerlin
+            mib_path = page.getMibPath()
+            # hdr_path = page.getHeaderPath()
+            importer.parseMibHead(mib_path)
+            importer.scan_i = page.scan_i
+            importer.scan_j = page.scan_j 
+            importer.loadData()
+
+            # importer.parseHdrFile(hdr_path)
+
+
         elif mode == 3:
             importer = ImporterRawFourDSTEM(new_name, parent_path)
+            page: WidgetImportRaw
             importer.setReadParameters(
                 raw_path = page.getRawPath(),
                 scalar_type = page.getScalarType(),
@@ -484,20 +504,20 @@ class ActionImportFourDSTEM(ActionEditBase):
                 gap_between_images = page.getGapBetweenImages(),
                 little_endian = page.getLittleEndian(),
             )
-            meta = {
-                '/General/original_path': page.getRawPath(),
-                '/General/original_name': os.path.splitext(
-                    os.path.split(page.getRawPath())[1]
-                )[0],
-                '/General/fourd_explorer_version': '.'.join(APP_VERSION),
-                '/General/time': datetime.datetime.now().time().strftime('%H:%M:%S'),
-                '/General/date': datetime.datetime.now().date().strftime('%Y-%m-%d'),
-                '/General/time_zone': time.strftime('%Z'),
-                '/Calibration/Space/dp_i': page.getDp_i(),
-                '/Calibration/Space/dp_j': page.getDp_j(),
-                '/Calibration/Space/scan_i': page.getScan_i(),
-                '/Calibration/Space/scan_j': page.getScan_j(),
-            }
+            # meta = {
+            #     '/General/original_path': page.getRawPath(),
+            #     '/General/original_name': os.path.splitext(
+            #         os.path.split(page.getRawPath())[1]
+            #     )[0],
+            #     '/General/fourd_explorer_version': '.'.join(APP_VERSION),
+            #     '/General/time': datetime.datetime.now().time().strftime('%H:%M:%S'),
+            #     '/General/date': datetime.datetime.now().date().strftime('%Y-%m-%d'),
+            #     '/General/time_zone': time.strftime('%Z'),
+            #     '/Calibration/Space/dp_i': page.getDp_i(),
+            #     '/Calibration/Space/dp_j': page.getDp_j(),
+            #     '/Calibration/Space/scan_i': page.getScan_i(),
+            #     '/Calibration/Space/scan_j': page.getScan_j(),
+            # }
             # meta = {
             #     'raw_path': page.getRawPath(),
             #     'scalar_type': page.getScalarType(),
@@ -510,7 +530,10 @@ class ActionImportFourDSTEM(ActionEditBase):
             #     'gap_between_images': page.getGapBetweenImages(),
             #     'little_endian': page.getLittleEndian(),
             # }
-            importer.setMeta(**meta)
+            # importer.setMeta(**meta)
+
+
+
             importer.loadData()
         
 

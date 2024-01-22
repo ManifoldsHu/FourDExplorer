@@ -31,7 +31,7 @@ from PySide6.QtWidgets import QDialog, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 
 from bin.HDFManager import reValidHDFName, HDFHandler, HDFGroupNode
-from bin.Widgets.DialogChooseItem import DialogHDFChoose
+from bin.Widgets.DialogChooseItem import DialogHDFChoose  
 from ui import uiDialogImportFourDSTEM
 
 
@@ -73,7 +73,7 @@ class DialogImportFourDSTEM(QDialog):
         arguments:
             index: (int)    0   'EMPAD v1.0'
                             1   'EMPAD v0.51 (for NJU)'
-                            2   'Medipix'
+                            2   'MerlinEM Medipix3 (.mib)'
                             3   'General Raw Data (Binary)'
                             4   'MATLAB 4D Matrix (.mat)'
                             5   'MATLAB Matrix Sequence'
