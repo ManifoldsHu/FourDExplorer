@@ -208,9 +208,9 @@ class ImporterMIB(QObject):
             
         self._time_stamp = head[-3]     # ISO 8601
         date_str, time_str, timezone_str = self._parseMibDatetime(self._time_stamp)
-        self.meta['/Acquisition/acquisition_date'] = date_str 
-        self.meta['/Acquisition/acquisition_time'] = time_str 
-        self.meta['/Acquisition/acquisition_timezone'] = timezone_str 
+        self.meta['/Acquisition/Microscope/acquisition_date'] = date_str 
+        self.meta['/Acquisition/Microscope/acquisition_time'] = time_str 
+        self.meta['/Acquisition/Microscope/acquisition_timezone'] = timezone_str 
 
         if not self._scan_i_in_hdr or not self._scan_j_in_hdr:
             bytes_per_image = image_size[0] * image_size[1] * self._scalar_size

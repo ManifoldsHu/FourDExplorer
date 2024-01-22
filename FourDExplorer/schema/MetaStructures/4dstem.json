@@ -197,7 +197,7 @@
             },
             "pixel_size_i": {
                 "type": "float",
-                "title": "pixel size (i-direction)",
+                "title": "sensor pixel size (i-direction)",
                 "value": null,
                 "unit": "m",
                 "display_unit": "μm",
@@ -205,7 +205,7 @@
             },
             "pixel_size_j": {
                 "type": "float",
-                "title": "pixel size (j-direction)",
+                "title": "sensor pixel size (j-direction)",
                 "value": null,
                 "unit": "m",
                 "display_unit": "μm",
@@ -271,7 +271,7 @@
                 "value": null,
                 "unit": "m^-1",
                 "display_unit": "nm^-1",
-                "description": "Pixel size of the diffraction (reciprocal) space in i direction (-y direction)."
+                "description": "Pixel size of the diffraction (reciprocal) space in i direction (-y direction)." 
             },
             "du_j": {
                 "type": "float",

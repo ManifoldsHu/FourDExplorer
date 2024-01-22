@@ -182,8 +182,6 @@ class WidgetImportMerlin(QWidget):
                 key, value = line.split('\t')
                 key = key.rstrip(':')
                 value = value.rstrip('\n')
-                # _hdr_meta[key] = value 
-                print(key, ':\t', value)
                 if key == "Frames in Acquisition (Number)":
                     total_image_number = int(value) 
                 elif key == "Frames per Trigger (Number)":
