@@ -1758,7 +1758,7 @@ class HDFTreeModel(QAbstractItemModel):
         """
         if not index.isValid():
             return None
-        node = index.internalPointer()
+        node: HDFTreeNode = index.internalPointer()
         if role == self.DataRoles.NodeRole:
             return node
 
@@ -2006,7 +2006,7 @@ class TaskCopy(Task):
     """
     复制任务，将 HDF5 对象及其所有子对象都复制过去。
 
-    这个任务会提交到线程池运行。更多有关信息请查看 TaskManager 模块。
+    这个任务会提交到线程池运行。更多有关信息请查看 TaskManager 模块。       
 
     Copy an item with all its children to destination.
 
@@ -2245,7 +2245,7 @@ class HDFAttrModel(QAbstractTableModel):
             if isinstance(value, np.ndarray):
                 return '<numpy.ndarray> shape: {0}'.format(value.shape)
             else:
-                return '<{0}>'.format(type(value).__name__)
+                return f'<{type(value).__name__}: {self.data(index, Qt.DisplayRole)}>'
         else:
             return None
             

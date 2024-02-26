@@ -67,6 +67,8 @@ class ItemDataRoles(IntEnum):
     """
     Optional choice for getting data from QModelIndex.
 
+    It is designed for HDFTreeModel.
+
     For more information of those roles in Qt, read the official document.
     """
     # General purpose roles
@@ -96,6 +98,41 @@ class ItemDataRoles(IntEnum):
     # Accessibility roles (with associated types)
     AccessibleTextRole = Qt.AccessibleTextRole
     AccessibleDescriptionRole = Qt.AccessibleDescriptionRole
+
+
+class MetaDataRoles(IntEnum):
+    """
+    Optional choice for getting data from QModelIndex.
+
+    It is designed for MetaTreeModel.
+
+    For more information of those roles in Qt, read the official document.
+    """
+    # General purpose roles
+    DisplayRole = Qt.DisplayRole
+    DecorationRole = Qt.DecorationRole
+    EditRole = Qt.EditRole
+    ToolTipRole = Qt.ToolTipRole
+    StatusTipRole = Qt.StatusTipRole
+    WhatsThisRole = Qt.WhatsThisRole
+    SizeHintRole = Qt.SizeHintRole 
+    NodeRole = Qt.UserRole                  # Get the metatree node instance of the index
+    KeyRole = Qt.UserRole + 1               # Get the key of the metadata 
+    ValueTypeRole = Qt.UserRole + 2         # Get the type of the metadata, e.g. IntField
+    ValueRole = Qt.UserRole + 2             # Get the value of the metadata
+
+    # Roles describing appearance and meta data (with associated types)
+    FontRole = Qt.FontRole 
+    TextAlignmentRole = Qt.TextAlignmentRole 
+    BackgroundRole = Qt.BackgroundRole 
+    ForegroundRole = Qt.ForegroundRole 
+    CheckStateRole = Qt.CheckStateRole
+    InitialSortOrderRole = Qt.InitialSortOrderRole
+
+    # Accessibility roles (with associated types)
+    AccessibleTextRole = Qt.AccessibleTextRole
+    AccessibleDescriptionRole = Qt.AccessibleDescriptionRole
+
 
 
 class UIThemeColor(IntEnum):

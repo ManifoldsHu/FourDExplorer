@@ -278,6 +278,7 @@ class ActionRename(ActionEditBase):
         rename_dialog.setWindowTitle('Rename Item')
         rename_dialog.setInputMode(QInputDialog.TextInput)
         rename_dialog.setLabelText('Enter a new name')
+        rename_dialog.setTextValue(self.item_path.split('/')[-1])
         dialog_code = rename_dialog.exec()
         if not dialog_code == rename_dialog.Accepted:
             return False 
