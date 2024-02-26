@@ -1327,7 +1327,7 @@ class MetaTreeModel(QAbstractItemModel):
             parent_node = parent.internalPointer()
         return len(parent_node)
     
-    def columnCount(self, parent: QModelIndex() = QModelIndex()) -> int:
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
         """
         Returns the number of columns for the children of the given parent. In 
         most subclasses, the number of columns is independent of the parent.
