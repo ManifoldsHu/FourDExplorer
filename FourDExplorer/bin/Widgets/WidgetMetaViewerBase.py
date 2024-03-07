@@ -121,11 +121,12 @@ from PySide6.QtGui import QAction
 from PySide6.QtCore import QObject, QModelIndex, Qt 
 
 # from bin.MetaManager import MetaManagerFourDSTEM, MetaManagerImg, MetaManagerVec, MetaManagerBase
-from bin.MetaManager import MetaManager, MetadataFieldBase, MetaRootNode, MetaTreeNode, ValueTree, ValueTreeModel, IntField, FloatField, StringField
+from bin.MetaManager import MetaManager, MetadataFieldBase, MetaRootNode, MetaTreeNode, IntField, FloatField, StringField, MetaTree, MetaTreeModel 
 # from bin.MetaManagers.MetadataFields import IntField, FloatField, StringField
 # from bin.MetaManagers.UnitManager import UnitManager
 from bin.HDFManager import HDFHandler, ItemDataRoles
 from bin.UIManager import ThemeHandler
+from bin.Actions.MetaActions import ActionEditMeta
 
 from ui import uiWidgetMetaViewerBase
 
@@ -146,12 +147,12 @@ class WidgetMetaViewerBase(QWidget):
         return self._meta_manager  
     
     @property
-    def value_tree(self) -> ValueTree:
-        return self._meta_manager.value_tree
+    def meta_tree(self) -> MetaTree:
+        return self._meta_manager.meta_tree
     
     @property
-    def value_tree_model(self) -> ValueTreeModel:
-        return self._meta_manager.value_tree_model
+    def meta_tree_model(self) -> MetaTreeModel:
+        return self._meta_manager.meta_tree_model
     
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -161,7 +162,7 @@ class WidgetMetaViewerBase(QWidget):
     def _initValueTreeView(self):
         # self._value_tree_view = QTreeView(self)
         # self._value_tree_view.setModel(self.value_tree_model)
-        self.ui.treeView.setModel(self.value_tree_model)
+        self.ui.treeView.setModel(self.meta_tree_model)
 
     def _initMetaManager(self, item_path: str):
         self._meta_manager = MetaManager(self)

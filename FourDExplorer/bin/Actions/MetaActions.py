@@ -174,6 +174,10 @@ class ActionEditMeta(ActionMetaBase):
             self.setKeyFromIndex(self._table_view.currentIndex())
 
         # dialog_edit = DialogEditMeta()
+        # TODO 
+            
+
+# class ActionEditMetaString(ActionMetaBase)
            
 
 
