@@ -205,7 +205,7 @@ class ActionViewItemBase(QAction):
         Set the target item path from its model index.
 
         arguments:
-            index: QModelIndex
+            index: (QModelIndex)
         """
         if not isinstance(index, QModelIndex):
             raise TypeError('index must be a QModelIndex, not '
