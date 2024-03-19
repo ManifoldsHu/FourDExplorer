@@ -11,6 +11,7 @@ Desktop.ini
 *.egg-info
 dist
 build
+release
 .qt_for_python
 
 #Log:
@@ -20,5 +21,4 @@ logs
 # My Configurations:
 *.oaqs
 *.h5
-
 .vscode

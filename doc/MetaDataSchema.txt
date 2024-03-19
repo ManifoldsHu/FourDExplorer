@@ -1,0 +1,402 @@
+The schema of metadata of datasets manipulated by 4D-Explorer.
+
+Note that only basical parameters will be stored (e.g. accelerate_voltage), while other parameters will be calculated in time (e.g. wave_length)
+
+The metadata is organized as a tree. Branch nodes should use Upper Letters, while leaf nodes should use lower letters. (Although in programs, we will not use this regular to distinguish whether a node is a leaf)
+
+
+.4dstem     metadata structure
+
+General/
+    title                   str         title                   
+    title of the dataset. initialized by dataset name, but not necessarily the same
+
+    data_path               str         original data file path      
+    original file path storing raw data 
+
+    header_path             str         original header file path 
+    original file path storing header of the data (metadata). It can be the same as data_path if the header is stored along with the raw data.
+
+    authors                 str         authors                 
+    in LaTeX format, i.e. Surname1, Name1 and Surname2, Name2 and ...
+
+    notes                   str         notes                   
+    may support rich text (html?)
+
+    time                    str         created time            
+    creation time in ISO 8601, e.g. 13:29:10
+
+    date                    str         created date            
+    creation date in ISO 8601, e.g. 2018-01-28
+
+    time_zone               str         time zone               
+    supported by the python-dateutil library, the same as the system
+
+    doi                     str         DOI                     
+    Digital Object Unique Identifier (DOI)
+
+    fourd_explorer_version  str         4D-Explorer Version     
+    the version of 4D-Explorer
+
+Acquisition/Microscope/
+    name                    str         name of microscope      
+    the name of the TEM, e.g. Titan3 Cubed 60-300
+
+    manufacturer            str         manufacturer of microscope      
+    the manufacturer of the TEM
+
+    beam_current            float       A       nA          beam current 
+    the total current of the electron beam 
+
+    accelerate_voltage      float       V       kV          accelerate voltage (U)
+    the accelerate voltage of the electron beam 
+
+    probe_area              float       m^2     nm^2        probe area 
+    the area of scanning probe 
+
+    camera_length           float       m       mm          camera length (CL)
+    the effect camera length of the STEM 
+
+    convergence_angle       float       rad     mrad        convergence semi-angle (α)
+    determined by the size of the convergence aperture
+
+    magnification           int         magnification factor
+    determined by the scanning step size of STEM
+
+    dwell_time              float       s       us          dwell time
+    time for an electron beam to stey per pixel at acquisition of a STEM image by scan 
+
+    step_size_i             float       m       nm          step size (i-direction)
+    the step size in the i direction (-y direction)
+
+    step_size_j             float       m       nm          step size (j-direction)
+    the step size in the j direction (x direction)
+
+    acquisition_time        str         experiment time 
+    The time when the data is acquired
+
+    acquisition_date        str         experiment date 
+    The date when the data is acquired
+
+    acquisition_location    str         experiment location 
+    The location where the data is acquired 
+
+    acquisition_timezone    str         experiment time zone
+    The time zone where the data is acquired
+
+AcquisitionInstrument/Camera/
+    name                    str         name of camera 
+    the name of the pixelated electron camera or direct electron detector
+
+    manufacturer            str         manufacturer of camera 
+    the manufacturer of the camera 
+
+    pixel_number_i          int         pixels (i-direction) 
+    sensor pixels in i-direction (-y direction, height)
+
+    pixel_number_j          int         pixels (j-direction) 
+    sensor pixels in j-direction (x direction, width)
+
+    pixel_size_i            float       m       um          pixel size (i-direction)
+    sensor pixel size in i-direction (-y direction, height)
+
+    pixel_size_j            float       m       um          pixel size (j-direction)
+    sensor pixel size in j-direction (x direction, width)
+
+AcquisitionInstrument/Stage/
+    (Not Implemented)
+    tilt_alpha              float       rad     deg         tilt angle α (X)
+    the tilt angle α/X of the specimen
+
+    tilt_beta               float       rad     deg         tilt angle β (Y)
+    the tilt angle β/Y of the specimen 
+
+    rotation                float       rad     deg         rotation angle 
+    the rotational offset angle of the specimen
+
+    x                       float       m       mm          stage coordinate x 
+    the x coordinate of the specimen stage 
+
+    y                       float       m       mm          stage coordinate y 
+    the y coordinate of the specimen stage 
+
+    z                       float       m       mm          stage coordinate z 
+    the z coordinate (height) of the specimen stage
+
+Calibration/Space/
+    du_i                    float       m^-1    nm^-1       reciprocal space pixel size (i-direction)
+    pixel size of the diffraction space in i direction (-y direction), can be calibrated by alpha / wave_length / bright_field_disk_radius (in pixel). Note that dr_i and dr_j can be induced from du_i and du_j, and are not equal to scan_dr_i and scan_dr_j.
+
+    du_j                    float       m^-1    nm^-1       reciprocal space pixel size (j-direction)
+    pixel size of the diffraction space in j direction (x direction), can be calibrated by alpha / wave_length / bright_field_disk_radius(in pixel). Note that dr_i and dr_j can be induced from du_i and du_j, and are not equal to scan_dr_i and scan_dr_j.
+
+    scan_dr_i               float       m       nm          scanning step size (i-direction)
+    scanning step size in i-direction (-y direction), equal to scan_step_size_i (only to be displayed)
+
+    scan_dr_j               float       m       nm          scanning step size (j-direction)
+    scanning step size in j-direction (x direction), equal to scan_step_size_j (only to be displayed)
+
+    dr_i                    float       m       nm          real space pixel size (i-direction)
+    real space pixel size in i-direction (-y direction), equal to wave_length * bright_field_disk_radius (in pixel) / alpha / dp_i (only to be displayed)
+
+    dr_j                    float       m       nm          real space pixel size (j-direction)
+    real space pixel size in j-direction (x direction), equal to wave_length * bright_field_disk_radius (in pixel) / alpha / dp_j (only to be displayed)
+
+    dp_i                    int         diffraction pattern pixel number (i-direction)
+    diffraction pattern pixel number in i-direction (-y direction, height) (only to be displayed) 
+
+    dp_j                                diffraction pattern pixel number (j-direction)diffraction pattern pixel number in j-direction (x direction, width) (only to be displayed)
+
+    scan_i                  int         scanning steps (i-direction)
+    scanning steps in i-direction (-y direction), determining height of virtual image (only to be displayed)
+
+    scan_j                  int         scanning steps (j-direction)
+    scanning steps in j-direction (x direction), determining width of virtual image (only to be displayed)
+
+Calibration/RotationalOffsetCorrection/
+    scan_rotation           float       rad     deg         scanning rotational offset 
+    the rotation angle between scanning coordinates and camera coordinates
+
+Calibration/DiffractionAlignment/
+    alignment_pixel_i       int                             translation pixel of diffraction pattern (i-direction)
+    translation pixel of diffraction pattern in i-direction (-y direction) to centering the diffraction pattern
+
+    alignment_pixel_j       int                             translation pixel of diffraction pattern (j-direction)
+    translation pixel of diffraction pattern in j-direction (x direction) to centering the diffraction pattern
+
+    alignment_moving_path   str         path of alignment translation vectors
+    record the path of the vector field that records the center of the diffraction pattern should be moved at each scanning point.
+    
+Aberration/
+    (Not Implemented)
+    C1                      float       m       nm          defocus (C1)
+    defocus (C1)
+
+    A1                      float       m       nm          2-fold astigmatism (A1)
+    2-fold astigmatism (A1)
+
+    B2                      float       m       nm          axial coma (B2)
+    axial coma (B2)
+
+    A2                      float       m       nm          3-fold astigmatism (A2)
+    3-fold astigmatism (A2)
+
+    C3                      float       m       um          spherical aberration (C3)
+    spherical aberration (C3)
+
+    S3                      float       m       um          star aberration (S3)
+    star aberration (S3)
+
+    A3                      float       m       um          4-fold astigmatism (A3)
+    4-fold astigmatism (A3)
+
+    B4                      float       m       um          axial coma (B4)
+    axial coma (B4)
+
+    D4                      float       m       um          3 lobe aberration (D4)
+    3 lobe aberration (D4)
+
+    A4                      float       m       um          5-fold astigmatism (A4)
+    5-fold astigmatism (A4)
+
+    C5                      float       m       mm          spherical aberration (C5)
+    spherical aberration (C5)
+
+    A5                      float       m       mm          6-fold astigmatism (A6)
+    6-fold astigmatism (A6)
+
+Quantify/
+    display_vmin            float                           minimum displaying value
+    minimum displaying value of the diffraction patterns
+    
+    display_vmax            float                           maximum displaying value 
+    maximum displaying value of the diffraction patterns 
+
+    display_norm_mode       str                             displaying normalize mode
+    linear or logarithm
+
+    display_colormap        str                             displaying colormap 
+    the display colormap of diffraction patterns, e.g. viridis
+
+
+.img    metadata structure 
+General/
+    title                   str         initialized by dataset name, but not necessarily the same.
+    original_filename       str         original file name without extension (if this is not the original acquisition image, the file could be a 4D-STEM dataset or other kind of experiment data)
+    original_path           str         original file path (if this is not the original acquisition image, the file could be a 4D-STEM dataset or other kind of experiment data)
+    authors                 str         in LaTeX format, i.e. Surname1, Name1 and Surname2, Name2 and ...
+    notes                   str         may support rich text (html?)
+    time                    str         creation time in ISO 8601, 13:29:10
+    date                    str         creation date in ISO 8601, 2018-01-28
+    time_zone               str         supported by the python-dateutil library, the same as the system
+    doi                     str         
+    fourd_explorer_version  str         e.g. 0.5.2
+
+Calibration/Space/
+    pixel_size_i            float       
+    pixel_size_j            float 
+    pixel_size_unit         str         e.g. m 
+    pixel_size_unit_display str         e.g. nm 
+    display_unit_magnify    float       if pixel_size_unit is m (meter), and pixel_size_unit_display is nm (nanometer), the display_unit_magnify should be 1e9
+
+Quantify/
+    (Not Implemented)
+    value_unit              str         e.g. N/C (electric field)
+    value_unit_display      str         e.g. V/m 
+    display_unit_magnify    float       if value_unit is m (meter), and value_unit_display is nm (nanometer), the value_unit_magnify should be 1e9
+    display_vmin            float 
+    display_vmax            float 
+    display_norm_mode       str         'linear' or 'logarithm'
+    display_colormap        str 
+
+######### If the image is originally acquired from TEM/STEM ##########
+AcquisitionInstrument/Microscope/
+    (Not Implemented)
+    name                    str         e.g. Titan3 Cubed 60-300
+    manufacturer            str         e.g. FEI 
+    acquisition_mode        str         TEM/STEM
+    beam_current            float       A       nA 
+    accelerate_voltage      float       V       kV
+    probe_area              float       m^2     nm^2
+    camera_length           float       m       mm
+    convergence_angle       float       rad     mrad        alpha/convergent semi-angle 
+    magnification           float
+    dwell_time              float       s       ms          Only valid for STEM 
+    exposure_time           float       s       s           Only valid for TEM 
+    step_size_i             float       m       nm          Only valid for STEM
+    step_size_j             float       m       nm          Only valid for STEM 
+
+AcquisitionInstrument/Camera/
+    (Not Implemented)
+    name                    str         e.g. EMPAD 
+    manufacturer            str         e.g. FEI 
+    pixel_number_i          int         
+    pixel_number_j          int 
+    pixel_size_i            float       m       um
+    pixel_size_j            float       m       um          
+
+AcquisitionInstrument/AnnularDetector/
+    (Not Implemented)
+    name                    str         e.g. Panther
+    manufacturer            str         e.g. FEI 
+    inner_radius            float       m       mm          inner radius of the annular sensor 
+    outer_radius            float       m       mm          outer radius of the annular sensor 
+
+AcquisitionInstrument/SegmentedDetector/
+    (Not Implemented)
+    name                    str         e.g. Panther 
+    manufacturer            str         e.g. FEI 
+    inner_radius            float       m       mm          inner radius of the annular sensor 
+    outer_radius            float       m       mm          outer radius of the annular sensor 
+    start_angle             float       rad     deg         the start angle in i-j coordinate system of the segmented detector of the image. For example, if a detector records the right-quadrant signal, its start angle should be 45 deg, while its end angle should be 135 deg. (In i-j coordinate system, the i axis points down)
+    end_angle               float       rad     deg         the end angle in i-j coordinate system of the segmented detector of the image. For example, if a detector records the right-quadrant signal, its start angle should be 45 deg, while its end angle should be 135 deg. (In i-j coordinate system, the j axis points right)
+
+AcquisitionInstrument/Stage/
+    (Not Implemented)
+    tilt_alpha              float       mrad    deg 
+    tilt_beta               float       mrad    deg 
+    rotation                float       mrad    deg 
+    x                       float       m       mm 
+    y                       float       m       mm 
+    z                       float       m       mm 
+
+Aberration/
+    (Not Implemented)
+    C1                      float       m       nm          defocus
+    A1                      float       m       nm          2-fold astigmatism
+    B2                      float       m       nm          axial coma
+    A2                      float       m       nm          3-fold astigmatism
+    C3                      float       m       um          spherical aberration
+    S3                      float       m       um          star aberration
+    A3                      float       m       um          4-fold astigmatism
+    B4                      float       m       um          axial coma
+    D4                      float       m       um          3 lobe aberration
+    A4                      float       m       um          5-fold astigmatism
+    C5                      float       m       mm          spherical aberration
+    A5                      float       m       mm          6-fold astigmatism
+
+######### If the image is related (reconstructed) from 4D-STEM ##########
+(
+    Copy from FourDSTEM:
+    AcquisitionInstrument/  -> FourDSTEM/AcquisitionInstrument/
+    Aberration/ -> FourDSTEM/Aberration/
+    Calibration/ -> FourDSTEM/Calibration/
+    General/ -> FourDSTEM/General/
+)
+
+FourDSTEM/General/
+    fourd_stem_path         str         the path of the original 4D-STEM dataset
+
+    
+
+
+.vec        metadata structure 
+General/
+    title                   str         initialized by dataset name, but not necessarily the same.
+    original_name           str         original file name without extension
+    original_path           str         original file path
+    authors                 str         in LaTeX format, i.e. Surname1, Name1 and Surname2, Name2 and ...
+    notes                   str         may support rich text (html?)
+    time                    str         creation time in ISO 8601, 13:29:10
+    date                    str         creation date in ISO 8601, 2018-01-28
+    time_zone               str         supported by the python-dateutil library, the same as the system
+    doi                     str         
+    fourd_explorer_version  str         e.g. 0.5.2
+
+Calibration/Space/
+    pixel_size_i            float       
+    pixel_size_j            float 
+    pixel_size_unit         str         e.g. m 
+    pixel_size_unit_display str         e.g. nm 
+    display_unit_magnify    float       if pixel_size_unit is m (meter), and pixel_size_unit_display is nm (nanometer), the display_unit_magnify should be 1e9
+
+Quantify/
+    (Not Implemented)
+    value_unit              str         e.g. N/C (electric field)
+    value_unit_display      str         e.g. V/m 
+    display_unit_magnify    float       if value_unit is m (meter), and value_unit_display is nm (nanometer), the value_unit_magnify should be 1e9
+    display_length_magnify  float 
+
+######### If the vector field is related (reconstructed from 4D-STEM) ##########
+(
+    Copy from FourDSTEM:
+    AcquisitionInstrument/  -> FourDSTEM/AcquisitionInstrument/
+    Aberration/ -> FourDSTEM/Aberration/
+    Calibration/ -> FourDSTEM/Calibration/
+    General/ -> FourDSTEM/General/
+)
+
+FourDSTEM/General/
+    fourd_stem_path         str         the path of the original 4D-STEM dataset
+
+######### If the vector field has a related background #########
+(
+    Copy from Image:
+      
+)
+Background/General/
+    background_path         str         the path of the background img 
+
+(Deprecated)
+
+AcquisitionInstrument/EDS/
+    (Not Implemented)
+    name                    str         
+    manufacturer            str 
+    azimuth_angle           float       rad     deg
+    elevation_angle         float       rad     deg 
+    energy_resolution_MnKa  float       eV      eV          The full width at half maximum (FWHM) of the manganese K alpha (Mn Ka) peak. This value is used as a first approximation of the energy resolution of the detector
+    live_time               float       s       s           The time spent to record the spectrum, compensated for the dead time of the detector
+    real_time               float       s       s 
+
+AcquisitionInstrument/EELS/
+    (Not Implemented)
+    name                    str         e.g. Enfinium ER 977
+    manufacturer            str         e.g. Gatan 
+    aperture_size           float       m       mm          The entrance aperture size of the spectrometer
+    collection_angle        float       rad     mrad        beta/collection semi-angle
+    dwell_time              float       s       ms          Only valid for STEM 
+    exposure                float       s       s           Only valid for TEM 
+    frame_number            int                             The number of frames/spectra integrated during the acquisition 
+
+    

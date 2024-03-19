@@ -9,11 +9,11 @@ platform_os = sys.platform          # win32
 
 block_cipher = None
 py_files = [
-    'FourDExplorer.py',
+    'FourDExplorer\\FourDExplorer.py',
 ]
 
 # Read APP_VERSION variable from Constants.py file
-with open(os.path.join(os.getcwd(), 'Constants.py'), encoding='utf-8') as f:
+with open(os.path.join(os.getcwd(), 'FourDExplorer', 'Constants.py'), encoding='utf-8') as f:
     try:
         exec(f.read())
     except NameError:
@@ -25,16 +25,16 @@ version = '.'.join([str(v) for v in APP_VERSION])
 package_name = 'FourDExplorer-v{0}-{1}-{2}'.format(version, platform_os, bits)
 
 add_files = [
-    ('ui\\resources\\icons\\*.png', 'ui\\resources\\icons'),
-    ('ui\\resources\\icons\\*.ico', 'ui\\resources\\icons'),
-    ('ui\\resources\\images\\*.png', 'ui\\resources\\images'),
-    ('ui\\resources\\themes\\dark\\*.xml', 'ui\\resources\\themes\\dark'),
-    ('ui\\resources\\themes\\light\\*.xml', 'ui\\resources\\themes\\light')
+    ('FourDExplorer\\ui\\resources\\icons\\*.png', 'ui\\resources\\icons'),
+    ('FourDExplorer\\ui\\resources\\icons\\*.ico', 'ui\\resources\\icons'),
+    ('FourDExplorer\\ui\\resources\\images\\*.png', 'ui\\resources\\images'),
+    ('FourDExplorer\\ui\\resources\\themes\\dark\\*.xml', 'ui\\resources\\themes\\dark'),
+    ('FourDExplorer\\ui\\resources\\themes\\light\\*.xml', 'ui\\resources\\themes\\light')
 ]
 
 a = Analysis(
     py_files,
-    pathex=['.'],
+    pathex=['.\\FourDExplorer\\'],
     binaries=[],
     datas=add_files,
     hiddenimports=[],
@@ -69,7 +69,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='ui\\resources\\icons\\4D.ico',
+    icon='FourDExplorer\\ui\\resources\\icons\\4D.ico',
 )
 
 coll = COLLECT(
