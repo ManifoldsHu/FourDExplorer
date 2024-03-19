@@ -116,17 +116,6 @@ date:           Nov 17, 2023
 
 from logging import Logger 
 
-# from PySide6.QtWidgets import QWidget, QMessageBox, QToolBar, QLineEdit, QTreeView
-# from PySide6.QtGui import QAction 
-# from PySide6.QtCore import QObject, QModelIndex, Qt 
-
-# # from bin.MetaManager import MetaManagerFourDSTEM, MetaManagerImg, MetaManagerVec, MetaManagerBase
-# from bin.MetaManager import MetaManager, MetadataFieldBase, MetaRootNode, MetaTreeNode, IntField, FloatField, StringField, MetaTree, MetaTreeModel
-# # from bin.MetaManagers.MetadataFields import IntField, FloatField, StringField
-# # from bin.MetaManagers.UnitManager import UnitManager
-# from bin.HDFManager import HDFHandler, ItemDataRoles
-# from bin.UIManager import ThemeHandler
-
 from PySide6.QtWidgets import QWidget 
 from PySide6.QtWidgets import QToolBar
 from PySide6.QtWidgets import QTreeView 
@@ -224,7 +213,13 @@ class WidgetMetaViewerBase(QWidget):
         """
         self._lineEdit_search = QLineEdit('', parent = self)
         self._action_search = ActionSearch(self.search_toolbar)
-        self.
+        self._action_search.setLinkedLineEdit(self._lineEdit_search)
+        self._action_search.setLinkedTreeView(self.ui.treeView_meta)
+        self._lineEdit_search.addAction(
+            self._action_search, 
+            QLineEdit.LeadingPosition
+        )
+        self.search_toolbar.addWidget(self._lineEdit_search)
  
     def _updateModel(self):
         """
@@ -479,7 +474,22 @@ class ActionSearch(ActionViewMetaBase):
             # When the user changes the key word, we need to rebuild 
             # the generator and search from the beggining of the tree.
             self._last_kw = kw 
-            model = self._treeview.model()
-            self._result_generator = model.
+            model: MetaTreeModel = self._treeview.model()
+            self._result_generator = model.matchIndexGenerator(kw)
             # TODO
+        if self._result_generator is None:
+            return False 
+        try:
+            index = next(self._result_generator)
+            self._treeview.setCurrentIndex(index)
+            return True 
+        except StopIteration:
+            msg = QMessageBox()
+            msg.setWindowTitle('Search')
+            msg.setIcon(QMessageBox.Information)
+            msg.setText('No more results.')
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec()
+            self._last_kw = ''
+            return False 
 
