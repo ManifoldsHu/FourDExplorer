@@ -25,10 +25,10 @@ class Ui_Form(object):
         Form.resize(400, 300)
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.treeView = QTreeView(Form)
-        self.treeView.setObjectName(u"treeView")
+        self.treeView_meta = QTreeView(Form)
+        self.treeView_meta.setObjectName(u"treeView_meta")
 
-        self.verticalLayout.addWidget(self.treeView)
+        self.verticalLayout.addWidget(self.treeView_meta)
 
 
         self.retranslateUi(Form)

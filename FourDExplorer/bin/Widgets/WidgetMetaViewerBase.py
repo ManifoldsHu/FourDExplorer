@@ -116,36 +116,48 @@ date:           Nov 17, 2023
 
 from logging import Logger 
 
-from PySide6.QtWidgets import QWidget, QMessageBox, QToolBar, QLineEdit, QTreeView
+from PySide6.QtWidgets import QWidget 
+from PySide6.QtWidgets import QToolBar
+from PySide6.QtWidgets import QTreeView 
+from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QLineEdit
 from PySide6.QtGui import QAction 
-from PySide6.QtCore import QObject, QModelIndex, Qt 
+from PySide6.QtCore import Qt
+from PySide6.QtCore import QObject
+from PySide6.QtCore import QModelIndex
 
-# from bin.MetaManager import MetaManagerFourDSTEM, MetaManagerImg, MetaManagerVec, MetaManagerBase
-from bin.MetaManager import MetaManager, MetadataFieldBase, MetaRootNode, MetaTreeNode, IntField, FloatField, StringField, MetaTree, MetaTreeModel 
-# from bin.MetaManagers.MetadataFields import IntField, FloatField, StringField
-# from bin.MetaManagers.UnitManager import UnitManager
-from bin.HDFManager import HDFHandler, ItemDataRoles
+from bin.MetaManager import MetaManager 
+from bin.MetaManager import MetaTree 
+from bin.MetaManager import MetaTreeModel
+from bin.HDFManager import HDFHandler
 from bin.UIManager import ThemeHandler
-from bin.Actions.MetaActions import ActionEditMeta
+from Constants import MetaDataRoles
 
 from ui import uiWidgetMetaViewerBase
 
 class WidgetMetaViewerBase(QWidget):
     """
     查看元数据的基类。
+
+    The base widget to view metadata.
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiWidgetMetaViewerBase.Ui_Form()
         self.ui.setupUi(self)
+        self.search_toolbar = MetaToolBar(self)
+        self.ui.verticalLayout.insertWidget(0, self.search_toolbar)
+        # self._initMetaManager()
+        self._initSearch()
+        self._initRefresh()
         
-        # self._tabs = []
+        
         self._meta_manager = None 
         
     @property
     def meta_manager(self) -> MetaManager:
         return self._meta_manager  
-    
+
     @property
     def meta_tree(self) -> MetaTree:
         return self._meta_manager.meta_tree
@@ -159,19 +171,325 @@ class WidgetMetaViewerBase(QWidget):
         global qApp 
         return qApp.hdf_handler
         
-    def _initValueTreeView(self):
-        # self._value_tree_view = QTreeView(self)
-        # self._value_tree_view.setModel(self.value_tree_model)
-        self.ui.treeView.setModel(self.meta_tree_model)
+    def _initMetaTreeView(self):
+        """
+        Initialize meta tree model.
+        """
+        self.ui.treeView_meta.setModel(self.meta_tree_model)
 
     def _initMetaManager(self, item_path: str):
+        """
+        Initialize the meta manager according to the path of the item.
+
+        arguments:
+            item_path: (str) the path of the dataset or group.
+        """
         self._meta_manager = MetaManager(self)
         self._meta_manager.setItemPath(item_path)
         hdf_type = self._meta_manager.hdf_type
         self._meta_manager.initializeSchema(hdf_type)
 
     def initMetaViewer(self, item_path: str):
-        self._initMetaManager(item_path)
-        self._initValueTreeView()
+        """
+        Initialize the meta viewer according to the path of the item.
 
+        arguments:
+            item_path: (str) the path of the dataset or group.
+        """
+        self._initMetaManager(item_path)
+        self._initMetaTreeView()
+
+    def _initRefresh(self):
+        """
+        Initialize refresh action.
+        """
+        self._action_refresh = ActionRefreshMetaModel(self.search_toolbar)
+        self._action_refresh.setLinkedTreeView(self.ui.treeView_meta)
+        self.search_toolbar.addAction(self._action_refresh)
+
+    def _initSearch(self):
+        """
+        Initialize search lineEdita and action.
+        """
+        self._lineEdit_search = QLineEdit('', parent = self)
+        self._action_search = ActionSearch(self.search_toolbar)
+        self._action_search.setLinkedLineEdit(self._lineEdit_search)
+        self._action_search.setLinkedTreeView(self.ui.treeView_meta)
+        self._lineEdit_search.addAction(
+            self._action_search, 
+            QLineEdit.LeadingPosition
+        )
+        self.search_toolbar.addWidget(self._lineEdit_search)
  
+    def _updateModel(self):
+        """
+        Update to the newest model when it is changed.
+        """
+        self._initMetaTreeView()
+        self.ui.treeView_meta.expandToDepth(0)
+        
+
+    
+class MetaToolBar(QToolBar):
+    """
+    The toolbar to search items in Meta tree.
+    """
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
+        self.setMovable(False)
+        self.setFloatable(False)
+        self.setContextMenuPolicy(Qt.ActionsContextMenu)
+        qss = self.theme_handler
+
+    @property
+    def theme_handler(self) -> ThemeHandler:
+        global qApp 
+        return qApp.theme_handler 
+    
+    def _update_style_sheet(self):
+        """
+        When theme is changed, the style sheet must be updated.
+        """
+        qss = self.theme_handler.getToolBarStyleSheet(self)
+        self.setStyleSheet(qss)
+
+
+class ActionViewMetaBase(QAction):
+    """
+    用于在 Meta Tree 中查看 Metadata 的 Action 的基类。
+
+    The base action for viewing meta data in the meta tree.
+    """
+    def __init__(self, parent: QObject):
+        super().__init__(parent)
+        self._item_path = ''
+        self._icon_name = ''
+        self._meta_key = ''
+        self.theme_handler.theme_changed.connect(
+            self._updateIcon
+        )
+        self.hdf_handler.file_opened.connect(
+            lambda: self.setEnabled(True)
+        )
+        self.hdf_handler.file_closed.connect(
+            lambda: self.setEnabled(False)
+        )
+        self._meta_manager = None 
+        self._treeview = None 
+
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler 
+
+    @property
+    def theme_handler(self) -> ThemeHandler:
+        global qApp
+        return qApp.theme_handler 
+
+    @property
+    def logger(self) -> Logger:
+        global qApp 
+        return qApp.logger
+
+    @property
+    def item_path(self) -> str:
+        return self._item_path 
+    
+    @property
+    def meta_key(self) -> str:
+        return self._meta_key 
+    
+    @property
+    def meta_manager(self) -> MetaManager:
+        return self._meta_manager 
+    
+    @property
+    def meta_tree_model(self) -> MetaTreeModel:
+        return self.meta_manager.meta_tree_model
+    
+    @property
+    def meta_index(self) -> QModelIndex:
+        return self.meta_tree_model.indexFromKey()
+    
+    def initIconResources(self, icon_name: str):
+        """
+        Initialize the resouce of icons.
+
+        argumemnts:
+            icon_name: (str) the name of icon.
+        """
+        _path = ':/HDFEdit/resources/icons/' + icon_name 
+        icon = self.theme_handler.iconProvider(_path)
+        self._icon_name = icon_name 
+        self.setIcon(icon)
+    
+    def setItemPath(self, item_path: str):
+        """
+        Set the item path that this meta viewer action will manage. 
+
+        arguments:
+            item_path: (str) The path of the dataset or group in the HDF5 file.
+        """
+        if not isinstance(item_path, str):
+            raise TypeError(f'path must be a str, not {type(item_path).__name__}')
+        self._item_path = item_path
+
+    def setMetaKey(self, key: str):
+        """
+        Set the key of the metadata that this meta viewer action will manage.
+
+        arguments:
+            key: (str) The key of the metadata
+        """
+        if not isinstance(key, str):
+            raise TypeError(f'path must be a str, not {type(key).__name__}')
+        self._meta_key = key 
+
+    def setMetaKeyFromIndex(self, index: QModelIndex):
+        """
+        Set the target key from its model index.
+
+        arguments:
+            index: (QModelIndex) The meta key of the index.
+        """
+        if not isinstance(index, QModelIndex):
+            raise TypeError(f'index must be a QModelIndex, not {type(index).__name__}')
+        _key = index.data(MetaDataRoles.KeyRole)
+        if _key is not None:
+            self._meta_key = _key 
+        else:
+            self._meta_key = ''
+
+    def _updateIcon(self):
+        """
+        Will update the icon when the theme mode changes.
+        """
+        if self._icon_name:
+            _path = ':/HDFEdit/resources/icons/' + self._icon_name
+            icon = self.theme_handler.iconProvider(_path)
+            self.setIcon(icon)
+
+    def setLinkedTreeView(self, treeview: QTreeView):
+        """
+        Set the linked treeview, so that it can show the result.
+        """
+        if not isinstance(treeview, QTreeView):
+            raise TypeError('treeview must be a QTreeView, not '
+                '{0}'.format(type(treeview).__name__))
+        elif not isinstance(treeview.model(), MetaTreeModel):
+            raise TypeError(
+                f'treeview must be a MetaTreeModel, not {type(treeview).__name__}')
+        self._treeview = treeview 
+        model: MetaTreeModel = treeview.model()
+        if 'meta_manager' in model.__dir__():
+            self._meta_manager = model.meta_manager
+
+
+def failLogging(func):
+    """
+    Try to do something. If failed, log it.
+
+    This is a decorator, used for these actions on-triggered functions.
+    """
+    def wrapper(self: ActionViewMetaBase, *args, **kw):
+        try:
+            func(*args, **kw)
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setWindowTitle('Error')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText('An exception happened in '
+                '{0}: {1}'.format(self.text(), e))
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec()
+    return wrapper 
+
+
+class ActionRefreshMetaModel(ActionViewMetaBase):
+    """
+    用于刷新元数据列表的 Action
+
+    Action to refresh metadata tree.
+    """
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self.setText('Refresh')
+        self.initIconResources('refresh.png')
+        self.triggered.connect(lambda: self.refreshModel(self))
+
+    @failLogging
+    def refreshModel(self):
+        """
+        Will rebuild the Meta tree and then create a new model.
+
+        We first get the current chosen key. Then we rebuild the meta manager 
+        and the meta tree model. Finally, we set the chosen index of the tree 
+        view to the chosen key before.
+        """
+        if self._treeview is not None:
+            self.setMetaKeyFromIndex(self._treeview.currentIndex())
+            self._meta_manager.setItemPath(self._item_path)
+            self._treeview.setModel(self._meta_manager.meta_tree_model)
+            _index = self.meta_tree_model.indexFromKey(self.meta_key)
+            self._treeview.setCurrentIndex(_index)
+
+class ActionSearch(ActionViewMetaBase):
+    """
+    用于查找下一个匹配的 Metadata 的 Action。
+
+    Action to search Metadata.
+    """
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self.setText('Search')
+        self.initIconResources('search.png')
+        self.triggered.connect(self.searchItem)
+        self._last_kw = ''
+        self._result_generator = None 
+
+    def setLinkedTreeView(self, treeview: QTreeView):
+        """
+        Set the linked treeview, such that it can show the result.
+
+        arguments:
+            treeview: (QTreeView) 
+        """        
+        self._treeview = treeview 
+
+    def setLinkedLineEdit(self, line_edit: QLineEdit):
+        """
+        Set the linked line edit, such that it can get the word to search.
+        """
+        self._line_edit = line_edit 
+
+    def searchItem(self):
+        """
+        Find the next rearch result and show it in the treeview.
+        """
+        kw = self._line_edit.text()
+        if kw == '':
+            return False 
+        if kw != self._last_kw:
+            # When the user changes the key word, we need to rebuild 
+            # the generator and search from the beggining of the tree.
+            self._last_kw = kw 
+            model: MetaTreeModel = self._treeview.model()
+            self._result_generator = model.matchIndexGenerator(kw)
+            # TODO
+        if self._result_generator is None:
+            return False 
+        try:
+            index = next(self._result_generator)
+            self._treeview.setCurrentIndex(index)
+            return True 
+        except StopIteration:
+            msg = QMessageBox()
+            msg.setWindowTitle('Search')
+            msg.setIcon(QMessageBox.Information)
+            msg.setText('No more results.')
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec()
+            self._last_kw = ''
+            return False 
+

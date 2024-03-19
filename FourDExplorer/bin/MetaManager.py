@@ -53,9 +53,11 @@ date:           Oct 31, 2023
 from logging import Logger 
 import os 
 import json
-from typing import Any, Iterable
+from typing import Any
 from typing import Iterator 
 from collections.abc import Mapping
+from collections.abc import Set
+from collections.abc import Collection
 import re 
 
 from PySide6.QtCore import QObject
@@ -102,9 +104,6 @@ class MetaManager(QObject):
         self._item_path = None 
         self._schema_tree = None 
         self._meta_tree = None 
-        # self._value_tree = None 
-        # self._display_tree = None 
-        # self._display_tree_model = None 
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -124,31 +123,10 @@ class MetaManager(QObject):
     def schema_json_path(self) -> str:
         schema_file_name = self._hdf_meta_schema_file[self.hdf_type]
         return os.path.join(self._schema_dir_path, schema_file_name)
-        # raise NotImplementedError(
-        #     "No schema_json_path assigned. "
-        #     "You should success MetaManagerBase and define the path of the json file.")
-    
-    # def initializeTreeStructures(self, )
 
     @property
     def item_path(self) -> str:
         return self._item_path 
-
-    # @property
-    # def display_tree(self) -> "DisplayTree":
-    #     return self._display_tree
-
-    # @property
-    # def display_tree_model(self) -> "DisplayTreeModel":
-    #     return self._display_tree_model
-    
-    # @property
-    # def value_tree(self) -> "ValueTree":
-    #     return self._value_tree 
-    
-    # @property
-    # def value_tree_model(self) -> "ValueTreeModel":
-    #     return self._value_tree_model 
 
     @property
     def meta_tree(self) -> "MetaTree":
@@ -169,26 +147,15 @@ class MetaManager(QObject):
         """
         self._item_path = item_path 
 
-        with open(self.schema_json_path, 'r', encoding='utf-8') as f:
-            json_data = json.load(f)
+        # with open(self.schema_json_path, 'r', encoding='utf-8') as f:
+        #     json_data = json.load(f)
 
-        self._parseSchema(parent_key = '', definitions = json_data)
-        self._schema_tree = SchemaTree(self._schema, parent = self)
-
-        # self._value_tree = ValueTree(item_path, parent = self)
-        # self._value_tree_model = ValueTreeModel(self)
-        # self._display_tree = DisplayTree(
-        #     self._schema_tree, 
-        #     self._value_tree, 
-        #     parent = self,
-        # )
- 
-        # self._display_tree_model = DisplayTreeModel(self._display_tree, self)
-        # self._display_tree_model = DisplayTreeModel(self)
+        # self._parseSchema(parent_key = '', definitions = json_data)
+        # self._schema_tree = SchemaTree(self._schema, parent = self)
+        self.initializeSchema(self.hdf_handler.getNode(item_path).hdf_type)
 
         self._meta_tree = MetaTree(item_path, parent = self)
         self._meta_tree_model = MetaTreeModel(self)
-        # self._display_tree_model.meta_manager = self
 
     def initializeSchema(self, hdf_type: HDFType):
         """
@@ -204,62 +171,6 @@ class MetaManager(QObject):
             self._schema_tree = SchemaTree(self._schema, parent = self)
         else:
             raise ValueError(f"There is no predefined schema for the {hdf_type}")
-
-
-    # def initializeMetas(self, item_path: str):
-    #     """
-    #     Initialize schema, value and display trees, and its model.
-
-    #     arguments:
-    #         item_path: (str) the path of the attribute's dataset
-    #     """
-    #     # hdf_type: HDFType = self.hdf_handler.getNode(item_path).hdf_type
-    #     self._item_path = item_path 
-
-    #     with open(self.schema_json_path, 'r', encoding='utf-8') as f:
-    #         json_data = json.load(f)
-
-    #     self._parseSchema(parent_key = '/', definitions = json_data)
-
-    #     self._schema_tree = SchemaTree(self._schema, parent = self)
-    #     self._value_tree = ValueTree(item_path, parent = self)
-    #     self._display_tree = DisplayTree(
-    #         self._schema_tree, 
-    #         self._value_tree, 
-    #         parent = self,
-    #     )
-
-    #     self._display_tree_model = DisplayTreeModel(self._display_tree, self)
-    #     self._display_tree_model.meta_manager = self 
-
-
-    # def createModel(self) -> "DisplayTreeModel":
-    #     """
-    #     Create a DisplayTreeModel instance
-    #     """
-    #     self._display_tree_model = DisplayTreeModel(self._display_tree, self)
-    #     self._display_tree_model.meta_manager = self 
-    #     return self._display_tree_model
-
-    # def updateMetas(self) -> "DisplayTreeModel":
-    #     """
-    #     Update meta managers, along with its schema and models.
-
-    #     returns:
-    #         (DisplayTreeModel) the updated display tree model.
-    #     """
-    #     self.setItemPath(self._item_path)
-    #     return self._display_tree_model
-
-
-    # def _initializeSchema(self):
-    #     """
-    #     Initialize all of the metadata. All values will be set to None.
-    #     """
-    #     with open(self.schema_json_path, 'r', encoding='utf-8') as f:
-    #         json_data = json.load(f)
-        
-    #     self._parseSchema(parent_key = '/', definitions = json_data)
 
     def _parseSchema(self, parent_key: str, definitions: dict):
         """
@@ -326,22 +237,71 @@ class MetaManager(QObject):
                 f"Invalid type {field_instance['type']} of the field: {full_key}"
             )
             
-    def getSchemaField(self, key: str):
+    def getSchemaField(self, key: str) -> 'MetadataFieldBase':
+        """
+        Get the field in the predefined schema according to the key. 
+        
+        The field may have title, description, unit and so on.
+
+        arguments:
+            key: (str) The key of the metadata 
+
+        returns:
+            (MetadataFieldBase) metadata field
+        """
         return self._schema[key]
     
-    def listKeys(self) -> Iterable:
-        return self._schema.keys()
+    def listKeys(self) -> Set:
+        """
+        Get the keys of metadata mapping. Note that this is NOT a list.
+
+        returns:
+            (Set) The keys view of the metadata.
+        """
+        return self.hdf_handler.file[self.item_path].attrs.keys()
     
-    def getSchemaKeys(self) -> Iterable:
+    def listSchemaKeys(self) -> Set:
+        """
+        Get the keys of schema mapping. Note that this is NOT a list.
+
+        returns:
+            (Set) The keys view of the schema. 
+        """
         return self._schema.keys()
     
     def _getSchemaFields(self, key: str) -> "MetadataFieldBase":
+        """
+        Get the fields from schema according to the key of metadata.
+
+        returns:
+            (MetadataFieldBase) The field of the metadata.
+        """
         return self._schema[key]
     
     def getSchemaDescription(self, key: str) -> str:
+        """
+        Get the description from predefined schema according to the key.
+
+        arguments:
+            (str) The key of the metadata. Must be path-like.
+
+        returns:
+            (str) The description of the metadata
+        """
         return self._getSchemaFields(key).description
     
     def getSchemaUnit(self, key: str) -> str:
+        """
+        Get the unit of physical quantity in predefined schema. 
+        
+        The unit is managed by the UnitManager, and should be SI units.
+
+        arguments:
+            (str) The key of the metadata. Must be path-like.
+
+        returns:
+            (str) The unit of the metadata or None if there is no unit.
+        """
         field = self._getSchemaFields(key)
         if isinstance(field, (IntField, FloatField)):
             return field.unit
@@ -349,6 +309,15 @@ class MetaManager(QObject):
             return None 
            
     def getSchemaDisplayUnit(self, key: str) -> str:
+        """
+        Get the displayed unit that is read friendly.
+
+        arguments:
+            (str) The key of the metadata. Must be path-like.
+
+        returns:
+            (str) The displayed unit or None if there is no display unit.
+        """
         field = self._getSchemaFields(key)
         if isinstance(field, (IntField, FloatField)):
             return field.display_unit 
@@ -356,43 +325,80 @@ class MetaManager(QObject):
             return None 
 
     def getSchemaTitle(self, key: str) -> str:
+        """
+        Get the title of the metadata that is predefined in schema.
+
+        arguments:
+            (str) The key of the metadata. Must be path-like.
+
+        returns:
+            (str) The title of the metadata.
+        """
         return self._getSchemaFields(key).title
 
     def getValue(self, key: str) -> Any:
+        """
+        Get the value of the metadata.
+
+        arguments:
+            (str) The key of the metadata.
+
+        returns:
+            (str) The value of the metadata.
+        """
         return self.hdf_handler.file[self.item_path].attrs.get(key)
     
-# class MetaManagerFourDSTEM(MetaManagerBase):
-#     """
-#     管理 .4dstem 数据集的元数据的类 
+    def getNode(self, key: str) -> 'MetaTreeNode':
+        """
+        Get the node in the meta tree, according to the key.
 
-#     The meta manager of .4dstem datasets.
-#     """
-#     @property
-#     def schema_json_path(self) -> str:
-#         return os.path.join(ROOT_PATH, 'schema', 'MetaStructures', '4dstem.json')
-    
+        Note that if the key is not a valid path-like string, the node will 
+        be a child of the root.
 
-# class MetaManagerImg(MetaManagerBase):
-#     """
-#     管理 .img 数据集的元数据的类
+        arguments:
+            (str) The key of the metadata.
 
-#     The meta manager of .img datasets.
-#     """
-#     @property
-#     def schema_json_path(self) -> str:
-#         return os.path.join(ROOT_PATH, 'schema', 'MetaStructures', 'img.json')
-    
+        returns:
+            (MetaTreeNode) the node in the meta tree.
+        """
+        if key not in self.listKeys():
+            raise KeyError(f"Key not found in metadata: {key}")
+        if self.meta_tree.isValidPath(key):
+            path_parts = key.lstrip('/').split('/')
+            node = self.meta_tree.root 
+            for part in path_parts:
+                node = node[part]
+            return node 
+        else:
+            return self.meta_tree.root[key]
+        
+    def matchNodeGenerator(self, kw: str):
+        """
+        A generator that yields nodes whose metadata key or title matches the 
+        key word.
 
-# class MetaManagerVec(MetaManagerBase):
-#     """
-#     管理 .vec 数据集的元数据的类
+        arguments:
+            kw: (str) The key word to be matched.
 
-#     The meta manager of .vec datasets.
-#     """
-#     @property
-#     def schema_json_path(self) -> str:
-#         return os.path.join(ROOT_PATH, 'schema', 'MetaStructure', 'vec.json')
-    
+        returns:
+            (generator) Generate MetaTreeNode instance.
+        """
+        if not isinstance(kw, str):
+            raise TypeError(f'kw must be a str, not {type(kw).__name__}')
+        def _matchSubNode(node: 'MetaTreeNode'):
+            for key in node:
+                subnode: MetaTreeNode = node[key]
+                if kw in key:
+                    yield subnode
+                elif subnode.path in self._schema:
+                    if kw in self.getSchemaTitle(subnode.path):
+                        yield subnode 
+                elif len(subnode) > 0:
+                    for subsubnode in _matchSubNode(subnode):
+                        yield subsubnode 
+        return _matchSubNode(self._schema_tree.root)
+                
+
 
 class MetadataFieldBase(QObject):
     """
@@ -674,10 +680,22 @@ class MetaTreeNode(Mapping):
             self._mapping[child.name] = child 
             child.parent = self 
 
-    def keys(self):
+    def keys(self) -> Set:
+        """
+        Get the set of keys of the child nodes.
+
+        returns:
+            (Set) The key view of the current node.
+        """
         return self._mapping.keys()
     
-    def values(self):
+    def values(self) -> Collection:
+        """
+        Get the values collection of the child nodes.
+
+        returns:
+            (Collection) The value view of the current node.
+        """
         return self._mapping.values()
     
     def items(self):
@@ -701,7 +719,7 @@ class MetaRootNode(MetaTreeNode):
 
 
 class SchemaTree(QObject):
-    def __init__(self, schema_keys: Mapping, parent: QObject = None):
+    def __init__(self, schema_keys: Set, parent: QObject = None):
         super().__init__(parent)
         self._schema_keys = schema_keys 
         self._root = self._buildTree(self._schema_keys)
@@ -716,15 +734,15 @@ class SchemaTree(QObject):
         return self._root 
     
     @property
-    def schema_keys(self) -> Mapping:
+    def schema_keys(self) -> Set:
         return self._schema_keys
 
-    def _buildTree(self, schema_keys: Mapping) -> MetaRootNode:
+    def _buildTree(self, schema_keys: Set) -> MetaRootNode:
         """
         Build the tree structure from the predefined schema keys.
 
         arguments:
-            schema_keys: Iterable of path-like strings represending schema keys
+            schema_keys: Set of path-like strings represending schema keys
 
         returns:
             (MetaRootNode) The root node of the constructed schema tree.
@@ -777,48 +795,6 @@ class SchemaTree(QObject):
             parent.addChild(new_node)
         self._addPathToTree(parent[part], path_parts[1:])
 
-    # def _addPathToTree(self, root: MetaTreeNode, path: str):
-    #     """
-    #     Add a path to the schema tree, creating intermediate nodes as necessary.
-
-    #     arguments:
-    #         root: (MetaTreeNode) the root of the schema tree 
-            
-    #         path: (str) the path to be added to the tree 
-    #     """
-    #     current_node = root 
-    #     path_parts = path.split('/')[1:]    # split the path and ignore the first
-    #     for part in path_parts:
-    #         if part not in current_node:
-    #             new_node = MetaRootNode(part, current_node)
-    #             current_node.addChild(new_node)
-
-    # def _insertNode(self, current_node: dict, path_parts: list[str]):
-    #     """
-    #     Recursively insert a node into the tree. 
-
-    #     path            path_parts          path_parts[1:]
-    #     /sample         ['', 'sample']      ['sample']
-    #     sample          ['sample']          []
-    #     sample/         ['sample', '']      ['']
-        
-    #     """
-    #     if not path_parts:  # current node is the last leaf
-    #         return 
-    #     elif path_parts[0] == '': # current node end with /
-    #         return 
-        
-    #     if path_parts[0] not in current_node:
-    #         current_node[path_parts[0]] = {}
-
-    #     self._insertNode(current_node[path_parts[0]], path_parts[1:])
-
-
-    # def getFirstBranchNodes(self):
-    #     """
-    #     Get the first level branch nodes of the tree.
-    #     """
-
 
 class MetaTree(QObject):
     """
@@ -860,6 +836,10 @@ class MetaTree(QObject):
                 path_parts = key.lstrip('/').split('/')
                 self._addAttributeToTree(self._root, path_parts)
             else:
+                if key not in self.root:    
+                    # Add those items that is not path like to the root.
+                    new_node = MetaTreeNode(key, self.root)
+                    self.root.addChild(new_node)
                 self._undefined_attributes[key] = value
 
     def isValidPath(self, path: str) -> bool:
@@ -938,303 +918,6 @@ class MetaTree(QObject):
         return list(node.parent.values()).index(node)
 
 
-# class DisplayTree(QObject):
-#     """
-#     DEPRECATED
-#     """
-#     def __init__(
-#         self, 
-#         schema_tree: SchemaTree, 
-#         value_tree: ValueTree, 
-#         parent:QObject = None,
-#     ):
-#         super().__init__(parent)
-#         self._schema_tree = schema_tree 
-#         self._value_tree = value_tree 
-#         self._root = self._buildDisplayTree()
-
-#     @property
-#     def root(self) -> MetaRootNode:
-#         return self._root 
-    
-#     @property
-#     def schema_tree(self) -> SchemaTree:
-#         return self._schema_tree 
-    
-#     @property
-#     def value_tree(self) -> ValueTree:
-#         return self._value_tree 
-    
-#     def _buildDisplayTree(self) -> MetaRootNode:
-#         """
-#         Build the display tree by combining schema and value trees.
-
-#         returns:
-#             (MetaRootNode)
-#         """
-#         root = MetaRootNode()
-#         self._addSchemaBranches(root, self._schema_tree.root)
-#         self._addUndefinedAttributes(root)
-#         return root 
-    
-#     def _addSchemaBranches(self, display_root: MetaTreeNode, schema_root: MetaTreeNode):
-#         """
-#         Recursively add branches from the schema tree to the display tree.
-
-#         arguments:
-#             display_root: (MetaTreeNode) The root of the display tree 
-
-#             schema_root: (MetaTreeNode) The root of the schema tree
-#         """
-#         for child_name, child_node in schema_root.items():
-#             new_node = MetaTreeNode(child_name, display_root)
-#             display_root.addChild(new_node)
-#             self._addSchemaBranches(new_node, child_node)
-
-#     def _addUndefinedAttributes(self, display_root: MetaTreeNode):
-#         """
-#         Add undefined attributes from the value tree to the display tree.
-
-#         arguments:
-#             display_root: (MetaTreeNode) The root of the display tree
-#         """
-#         undefined_node = MetaTreeNode("Undefined", display_root)
-#         display_root.addChild(undefined_node)
-#         for key in self._value_tree.attributes:
-#             if key not in self._schema_tree.schema_keys:
-#                 new_node = MetaTreeNode(key, undefined_node)
-#                 undefined_node.addChild(new_node)
- 
-#     def getNodeByRow(self, parent_node: MetaTreeNode, row: int) -> MetaTreeNode:
-#         """
-#         Given a parent node and a row number, return the corresponding child node.
-
-#         arguments:
-#             parent_node: (MetaTreeNode) The parent node
-
-#             row: (int) The row number of the child node
-
-#         returns:
-#             (MetaTreeNode) the child node at the given row under the parent node
-#         """
-#         if parent_node is None or not isinstance(parent_node, MetaTreeNode):
-#             raise TypeError("parent_node must be a MetaTreeNode")
-#         elif row < 0 or row >= len(parent_node):
-#             raise ValueError("row must be between 0 and len(parent_node)")
-#         return list(parent_node.values())[row]
-    
-#     def getRowOfNode(self, node: MetaTreeNode) -> int:
-#         """
-#         Given a node, return its row number under its parent.
-
-#         arguments:
-#             node: (MetaTreeNode) The node to find the row number for.
-
-#         returns:
-#             (int) The row number of the node under its parent.
-#         """
-#         if node.parent is None:
-#             raise ValueError("root node does not have row index")   # or returns 0?
-#         return list(node.parent.values()).index(node)
-
-#     # def rowCount(self, parent_node: MetaTreeNode) -> int:
-#     #     return len(parent_node)
-    
-#     # def columnCount(self, parent_node: MetaTreeNode) -> int:
-#     #     return 1
-
-#     # def updateDisplay(self, updated_attributes):
-#     #     pass 
-
-#     # def getAttributeValue(self, key: str):
-#     #     return self._value_tree.attributes[key]
-    
-#     # def getAttributeTitle(self, key: str):
-#     #     return self._schema_tree.
-
-
-# class DisplayTreeModel(QAbstractItemModel):
-#     """
-#     DEPRECATED
-
-#     DisplayTreeModel 用于在 QTreeView 控件中展示 DisplayTree 数据。
-
-#     本模型类继承自 QAbstractItemModel，提供了与 DisplayTree 数据交互所需的界面，使
-#     得 DisplayTree 中的数据可以在 QTreeView 控件中被正确显示和管理。
-
-#     DisplayTreeModel 主要处理节点数据的检索、节点层次关系的定义，以及如何在视图中呈现
-#     这些数据。
-
-#     注意：该模型假设 DisplayTree 的节点对象 (MetaTreeNode) 具有 name 属性作为显示名
-#     称，并且已经实现了 getNodeByRow 和 getRowOfNode 方法。
-
-#     DisplayTreeModel is designed for displaying DisplayTree data in a QTreeView
-#     widget.
-
-#     This model class, inheriting from QAbstractItemModel, provides the necessary 
-#     interface to interact with the DisplayTree data, ensuring that the data from 
-#     the DisplayTree can be correctly displayed and managed within a QTreeView 
-#     widget.
-
-#     DisplayTreeModel mainly deals with retrieving node data, defining the hier-
-#     archical relationship of nodes, and how to present these data in the view.
-
-#     Note: The model assumes that the node object of DisplayTree (MetaTreeNode) 
-#     has a name attribute for display and that the methods getNodeByRow and 
-#     getRowOfNode are already implemented.
-#     """
-#     def __init__(self, meta_manager: MetaManager, parent: QObject = None):
-#         """
-#         Initialize the display tree model.
-
-#         arguments:
-#             display_tree: (DisplayTree) the backend display_tree of the model
-
-#             parent: (QObject)
-#         """
-#         super(DisplayTreeModel, self).__init__(parent)
-#         self._meta_manager = meta_manager  
-        
-    
-#     @property
-#     def meta_manager(self) -> MetaManager:
-#         return self._meta_manager 
-    
-#     @meta_manager.setter
-#     def meta_manager(self, meta_mgr: MetaManager):
-#         self._meta_manager = meta_mgr
-
-#     @property
-#     def display_tree(self) -> DisplayTree:
-#         return self._meta_manager._display_tree
-    
-#     @property
-#     def root_node(self) -> MetaRootNode:
-#         return self._meta_manager.display_tree.root 
-    
-#     @property
-#     def hdf_handler(self) -> HDFHandler:
-#         global qApp 
-#         return qApp.hdf_handler 
-
-#     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
-#         """
-#         Returns the number of rows under the given parent. When the parent is valid,
-#         rowCount() returns the number of children of parent. When the parent is 
-#         QModelIndex(), rowCount() returns the number of top-level items.
-
-#         arguments:
-#             parent: (QModelIndex) The parent index.
-
-#         returns:
-#             (int) The number of rows under the given parent.
-#         """
-#         if not parent.isValid():
-#             parent_node = self.root_node 
-#         else:
-#             parent_node = parent.internalPointer()
-#         return len(parent_node)
-    
-#     def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
-#         """
-#         Returns the number of columns for the children of the given parent.
-#         In most subclasses, the number of columns is independent of the parent.
-
-#         arguments:
-#             parent: (QModelIndex) The parent index.
-
-#         returns:
-#             (int) The number of columns for the given parent.
-#         """
-#         return 2    # TODO: turns to actual item number.
-    
-#     def data(self, index: QModelIndex, role: int = ItemDataRoles.DisplayRole):
-#         """
-#         Returns the data stored under the given role for the item referred to by the index.
-
-#         arguments:
-#             index: (QModelIndex) The index of the item.
-
-#             role: (int) The role for which data is requested.
-
-#         returns:
-#             (Any) The data stored under the given role for the item referred to by the index.
-#         """
-        
-#         if not index.isValid():
-#             return None 
-#         node: MetaTreeNode = index.internalPointer()
-#         if role == ItemDataRoles.DisplayRole and index.column() == 0:
-#             # if node.path in self.display_tree.schema_tree.schema_keys:
-#             if node.path in self.meta_manager.getSchemaKeys():
-#                 return self.meta_manager.getSchemaTitle(node.path)
-#             return node.name
-#         elif role == ItemDataRoles.DisplayRole and index.column() == 1:
-#             if node.path in self.meta_manager.getSchemaKeys():
-#                 if isinstance(self.meta_manager.getSchemaField(node.path), (IntField, FloatField)):
-#                     attrs = self.hdf_handler.file[self.meta_manager.item_path].attrs
-#                     value = attrs[node.path]
-#                     # 这里我们需要构造 display_str，通过实际的值，与 Schema 中记录的展示单位。
-#                     # TODO
-#                     return value 
-#                 else: 
-#                     return -1   # TODO
-
-
-#     def index(
-#         self, 
-#         row: int, 
-#         column: int, 
-#         parent: QModelIndex = QModelIndex()
-#     ) -> QModelIndex:
-#         """
-#         Returns the index of the item in the model specified by the given row, column, and parent index.
-
-#         arguments:
-#             row: (int) The row number of the item.
-
-#             column: (int) The column number of the item.
-
-#             parent: (QModelIndex) The parent index of the item.
-
-#         returns:
-#             (QModelIndex) The index of the specified item.
-#         """
-#         if not parent.isValid():
-#             parent_node = self.root_node
-#         else:
-#             parent_node = parent.internalPointer()
-#         if row >= 0 and row < len(parent_node):
-#             child_node = self.display_tree.getNodeByRow(row)
-#             self.createIndex(row, column, child_node)
-#         else:
-#             return QModelIndex()
-        
-#     def parent(self, index: QModelIndex) -> QModelIndex:
-#         """
-#         Returns the parent of the model item with the given index. If the item
-#         has no parent, an invalid QModelIndex is returned.
-
-#         arguments:
-#             index: (QModelIndex) The index of the item.
-
-#         Returns:
-#             (QModelIndex) The parent index of the specified item.
-#         """
-#         if not index.isValid():
-#             return QModelIndex()
-        
-#         child_node = index.internalPointer()
-#         parent_node = child_node.parent
-
-#         if parent_node is self.root_node:
-#             return QModelIndex()
-        
-#         return self.createIndex(self.display_tree.getRowOfNode(child_node), 0, parent_node)
-        
-    
-
-# class ValueTreeModel(QAbstractItemModel):
 class MetaTreeModel(QAbstractItemModel):
     """
     MetaTreeModel 用于在 QTreeView 控件中展示 MetaTree 的数据。
@@ -1291,7 +974,7 @@ class MetaTreeModel(QAbstractItemModel):
     
     @property
     def root_node(self) -> MetaRootNode:
-        return self._meta_manager.value_tree.root 
+        return self._meta_manager.meta_tree.root 
     
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -1357,7 +1040,7 @@ class MetaTreeModel(QAbstractItemModel):
         if not index.isValid():
             return None 
         node: MetaTreeNode = index.internalPointer()
-        schema_keys = self.meta_manager.getSchemaKeys()
+        schema_keys = self.meta_manager.listSchemaKeys()
 
         if role == MetaDataRoles.DisplayRole and index.column() == 0:
             if node.path in schema_keys:
@@ -1456,7 +1139,7 @@ class MetaTreeModel(QAbstractItemModel):
             (str) the displayed string of the value. 
         """
         node: MetaTreeNode = index.internalPointer()
-        schema_keys = self.meta_manager.getSchemaKeys()
+        schema_keys = self.meta_manager.listSchemaKeys()
         attrs = self.hdf_handler.file[self.meta_manager.item_path].attrs 
         value = attrs.get(node.path)
         if value is None:
@@ -1482,12 +1165,36 @@ class MetaTreeModel(QAbstractItemModel):
             return f"{display_value:.4g} {display_unit}"    #TODO: Format displying with rich text.
 
 
-        
-        # if not self.meta_manager.getSchemaUnit(node.path) is None:
-        #     display_str = f"" 
-        #     # TODO: display as converted unit 
-        #     return display_str  
-        # return f"{value}"
+    def indexFromKey(self, key: str) -> QModelIndex:
+        """
+        Get the model index from a key.
+
+        arguments:
+            key: (str) The key of the meta data item.
+
+        returns:
+            (QModelIndex) Must be the index of column 0.
+        """
+        if not isinstance(key, str):
+            raise TypeError(f'key must be a str, not {type(key).__name__}')
+        node = self.meta_manager.getNode(key)
+        if node is self.root_node:
+            return QModelIndex()
+        row = list(node.parent.keys()).index(node.name)
+        return self.createIndex(row, 0, node)
+    
+
+    def keyFromIndex(self, index: QModelIndex) -> str:
+        """
+        Get the key from a model index.
+
+        arguments:
+            index: (QModelIndex) The index of the item.
+
+        returns:
+            (str) The key of the metadata.
+        """
+        return self.data(index, role = MetaDataRoles.KeyRole)
 
 
     def headerData(
@@ -1499,9 +1206,9 @@ class MetaTreeModel(QAbstractItemModel):
         Write the header data of the metadata tree.
 
         arguments:
-            section: (int) the column of the header
+            section: (int) The column of the header
 
-            orientation: (Qt.Orientation) the column or row head 
+            orientation: (Qt.Orientation) The column or row head 
 
             role: (int) 
 
@@ -1513,6 +1220,21 @@ class MetaTreeModel(QAbstractItemModel):
                 return 'KEY'
             elif section == 1:
                 return 'VALUE'
+            
+    def matchIndexGenerator(self, kw: str):
+        """
+        A generator that yields the indexes matching the keywords.
+
+        arguments:
+            kw: (str) The key words for matching
+
+        returns:
+            (generator) A generator that generates QModelIndex that has the 
+                same substring in its name as the kw. 
+        """
+        for node in self.meta_manager.matchNodeGenerator(kw):
+            node: MetaTreeNode
+            yield self.indexFromKey(node.path)
             
 
 

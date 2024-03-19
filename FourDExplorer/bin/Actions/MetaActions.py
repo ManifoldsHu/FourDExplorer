@@ -173,11 +173,7 @@ class ActionEditMeta(ActionMetaBase):
         if self._table_view is not None:
             self.setKeyFromIndex(self._table_view.currentIndex())
 
-        # dialog_edit = DialogEditMeta()
-        # TODO 
-            
-
-# class ActionEditMetaString(ActionMetaBase)
+        # dialog_edit = DialogEditMeta()# TODO
            
 
 
