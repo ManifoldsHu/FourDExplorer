@@ -29,6 +29,7 @@ from Constants import MetaDataRoles
 
 from bin.HDFManager import HDFHandler 
 from bin.MetaManager import MetaManager 
+from bin.MetaManager import MetaTreeModel
 from bin.UIManager import ThemeHandler
 from bin.Widgets.DialogEditMeta import DialogEditMeta 
 
@@ -154,7 +155,7 @@ class ActionEditMeta(ActionMetaBase):
         self.setText('Edit')
         # self._table_view = None 
         self._treeview = None 
-        self.triggered.connect(lambda: self.editMeta)
+        self.triggered.connect(lambda: self.editMeta())
 
     # def setLinkedMetaTableView(self, table_view: QTableView):
     #     """
@@ -167,6 +168,11 @@ class ActionEditMeta(ActionMetaBase):
     #         raise TypeError(f"table_view must be a QTableView, not 
     #                         {type(table_view).__name__}")
     #     self._table_view = table_view   
+        
+    @property
+    def meta_manager(self) -> MetaManager:
+        model: MetaTreeModel = self._treeview.model()
+        return model.meta_manager
 
     def setLinkedTreeView(self, treeview: QTreeView):
         """
@@ -186,13 +192,21 @@ class ActionEditMeta(ActionMetaBase):
         #     self.setKeyFromIndex(self._table_view.currentIndex())
 
         # dialog_edit = DialogEditMeta()# TODO
-
         if self._treeview is not None:
             self.setKeyFromIndex(self._treeview.currentIndex())
-            dialog_edit = DialogEditMeta()
+            global qApp
+            dialog_edit = DialogEditMeta(qApp.main_window)
             dialog_edit.setItemPath(self.item_path)
             dialog_edit.setMetaKey(self.key)
+            dialog_edit.setMetaManager(self.meta_manager)
             dialog_edit.readMetaFromFile()
             dialog_edit.show()
 
+    # def setMetaManager(self, meta_manager: MetaManager):
+    #     """
+    #     Set the meta manager that manages this item.
 
+    #     arguments:
+    #         meta_manager: (MetaManager)
+    #     """
+    #     self._meta_manager = meta_manager

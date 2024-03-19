@@ -336,7 +336,7 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
             if chosen_type in _type_to_menu:
                 menu = _type_to_menu[chosen_type](self)
             else:
-                menu = HDFItemMenu(self, index)
+                menu = HDFItemMenu(self)
         else:
             menu = HDFViewerFileMenu(self)
         menu.exec(self.ui.treeView_HDF.mapToGlobal(pos))

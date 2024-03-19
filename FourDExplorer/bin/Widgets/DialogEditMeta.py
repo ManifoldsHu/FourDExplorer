@@ -27,10 +27,12 @@ date:          Mar 5, 2024
 from logging import Logger 
 
 from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QDialog
 from PySide6.QtWidgets import QMessageBox  
 from PySide6.QtWidgets import QPlainTextEdit
 from PySide6.QtWidgets import QComboBox
 from PySide6.QtCore import QObject 
+import numpy as np
 
 from bin.MetaManager import MetaManager 
 from bin.MetaManager import MetaTree 
@@ -40,7 +42,7 @@ from bin.UIManager import ThemeHandler
 
 from ui import uiDialogEditMeta
 
-class DialogEditMeta(QWidget):
+class DialogEditMeta(QDialog):
     """
     Dialog to edit attrs of items in the HDF5 file.
     """
@@ -51,7 +53,7 @@ class DialogEditMeta(QWidget):
 
         self._meta_manager = None 
         self._initEditDialog()
-    
+
     @property 
     def meta_manager(self) -> MetaManager:
         return self._meta_manager 
@@ -77,13 +79,27 @@ class DialogEditMeta(QWidget):
     def meta_key(self) -> str:
         return self.ui.lineEdit_meta_key.text()
     
+    @property
+    def logger(self) -> Logger:
+        global qApp 
+        return qApp.logger
+    
+    def setMetaManager(self, meta_manager: MetaManager):
+        """
+        Set the meta manager that manages this item.
+
+        arguments:
+            meta_manager: (MetaManager)
+        """
+        self._meta_manager = meta_manager
+    
     def _initEditDialog(self):
         """
         Initialize the edit metadata dialog.
         """
-        self.ui.pushButton_ok.clicked.connect(self._slot_ok_clicked)
-        self.ui.pushButton_cancel.clicked.connect(self._slot_cancel_clicked)
-        self.ui.pushButton_change_dtype.clicked.connect(self._slot_change_dtype_clicked)
+        self.ui.pushButton_ok.clicked.connect(self._slotOkClicked)
+        self.ui.pushButton_cancel.clicked.connect(self._slotCancelClicked)
+        self.ui.pushButton_change_dtype.clicked.connect(self._slotChangeDtypeClicked)
 
     def _slotOkClicked(self):
         """
@@ -91,6 +107,20 @@ class DialogEditMeta(QWidget):
         """
         item_path = self.item_path 
         meta_key = self.meta_key
+        if self.meta_manager is not None:
+            if meta_key in self.meta_manager.listSchemaKeys():
+                msg_box_ask = QMessageBox(self)
+                msg_box_ask.setWindowTitle("Metadata Modification Warning")
+                msg_box_ask.setIcon(QMessageBox.Warning)
+                msg_box_ask.setText(f"Modifying this metadata may affect how the software works.")
+                msg_box_ask.setInformativeText(
+                    f"<code>{meta_key}</code> is a predefined metadata item that may have actual physical meaning or be involved in the computation. Please double check before making any changes."
+                )
+                msg_box_ask.setStandardButtons(QMessageBox.Ok|QMessageBox.Cancel)
+                msg_box_ask.setDefaultButton(QMessageBox.Cancel)
+                ret = msg_box_ask.exec()
+                if ret == QMessageBox.Cancel:
+                    return 
 
         current_page_index = self.ui.stackedWidget_set_value.currentIndex()
         if current_page_index == 0:     # Integer
@@ -152,14 +182,21 @@ class DialogEditMeta(QWidget):
         try:
             meta_value = self.hdf_handler.file[item_path].attrs[meta_key]
         except KeyError:
-            QMessageBox.warning(self, 'Warning', f'Metadata key "meta_key" not found.' )
+            self.logger.warning(
+                f'Metadata key {meta_key} not found in attrs of  {item_path}'
+            )
+            QMessageBox.warning(
+                self, 
+                'Warning', 
+                f'Metadata key <code>{meta_key}</code> not found.', 
+            )
             return 
         
-        if isinstance(meta_value, int):
+        if isinstance(meta_value, (int, np.integer)):
             self.ui.stackedWidget_set_value.setCurrentIndex(0)
             self.ui.spinBox_edit_integer.setValue(meta_value)
             self.ui.label_current_dtype.setText('Integer')
-        elif isinstance(meta_value, float):
+        elif isinstance(meta_value, (float, np.floating)):
             self.ui.stackedWidget_set_value.setCurrentIndex(1)
             decimal_part, exp_part = f'{meta_value:e}'.split('e')
             self.ui.doubleSpinBox_float_decimal.setValue(float(decimal_part))

@@ -58,7 +58,7 @@ class WidgetMetaViewer(WidgetMetaViewerBase):
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-
+        # self.ui.treeView_meta.setModel()
         self.ui.treeView_meta.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.treeView_meta.customContextMenuRequested.connect(self.showContextMenu)
         self._action_edit = None 
@@ -82,11 +82,18 @@ class WidgetMetaViewer(WidgetMetaViewerBase):
         """
         Show context menu in the treeview of metadata.
 
+        In this slot, actions will set their belonging item path and key.
+
         attributes:
             pos: (QPoint) The position where context menu should be created.
         """
+        self._action_edit.setItemPath(self.meta_manager.item_path)
         index = self.ui.treeView_meta.currentIndex()
-        menu = MetaViewerMenu(self, index)
+        self._action_edit.setKeyFromIndex(index)
+        # menu = MetaViewerMenu(self)
+        menu = QMenu(self)
+        # menu.setLinkedMetaViewer(self)
+        menu.addAction(self._action_edit)
         menu.exec(self.ui.treeView_meta.mapToGlobal(pos))
 
     def _initMetaActions(self):
@@ -98,29 +105,35 @@ class WidgetMetaViewer(WidgetMetaViewerBase):
         
 
 
-class MetaViewerMenu(QMenu):
-    """
-    当点到 MetaViewer 时的鼠标右键菜单。
+# class MetaViewerMenu(QMenu):
+#     """
+#     当点到 MetaViewer 时的鼠标右键菜单。
 
-    The context menu of meta tree view.
-    """
-    def __init__(self, parent: QWidget = None):
-        super().__init__(parent)
-        self._meta_viewer = None 
+#     The context menu of meta tree view.
+#     """
+#     def __init__(self, parent: QWidget = None):
+#         super().__init__(parent)
+#         self._meta_viewer = None 
         
 
-    @property
-    def meta_viewer(self) -> WidgetMetaViewer:
-        return self._meta_viewer 
+#     @property
+#     def meta_viewer(self) -> WidgetMetaViewer:
+#         return self._meta_viewer 
     
-    def setLinkedMetaViewer(self, meta_viewer: WidgetMetaViewer):
-        """
-        Set the meta viewer of the menu.
+#     def setLinkedMetaViewer(self, meta_viewer: WidgetMetaViewer):
+#         """
+#         Set the meta viewer of the menu.
 
-        arguments:
-            meta_viewer: (WidgetMetaViewer)
-        """
-        self._meta_viewer = meta_viewer 
-        self.addActions(self._meta_viewer.action_edit)
+#         arguments:
+#             meta_viewer: (WidgetMetaViewer)
+#         """
+#         self._meta_viewer = meta_viewer 
+#         # action_edit = self._meta_viewer.action_edit
+#         # action_edit.setItemPath(self.meta_viewer.meta_manager.item_path)
+#         # action_edit.setKeyFromIndex(
+#         #     self._meta_viewer.ui.treeView_meta.currentIndex()
+#         # )
+#         self.addAction(self._meta_viewer.action_edit)
+        
 
-    # def addActionGroup(self, group: QActionGroup, separator: bool = )
+#     # def addActionGroup(self, group: QActionGroup, separator: bool = )

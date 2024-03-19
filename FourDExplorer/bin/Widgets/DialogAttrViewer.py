@@ -47,7 +47,6 @@ class DialogAttrViewer(QDialog):
         
         
         
-    
     @property
     def item_path(self) -> str:
         return self._item_path
@@ -80,6 +79,7 @@ class DialogAttrViewer(QDialog):
         horizontal_header.setAlternatingRowColors(True)
 
         self.setMetaTree()
+        self.setupWidgetMetaViewer()
 
 
     def setMetaTree(self):
@@ -89,3 +89,11 @@ class DialogAttrViewer(QDialog):
         hdf_type = self._meta_manager.hdf_type 
         self._meta_manager.initializeSchema(hdf_type)
         self.ui.treeView.setModel(self._meta_manager.meta_tree_model)
+
+    def setupWidgetMetaViewer(self):
+        # Experimental 
+        self._meta_manager_2 = MetaManager(self)
+        self.widget_meta_viewer = self.ui.widget 
+        self.widget_meta_viewer.initMetaViewer(self.item_path)
+        
+        

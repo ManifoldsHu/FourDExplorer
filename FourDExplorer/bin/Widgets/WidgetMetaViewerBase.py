@@ -121,6 +121,7 @@ from PySide6.QtWidgets import QToolBar
 from PySide6.QtWidgets import QTreeView 
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtWidgets import QLineEdit
+from PySide6.QtWidgets import QHeaderView
 from PySide6.QtGui import QAction 
 from PySide6.QtCore import Qt
 from PySide6.QtCore import QObject
@@ -176,6 +177,8 @@ class WidgetMetaViewerBase(QWidget):
         Initialize meta tree model.
         """
         self.ui.treeView_meta.setModel(self.meta_tree_model)
+        header = self.ui.treeView_meta.header()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
 
     def _initMetaManager(self, item_path: str):
         """
@@ -217,7 +220,7 @@ class WidgetMetaViewerBase(QWidget):
         self._action_search.setLinkedTreeView(self.ui.treeView_meta)
         self._lineEdit_search.addAction(
             self._action_search, 
-            QLineEdit.LeadingPosition
+            QLineEdit.LeadingPosition,
         )
         self.search_toolbar.addWidget(self._lineEdit_search)
  
@@ -377,9 +380,6 @@ class ActionViewMetaBase(QAction):
         if not isinstance(treeview, QTreeView):
             raise TypeError('treeview must be a QTreeView, not '
                 '{0}'.format(type(treeview).__name__))
-        elif not isinstance(treeview.model(), MetaTreeModel):
-            raise TypeError(
-                f'treeview must be a MetaTreeModel, not {type(treeview).__name__}')
         self._treeview = treeview 
         model: MetaTreeModel = treeview.model()
         if 'meta_manager' in model.__dir__():

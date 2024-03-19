@@ -60,7 +60,7 @@ from collections.abc import Set
 from collections.abc import Collection
 import re 
 
-from PySide6.QtCore import QObject
+from PySide6.QtCore import QObject, QPersistentModelIndex
 from PySide6.QtCore import QAbstractItemModel
 from PySide6.QtCore import QAbstractTableModel
 from PySide6.QtCore import QModelIndex
@@ -104,6 +104,8 @@ class MetaManager(QObject):
         self._item_path = None 
         self._schema_tree = None 
         self._meta_tree = None 
+        self._meta_tree_model = None 
+        self._meta_not_pathlike_table_model = None 
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -135,6 +137,10 @@ class MetaManager(QObject):
     @property
     def meta_tree_model(self) -> "MetaTreeModel":
         return self._meta_tree_model
+    
+    @property
+    def meta_not_pathlike_table_model(self) -> "MetaNotPathLikeTableModel":
+        return self._meta_not_pathlike_table_model 
     
     def setItemPath(self, item_path: str):
         """
@@ -800,14 +806,19 @@ class MetaTree(QObject):
     """
     将具有类似于路径名称的元数据键，按照树的形式组织起来。
 
+    注意，对于那些不为合法的路径的元数据 key，例如不以 / 开头的，我们将其放进 not_path_like_attrs 这个 dict 里。
+
     Let metadata, whose keys are similar to path names, organize in the form of 
     trees.
+
+    Note that for those keys which are not valid paths, such as strings not 
+    beginning with /, we put them into the not_path_like_attrs dict.
     """
     def __init__(self, item_path: str, parent: QObject = None):
         super().__init__(parent)
         self._item_path = item_path 
         self._root = MetaRootNode()
-        self._undefined_attributes = {}
+        self._not_path_like_attrs = {}
         self._buildTree() 
 
     @property
@@ -820,8 +831,8 @@ class MetaTree(QObject):
         return self.hdf_handler.file[self._item_path].attrs
 
     @property
-    def undefined_attributes(self) -> Mapping:
-        return self._undefined_attributes
+    def not_path_like_attrs(self) -> Mapping:
+        return self._not_path_like_attrs
     
     @property
     def root(self) -> MetaRootNode:
@@ -836,11 +847,11 @@ class MetaTree(QObject):
                 path_parts = key.lstrip('/').split('/')
                 self._addAttributeToTree(self._root, path_parts)
             else:
-                if key not in self.root:    
-                    # Add those items that is not path like to the root.
-                    new_node = MetaTreeNode(key, self.root)
-                    self.root.addChild(new_node)
-                self._undefined_attributes[key] = value
+                # if key not in self.root:    
+                #     # Add those items that is not path like to the root.
+                #     new_node = MetaTreeNode(key, self.root)
+                #     self.root.addChild(new_node)
+                self._not_path_like_attrs[key] = value
 
     def isValidPath(self, path: str) -> bool:
         """
@@ -964,10 +975,6 @@ class MetaTreeModel(QAbstractItemModel):
     def meta_manager(self, meta_mgr: MetaManager):
         self._meta_manager = meta_mgr 
 
-    # @property
-    # def value_tree(self) -> ValueTree: 
-    #     return self._meta_manager.value_tree
-        
     @property
     def meta_tree(self) -> MetaTree:
         return self._meta_manager.meta_tree 
@@ -1515,3 +1522,192 @@ class MetaTableModel(QAbstractTableModel):
         self.logger.debug('Change the value of attribute {0} in {1}'.format(
             key, self.item_path
         ))
+
+
+class MetaNotPathLikeTableModel(QAbstractTableModel):
+    """
+    用于在表格中展示非合法路径的 Metadata 所需的 Model。
+
+    HDF5 的数据集与 Group 具有 attrs 属性，这是一个类似于 Mapping 的数据结构。在该表格中，
+    有两列，左列是 key，右列是 value。
+
+    为了实现只读的、显示与数据分离的架构，这个 Model 类必须实现如下方法：
+        - rowCount(self, parent: QModelIndex) -> int
+            返回相应的 parent 之下有多少行
+
+        - data(self, index: QModelIndex, role: int)
+            根据 role 的不同，返回数据结构中内部存储的数据
+
+    注意，实践证明，不能使用 HDF5 本身的对象作为 ptr，原因不明，可能与 HDF5 采用的锁
+    机制有关；所以，唯一方案便是自己创建一个 meta 副本，而只在修改时访问 HDF5 文件。
+
+    This is a model for viewing attributions of HDF5 objects whose keys are not 
+    path like.
+
+    Attributions of HDF5 objects are like Mapping (dict in python), So we use
+    a table to show them. There are 2 columns in the table, the left contains
+    keys, while the right contains values.
+
+    This is a part of Model/View architecture of Qt. If we want to display the
+    path tree, we can instantiate QTreeView, and call its setModel() method.
+
+    In order to realize a read-only and data-display decoupled architecture, we
+    need to reimplement the following methods:
+        - rowCount(self, parent: QModelIndex) -> int
+            Get number of rows under the parent
+
+        - data(self, index: QModelIndex, role: int)
+            Return the internal data according to the role
+
+    NOTE: Practice shows that it seems we cannot use h5py.AttributeManager 
+    itself as the ptr, and I don't know why. So here we create a replica: meta
+    as a dict, which will always conserves the same as the attrs. Only when we
+    need to modify the attribution, we use attrs.
+
+    attributes:
+        hdf_handler: (HDFHandler)
+
+        item_path: (str) the corresponding h5py object's path
+
+        attrs: (h5py.AttributeManager) the AttributeManager of the h5py object
+
+        meta: (dict) replica. always conserves the same as self.attrs
+    """
+    def __init__(self, meta_manager: MetaManager, parent: QObject = None):
+        super(MetaNotPathLikeTableModel, self).__init__(parent)
+        self._meta_manager = meta_manager
+
+    @property
+    def meta_manager(self) -> MetaManager:
+        return self._meta_manager
+    
+    @meta_manager.setter 
+    def meta_manager(self, meta_mgr: MetaManager):
+        self._meta_manager = meta_mgr 
+
+    @property
+    def meta_tree(self) -> MetaTree:
+        return self._meta_manager.meta_tree 
+
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler
+
+    @property
+    def theme_handler(self) -> ThemeHandler:
+        global qApp 
+        return qApp.theme_handler
+    
+    @property
+    def meta_not_pathlike(self) -> Mapping:
+        return self.meta_tree.not_path_like_attrs
+
+    # @property
+    # def item_path(self) -> str:
+    #     return self._item_path
+    
+    # @item_path.setter
+    # def item_path(self, path: str):
+    #     self.hdf_handler.getNode(path)
+    #     self._item_path = path 
+
+    # @property
+    # def meta(self) -> Mapping:
+    #     return self._meta
+    
+    # @property
+    # def attrs(self) -> h5py.AttributeManager:
+    #     return self.hdf_handler.file[self.item_path].attrs
+
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        return len(self.meta_not_pathlike)
+    
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        return 2
+    
+    def data(self, index: QModelIndex, role: int = MetaDataRoles.DisplayRole):
+        if not index.isValid():
+            return None 
+        row = index.row()
+        column = index.column()
+        key = list(self.meta_not_pathlike.keys())[row]
+        value = self.meta_not_pathlike[key]
+        if role == Qt.DisplayRole:
+            if column == 0:
+                return f'{key}'
+            elif column == 1:
+                if isinstance(value, np.ndarray):
+                    if len(value) > 5:
+                        return f'<numpy.ndarray> shape: {value.shape}'
+                return f'{value}'
+            else:
+                return None
+        elif role == Qt.ToolTipRole:
+            if isinstance(value, np.ndarray):
+                return f'<numpy.ndarray shape: {value.shape}>'
+            else:
+                return f'<{type(value).__name__}: {self.data(index, Qt.DisplayRole)}>'
+        else:
+            return None
+        
+    def headerData(
+        self, section: int, 
+        orientation: Qt.Orientation = Qt.Horizontal, 
+        role: int = Qt.DisplayRole
+    ) -> str:
+        """
+        Write the header data of the metadata tree.
+
+        arguments:
+            section: (int) The column of the header
+
+            orientation: (Qt.Orientation) The column or row head 
+
+            role: (int) 
+
+        returns:
+            (str) The head string of the metadata tree.
+        """
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            if section == 0:
+                return 'KEY'
+            elif section == 1:
+                return 'VALUE'
+            
+    def indexFromKey(self, key: str) -> QModelIndex:
+        """
+        Get the index from a key.
+
+        arguments:
+            key: (str)
+
+        returns:
+            (QModelIndex) must be the index of column 0.
+        """
+        if not isinstance(key, str):
+            raise TypeError('key must be a str, not '
+                '{0}'.format(type(key).__name__))
+        if not key in self.meta_not_pathlike:
+            raise KeyError('Key not founded.')
+        row = list(self.meta_not_pathlike.keys()).index(key)
+        column = 0
+        return self.createIndex(row, column)
+    
+    def keyFromIndex(self, index: QModelIndex) -> QModelIndex:
+        """
+        Get the key from the index.
+
+        arguments:
+            index: (QModelIndex)
+
+        returns:
+            (str) the key of the corresponding index, regardless the column.
+        """
+        row = index.row()
+        return list(self.meta.keys())[row]
+    
+
+        
+
+    

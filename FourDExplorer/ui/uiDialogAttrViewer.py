@@ -20,6 +20,8 @@ from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QHeaderView,
     QTabWidget, QTableView, QTreeView, QVBoxLayout,
     QWidget)
 
+from bin.Widgets.WidgetMetaViewer import WidgetMetaViewer
+
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
@@ -69,6 +71,16 @@ class Ui_Dialog(object):
         self.verticalLayout_2.addWidget(self.treeView)
 
         self.tabWidget.addTab(self.Current, "")
+        self.New = QWidget()
+        self.New.setObjectName(u"New")
+        self.verticalLayout_4 = QVBoxLayout(self.New)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.widget = WidgetMetaViewer(self.New)
+        self.widget.setObjectName(u"widget")
+
+        self.verticalLayout_4.addWidget(self.widget)
+
+        self.tabWidget.addTab(self.New, "")
 
         self.verticalLayout_3.addWidget(self.tabWidget)
 
@@ -95,7 +107,7 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(Dialog)
@@ -107,6 +119,7 @@ class Ui_Dialog(object):
         self.pushButton_browse.setText(QCoreApplication.translate("Dialog", u"Browse...", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Legacy), QCoreApplication.translate("Dialog", u"Legacy", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Current), QCoreApplication.translate("Dialog", u"Current", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.New), QCoreApplication.translate("Dialog", u"New", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Search Attribution", None))
         self.pushButton_search_next.setText(QCoreApplication.translate("Dialog", u"Search Next", None))
     # retranslateUi
