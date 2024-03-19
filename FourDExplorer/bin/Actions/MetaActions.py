@@ -30,6 +30,7 @@ from Constants import MetaDataRoles
 from bin.HDFManager import HDFHandler 
 from bin.MetaManager import MetaManager 
 from bin.UIManager import ThemeHandler
+from bin.Widgets.DialogEditMeta import DialogEditMeta 
 
 
 
@@ -151,29 +152,47 @@ class ActionEditMeta(ActionMetaBase):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.setText('Edit')
-        self._table_view = None 
+        # self._table_view = None 
+        self._treeview = None 
         self.triggered.connect(lambda: self.editMeta)
 
-    def setLinkedMetaTableView(self, table_view: QTableView):
+    # def setLinkedMetaTableView(self, table_view: QTableView):
+    #     """
+    #     Set the linked table view for metadata, such that it can show the result.
+
+    #     arguments:
+    #         table_view: (QTableView) The table view where this action works.
+    #     """
+    #     if not isinstance(table_view, QTableView):
+    #         raise TypeError(f"table_view must be a QTableView, not 
+    #                         {type(table_view).__name__}")
+    #     self._table_view = table_view   
+
+    def setLinkedTreeView(self, treeview: QTreeView):
         """
-        Set the linked table view for metadata, such that it can show the result.
+        Set the linked tree view for metadata, such that it can initialize itself.
 
         arguments:
-            table_view: (QTableView) The table view where this action works.
+            treeview: (QTreeView) The tree view where this action works.
         """
-        if not isinstance(table_view, QTableView):
-            raise TypeError(f"table_view must be a QTableView, not 
-                            {type(table_view).__name__}")
-        self._table_view = table_view   
-   
+        self._treeview = treeview 
+
+
     def editMeta(self):
         """
         Open a dialog to edit metadata.
         """
-        if self._table_view is not None:
-            self.setKeyFromIndex(self._table_view.currentIndex())
+        # if self._table_view is not None:
+        #     self.setKeyFromIndex(self._table_view.currentIndex())
 
         # dialog_edit = DialogEditMeta()# TODO
-           
+
+        if self._treeview is not None:
+            self.setKeyFromIndex(self._treeview.currentIndex())
+            dialog_edit = DialogEditMeta()
+            dialog_edit.setItemPath(self.item_path)
+            dialog_edit.setMetaKey(self.key)
+            dialog_edit.readMetaFromFile()
+            dialog_edit.show()
 
 

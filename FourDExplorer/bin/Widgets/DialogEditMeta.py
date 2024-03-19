@@ -99,7 +99,7 @@ class DialogEditMeta(QWidget):
             decimal_part = self.ui.doubleSpinBox_float_decimal.value()
             exp_part = self.ui.spinBox_float_exp.value()
             meta_value = decimal_part * (10 ** exp_part)
-        else:
+        else:                           # String
             meta_value = self.ui.plainTextEdit_edit_string.toPlainText()
 
         try:

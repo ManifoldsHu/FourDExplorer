@@ -74,6 +74,10 @@ class WidgetMetaViewer(WidgetMetaViewerBase):
         global qApp 
         return qApp.theme_handler 
     
+    @property
+    def action_edit(self) -> ActionEditMeta:
+        return self._action_edit 
+    
     def showContextMenu(self, pos: QPoint):
         """
         Show context menu in the treeview of metadata.
@@ -90,7 +94,8 @@ class WidgetMetaViewer(WidgetMetaViewerBase):
         Initialize the actions to edit meta.
         """
         self._action_edit = ActionEditMeta(self)
-        # self._action_edit. # TODO
+        self._action_edit.setLinkedTreeView(self.ui.treeView_meta)
+        
 
 
 class MetaViewerMenu(QMenu):
