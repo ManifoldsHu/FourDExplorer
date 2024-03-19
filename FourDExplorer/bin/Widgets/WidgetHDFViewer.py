@@ -26,8 +26,10 @@ date:           Feb 18, 2022
 
 from logging import Logger
 
-from PySide6.QtCore import QModelIndex, Qt, QPoint
-from PySide6.QtWidgets import QMessageBox, QMenu, QWidget, QInputDialog, QWidgetAction
+from PySide6.QtCore import Qt
+from PySide6.QtCore import QPoint
+from PySide6.QtWidgets import QMenu
+from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QActionGroup
 
 from bin.Actions.DataActions import ActionOpenData
@@ -42,7 +44,8 @@ from bin.Actions.EditActions import ActionMove
 from bin.Actions.EditActions import ActionNew
 from bin.Actions.EditActions import ActionRename
 
-from bin.Actions.FileActions import ActionCloseFile, ActionNewFile
+from bin.Actions.FileActions import ActionCloseFile
+from bin.Actions.FileActions import ActionNewFile
 from bin.Actions.FileActions import ActionOpenFile
 
 from bin.Actions.FourDSTEMActions import ActionAlign
@@ -65,7 +68,8 @@ from bin.UIManager import ThemeHandler
 from bin.Widgets.WidgetBaseHDFViewer import HDFToolBar
 from bin.TabViewManager import TabViewManager
 from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
-from Constants import HDFType, ItemDataRoles
+from Constants import HDFType
+from Constants import ItemDataRoles
 
 class WidgetHDFViewer(WidgetBaseHDFViewer):
     """
