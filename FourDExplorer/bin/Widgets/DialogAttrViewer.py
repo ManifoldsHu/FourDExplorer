@@ -46,7 +46,6 @@ class DialogAttrViewer(QDialog):
         # horizontal_header.setHidden(False)
         
         
-        
     @property
     def item_path(self) -> str:
         return self._item_path
@@ -55,19 +54,26 @@ class DialogAttrViewer(QDialog):
     def model(self) -> HDFAttrModel:
         return self.ui.tableView_attr.model()
 
-    @item_path.setter
-    def item_path(self, path):
-        if not isinstance(path, str):
-            raise TypeError('path must be a str, not'
-                '{0}'.format(type(path)))
-        self._item_path = path
+    # @item_path.setter
+    # def item_path(self, path):
+    #     if not isinstance(path, str):
+    #         raise TypeError('path must be a str, not'
+    #             '{0}'.format(type(path)))
+    #     self._item_path = path
         
+    @property
+    def meta_manager(self) -> MetaManager:
+        global qApp 
+        return qApp.requireMetaManager(self.item_path)
 
     def setItemPath(self, path: str):
         """
         Set the item path (of the attributions).
         """
-        self.item_path = path
+        if not isinstance(path, str):
+            raise TypeError('path must be a str, not'
+                '{0}'.format(type(path)))
+        self._item_path = path
         self.ui.lineEdit_item_path.setText(path)
         model = HDFAttrModel(self)
         model.initialize(path)
@@ -84,15 +90,15 @@ class DialogAttrViewer(QDialog):
 
     def setMetaTree(self):
         # Experimental
-        self._meta_manager = MetaManager(self)
-        self._meta_manager.setItemPath(self.item_path)
-        hdf_type = self._meta_manager.hdf_type 
-        self._meta_manager.initializeSchema(hdf_type)
-        self.ui.treeView.setModel(self._meta_manager.meta_tree_model)
+        # self._meta_manager = MetaManager(self)
+        # self._meta_manager.setItemPath(self.item_path)
+        hdf_type = self.meta_manager.hdf_type 
+        self.meta_manager.initializeSchema(hdf_type)
+        self.ui.treeView.setModel(self.meta_manager.meta_tree_model)
 
     def setupWidgetMetaViewer(self):
         # Experimental 
-        self._meta_manager_2 = MetaManager(self)
+        # self._meta_manager_2 = MetaManager(self)
         self.widget_meta_viewer = self.ui.widget 
         self.widget_meta_viewer.initMetaViewer(self.item_path)
         

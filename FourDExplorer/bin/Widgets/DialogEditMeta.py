@@ -51,20 +51,22 @@ class DialogEditMeta(QDialog):
         self.ui = uiDialogEditMeta.Ui_Dialog()
         self.ui.setupUi(self)
 
-        self._meta_manager = None 
+        # self._meta_manager = None 
         self._initEditDialog()
 
     @property 
     def meta_manager(self) -> MetaManager:
-        return self._meta_manager 
+        # return self._meta_manager 
+        global qApp 
+        return qApp.requireMetaManager(self.item_path)
     
     @property
     def meta_tree(self) -> MetaTree:
-        return self._meta_manager.meta_tree
+        return self.meta_manager.meta_tree
     
     @property
     def meta_tree_model(self) -> MetaTreeModel:
-        return self._meta_manager.meta_tree_model
+        return self.meta_manager.meta_tree_model
     
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -84,14 +86,14 @@ class DialogEditMeta(QDialog):
         global qApp 
         return qApp.logger
     
-    def setMetaManager(self, meta_manager: MetaManager):
-        """
-        Set the meta manager that manages this item.
+    # def setMetaManager(self, meta_manager: MetaManager):
+    #     """
+    #     Set the meta manager that manages this item.
 
-        arguments:
-            meta_manager: (MetaManager)
-        """
-        self._meta_manager = meta_manager
+    #     arguments:
+    #         meta_manager: (MetaManager)
+    #     """
+    #     self._meta_manager = meta_manager
     
     def _initEditDialog(self):
         """
@@ -107,20 +109,20 @@ class DialogEditMeta(QDialog):
         """
         item_path = self.item_path 
         meta_key = self.meta_key
-        if self.meta_manager is not None:
-            if meta_key in self.meta_manager.listSchemaKeys():
-                msg_box_ask = QMessageBox(self)
-                msg_box_ask.setWindowTitle("Metadata Modification Warning")
-                msg_box_ask.setIcon(QMessageBox.Warning)
-                msg_box_ask.setText(f"Modifying this metadata may affect how the software works.")
-                msg_box_ask.setInformativeText(
-                    f"<code>{meta_key}</code> is a predefined metadata item that may have actual physical meaning or be involved in the computation. Please double check before making any changes."
-                )
-                msg_box_ask.setStandardButtons(QMessageBox.Ok|QMessageBox.Cancel)
-                msg_box_ask.setDefaultButton(QMessageBox.Cancel)
-                ret = msg_box_ask.exec()
-                if ret == QMessageBox.Cancel:
-                    return 
+        # if self.meta_manager is not None:
+        if meta_key in self.meta_manager.listSchemaKeys():
+            msg_box_ask = QMessageBox(self)
+            msg_box_ask.setWindowTitle("Metadata Modification Warning")
+            msg_box_ask.setIcon(QMessageBox.Warning)
+            msg_box_ask.setText(f"Modifying this metadata may affect how the software works.")
+            msg_box_ask.setInformativeText(
+                f"<code>{meta_key}</code> is a predefined metadata item that may have actual physical meaning or be involved in the computation. Please double check before making any changes."
+            )
+            msg_box_ask.setStandardButtons(QMessageBox.Ok|QMessageBox.Cancel)
+            msg_box_ask.setDefaultButton(QMessageBox.Cancel)
+            ret = msg_box_ask.exec()
+            if ret == QMessageBox.Cancel:
+                return 
 
         current_page_index = self.ui.stackedWidget_set_value.currentIndex()
         if current_page_index == 0:     # Integer

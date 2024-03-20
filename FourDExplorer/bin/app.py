@@ -80,6 +80,7 @@ class App(QApplication):
         """
         super().__init__(argv)
         self._main_window = None
+        
 
     def startBackEnds(self):
         """
@@ -91,6 +92,7 @@ class App(QApplication):
         from bin.Log import LogUtil
         from bin.UnitManager import UnitManager
         from bin.DateTimeManager import DateTimeManager
+        # from bin.MetaManager import MetaManager
 
         self._hdf_handler = HDFHandler(self)
         self._theme_handler = ThemeHandler(self)
@@ -98,6 +100,8 @@ class App(QApplication):
         self._log_util = LogUtil(self)
         self._unit_manager = UnitManager(self)
         self._datetime_manager = DateTimeManager(self)
+        self._meta_managers = {}
+
  
     @property
     def hdf_handler(self):
@@ -153,3 +157,51 @@ class App(QApplication):
         self.hdf_handler.closeFile()
         self.task_manager.shutDown()
 
+    def requireMetaManager(self, item_path: str):
+        """
+        Require meta manager according to the item path in HDF5 file.
+
+        If there is no HDF5 file opened, it will raise RuntimeError. And if 
+        there is no item in the HDF5 file found, it will raise KeyError.
+
+        The App instance keeps a dict that stores meta managers that has been
+        opened. Use this method to get the meta manager corresponding to the 
+        item, like this:
+            global qApp 
+            meta_manager = qApp.requireMetaManager(item_path)
+        where item_path is the dataset's path in the HDF5 file.
+
+        arguments:
+            item_path: (str) the path of the dataset or group in the HDF5 file.
+
+        returns:
+            (MetaManager) 
+        """
+        from bin.MetaManager import MetaManager
+        if not self.hdf_handler.isFileOpened():
+            # keep the dict empty if file is not opened.
+            self._meta_managers = {}
+            raise RuntimeError("The HDF5 file is not opened.")
+        elif not isinstance(item_path, str):
+            raise TypeError(
+                f"item_path should be a str, not {type(item_path).__name__}"
+            )
+        elif item_path not in self.hdf_handler.file:
+            if item_path in self._meta_managers:    
+                # keep the dict the same as the file.
+                del self._meta_managers[item_path]
+            raise KeyError(f"{item_path} does not exist in the HDF5 file.")
+        
+        if item_path not in self._meta_managers:
+            self._meta_managers[item_path] = MetaManager(self)
+            meta_manager: MetaManager = self._meta_managers[item_path]
+            meta_manager.setItemPath(item_path)
+        return self._meta_managers[item_path]
+        
+    def clearMetaManagerDict(self):
+        """
+        Clear all of the meta managers stored in the self._meta_managers
+
+        This method should be called whenver the HDF5 file is closed.
+        """
+        self._meta_managers = {}

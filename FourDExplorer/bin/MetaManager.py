@@ -404,6 +404,23 @@ class MetaManager(QObject):
                         yield subsubnode 
         return _matchSubNode(self._schema_tree.root)
                 
+    def matchNumberGeneratorNotPathlike(self, kw: str):
+        """
+        A generator that yields number whose metadata key matches the key word.
+
+        arguments:
+            kw: (str) The key word to be matched.
+
+        returns:
+            (generator) Generating the number
+        """
+        if not isinstance(kw, str):
+            raise TypeError(f'kw must be a str, not {type(kw).__name__}')
+        def _matchNumber():
+            for number, key in enumerate(self.meta_tree.not_path_like_attrs):
+                if kw in key:
+                    yield number 
+        return _matchNumber()
 
 
 class MetadataFieldBase(QObject):
@@ -1245,283 +1262,283 @@ class MetaTreeModel(QAbstractItemModel):
             
 
 
-class MetaTableModel(QAbstractTableModel):
-    """
-    用于在表格中展示 Metadata 所需的 Model。
+# class MetaTableModel(QAbstractTableModel):
+#     """
+#     用于在表格中展示 Metadata 所需的 Model。
 
-    HDF5 的数据集与 Group 具有 attrs 属性，这是一个类似于 Mapping 的数据结构。在该表格中，
-    有两列，左列是 key，右列是 value。
+#     HDF5 的数据集与 Group 具有 attrs 属性，这是一个类似于 Mapping 的数据结构。在该表格中，
+#     有两列，左列是 key，右列是 value。
 
-    为了实现只读的、显示与数据分离的架构，这个 Model 类必须实现如下方法：
-        - rowCount(self, parent: QModelIndex) -> int
-            返回相应的 parent 之下有多少行
+#     为了实现只读的、显示与数据分离的架构，这个 Model 类必须实现如下方法：
+#         - rowCount(self, parent: QModelIndex) -> int
+#             返回相应的 parent 之下有多少行
 
-        - data(self, index: QModelIndex, role: int)
-            根据 role 的不同，返回数据结构中内部存储的数据
+#         - data(self, index: QModelIndex, role: int)
+#             根据 role 的不同，返回数据结构中内部存储的数据
 
-    注意，实践证明，不能使用 HDF5 本身的对象作为 ptr，原因不明，可能与 HDF5 采用的锁
-    机制有关；所以，唯一方案便是自己创建一个 meta 副本，而只在修改时访问 HDF5 文件。
+#     注意，实践证明，不能使用 HDF5 本身的对象作为 ptr，原因不明，可能与 HDF5 采用的锁
+#     机制有关；所以，唯一方案便是自己创建一个 meta 副本，而只在修改时访问 HDF5 文件。
 
-    This is a model for viewing attributions of HDF5 objects.
+#     This is a model for viewing attributions of HDF5 objects.
 
-    Attributions of HDF5 objects are like Mapping (dict in python), So we use
-    a table to show them. There are 2 columns in the table, the left contains
-    keys, while the right contains values.
+#     Attributions of HDF5 objects are like Mapping (dict in python), So we use
+#     a table to show them. There are 2 columns in the table, the left contains
+#     keys, while the right contains values.
 
-    This is a part of Model/View architecture of Qt. If we want to display the
-    path tree, we can instantiate QTreeView, and call its setModel() method.
+#     This is a part of Model/View architecture of Qt. If we want to display the
+#     path tree, we can instantiate QTreeView, and call its setModel() method.
 
-    In order to realize a read-only and data-display decoupled architecture, we
-    need to reimplement the following methods:
-        - rowCount(self, parent: QModelIndex) -> int
-            Get number of rows under the parent
+#     In order to realize a read-only and data-display decoupled architecture, we
+#     need to reimplement the following methods:
+#         - rowCount(self, parent: QModelIndex) -> int
+#             Get number of rows under the parent
 
-        - data(self, index: QModelIndex, role: int)
-            Return the internal data according to the role
+#         - data(self, index: QModelIndex, role: int)
+#             Return the internal data according to the role
 
-    NOTE: Practice shows that it seems we cannot use h5py.AttributeManager 
-    itself as the ptr, and I don't know why. So here we create a replica: meta
-    as a dict, which will always conserves the same as the attrs. Only when we
-    need to modify the attribution, we use attrs.
+#     NOTE: Practice shows that it seems we cannot use h5py.AttributeManager 
+#     itself as the ptr, and I don't know why. So here we create a replica: meta
+#     as a dict, which will always conserves the same as the attrs. Only when we
+#     need to modify the attribution, we use attrs.
 
-    attributes:
-        hdf_handler: (HDFHandler)
+#     attributes:
+#         hdf_handler: (HDFHandler)
 
-        item_path: (str) the corresponding h5py object's path
+#         item_path: (str) the corresponding h5py object's path
 
-        attrs: (h5py.AttributeManager) the AttributeManager of the h5py object
+#         attrs: (h5py.AttributeManager) the AttributeManager of the h5py object
 
-        meta: (dict) replica. always conserves the same as self.attrs
-    """
+#         meta: (dict) replica. always conserves the same as self.attrs
+#     """
 
-    def __init__(self, parent: QObject = None):
-        super().__init__(parent)
-        self._item_path = '/'
-        self._meta = {}
+#     def __init__(self, parent: QObject = None):
+#         super().__init__(parent)
+#         self._item_path = '/'
+#         self._meta = {}
 
-    @property
-    def hdf_handler(self) -> HDFHandler:
-        global qApp 
-        return qApp.hdf_handler
+#     @property
+#     def hdf_handler(self) -> HDFHandler:
+#         global qApp 
+#         return qApp.hdf_handler
 
-    @property
-    def item_path(self) -> str:
-        return self._item_path
+#     @property
+#     def item_path(self) -> str:
+#         return self._item_path
 
-    @item_path.setter
-    def item_path(self, path: str):
-        self.hdf_handler.getNode(path)
-        self._item_path = path 
+#     @item_path.setter
+#     def item_path(self, path: str):
+#         self.hdf_handler.getNode(path)
+#         self._item_path = path 
 
-    @property
-    def meta(self):
-        return self._meta
+#     @property
+#     def meta(self):
+#         return self._meta
 
-    @property
-    def attrs(self) -> h5py.AttributeManager:
-        return self.hdf_handler.file[self.item_path].attrs
+#     @property
+#     def attrs(self) -> h5py.AttributeManager:
+#         return self.hdf_handler.file[self.item_path].attrs
 
-    @property
-    def logger(self) -> Logger:
-        global qApp
-        return qApp.logger
+#     @property
+#     def logger(self) -> Logger:
+#         global qApp
+#         return qApp.logger
     
-    def initialize(self, item_path: str):
-        """
-        Initialize the model, copy items from h5py.AttributeManager to 
-        self._meta dict.
+#     def initialize(self, item_path: str):
+#         """
+#         Initialize the model, copy items from h5py.AttributeManager to 
+#         self._meta dict.
 
-        arguments:
-            item_path: (str) the path of the dataset or group.
-        """
-        self.item_path = item_path
-        self.beginRemoveRows(QModelIndex(), 0, self.rowCount())
-        self._meta = {}
-        self.endRemoveRows()
-        self.beginInsertRows(QModelIndex(), 0, len(self.attrs))
-        for key in self.attrs:
-            self.meta[key] = self.attrs[key]
-        self.endInsertRows()
+#         arguments:
+#             item_path: (str) the path of the dataset or group.
+#         """
+#         self.item_path = item_path
+#         self.beginRemoveRows(QModelIndex(), 0, self.rowCount())
+#         self._meta = {}
+#         self.endRemoveRows()
+#         self.beginInsertRows(QModelIndex(), 0, len(self.attrs))
+#         for key in self.attrs:
+#             self.meta[key] = self.attrs[key]
+#         self.endInsertRows()
 
-    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
-        """
-        The number of columns.
+#     def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
+#         """
+#         The number of columns.
 
-        arguments:
-            parent: (QModelIndex)
+#         arguments:
+#             parent: (QModelIndex)
 
-        returns:
-            (int) 2. left is key, right is value.
-        """
-        return 2
+#         returns:
+#             (int) 2. left is key, right is value.
+#         """
+#         return 2
     
-    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
-        """
-        The number of rows.
-        """
-        return len(self.meta)
+#     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+#         """
+#         The number of rows.
+#         """
+#         return len(self.meta)
     
-    def data(self, index: QModelIndex, role: int):
-        """
-        The data of the attributions.
+#     def data(self, index: QModelIndex, role: int):
+#         """
+#         The data of the attributions.
 
-        arguments:
-            index: (QModelIndex)
+#         arguments:
+#             index: (QModelIndex)
 
-            role: int (ItemDataRoles)
-        """
-        if not index.isValid():
-            return None
-        row = index.row()
-        column = index.column()
-        key = list(self.meta.keys())[row]
-        value = self.meta[key]
-        if role == Qt.DisplayRole:
-            if column == 0:
-                return f'{key}'
-            elif column == 1:
-                if isinstance(value, np.ndarray):
-                    if len(value) > 5:
-                        return f'<numpy.ndarray> shape: {value.shape}'
-                return f'{value}'
-            else:
-                return None
-        elif role == Qt.ToolTipRole:
-            if isinstance(value, np.ndarray):
-                return f'<numpy.ndarray shape: {value.shape}>'
-            else:
-                return f'<{type(value).__name__}: {self.data(index, Qt.DisplayRole)}>'
-        else:
-            return None
+#             role: int (ItemDataRoles)
+#         """
+#         if not index.isValid():
+#             return None
+#         row = index.row()
+#         column = index.column()
+#         key = list(self.meta.keys())[row]
+#         value = self.meta[key]
+#         if role == Qt.DisplayRole:
+#             if column == 0:
+#                 return f'{key}'
+#             elif column == 1:
+#                 if isinstance(value, np.ndarray):
+#                     if len(value) > 5:
+#                         return f'<numpy.ndarray> shape: {value.shape}'
+#                 return f'{value}'
+#             else:
+#                 return None
+#         elif role == Qt.ToolTipRole:
+#             if isinstance(value, np.ndarray):
+#                 return f'<numpy.ndarray shape: {value.shape}>'
+#             else:
+#                 return f'<{type(value).__name__}: {self.data(index, Qt.DisplayRole)}>'
+#         else:
+#             return None
         
-    def headerData(
-        self, 
-        section: int, 
-        orientation: Qt.Orientation = Qt.Horizontal, 
-        role: int = Qt.DisplayRole
-    ):
-        """
-        Write the header data of the table.
+#     def headerData(
+#         self, 
+#         section: int, 
+#         orientation: Qt.Orientation = Qt.Horizontal, 
+#         role: int = Qt.DisplayRole
+#     ):
+#         """
+#         Write the header data of the table.
 
-        arguments:
-            section: (int)
+#         arguments:
+#             section: (int)
 
-            orientation: (Qt.Orientation)
+#             orientation: (Qt.Orientation)
 
-            role: (int)
+#             role: (int)
 
-        returns:
-            (str) 'KEY' or 'VALUE' or ''.
-        """
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            if section == 0:
-                return 'KEY'
-            elif section == 1:
-                return 'VALUE'
-        return None
+#         returns:
+#             (str) 'KEY' or 'VALUE' or ''.
+#         """
+#         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+#             if section == 0:
+#                 return 'KEY'
+#             elif section == 1:
+#                 return 'VALUE'
+#         return None
     
-    def indexFromKey(self, key: str) -> QModelIndex:
-        """
-        Get the index from a key.
+#     def indexFromKey(self, key: str) -> QModelIndex:
+#         """
+#         Get the index from a key.
 
-        arguments:
-            key: (str)
+#         arguments:
+#             key: (str)
 
-        returns:
-            (QModelIndex) must be the index of column 0.
-        """
-        if not isinstance(key, str):
-            raise TypeError('key must be a str, not '
-                '{0}'.format(type(key).__name__))
-        if not key in self.meta:
-            raise KeyError('Key not founded.')
+#         returns:
+#             (QModelIndex) must be the index of column 0.
+#         """
+#         if not isinstance(key, str):
+#             raise TypeError('key must be a str, not '
+#                 '{0}'.format(type(key).__name__))
+#         if not key in self.meta:
+#             raise KeyError('Key not founded.')
         
-        row = list(self.meta.keys()).index(key)
-        column = 0
-        return self.createIndex(row, column)
+#         row = list(self.meta.keys()).index(key)
+#         column = 0
+#         return self.createIndex(row, column)
     
-    def keyFromIndex(self, index: QModelIndex) -> str:
-        """
-        Get the key from the index.
+#     def keyFromIndex(self, index: QModelIndex) -> str:
+#         """
+#         Get the key from the index.
 
-        arguments:
-            index: (QModelIndex)
+#         arguments:
+#             index: (QModelIndex)
 
-        returns:
-            (str) the key of the corresponding index, regardless the column.
-        """
-        row = index.row()
-        return list(self.meta.keys())[row]
+#         returns:
+#             (str) the key of the corresponding index, regardless the column.
+#         """
+#         row = index.row()
+#         return list(self.meta.keys())[row]
     
-    def createItem(self, key: str, value):
-        """
-        Add an item.
+#     def createItem(self, key: str, value):
+#         """
+#         Add an item.
         
-        arguments:
-            key: (str)
+#         arguments:
+#             key: (str)
 
-            value: Any (str, int, float, np.ndarray)
-        """
-        if not isinstance(key, str):
-            raise TypeError('key must be a str, not '
-                '{0}'.format(type(key).__name__))
-        if key in self.meta:
-            raise ValueError('key already exists.')
+#             value: Any (str, int, float, np.ndarray)
+#         """
+#         if not isinstance(key, str):
+#             raise TypeError('key must be a str, not '
+#                 '{0}'.format(type(key).__name__))
+#         if key in self.meta:
+#             raise ValueError('key already exists.')
 
-        self.beginInsertRows(
-            QModelIndex(), 
-            self.rowCount(), 
-            self.rowCount(),
-        )
+#         self.beginInsertRows(
+#             QModelIndex(), 
+#             self.rowCount(), 
+#             self.rowCount(),
+#         )
         
-        self.attrs.create(key, value)
-        self.meta[key] = value
-        self.endInsertRows()
-        self.logger.debug(f'Create Attrbute {key} in {self.item_path}')
+#         self.attrs.create(key, value)
+#         self.meta[key] = value
+#         self.endInsertRows()
+#         self.logger.debug(f'Create Attrbute {key} in {self.item_path}')
 
-    def deleteItem(self, index: QModelIndex):
-        """
-        Delete an item according to the index.
+#     def deleteItem(self, index: QModelIndex):
+#         """
+#         Delete an item according to the index.
 
-        arguments:
-            index: (QModelIndex)
-        """
-        if not isinstance(index, QModelIndex):
-            raise TypeError('index must be QModelIndex, not '
-                '{0}'.format(type(index).__name__))
-        if not index.isValid():
-            return None
-        key = self.keyFromIndex(index)
-        row = index.row()
-        self.beginRemoveRows(QModelIndex(), row, row)
-        del self.attrs[key]
-        del self.meta[key]
-        self.endRemoveRows()
-        self.logger.debug('Delete Attribute {0} in {1}'.format(
-            key, self.item_path
-        ))
+#         arguments:
+#             index: (QModelIndex)
+#         """
+#         if not isinstance(index, QModelIndex):
+#             raise TypeError('index must be QModelIndex, not '
+#                 '{0}'.format(type(index).__name__))
+#         if not index.isValid():
+#             return None
+#         key = self.keyFromIndex(index)
+#         row = index.row()
+#         self.beginRemoveRows(QModelIndex(), row, row)
+#         del self.attrs[key]
+#         del self.meta[key]
+#         self.endRemoveRows()
+#         self.logger.debug('Delete Attribute {0} in {1}'.format(
+#             key, self.item_path
+#         ))
 
-    def modifyValue(self, index: QModelIndex, value):
-        """
-        Modify an item. The type should not be changed.
+#     def modifyValue(self, index: QModelIndex, value):
+#         """
+#         Modify an item. The type should not be changed.
 
-        arguments:
-            index: (QModelIndex)
+#         arguments:
+#             index: (QModelIndex)
 
-            value: Any (must conserve the type of the original item)
-        """
-        if not isinstance(index, QModelIndex):
-            raise TypeError('index must be QModelIndex, not '
-                '{0}'.format(type(index).__name__))
-        if not index.isValid():
-            return None
-        key = self.keyFromIndex(index)
-        self.attrs.modify(key, value)
-        self.meta[key] = value
-        self.dataChanged.emit(QModelIndex(), index)
-        self.logger.debug('Change the value of attribute {0} in {1}'.format(
-            key, self.item_path
-        ))
+#             value: Any (must conserve the type of the original item)
+#         """
+#         if not isinstance(index, QModelIndex):
+#             raise TypeError('index must be QModelIndex, not '
+#                 '{0}'.format(type(index).__name__))
+#         if not index.isValid():
+#             return None
+#         key = self.keyFromIndex(index)
+#         self.attrs.modify(key, value)
+#         self.meta[key] = value
+#         self.dataChanged.emit(QModelIndex(), index)
+#         self.logger.debug('Change the value of attribute {0} in {1}'.format(
+#             key, self.item_path
+#         ))
 
 
 class MetaNotPathLikeTableModel(QAbstractTableModel):
@@ -1706,6 +1723,20 @@ class MetaNotPathLikeTableModel(QAbstractTableModel):
         """
         row = index.row()
         return list(self.meta.keys())[row]
+    
+    def matchIndexGenerator(self, kw: str):
+        """
+        A generator that yields the indexes matching the keywords.
+
+        arguments:
+            kw: (str) The key words for matching
+
+        returns:
+            (generator) A generator that generates QModelIndex that has the 
+                same substring included in its name as the kw.
+        """
+        for number in self.meta_manager.matchNumberGeneratorNotPathlike(kw):
+            yield self.createIndex(number, 0)
     
 
         

@@ -258,6 +258,9 @@ class HDFHandler(QObject):
         self._root_node = HDFRootNode()
         self._createModel()
         self._keep_file_opened = []
+
+        global qApp
+        self.file_closed.connect(qApp.clearMetaManagerDict)
     
     @property
     def logger(self) -> Logger:
