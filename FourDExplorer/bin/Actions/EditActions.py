@@ -32,7 +32,8 @@ from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from bin.Widgets.DialogImportFourDSTEM import DialogImportFourDSTEM
 from bin.Widgets.DialogMoveItem import DialogHDFMove
 from bin.Widgets.DialogCopyItem import DialogHDFCopy
-from bin.Widgets.DialogAttrViewer import DialogAttrViewer
+# from bin.Widgets.DialogAttrViewer import DialogAttrViewer
+from bin.Widgets.DialogMetaViewer import DialogMetaViewer
 from bin.Widgets.DialogImportImage import DialogImportImage
 from bin.Widgets.WidgetImportEMPAD import WidgetImportEMPAD
 from bin.Widgets.WidgetImportMerlin import WidgetImportMerlin 
@@ -429,7 +430,8 @@ class ActionAttributes(ActionEditBase):
         # If we use dialog.exec(), the code will stop and wait for that 
         # function returning, which keeps the lifetime of the dialog.
         global qApp 
-        dialog_attr = DialogAttrViewer(qApp.main_window)
+        # dialog_attr = DialogAttrViewer(qApp.main_window)
+        dialog_attr = DialogMetaViewer(qApp.main_window)
         dialog_attr.setItemPath(self.item_path)
         dialog_attr.show()
 

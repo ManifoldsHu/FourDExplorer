@@ -80,9 +80,17 @@ class WidgetMetaViewer(QWidget):
         self.ui.widget_meta_viewer.customContextMenuRequested.connect(
             self.showMetaViewerContextMenu
         )
+        self.ui.widget_meta_viewer.search_result_found.connect(
+            lambda: self.ui.tabWidget.setCurrentIndex(0)
+        )
+        
         self.ui.widget_meta_viewer_not_pathlike.customContextMenuRequested.connect(
             self.showMetaViewerNotPathlikeContextMenu
         )
+        self.ui.widget_meta_viewer_not_pathlike.search_result_found.connect(
+            lambda: self.ui.tabWidget.setCurrentIndex(1)
+        )
+        self.ui.tabWidget.setCurrentIndex(0)
         self._item_path = ''
         
         self._action_edit = ActionEditMeta(self) 
@@ -100,7 +108,7 @@ class WidgetMetaViewer(QWidget):
     @property 
     def logger(self) -> Logger:
         global qApp 
-        return qApp.logger 
+        return qApp.logger
     
     @property
     def theme_handler(self) -> ThemeHandler:
@@ -179,11 +187,15 @@ class WidgetMetaViewer(QWidget):
         self.action_delete.initialize(
             item_path = self.item_path,
             meta_key = meta_key,
+            widget_viewer = self.ui.widget_meta_viewer,
+            widget_viewer_not_path_like = self.ui.widget_meta_viewer_not_pathlike,
             active_widget_viewer = act_widget,
         )
         self.action_edit.initialize(
             item_path = self.item_path,
             meta_key = meta_key,
+            widget_viewer = self.ui.widget_meta_viewer,
+            widget_viewer_not_path_like = self.ui.widget_meta_viewer_not_pathlike,
             active_widget_viewer = act_widget, 
         )
         self.action_refresh.initialize(
@@ -207,17 +219,21 @@ class WidgetMetaViewer(QWidget):
             pos: (QPoint) The position where context menu should be created
         """
         act_widget = self.ui.widget_meta_viewer_not_pathlike 
-        index = self.ui.widget_meta_viewer_not_pathlike.ui.tableView_meta_not_pathlike.currentIndex()
+        index = self.ui.widget_meta_viewer_not_pathlike.ui.treeView_meta_not_pathlike.currentIndex()
         meta_key = index.data(role = MetaDataRoles.KeyRole)
         self.action_add.initialize(item_path = self.item_path)
         self.action_delete.initialize(
             item_path = self.item_path,
             meta_key = meta_key,
+            widget_viewer = self.ui.widget_meta_viewer,
+            widget_viewer_not_path_like = self.ui.widget_meta_viewer_not_pathlike,
             active_widget_viewer = act_widget,
         )
         self.action_edit.initialize(
             item_path = self.item_path,
             meta_key = meta_key,
+            widget_viewer = self.ui.widget_meta_viewer,
+            widget_viewer_not_path_like = self.ui.widget_meta_viewer_not_pathlike,
             active_widget_viewer = act_widget, 
         )
         self.action_refresh.initialize(
@@ -230,7 +246,7 @@ class WidgetMetaViewer(QWidget):
         menu.addAction(self.action_add)
         menu.addAction(self.action_edit)
         menu.addAction(self.action_delete)
-        menu.exec(self.ui.widget_meta_viewer.mapToGlobal(pos))
+        menu.exec(self.ui.widget_meta_viewer_not_pathlike.mapToGlobal(pos))
 
     def _initSearch(self):
         """
@@ -245,6 +261,7 @@ class WidgetMetaViewer(QWidget):
         ) 
         self._lineEdit_search.addAction(self._action_search, QLineEdit.LeadingPosition)
         self._search_toolbar.addWidget(self._lineEdit_search)
+        self._lineEdit_search.editingFinished.connect(self._action_search.trigger)
 
 
     

@@ -15,19 +15,15 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <widget class="QSplitter" name="splitter">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
      </property>
-     <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Predefined Metadata:</string>
-         </property>
-        </widget>
-       </item>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Predefined Metadata</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="WidgetMetaViewerBase" name="widget_meta_viewer" native="true">
          <property name="sizePolicy">
@@ -40,15 +36,11 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Other Metadata:</string>
-         </property>
-        </widget>
-       </item>
+     <widget class="QWidget" name="tab_not_pathlike">
+      <attribute name="title">
+       <string>Other Metadata</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="WidgetMetaViewerBaseNotPathlike" name="widget_meta_viewer_not_pathlike" native="true">
          <property name="sizePolicy">

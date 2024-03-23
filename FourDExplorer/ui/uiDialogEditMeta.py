@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiDialogEditMeta.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -24,9 +24,9 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(400, 375)
-        self.verticalLayout_5 = QVBoxLayout(Dialog)
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        Dialog.resize(445, 712)
+        self.verticalLayout_6 = QVBoxLayout(Dialog)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.verticalLayout = QVBoxLayout()
@@ -75,7 +75,7 @@ class Ui_Dialog(object):
         self.horizontalLayout_4.addLayout(self.verticalLayout_3)
 
 
-        self.verticalLayout_5.addLayout(self.horizontalLayout_4)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_4)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -99,14 +99,15 @@ class Ui_Dialog(object):
         self.horizontalLayout.addWidget(self.pushButton_change_dtype)
 
 
-        self.verticalLayout_5.addLayout(self.horizontalLayout)
+        self.verticalLayout_6.addLayout(self.horizontalLayout)
 
         self.stackedWidget_set_value = QStackedWidget(Dialog)
         self.stackedWidget_set_value.setObjectName(u"stackedWidget_set_value")
         self.page_edit_integer = QWidget()
         self.page_edit_integer.setObjectName(u"page_edit_integer")
-        self.verticalLayout_4 = QVBoxLayout(self.page_edit_integer)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_5 = QVBoxLayout(self.page_edit_integer)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(0, -1, 0, -1)
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.label_3 = QLabel(self.page_edit_integer)
@@ -126,17 +127,37 @@ class Ui_Dialog(object):
         self.horizontalLayout_2.addWidget(self.spinBox_edit_integer)
 
 
-        self.verticalLayout_4.addLayout(self.horizontalLayout_2)
+        self.verticalLayout_5.addLayout(self.horizontalLayout_2)
+
+        self.horizontalLayout_7 = QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_7.addItem(self.horizontalSpacer_6)
+
+        self.label_unit_int_hint = QLabel(self.page_edit_integer)
+        self.label_unit_int_hint.setObjectName(u"label_unit_int_hint")
+
+        self.horizontalLayout_7.addWidget(self.label_unit_int_hint)
+
+        self.label_unit_int = QLabel(self.page_edit_integer)
+        self.label_unit_int.setObjectName(u"label_unit_int")
+
+        self.horizontalLayout_7.addWidget(self.label_unit_int)
+
+
+        self.verticalLayout_5.addLayout(self.horizontalLayout_7)
 
         self.verticalSpacer = QSpacerItem(20, 180, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.verticalLayout_4.addItem(self.verticalSpacer)
+        self.verticalLayout_5.addItem(self.verticalSpacer)
 
         self.stackedWidget_set_value.addWidget(self.page_edit_integer)
         self.page_edit_float = QWidget()
         self.page_edit_float.setObjectName(u"page_edit_float")
-        self.verticalLayout_6 = QVBoxLayout(self.page_edit_float)
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.verticalLayout_4 = QVBoxLayout(self.page_edit_float)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, -1, 0, -1)
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.label_4 = QLabel(self.page_edit_float)
@@ -169,17 +190,37 @@ class Ui_Dialog(object):
         self.horizontalLayout_5.addWidget(self.spinBox_float_exp)
 
 
-        self.verticalLayout_6.addLayout(self.horizontalLayout_5)
+        self.verticalLayout_4.addLayout(self.horizontalLayout_5)
+
+        self.horizontalLayout_6 = QHBoxLayout()
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_6.addItem(self.horizontalSpacer_5)
+
+        self.label_unit_float_hint = QLabel(self.page_edit_float)
+        self.label_unit_float_hint.setObjectName(u"label_unit_float_hint")
+
+        self.horizontalLayout_6.addWidget(self.label_unit_float_hint)
+
+        self.label_unit_float = QLabel(self.page_edit_float)
+        self.label_unit_float.setObjectName(u"label_unit_float")
+
+        self.horizontalLayout_6.addWidget(self.label_unit_float)
+
+
+        self.verticalLayout_4.addLayout(self.horizontalLayout_6)
 
         self.verticalSpacer_2 = QSpacerItem(20, 180, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.verticalLayout_6.addItem(self.verticalSpacer_2)
+        self.verticalLayout_4.addItem(self.verticalSpacer_2)
 
         self.stackedWidget_set_value.addWidget(self.page_edit_float)
         self.page_edit_string = QWidget()
         self.page_edit_string.setObjectName(u"page_edit_string")
         self.verticalLayout_7 = QVBoxLayout(self.page_edit_string)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.verticalLayout_7.setContentsMargins(0, -1, 0, -1)
         self.label_6 = QLabel(self.page_edit_string)
         self.label_6.setObjectName(u"label_6")
 
@@ -192,7 +233,26 @@ class Ui_Dialog(object):
 
         self.stackedWidget_set_value.addWidget(self.page_edit_string)
 
-        self.verticalLayout_5.addWidget(self.stackedWidget_set_value)
+        self.verticalLayout_6.addWidget(self.stackedWidget_set_value)
+
+        self.horizontalLayout_8 = QHBoxLayout()
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.label_8 = QLabel(Dialog)
+        self.label_8.setObjectName(u"label_8")
+
+        self.horizontalLayout_8.addWidget(self.label_8)
+
+        self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_8.addItem(self.horizontalSpacer_7)
+
+
+        self.verticalLayout_6.addLayout(self.horizontalLayout_8)
+
+        self.plainTextEdit_note = QPlainTextEdit(Dialog)
+        self.plainTextEdit_note.setObjectName(u"plainTextEdit_note")
+
+        self.verticalLayout_6.addWidget(self.plainTextEdit_note)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -211,12 +271,12 @@ class Ui_Dialog(object):
         self.horizontalLayout_3.addWidget(self.pushButton_cancel)
 
 
-        self.verticalLayout_5.addLayout(self.horizontalLayout_3)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_3)
 
 
         self.retranslateUi(Dialog)
 
-        self.stackedWidget_set_value.setCurrentIndex(1)
+        self.stackedWidget_set_value.setCurrentIndex(2)
 
 
         QMetaObject.connectSlotsByName(Dialog)
@@ -232,9 +292,14 @@ class Ui_Dialog(object):
         self.label_current_dtype.setText(QCoreApplication.translate("Dialog", u"Integer", None))
         self.pushButton_change_dtype.setText(QCoreApplication.translate("Dialog", u"Change Data Type", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"Value", None))
+        self.label_unit_int_hint.setText(QCoreApplication.translate("Dialog", u"Unit: ", None))
+        self.label_unit_int.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label_4.setText(QCoreApplication.translate("Dialog", u"Value", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"x10^", None))
+        self.label_unit_float_hint.setText(QCoreApplication.translate("Dialog", u"Unit: ", None))
+        self.label_unit_float.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
         self.label_6.setText(QCoreApplication.translate("Dialog", u"Value", None))
+        self.label_8.setText(QCoreApplication.translate("Dialog", u"Note", None))
         self.pushButton_ok.setText(QCoreApplication.translate("Dialog", u"Ok", None))
         self.pushButton_cancel.setText(QCoreApplication.translate("Dialog", u"Cancel", None))
     # retranslateUi

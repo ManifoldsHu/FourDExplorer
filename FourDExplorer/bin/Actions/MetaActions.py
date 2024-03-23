@@ -35,7 +35,8 @@ from bin.MetaManager import MetaManager
 from bin.MetaManager import MetaTreeModel
 from bin.UIManager import ThemeHandler
 from bin.Widgets.DialogEditMeta import DialogEditMeta 
-from bin.Widgets.DialogDeleteMeta import DialogDeleteMeta
+from bin.Widgets.DialogAddMeta import DialogAddMeta
+# from bin.Widgets.DialogDeleteMeta import DialogDeleteMeta
 
 
 
@@ -79,6 +80,9 @@ class ActionMetaBase(QAction):
         self.setEnabled(self.hdf_handler.isFileOpened())
         self.hdf_handler.file_opened.connect(self._onFileOpened)
         self.hdf_handler.file_closed.connect(self._onFileClosed)
+        self.theme_handler.theme_changed.connect(
+            self._updateIcon
+        )
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -117,10 +121,10 @@ class ActionMetaBase(QAction):
             return None 
     
     @property 
-    def tableview_not_pathlike(self) -> QTableView:
+    def treeview_not_pathlike(self) -> QTableView:
         # return self._tableview_not_pathlike
         if self._widget_viewer_base_not_pathlike:
-            return self._widget_viewer_base_not_pathlike.ui.tableView_meta_not_pathlike
+            return self._widget_viewer_base_not_pathlike.ui.treeView_meta_not_pathlike
         else:
             return None 
     
@@ -130,7 +134,7 @@ class ActionMetaBase(QAction):
             if self._active_widget_viewer is self._widget_viewer_base:
                 return self.treeview
             elif self._active_widget_viewer is self._widget_viewer_base_not_pathlike:
-                return self.tableview_not_pathlike
+                return self.treeview_not_pathlike
         else:
             return None 
 
@@ -245,6 +249,27 @@ class ActionMetaBase(QAction):
         """
         self._active_widget_viewer = active_widget_viewer
 
+    def initIconResources(self, icon_name: str):
+        """
+        Initialize the resource of icons.
+
+        arguments:
+            icon_name: (str) the name of icon.
+        """
+        _path = ':/HDFEdit/resources/icons/' + icon_name
+        icon = self.theme_handler.iconProvider(_path)
+        self._icon_name = icon_name 
+        self.setIcon(icon)
+
+    def _updateIcon(self):
+        """
+        Will update the icon when the theme mode changes.
+        """
+        if self._icon_name:
+            _path = ':/HDFEdit/resources/icons/' + self._icon_name
+            icon = self.theme_handler.iconProvider(_path)
+            self.setIcon(icon)
+
 
 class ActionEditMeta(ActionMetaBase):
     """
@@ -255,12 +280,15 @@ class ActionEditMeta(ActionMetaBase):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.setText('Edit')
+        self.initIconResources('edit')
         self.triggered.connect(self.editMeta)
 
     def initialize(
         self, 
         item_path: str, 
         meta_key: str = None,
+        widget_viewer: QWidget = None,
+        widget_viewer_not_path_like: QWidget = None,
         active_widget_viewer: QWidget = None, 
     ):
         """
@@ -273,13 +301,22 @@ class ActionEditMeta(ActionMetaBase):
 
             meta_key: (str) The key of the metadata ot be edited
 
-            activate_view: (QAbstractItemView) the linked activated view, either 
-                QTableView or QTreeView
+            widget_viewer: (QWidget) The linked WidgetMetaViewerBase object
+            
+            widget_viewer_not_path_like: (QWidget) The linked 
+                WidgetMetaViewerBaseNotPathlike object
+
+            active_widget_viewer: (QWidget) The linked active view, of which 
+                this action will be created in the menu.
         """
         if item_path:
             self.setItemPath(item_path)
         if meta_key:
             self.setKey(meta_key)
+        if widget_viewer:
+            self.setWidgetViewerBase(widget_viewer)
+        if widget_viewer_not_path_like:
+            self.setWidgetViewerBaseNotPathlike(widget_viewer_not_path_like)
         if active_widget_viewer:
             self.setActiveWidgetViewer(active_widget_viewer)
 
@@ -320,6 +357,7 @@ class ActionAddMeta(ActionMetaBase):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.setText('Add')
+        self.initIconResources('file_add')
         self.triggered.connect(self.addMeta)
 
     def initialize(self, item_path: str):
@@ -335,7 +373,7 @@ class ActionAddMeta(ActionMetaBase):
         """
         Open a dialog to add metadata.
         """
-        dialog_edit = DialogEditMeta(qApp.main_window)
+        dialog_edit = DialogAddMeta(qApp.main_window)
         dialog_edit.setItemPath(self.item_path)
         dialog_edit.setMetaKey('')
         dialog_edit.show()  # TODO dialog_edit raise exception when there exists metadata.
@@ -350,12 +388,15 @@ class ActionDeleteMeta(ActionMetaBase):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.setText('Delete')
+        self.initIconResources('file_delete')
         self.triggered.connect(self.deleteMeta)
 
     def initialize(
         self, 
         item_path: str, 
         meta_key: str = None,
+        widget_viewer: QWidget = None,
+        widget_viewer_not_path_like: QWidget = None,
         active_widget_viewer: QWidget = None, 
     ):
         """
@@ -368,13 +409,22 @@ class ActionDeleteMeta(ActionMetaBase):
 
             meta_key: (str) The key of the metadata ot be edited
 
-            activate_view: (QAbstractItemView) The linked activated view, either 
-                QTableView or QTreeView
+            widget_viewer: (QWidget) The linked WidgetMetaViewerBase object
+            
+            widget_viewer_not_path_like: (QWidget) The linked 
+                WidgetMetaViewerBaseNotPathlike object
+
+            active_widget_viewer: (QWidget) The linked active view, of which 
+                this action will be created in the menu.
         """
         if item_path:
             self.setItemPath(item_path)
         if meta_key:
             self.setKey(meta_key)
+        if widget_viewer:
+            self.setWidgetViewerBase(widget_viewer)
+        if widget_viewer_not_path_like:
+            self.setWidgetViewerBaseNotPathlike(widget_viewer_not_path_like)
         if active_widget_viewer:
             self.setActiveWidgetViewer(active_widget_viewer)
 
@@ -384,10 +434,22 @@ class ActionDeleteMeta(ActionMetaBase):
         """
         if self._active_widget_viewer is not None:
             self.setKeyFromIndex(self.active_view.currentIndex())
-        dialog_delete = DialogDeleteMeta(qApp.main_window)
-        dialog_delete.setItemPath(self.item_path)
-        dialog_delete.setMetaKey(self.key)
-        dialog_delete.show()
+        # dialog_delete = DialogDeleteMeta(qApp.main_window)
+        # dialog_delete.setItemPath(self.item_path)
+        # dialog_delete.setMetaKey(self.key)
+        # dialog_delete.show()
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("Confirm Deletion")
+        msg_box.setText(
+            f"Are you sure to delete metadata <code>{self.key}</code> from item (Dataset or Group) <code>{self.item_path}</code>?"
+        )
+        msg_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msg_box.setDefaultButton(QMessageBox.No)
+        response = msg_box.exec()
+        if response == QMessageBox.Yes:
+            del self.hdf_handler.file[self.item_path].attrs[self.key]
+            self.meta_manager.refreshModel()
+        return 
 
     
 class ActionRefreshMeta(ActionMetaBase):
@@ -399,6 +461,7 @@ class ActionRefreshMeta(ActionMetaBase):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.setText('Refresh')
+        self.initIconResources('refresh.png')
         self.triggered.connect(self.refreshMeta)
 
     def initialize(
@@ -427,7 +490,6 @@ class ActionRefreshMeta(ActionMetaBase):
         if self._widget_viewer_base_not_pathlike is not None:
             self._widget_viewer_base_not_pathlike.refreshModel()
 
-
 class ActionSearchMeta(ActionMetaBase):
     """
     搜索 Metadata 的 Action
@@ -437,6 +499,7 @@ class ActionSearchMeta(ActionMetaBase):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.setText('Search')
+        self.initIconResources('search.png')
         self._linked_line_edit = None 
         # self._kw = ''
         self.triggered.connect(self.searchMeta)

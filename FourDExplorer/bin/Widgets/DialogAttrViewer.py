@@ -4,10 +4,14 @@
 *--------------------------- DialogAttrViewer.py -----------------------------*
 用于查看属性值的对话框。
 
+已废弃
+
 作者：          胡一鸣
 创建时间：      2022年3月11日
 
 Dialog to view the attrs of items in the h5 file.
+
+DEPRECATED
 
 author:             Hu Yiming
 date:               Mar 11, 2022
@@ -100,6 +104,7 @@ class DialogAttrViewer(QDialog):
         # Experimental 
         # self._meta_manager_2 = MetaManager(self)
         self.widget_meta_viewer = self.ui.widget 
-        self.widget_meta_viewer.initMetaViewer(self.item_path)
+        # self.widget_meta_viewer.initMetaViewer(self.item_path)
+        self.widget_meta_viewer.setItemPath(self.item_path)
         
         

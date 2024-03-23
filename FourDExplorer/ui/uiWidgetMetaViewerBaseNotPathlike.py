@@ -15,7 +15,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QHeaderView, QSizePolicy, QTableView,
+from PySide6.QtWidgets import (QApplication, QHeaderView, QSizePolicy, QTreeView,
     QVBoxLayout, QWidget)
 
 class Ui_Form(object):
@@ -25,10 +25,10 @@ class Ui_Form(object):
         Form.resize(400, 300)
         self.verticalLayout = QVBoxLayout(Form)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.tableView_meta_not_pathlike = QTableView(Form)
-        self.tableView_meta_not_pathlike.setObjectName(u"tableView_meta_not_pathlike")
+        self.treeView_meta_not_pathlike = QTreeView(Form)
+        self.treeView_meta_not_pathlike.setObjectName(u"treeView_meta_not_pathlike")
 
-        self.verticalLayout.addWidget(self.tableView_meta_not_pathlike)
+        self.verticalLayout.addWidget(self.treeView_meta_not_pathlike)
 
 
         self.retranslateUi(Form)

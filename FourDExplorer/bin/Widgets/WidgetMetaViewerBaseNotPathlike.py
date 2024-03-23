@@ -34,14 +34,16 @@ from PySide6.QtWidgets import QTableView
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtWidgets import QLineEdit
 from PySide6.QtWidgets import QHeaderView
+from PySide6.QtWidgets import QTreeView
 from PySide6.QtGui import QAction 
 from PySide6.QtCore import Qt
 from PySide6.QtCore import QObject
 from PySide6.QtCore import QModelIndex
+from PySide6.QtCore import Signal
 
 from bin.MetaManager import MetaManager 
 from bin.MetaManager import MetaTree 
-from bin.MetaManager import MetaNotPathLikeTableModel
+from bin.MetaManager import MetaNotPathLikeModel
 from bin.HDFManager import HDFHandler
 from bin.UIManager import ThemeHandler
 from Constants import MetaDataRoles
@@ -54,12 +56,13 @@ class WidgetMetaViewerBaseNotPathlike(QWidget):
 
     The base widget to view metadata whose keys are not path-like.
     """
+
+    search_result_found = Signal()  # The search action has a result
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiWidgetMetaViewerBaseNotPathlike.Ui_Form()
         self.ui.setupUi(self)
-        header = self.ui.tableView_meta_not_pathlike.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
 
         self._item_path = ''
         self._last_kw = ''
@@ -75,7 +78,7 @@ class WidgetMetaViewerBaseNotPathlike(QWidget):
         return self.meta_manager.meta_tree 
     
     @property
-    def meta_not_pathlike_table_model(self) -> MetaNotPathLikeTableModel:
+    def meta_not_pathlike_table_model(self) -> MetaNotPathLikeModel:
         return self.meta_manager.meta_not_pathlike_table_model 
     
     @property
@@ -100,17 +103,30 @@ class WidgetMetaViewerBaseNotPathlike(QWidget):
                 f"item_path must be a str, not {type(item_path).__name__}"
             )
         self._item_path = item_path 
-        self.ui.tableView_meta_not_pathlike.setModel(
+        self.meta_manager.model_refreshed.connect(self.resetModel)
+        self.ui.treeView_meta_not_pathlike.setModel(
             self.meta_not_pathlike_table_model
         )
+        self.ui.treeView_meta_not_pathlike.expandAll()  # Without which search won't work properly
+
+        # Only after model is set, header can be set.
+        header = self.ui.treeView_meta_not_pathlike.header()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
 
     def refreshModel(self):
         """
         Refresh the metadata tableview.
         """
-        self.ui.tableView_meta_not_pathlike.setModel(
+        self.meta_manager.refreshModel()
+
+    def resetModel(self):
+        """
+        On meta manager refresh the model, this function should be called.
+        """
+        self.ui.treeView_meta_not_pathlike.setModel(
             self.meta_not_pathlike_table_model
         )
+        self.ui.treeView_meta_not_pathlike.expandAll()
 
     def searchItem(self, kw: str):
         """
@@ -141,7 +157,8 @@ class WidgetMetaViewerBaseNotPathlike(QWidget):
             return -2 
         try:
             index = next(self._result_generator)
-            self.ui.tableView_meta_not_pathlike.setCurrentIndex(index)
+            self.search_result_found.emit()
+            self.ui.treeView_meta_not_pathlike.setCurrentIndex(index)
             return 0 
         except StopIteration:
             self._last_kw = ''

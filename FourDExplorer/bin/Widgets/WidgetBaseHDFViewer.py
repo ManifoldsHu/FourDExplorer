@@ -70,6 +70,7 @@ class WidgetBaseHDFViewer(QWidget):
             self._action_search, 
             QLineEdit.LeadingPosition
         )
+        self._lineEdit_search.editingFinished.connect(self._action_search.trigger)
         self.search_toolbar.addWidget(self._lineEdit_search)
 
     def _initRefresh(self):

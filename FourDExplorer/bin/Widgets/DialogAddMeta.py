@@ -1,27 +1,23 @@
 # -*- coding: utf-8 -*- 
 
 """
-*--------------------------- DialogEditMeta.py -------------------------------*
-DialogEditMeta 用于编辑 HDF5 文件中 Group 或者 Dataset 的元数据/属性 attrs。
+*--------------------------- DialogAddMeta.py -------------------------------*
+DialogAddMeta 用于添加 HDF5 文件中 Group 或者 Dataset 的元数据/属性 attrs。
 
-需要注意的是，该窗口支持对任意 key 进行任意三种数据类型 (int, float 和 str) 的编辑。
-然而对于 4D-STEM 应用中常见的实验参数，我们不建议使用该窗口进行编辑，因为我们会提供特
-定的、能展示参数相关信息的页面进行修改。
+需要注意的是，该窗口支持对任意 key 进行任意三种数据类型 (int, float 和 str) 的添加。
 
 作者：          胡一鸣
-创建时间：      2023年3月5日
+创建时间：      2023年3月24日
 
-The DialogEditMeta is used to edit the metadata/attributes (attrs) of a Group 
+The DialogEditMeta is used to add the metadata/attributes (attrs) of a Group 
 or Dataset in an HDF5 file.
 
-It is important to note that this window supports editing of any key for any of 
-the three data types (int, float, and str). However, for experimental parameters 
-common in 4D-STEM applications, we do not recommend using this window for editing. Instead, we will provide specific pages that display relevant parameter 
-information for modifications.
+It is important to note that this window supports adding of any key for any of 
+the three data types (int, float, and str). 
 
 author:        Hu Yiming
-date:          Mar 5, 2024
-*--------------------------- DialogEditMeta.py -------------------------------*
+date:          Mar 24, 2024
+*--------------------------- DialogAddMeta.py -------------------------------*
 """
 
 from logging import Logger 
@@ -45,10 +41,11 @@ from bin.MetaManager import MetaTree
 from bin.MetaManager import MetaTreeModel 
 from bin.HDFManager import HDFHandler
 from bin.UIManager import ThemeHandler
+from bin.Widgets.DialogEditMeta import DialogTypeSelection
 
 from ui import uiDialogEditMeta
 
-class DialogEditMeta(QDialog):
+class DialogAddMeta(QDialog):
     """
     Dialog to edit attrs of items in the HDF5 file.
     """
@@ -58,21 +55,12 @@ class DialogEditMeta(QDialog):
         self.ui.setupUi(self)
         
         # self._meta_manager = None 
-        self._initEditDialog()
+        self._initAddDialog()
 
     @property 
     def meta_manager(self) -> MetaManager:
-        # return self._meta_manager 
         global qApp 
         return qApp.requireMetaManager(self.item_path)
-    
-    # @property
-    # def meta_tree(self) -> MetaTree:
-    #     return self.meta_manager.meta_tree
-    
-    # @property
-    # def meta_tree_model(self) -> MetaTreeModel:
-    #     return self.meta_manager.meta_tree_model
     
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -92,19 +80,11 @@ class DialogEditMeta(QDialog):
         global qApp 
         return qApp.logger
     
-    # def setMetaManager(self, meta_manager: MetaManager):
-    #     """
-    #     Set the meta manager that manages this item.
-
-    #     arguments:
-    #         meta_manager: (MetaManager)
-    #     """
-    #     self._meta_manager = meta_manager
-    
-    def _initEditDialog(self):
+    def _initAddDialog(self):
         """
         Initialize the edit metadata dialog.
         """
+        self.setWindowTitle("Add Metadata")
         self.ui.lineEdit_item_path.setReadOnly(True)
         self.ui.lineEdit_meta_key.textChanged.connect(self._onMetaKeyChanged)
         self.ui.lineEdit_meta_key.editingFinished.connect(self.readMetaFromFile)
@@ -115,11 +95,13 @@ class DialogEditMeta(QDialog):
         self.ui.pushButton_ok.clicked.connect(self._slotOkClicked)
         self.ui.pushButton_cancel.clicked.connect(self._slotCancelClicked)
         self.ui.pushButton_change_dtype.clicked.connect(self._slotChangeDtypeClicked)
+        self.ui.stackedWidget_set_value.setCurrentIndex(0)
         self.ui.plainTextEdit_note.setReadOnly(True)
         self.ui.label_unit_float.setVisible(False)
         self.ui.label_unit_float_hint.setVisible(False)
         self.ui.label_unit_int.setVisible(False)
         self.ui.label_unit_int_hint.setVisible(False)
+        
 
     def _onMetaKeyChanged(self):
         """
@@ -158,6 +140,12 @@ class DialogEditMeta(QDialog):
         else:                           # String
             meta_value = self.ui.plainTextEdit_edit_string.toPlainText()
 
+        if meta_key in self.hdf_handler.file[item_path].attrs:
+            ret = QMessageBox.information(self, 'Info', f'There has been an existing metadata: <code>{meta_key}</code>. Do you want to overwrite it?', buttons = QMessageBox.Ok|QMessageBox.Cancel)
+            if ret == QMessageBox.Cancel:
+                return 
+            
+
         try:
             self.hdf_handler.file[item_path].attrs[meta_key] = meta_value 
         except Exception as e:
@@ -188,7 +176,7 @@ class DialogEditMeta(QDialog):
             self.ui.stackedWidget_set_value.setCurrentIndex(pages[dialog.chosen_type])
             self.ui.label_current_dtype.setText(dialog.chosen_type)
         return 
-
+    
     def setItemPath(self, item_path: str):
         """
         Set the item path (Dataset or Group) to edit metadata for.
@@ -213,20 +201,33 @@ class DialogEditMeta(QDialog):
         """
         item_path = self.item_path 
         meta_key = self.meta_key 
-
-        try:
-            meta_value = self.hdf_handler.file[item_path].attrs[meta_key]
-        except KeyError:
+        if not meta_key:
+            return 
+        if meta_key in self.hdf_handler.file[item_path].attrs:
             self.logger.warning(
-                f'Metadata key {meta_key} not found in attrs of  {item_path}'
+                f'Metadata key {meta_key} exists in {item_path}'
             )
             QMessageBox.warning(
-                self, 
-                'Warning', 
-                f'Metadata key <code>{meta_key}</code> not found.', 
+                self,
+                'Warning',
+                f'Metadata key <code>{meta_key}</code> exists in <code>{item_path}</code>',
             )
-            return 
+            self._setExistMeta()
+        else:
+            self.ui.label_unit_int_hint.setVisible(False)
+            self.ui.label_unit_int.setVisible(False)
+            self.ui.label_unit_float_hint.setVisible(False)
+            self.ui.label_unit_float.setVisible(False)
         
+
+        
+    def _setExistMeta(self):
+        """
+        If there exists metadata, use the same logic as DialogEditMeta.
+        """
+        item_path = self.item_path 
+        meta_key = self.meta_key 
+        meta_value = self.hdf_handler.file[item_path].attrs[meta_key]
         if isinstance(meta_value, (int, np.integer)):
             self.ui.stackedWidget_set_value.setCurrentIndex(0)
             self.ui.spinBox_edit_integer.setValue(meta_value)
@@ -284,40 +285,5 @@ class DialogEditMeta(QDialog):
             self.ui.plainTextEdit_note.setPlainText(
                 'This is a parameter whose physical meaning and default units have been predefined.\n\n'+self.meta_manager.getSchemaDescription(meta_key)
             )
-        
 
-class DialogTypeSelection(QDialog):
-    """
-    Dialog to choose dtype.
-    """
-    def __init__(self, parent: QWidget):
-        super().__init__(parent)
-        self.setWindowTitle("Select Data Type")
-        layout = QVBoxLayout()
-        label = QLabel("Select a type:")
-        layout.addWidget(label)
-        self.comboBox = QComboBox()
-        self.comboBox.addItems(["Float", "Integer", "String"])
-        layout.addWidget(self.comboBox)
-        layout_2 = QHBoxLayout()
-        layout_2.addItem(
-            QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
-        
-        button_ok = QPushButton("OK")
-        button_cancel = QPushButton("Cancel")
-        button_ok.clicked.connect(self.accept)
-        button_cancel.clicked.connect(self.reject)
-        layout_2.addWidget(button_ok)
-        layout_2.addWidget(button_cancel)
-        layout.addItem(
-            QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        )
-        layout.addLayout(layout_2)
-        self.setLayout(layout)
-
-    @property
-    def chosen_type(self) -> str:
-        return self.comboBox.currentText()
-
-
+    

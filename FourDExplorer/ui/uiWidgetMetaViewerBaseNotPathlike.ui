@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTableView" name="tableView_meta_not_pathlike"/>
+    <widget class="QTreeView" name="treeView_meta_not_pathlike"/>
    </item>
   </layout>
  </widget>

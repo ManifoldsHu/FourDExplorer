@@ -65,6 +65,7 @@ from PySide6.QtCore import QAbstractItemModel
 from PySide6.QtCore import QAbstractTableModel
 from PySide6.QtCore import QModelIndex
 from PySide6.QtCore import Qt 
+from PySide6.QtCore import Signal 
 import h5py
 import numpy as np
 
@@ -97,6 +98,8 @@ class MetaManager(QObject):
     }
 
     _schema_dir_path = os.path.join(ROOT_PATH, 'schema', 'MetaStructures')
+
+    model_refreshed = Signal()
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
@@ -139,7 +142,7 @@ class MetaManager(QObject):
         return self._meta_tree_model
     
     @property
-    def meta_not_pathlike_table_model(self) -> "MetaNotPathLikeTableModel":
+    def meta_not_pathlike_table_model(self) -> "MetaNotPathLikeModel":
         return self._meta_not_pathlike_table_model 
     
     def setItemPath(self, item_path: str):
@@ -162,6 +165,7 @@ class MetaManager(QObject):
 
         self._meta_tree = MetaTree(item_path, parent = self)
         self._meta_tree_model = MetaTreeModel(self)
+        self._meta_not_pathlike_table_model = MetaNotPathLikeModel(self)
 
     def initializeSchema(self, hdf_type: HDFType):
         """
@@ -367,8 +371,8 @@ class MetaManager(QObject):
         returns:
             (MetaTreeNode) the node in the meta tree.
         """
-        if key not in self.listKeys():
-            raise KeyError(f"Key not found in metadata: {key}")
+        # if key not in self.listKeys():
+        #     raise KeyError(f"Key not found in metadata: {key}")
         if self.meta_tree.isValidPath(key):
             path_parts = key.lstrip('/').split('/')
             node = self.meta_tree.root 
@@ -376,7 +380,9 @@ class MetaManager(QObject):
                 node = node[part]
             return node 
         else:
-            return self.meta_tree.root[key]
+            # return self.meta_tree.root[key]
+            raise KeyError(f"Key is not a valid path-like string: {key}.")
+            
         
     def matchNodeGenerator(self, kw: str):
         """
@@ -402,7 +408,7 @@ class MetaManager(QObject):
                 elif len(subnode) > 0:
                     for subsubnode in _matchSubNode(subnode):
                         yield subsubnode 
-        return _matchSubNode(self._schema_tree.root)
+        return _matchSubNode(self.meta_tree.root)
                 
     def matchNumberGeneratorNotPathlike(self, kw: str):
         """
@@ -421,6 +427,15 @@ class MetaManager(QObject):
                 if kw in key:
                     yield number 
         return _matchNumber()
+    
+    def refreshModel(self):
+        """
+        Refresh the models.
+        """
+        self.setItemPath(self.item_path)
+        self.model_refreshed.emit()
+
+
 
 
 class MetadataFieldBase(QObject):
@@ -1065,33 +1080,41 @@ class MetaTreeModel(QAbstractItemModel):
             return None 
         node: MetaTreeNode = index.internalPointer()
         schema_keys = self.meta_manager.listSchemaKeys()
+        value = self.meta_manager.getValue(node.path)
+        column = index.column()
 
-        if role == MetaDataRoles.DisplayRole and index.column() == 0:
+        if role == MetaDataRoles.DisplayRole and column == 0:
             if node.path in schema_keys:
                 return self.meta_manager.getSchemaTitle(node.path)
             else:
                 return node.name 
-        elif role == MetaDataRoles.DisplayRole and index.column() == 1:
+        elif role == MetaDataRoles.DisplayRole and column == 1:
             return self._makeDisplayValue(index)
         elif role == MetaDataRoles.ToolTipRole:
             if node.path in schema_keys:
                 return self.meta_manager.getSchemaDescription(node.path)
+            elif isinstance(value, np.ndarray):
+                return f'<numpy.ndarray shape: {value.shape}>'
+            else:
+                return f'<{type(value).__name__}: {self.data(index, Qt.DisplayRole)}>'
+
         elif role == MetaDataRoles.NodeRole:
             return node 
         elif role == MetaDataRoles.KeyRole:
             return node.path 
         elif role == MetaDataRoles.ValueRole:
-            return self.meta_manager.getValue(node.path) 
+            return value
         elif role == MetaDataRoles.ValueTypeRole:
             raise NotImplementedError(f"Unsupported role: {role}")
-        elif role == MetaDataRoles.DecorationRole:
-            if self.hdf_handler.isFileOpened() and node.path:
-                _path = ":/HDFItem/resources/icons"
-                if len(node) > 0:
-                    icon_name = 'folder'
-                else:
-                    icon_name = 'file'
-                return self.theme_handler.iconProvider(_path + icon_name)
+        elif role == MetaDataRoles.DecorationRole and column == 0:
+            _path = ":/HDFItem/resources/icons/"
+            if len(node) > 0:
+                icon_name = 'folder'
+            else:
+                icon_name = 'file'
+            return self.theme_handler.iconProvider(_path + icon_name)
+            # _path = ":/HDFItem/resources/icons/file"
+            # return self.theme_handler.iconProvider(_path)
 
         return None 
     
@@ -1169,6 +1192,9 @@ class MetaTreeModel(QAbstractItemModel):
         if value is None:
             return ""
         if node.path not in schema_keys:
+            if isinstance(value, np.ndarray):
+                if len(value) > 5:
+                    return f'<numpy.ndarray> shape: {value.shape}'
             return f"{value}"
         
         # The actual unit of the stored metadata value. (e.g. 'm')
@@ -1541,7 +1567,7 @@ class MetaTreeModel(QAbstractItemModel):
 #         ))
 
 
-class MetaNotPathLikeTableModel(QAbstractTableModel):
+class MetaNotPathLikeModel(QAbstractItemModel):
     """
     用于在表格中展示非合法路径的 Metadata 所需的 Model。
 
@@ -1591,7 +1617,7 @@ class MetaNotPathLikeTableModel(QAbstractTableModel):
         meta: (dict) replica. always conserves the same as self.attrs
     """
     def __init__(self, meta_manager: MetaManager, parent: QObject = None):
-        super(MetaNotPathLikeTableModel, self).__init__(parent)
+        super(MetaNotPathLikeModel, self).__init__(parent)
         self._meta_manager = meta_manager
 
     @property
@@ -1638,7 +1664,24 @@ class MetaNotPathLikeTableModel(QAbstractTableModel):
     #     return self.hdf_handler.file[self.item_path].attrs
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
-        return len(self.meta_not_pathlike)
+        """
+        Returns the number of rows under the given parent. When the parent is valid,
+        rowCount() returns the number of children of parent. When the parent is 
+        QModelIndex(), rowCount() returns the number of top-level items.
+
+        In MetaNotPathlikeModel, the row count is always the same as the length of 
+        meta_not_pathlike mapping.
+
+        arguments:
+            parent: (QModelIndex) The parent index.
+
+        returns:
+            (int): The number of rows under the given parent.
+        """
+        if not parent.isValid():
+            return len(self.meta_not_pathlike)
+        else:
+            return 0
     
     def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
         return 2
@@ -1650,24 +1693,70 @@ class MetaNotPathLikeTableModel(QAbstractTableModel):
         column = index.column()
         key = list(self.meta_not_pathlike.keys())[row]
         value = self.meta_not_pathlike[key]
-        if role == Qt.DisplayRole:
-            if column == 0:
+        if role == MetaDataRoles.DisplayRole and column == 0:
                 return f'{key}'
-            elif column == 1:
-                if isinstance(value, np.ndarray):
-                    if len(value) > 5:
-                        return f'<numpy.ndarray> shape: {value.shape}'
-                return f'{value}'
-            else:
-                return None
-        elif role == Qt.ToolTipRole:
+        elif role == MetaDataRoles.DisplayRole and column == 1:
+            if isinstance(value, np.ndarray):
+                if len(value) > 5:
+                    return f'<numpy.ndarray> shape: {value.shape}'
+            return f'{value}'
+        elif role == MetaDataRoles.ToolTipRole:
             if isinstance(value, np.ndarray):
                 return f'<numpy.ndarray shape: {value.shape}>'
             else:
                 return f'<{type(value).__name__}: {self.data(index, Qt.DisplayRole)}>'
-        else:
-            return None
+        elif role == MetaDataRoles.KeyRole:
+            return key 
+        elif role == MetaDataRoles.ValueRole:
+            return value
+        elif role == MetaDataRoles.ValueTypeRole:
+            raise NotImplementedError(f"Unsupported role: {role}")
+        elif role == MetaDataRoles.NodeRole:
+            raise NotImplementedError(f"Unsupported role: {role}")
+        elif role == MetaDataRoles.DecorationRole and column == 0:
+            _path = ":/HDFItem/resources/icons/file"
+            return self.theme_handler.iconProvider(_path)
+        return None
         
+    def index(
+        self,
+        row: int,
+        column: int,
+        parent: QModelIndex = QModelIndex()
+    ) -> QModelIndex:
+        """
+        Returns the index of the item in the model specified by the given row, 
+        column and parent index.
+
+        arguments:
+            row: (int) The row number of the item.
+
+            column: (int) The column number of the item.
+
+            parent: (QModelIndex) The parent index of the item.
+
+        returns:
+            (QModelIndex) The index of the specified item.
+        """
+        if not parent.isValid():
+            key = list(self.meta_not_pathlike.keys())[row]
+            return self.createIndex(row, column, self.meta_not_pathlike[key])
+        else:
+            return QModelIndex()
+        
+    def parent(self, index: QModelIndex) -> QModelIndex:
+        """
+        Returns the parent of the model item with the given index. If the item 
+        has no parent, an invalid QModelIndex is returned.
+
+        arguments:
+            index: (QModelIndex) The index of the item.
+
+        returns:
+            (QModelIndex) The parent index of the specified item.
+        """
+        return QModelIndex()
+
     def headerData(
         self, section: int, 
         orientation: Qt.Orientation = Qt.Horizontal, 
@@ -1709,7 +1798,7 @@ class MetaNotPathLikeTableModel(QAbstractTableModel):
             raise KeyError('Key not founded.')
         row = list(self.meta_not_pathlike.keys()).index(key)
         column = 0
-        return self.createIndex(row, column)
+        return self.createIndex(row, column, self.meta_not_pathlike[key])
     
     def keyFromIndex(self, index: QModelIndex) -> QModelIndex:
         """
@@ -1722,7 +1811,7 @@ class MetaNotPathLikeTableModel(QAbstractTableModel):
             (str) the key of the corresponding index, regardless the column.
         """
         row = index.row()
-        return list(self.meta.keys())[row]
+        return list(self.meta_not_pathlike.keys())[row]
     
     def matchIndexGenerator(self, kw: str):
         """
