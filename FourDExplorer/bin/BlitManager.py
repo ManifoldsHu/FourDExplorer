@@ -26,6 +26,7 @@ All rights reserved
 
 
 from typing import Iterator
+import time 
 from PySide6.QtCore import QObject
 from matplotlib.artist import Artist
 from matplotlib.backend_bases import Event
@@ -66,6 +67,10 @@ class BlitManager(QObject):
         
         # grab the background on every draw
         self._cid = self._canvas.mpl_connect('draw_event', self._onDraw)
+        
+        self._last_update_time = time.time()
+        self._min_interval = 0.1
+        
 
     @property
     def canvas(self) -> FigureCanvas:
@@ -186,6 +191,12 @@ class BlitManager(QObject):
         Update the screen with animated artists.
         """
         # paranoia in case we missed the draw event
+        
+        current_time = time.time()
+        if current_time - self._last_update_time < self._min_interval:
+            return 
+        self._last_update_time = current_time
+        
         if self._background is None:
             self._onDraw(None)
         else:

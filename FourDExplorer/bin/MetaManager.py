@@ -60,13 +60,11 @@ from collections.abc import Set
 from collections.abc import Collection
 import re 
 
-from PySide6.QtCore import QObject, QPersistentModelIndex
+from PySide6.QtCore import QObject
 from PySide6.QtCore import QAbstractItemModel
-from PySide6.QtCore import QAbstractTableModel
 from PySide6.QtCore import QModelIndex
 from PySide6.QtCore import Qt 
 from PySide6.QtCore import Signal 
-import h5py
 import numpy as np
 
 from Constants import ROOT_PATH
@@ -1206,13 +1204,16 @@ class MetaTreeModel(QAbstractItemModel):
         display_unit = self.meta_manager.getSchemaDisplayUnit(node.path)
         if display_unit is None:
             # TODO: Format displaying with rich text
-            return f"{value:.4g} {real_unit}"  
+            # return f"{value:.4g} {real_unit}"  
+            return self.unit_manager.formatUnit(real_unit, value, context = 'unicode')
         try:
             display_value = self.unit_manager.convert(value, real_unit, display_unit)
         except ValueError:
-            return f"{value:.4g} {real_unit}"
+            # return f"{value:.4g} {real_unit}"
+            return self.unit_manager.formatUnit(real_unit, value, context = 'unicode')
         else:
-            return f"{display_value:.4g} {display_unit}"    #TODO: Format displying with rich text.
+            return self.unit_manager.formatUnit(display_unit, display_value, context = 'unicode')
+            # return f"{display_value:.4g} {display_unit}"    #TODO: Format displying with rich text.
 
 
     def indexFromKey(self, key: str) -> QModelIndex:

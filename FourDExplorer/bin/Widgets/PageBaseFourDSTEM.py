@@ -38,6 +38,8 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.axis import Axis
+from matplotlib.patches import Rectangle 
+from matplotlib.text import Text 
 
 import numpy as np
 import h5py
@@ -114,6 +116,11 @@ class PageBaseFourDSTEM(QWidget):
         scan_jj: (int) The j-coordinate of the current diffraction pattern in
             the real space. This is also regarded as the column index in a 
             matrix.
+            
+        scale_bar: (Rectangle) The rectangle object that shows the scale bar.
+        
+        scale_bar_text: (Text) The text object that shows how long the scale 
+            bar is.
     """
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
@@ -124,6 +131,8 @@ class PageBaseFourDSTEM(QWidget):
         self._colorbar_ax = None
         self._dp_object = None
         self._colorbar_object = None
+        self._scale_bar = None 
+        self._scale_bar_text = None 
         self._scan_ii = 0
         self._scan_jj = 0
         
@@ -190,6 +199,14 @@ class PageBaseFourDSTEM(QWidget):
     @property
     def scan_jj(self) -> int:
         return self._scan_jj
+
+    @property
+    def scale_bar(self) -> Rectangle:
+        return self._scale_bar
+    
+    @property
+    def scale_bar_text(self) -> Text:
+        return self._scale_bar_text
 
     def _initBaseUi(self):
         """
@@ -308,6 +325,7 @@ class PageBaseFourDSTEM(QWidget):
         # self._createAxes()
         self._createDP()
         self._createColorbar()
+        self._createScaleBar()
 
         self.ui.spinBox_scan_ii.setValue(0)
         self.ui.spinBox_scan_jj.setValue(0)
@@ -365,6 +383,32 @@ class PageBaseFourDSTEM(QWidget):
             )
         else:
             self.colorbar_object.update_normal(self.dp_object)
+            
+    def _createScaleBar(self):
+        """
+        Create the scale bar and its text artist.
+        """
+        if self._scale_bar is None:
+            self._scale_bar = Rectangle((1, 1), 1, 1)
+            self.dp_ax.add_patch(self._scale_bar)
+        if self._scale_bar_text is None:
+            self._scale_bar_text = self.dp_ax.text(1, 1, '1')
+        self.ui.widget_dp.setScaleBarRelatedArtists(
+            self._scale_bar, 
+            self._scale_bar_text,
+        )
+        self.dp_blit_manager['scale_bar'] = self._scale_bar 
+        self.dp_blit_manager['scale_bar_text'] = self._scale_bar_text
+        
+        self.ui.widget_dp.setScaleBarActionUseMeta(
+            item_path = self.data_path,
+            pixel_length_meta = '/Calibration/Space/du_i',
+            unit_meta = '/Calibration/Space/du_i',
+        )
+        
+        
+        
+    
 
     def _updateDP(self):
         """

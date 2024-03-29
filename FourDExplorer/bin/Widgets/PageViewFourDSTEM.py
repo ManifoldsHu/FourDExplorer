@@ -32,8 +32,7 @@ date:           Mar 30, 2022
 
 from PySide6.QtWidgets import QWidget, QMessageBox
 from matplotlib.backend_bases import MouseEvent
-from matplotlib.backends.backend_qtagg import (
-    FigureCanvasQTAgg as FigureCanvas)
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
@@ -511,8 +510,6 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
             self.preview_blit_manager.update()
 
     
-
-
 
 
 

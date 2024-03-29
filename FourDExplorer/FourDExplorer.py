@@ -22,6 +22,10 @@ All rights reserved.
 """
 
 import sys
+import traceback
+
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
 
 from Constants import ROOT_PATH
 from bin.Widgets.SplashScreenStart import SplashScreenStart

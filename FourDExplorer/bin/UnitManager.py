@@ -21,57 +21,55 @@ import pint
 class UnitManager(QObject):
     """
     管理元数据的单位，包括换算关系、显示。
-    
-    使用示例：
-        unit_manager = UnitManager()
-        converted_value = unit_manager.convert(10, 'mm', 'm')
-        formatted_unit = unit_manager.format_unit('m^2', 'html') # m<sup>2</sup>
+
     """
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self._ureg = pint.UnitRegistry()
-        self._registerStandardUnits() 
+        # self._ureg.define('pix')
+        # self._registerStandardUnits() 
 
-    def _registerStandardUnits(self):
-        """
-        Register standard units and our own units.
-        """
-        # example: self._ureg.define('angstrom = 1e-10 * meter')
-        # 使用已经内置的基本单位
-        # 如 m (米), s (秒), A (安培), K (开尔文), mol (摩尔), cd (坎德拉), kg (千克)
-        # (国际单位制基本单位)
+    # def _registerStandardUnits(self):
+    #     """
+    #     Register standard units and our own units.
+    #     """
+    #     # example: self._ureg.define('angstrom = 1e-10 * meter')
+    #     # 使用已经内置的基本单位
+    #     # 如 m (米), s (秒), A (安培), K (开尔文), mol (摩尔), cd (坎德拉), kg (千克)
+    #     # (国际单位制基本单位)
 
-        # 定义非基本单位，但常用的单位
-        self._ureg.define('nA = 1e-9 * A')  # 纳安
-        self._ureg.define('kV = 1e3 * V')   # 千伏
-        self._ureg.define('mm = 1e-3 * m')  # 毫米
-        self._ureg.define('um = 1e-6 * m')  # 微米 (μm)
-        self._ureg.define('μm = 1e-6 * m')  # 微米
-        self._ureg.define('nm = 1e-9 * m')  # 纳米
+    #     # 定义非基本单位，但常用的单位
+    #     self._ureg.define('nA = 1e-9 * A')  # 纳安
+    #     self._ureg.define('kV = 1e3 * V')   # 千伏
+    #     self._ureg.define('mm = 1e-3 * m')  # 毫米
+    #     self._ureg.define('um = 1e-6 * m')  # 微米 (μm)
+    #     self._ureg.define('μm = 1e-6 * m')  # 微米
+    #     self._ureg.define('nm = 1e-9 * m')  # 纳米
+    #     self._ureg.define('Å = 1e-10 * m')  # 埃
 
-        # 对于更复杂的单位，如平方米，可以直接使用内置单位
-        # m^2, nm^2 不需要特别定义
+    #     # 对于更复杂的单位，如平方米，可以直接使用内置单位
+    #     # m^2, nm^2 不需要特别定义
 
-        # 定义角度单位
-        self._ureg.define('rad = radian')  # 弧度
-        self._ureg.define('deg = degree')  # 度
-        self._ureg.define('mrad = 1e-3 * rad')  # 毫弧度
+    #     # 定义角度单位
+    #     self._ureg.define('rad = radian')  # 弧度
+    #     self._ureg.define('deg = degree')  # 度
+    #     self._ureg.define('mrad = 1e-3 * rad')  # 毫弧度
 
-        # 定义时间单位
-        self._ureg.define('ms = 1e-3 * s')  # 毫秒
+    #     # 定义时间单位
+    #     self._ureg.define('ms = 1e-3 * s')  # 毫秒
 
-        # 定义电场强度单位
-        # self._ureg.define('N/C = newton / coulomb')  # 牛顿每库仑
-        # self._ureg.define('V/m = volt / meter')  # 伏特每米
+    #     # 定义电场强度单位
+    #     self._ureg.define('N/C = newton / coulomb')  # 牛顿每库仑
+    #     self._ureg.define('V/m = volt / meter')  # 伏特每米
 
-        # 定义能量单位
-        self._ureg.define('eV = electron_volt')  # 电子伏
+    #     # 定义能量单位
+    #     self._ureg.define('eV = electron_volt')  # 电子伏
 
-        # 定义空间频率单位
-        # self._ureg.define('m^-1 = 1 / meter')  # 每米
+    #     # 定义空间频率单位
+    #     # self._ureg.define('m^-1 = 1 / meter')  # 每米
 
-        # 添加埃（Ångström）
-        self._ureg.define('angstrom = 1e-10 * meter')  # 埃
+    #     # 添加埃（Ångström）
+    #     # self._ureg.define('angstrom = 1e-10 * meter')  # 埃
 
     def registerUnit(self, definition: str):
         """
@@ -115,54 +113,54 @@ class UnitManager(QObject):
         quantity = self._ureg.Quantity(value, from_unit)
         return quantity.to(to_unit).magnitude 
     
-    def formatUnit(self, unit_str: str, context = "general") -> str:
+    def formatUnit(self, unit_str: str, value: float = None, context = "general") -> str:
         """
         Return a specific format of the unit.
 
-        There are 3 kind of format: general, html, and TeX. The general form-
+        There are 3 kind of format: general, unicode, and TeX. The general form-
         atting is registered in pint, but may not be displayed to the user. The 
-        html will be displayed in QLable, while TeX will be displayed in mat-
+        unicode will be displayed in QLable, while TeX will be displayed in mat-
         plotlib widgets.
 
         arguments:
             unit_str: (str) the unit name 
 
-            context: (str) must be one of "general", "html" and "TeX"
+            value: (float) the physical value
+
+            context: (str) should be one of "general", "unicode" or "TeX"
 
         returns:
             (str) the formatted unit str
         """
+
         unit = self._ureg.parse_units(unit_str)
-        if context == "general":
-            return "{0:~}".format(unit)
-        elif context in ("html", "HTML"):
-            return self._formatUnitHtml(unit)
+
+        if context in ("general", None, ''):
+            return self._formatUnitGeneral(unit, value)
         elif context in ("tex", "TeX", "TEX", "LaTeX", "LATEX", "latex"):
-            return self._formatUnitTex(unit)
+            return self._formatUnitTex(unit, value)
+        elif context in ("Unicode", "unicode", "utf-8", "UTF-8"):
+            return self._formatUnitUnicode(unit, value)
         else:
             raise ValueError("Invalid context for unit formatting")
-         
-    def _formatUnitHtml(self, unit: pint.Unit) -> str:
+
+    def _formatUnitGeneral(self, unit: pint.Unit, value: float = None) -> str:
         """
-        Format unit to html, for displaying in QLable
+        Format unit in general cases.
 
         arguments:
-            unit: (Unit) the input unit to be formatted.
+            unit: (Unit) the input unit to be formatted
+
+            value: (float) the physical value
 
         returns:
-            (str) the HTML formatted unit str
+            (str) General formatted unit str.
         """
-        unit_str = str(unit)
-        html_mappings = {
-            'm^2': 'm<sup>2</sup>',
-            'nm^2': 'nm<sup>2</sup>',
-            'um': 'μm',
-            'deg': '°',
-            'm^-1': 'm<sup>-1</sup>',
-        }
-        return html_mappings.get(unit_str, unit_str) 
+        if value:
+            return f"{value * unit:P}"
+        return f"{unit:P}"
     
-    def _formatUnitTex(self, unit: pint.Unit) -> str:
+    def _formatUnitTex(self, unit: pint.Unit, value: float = None) -> str:
         """
         Format unit to TeX, for displaying in matplotlib widgets.
 
@@ -172,17 +170,59 @@ class UnitManager(QObject):
         arguments:
             unit: (Unit) the input unit to be formatted.
 
+            value: (float) the physical value
+
         returns:
             (str) the TeX formatted unit str.
         """
-        unit_str = str(unit)
-
-        tex_mappings = {
-        'm^2': ' m$^2$',
-        'nm^2': ' nm$^2$',
-        'um': ' μm',  # 使用 Unicode 字符
-        'deg': '°',  # 对于角度单位不添加空格
-        'm^-1': ' m$^{-1}$',
-        }
-        return tex_mappings.get(unit_str, ' ' + unit_str)
+        if value:
+            return f"{value * unit:~L}"
+        return f"{unit:~L}"
     
+    def _formatUnitUnicode(self, unit: pint.Unit, value: float = None) -> str:
+        """
+        Format unit to Unicode, for displaying in plain text.
+
+        arguments:
+            unit: (Unit) the input unit to be formatted.
+
+            value: (float) the physical value
+
+        returns:
+            (str) the unicode formatted unit str.
+        """
+        if value:
+            return f"{value * unit:~P}"
+        return f"{unit:~P}"
+    
+    def isUnitLength(self, unit_str: str) -> bool:
+        """
+        Determines whether the dimension of a unit is a length.
+
+        arguments:
+            unit_str: (str) The inspected unit, e.g. 'nm'
+
+        returns:
+            (bool) True if the unit is a length, False otherwise.
+        """
+        unit = self._ureg.parse_units(unit_str)
+        dim = unit.dimensionality
+        length_dim = self._ureg.meter.dimensionality
+        return dim == length_dim 
+    
+    def isUnitSpaceFrequency(self, unit_str: str) -> bool:
+        """
+        Determins whether the dimension of a unit is a space frequency.
+
+        arguments:
+            unit_str: (str) The unit to checked, e.g. 'm ** -1'
+
+        returns:
+            (bool) True is the unit is a space frequency, False otherwise.
+        """
+        if '^' in unit_str:
+            unit_str = unit_str.replace('^', '**')
+        unit = self._ureg.parse_units(unit_str)
+        dim = unit.dimensionality 
+        space_frequency_dim = (1 / self._ureg.meter).dimensionality
+        return dim == space_frequency_dim

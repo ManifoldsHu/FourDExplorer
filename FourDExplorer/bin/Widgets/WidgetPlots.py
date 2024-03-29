@@ -17,12 +17,11 @@ from PySide6.QtGui import QAction
 from matplotlib.axes import Axes
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
+from matplotlib.patches import Rectangle 
+from matplotlib.text import Text 
 import numpy as np
 
-
-
 from bin.Widgets.WidgetPlotBase import WidgetPlotBase
-
 
 class WidgetPlotImage(WidgetPlotBase):
     """
@@ -34,6 +33,12 @@ class WidgetPlotImage(WidgetPlotBase):
         super().__init__(parent)
         self._initImageProcessingActions()
         self._initImageProcessingButton()
+        self._initMeasureActions()
+        self._initMeasureButton()
+        
+    @property
+    def action_scale_bar(self):
+        return self._action_scale_bar 
 
     def _initImageProcessingActions(self):
         """
@@ -85,6 +90,102 @@ class WidgetPlotImage(WidgetPlotBase):
         """
         for action in self._processing_actions.values():
             action.setItemPath(item_path)
+            
+    def _initMeasureActions(self):
+        """
+        Initialize the plot actions (and its menu).
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        self.menu_measure = QMenu(self)
+        self._action_scale_bar = ActionScaleBar(self)
+        self._measure_actions: dict[str, QAction] = {
+            'scale_bar': self._action_scale_bar
+        }
+        for action in self._measure_actions.values():
+            self.menu_measure.addAction(action)
+        
+        self._action_scale_bar.initialize(
+            canvas = self.canvas,
+            figure = self.figure,
+            blit_manager = self.blit_manager,
+        )
+        
+    def _initMeasureButton(self):
+        """
+        Will add a tool button (menu) in the toolbar that contains measuring 
+        actions.
+        """
+        self.toolButton_measure = QToolButton(self)
+        self.toolButton_measure.setPopupMode(QToolButton.MenuButtonPopup)
+        self.toolButton_measur_rc = ':/Navigation/resources/icons/measure'
+        self.toolButton_measure.setIcon(
+            self.theme_handler.iconProvider(self.toolButton_measur_rc)
+        )
+        self.theme_handler.theme_changed.connect(
+            lambda: self.toolButton_measure.setIcon(
+                self.theme_handler.iconProvider(
+                    self.toolButton_measur_rc 
+                )
+            )
+        )
+        self.addCustomizedToolButton(self.toolButton_measure)
+        self.toolButton_measure.clicked.connect(
+            lambda: self._measure_actions['scale_bar'].trigger()
+        )
+        self.toolButton_measure.setText(
+            self._measure_actions['scale_bar'].text()
+        )
+        
+    def setScaleBarActionUseMeta(
+        self, 
+        item_path: str,
+        pixel_length_meta: str,
+        unit_meta: str,
+    ):
+        """
+        Will set the scale bar's default dataset and its metadata. It will 
+        determine how long the scale bar should be.
+        
+        arguments:
+            item_path: (str) The dataset's path, where the metadata should read 
+                from
+            
+            pixel_length_meta: (str) The meta key that defines pixel length
+            
+            unit_meta: (str) The meta key that defines the unit of pixel length
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        action: ActionScaleBar = self._measure_actions['scale_bar']
+        action.initialize(
+            item_path = item_path, 
+            pixel_length_meta = pixel_length_meta, 
+            unit_meta = unit_meta
+        )
+        
+    def setScaleBarRelatedArtists(
+        self, 
+        scale_bar: Rectangle = None, 
+        scale_bar_text: Text = None
+    ):
+        """
+        Will set the scale bar's artist for the scale bar action.
+        
+        arguments:
+            scale_bar: (Rectangle)
+
+            scale_bar_text: (Text)
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        action: ActionScaleBar = self._measure_actions['scale_bar']
+        action.initialize(
+            scale_bar = scale_bar,
+            scale_bar_text = scale_bar_text,
+        )
+        
+        
+        
+        
+        
 
 class WidgetPlotHist(WidgetPlotBase):
     """
@@ -239,6 +340,12 @@ class WidgetPlotDP(WidgetPlotBase):
         super().__init__(parent)
         self._initFourDSTEMProcessingActions()
         self._initFourDSTEMProcessingButton()
+        self._initMeasureActions()
+        self._initMeasureButton()
+        
+    @property
+    def action_scale_bar(self):
+        return self._action_scale_bar 
 
     def _initFourDSTEMProcessingButton(self):
         """
@@ -307,6 +414,99 @@ class WidgetPlotDP(WidgetPlotBase):
         for action in self._processing_actions.values():
             action.setItemPath(item_path)
 
+            
+    def _initMeasureActions(self):
+        """
+        Initialize the plot actions (and its menu).
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        self.menu_measure = QMenu(self)
+        self._action_scale_bar = ActionScaleBar(self)
+        self._measure_actions: dict[str, QAction] = {
+            'scale_bar': self._action_scale_bar
+        }
+        for action in self._measure_actions.values():
+            self.menu_measure.addAction(action)
+        
+        self._action_scale_bar.initialize(
+            canvas = self.canvas,
+            figure = self.figure,
+            blit_manager = self.blit_manager,
+        )
+        
+    def _initMeasureButton(self):
+        """
+        Will add a tool button (menu) in the toolbar that contains measuring 
+        actions.
+        """
+        self.toolButton_measure = QToolButton(self)
+        self.toolButton_measure.setPopupMode(QToolButton.MenuButtonPopup)
+        self.toolButton_measur_rc = ':/Navigation/resources/icons/measure'
+        self.toolButton_measure.setIcon(
+            self.theme_handler.iconProvider(self.toolButton_measur_rc)
+        )
+        self.theme_handler.theme_changed.connect(
+            lambda: self.toolButton_measure.setIcon(
+                self.theme_handler.iconProvider(
+                    self.toolButton_measur_rc 
+                )
+            )
+        )
+        self.addCustomizedToolButton(self.toolButton_measure)
+        self.toolButton_measure.clicked.connect(
+            lambda: self._measure_actions['scale_bar'].trigger()
+        )
+        self.toolButton_measure.setText(
+            self._measure_actions['scale_bar'].text()
+        )
+        
+    def setScaleBarActionUseMeta(
+        self, 
+        item_path: str = None,
+        pixel_length_meta: str = None,
+        unit_meta: str = None,
+    ):
+        """
+        Will set the scale bar's default dataset and its metadata. It will 
+        determine how long the scale bar should be.
+        
+        arguments:
+            item_path: (str) The dataset's path, where the metadata should read 
+                from
+            
+            pixel_length_meta: (str) The meta key that defines pixel length
+            
+            unit_meta: (str) The meta key that defines the unit of pixel length
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        action: ActionScaleBar = self._measure_actions['scale_bar']
+        action.initialize(
+            item_path = item_path, 
+            pixel_length_meta = pixel_length_meta, 
+            unit_meta = unit_meta
+        )
+        
+    def setScaleBarRelatedArtists(
+        self, 
+        scale_bar: Rectangle = None, 
+        scale_bar_text: Text = None
+    ):
+        """
+        Will set the scale bar's artist for the scale bar action.
+        
+        arguments:
+            scale_bar: (Rectangle)
+
+            scale_bar_text: (Text)
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        action: ActionScaleBar = self._measure_actions['scale_bar']
+        action.initialize(
+            scale_bar = scale_bar,
+            scale_bar_text = scale_bar_text,
+        )
+        
+
 
 class WidgetPlotPreview(WidgetPlotBase):
     """
@@ -338,6 +538,13 @@ class WidgetPlotQuiver(WidgetPlotBase):
         super().__init__(parent)
         self._initVectorFieldProcessingActions()
         self._initVectorFieldProcessingButton()
+        self._initMeasureActions()
+        self._initMeasureButton()
+
+        
+    @property
+    def action_scale_bar(self):
+        return self._action_scale_bar 
 
     def _initVectorFieldProcessingButton(self):
         """
@@ -414,3 +621,96 @@ class WidgetPlotQuiver(WidgetPlotBase):
         """
         for action in self._processing_actions.values():
             action.setItemPath(item_path)
+            
+            
+    def _initMeasureActions(self):
+        """
+        Initialize the plot actions (and its menu).
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        self.menu_measure = QMenu(self)
+        self._action_scale_bar = ActionScaleBar(self)
+        self._measure_actions: dict[str, QAction] = {
+            'scale_bar': self._action_scale_bar
+        }
+        for action in self._measure_actions.values():
+            self.menu_measure.addAction(action)
+        
+        self._action_scale_bar.initialize(
+            canvas = self.canvas,
+            figure = self.figure,
+            blit_manager = self.blit_manager,
+        )
+        
+    def _initMeasureButton(self):
+        """
+        Will add a tool button (menu) in the toolbar that contains measuring 
+        actions.
+        """
+        self.toolButton_measure = QToolButton(self)
+        self.toolButton_measure.setPopupMode(QToolButton.MenuButtonPopup)
+        self.toolButton_measur_rc = ':/Navigation/resources/icons/measure'
+        self.toolButton_measure.setIcon(
+            self.theme_handler.iconProvider(self.toolButton_measur_rc)
+        )
+        self.theme_handler.theme_changed.connect(
+            lambda: self.toolButton_measure.setIcon(
+                self.theme_handler.iconProvider(
+                    self.toolButton_measur_rc 
+                )
+            )
+        )
+        self.addCustomizedToolButton(self.toolButton_measure)
+        self.toolButton_measure.clicked.connect(
+            lambda: self._measure_actions['scale_bar'].trigger()
+        )
+        self.toolButton_measure.setText(
+            self._measure_actions['scale_bar'].text()
+        )
+        
+    def setScaleBarActionUseMeta(
+        self, 
+        item_path: str = None,
+        pixel_length_meta: str = None,
+        unit_meta: str = None,
+    ):
+        """
+        Will set the scale bar's default dataset and its metadata. It will 
+        determine how long the scale bar should be.
+        
+        arguments:
+            item_path: (str) The dataset's path, where the metadata should read 
+                from
+            
+            pixel_length_meta: (str) The meta key that defines pixel length
+            
+            unit_meta: (str) The meta key that defines the unit of pixel length
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        action: ActionScaleBar = self._measure_actions['scale_bar']
+        action.initialize(
+            item_path = item_path, 
+            pixel_length_meta = pixel_length_meta, 
+            unit_meta = unit_meta
+        )
+        
+    def setScaleBarRelatedArtists(
+        self, 
+        scale_bar: Rectangle = None, 
+        scale_bar_text: Text = None
+    ):
+        """
+        Will set the scale bar's artist for the scale bar action.
+        
+        arguments:
+            scale_bar: (Rectangle)
+
+            scale_bar_text: (Text)
+        """
+        from bin.Actions.PlotActions import ActionScaleBar
+        action: ActionScaleBar = self._measure_actions['scale_bar']
+        action.initialize(
+            scale_bar = scale_bar,
+            scale_bar_text = scale_bar_text,
+        )
+        

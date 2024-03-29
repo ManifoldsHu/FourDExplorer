@@ -18,6 +18,8 @@
     <file>resources/icons/4D.ico</file>
   </qresource>
   <qresource prefix="Navigation">
+    <file>resources/icons/measure_light.png</file>
+    <file>resources/icons/measure.png</file>
     <file>resources/icons/home.png</file>
     <file>resources/icons/home_light.png</file>
     <file>resources/icons/backward.png</file>

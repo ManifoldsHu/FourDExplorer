@@ -15,6 +15,7 @@ date:           Mar 26, 2022
 
 # from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QToolBar, QToolButton
+from PySide6.QtWidgets import QDialog
 from PySide6.QtGui import QAction
 from PySide6.QtCore import QSize, Qt
 from matplotlib.backends.backend_qtagg import (
@@ -28,6 +29,7 @@ from Constants import UIThemeMode
 
 from bin.BlitManager import BlitManager
 from bin.UIManager import ThemeHandler
+from bin.Widgets.DialogScaleBar import DialogScaleBar
 
 class WidgetPlotBase(QWidget):
     """
@@ -149,7 +151,7 @@ class WidgetPlotBase(QWidget):
         if key is not None:
             self.navigation_actions[key] = action 
         else:
-            self.navigation_actions[action.text()]
+            self.navigation_actions[action.text()] = action
         self._navigation_toolbar.insertAction(self._action_loc_label, action)
 
     def addCustomizedToolButton(self, button: QToolButton):

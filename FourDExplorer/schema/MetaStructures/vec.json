@@ -3,61 +3,51 @@
         "title": {
             "type": "str",
             "title": "title",
-            "value": null,
             "description": "Title of the dataset. Initialized by dataset name, but not necessarily the same."
         },
         "original_name": {
             "type": "str",
             "title": "original filename",
-            "value": null,
             "description": "Original file name without extension."
         },
         "original_path": {
             "type": "str",
             "title": "original file path",
-            "value": null,
             "description": "Original file path."
         },
         "authors": {
             "type": "str",
             "title": "authors",
-            "value": null,
             "description": "In LaTeX format, i.e., Surname1, Name1 and Surname2, Name2, and so on."
         },
         "notes": {
             "type": "str",
             "title": "notes",
-            "value": null,
             "description": "May support rich text (HTML?)."
         },
         "time": {
             "type": "str",
             "title": "created time",
-            "value": null,
             "description": "Creation time in ISO 8601, e.g., 13:29:10."
         },
         "date": {
             "type": "str",
             "title": "created date",
-            "value": null,
             "description": "Creation date in ISO 8601, e.g., 2018-01-28."
         },
         "time_zone": {
             "type": "str",
             "title": "time zone",
-            "value": null,
             "description": "Supported by the python-dateutil library, the same as the system."
         },
         "doi": {
             "type": "str",
             "title": "DOI",
-            "value": null,
             "description": "Digital Object Unique Identifier (DOI)."
         },
         "fourd_explorer_version": {
             "type": "str",
             "title": "4D-Explorer Version",
-            "value": null,
             "description": "The version of 4D-Explorer."
         }
     },
@@ -66,32 +56,27 @@
             "pixel_size_i": {
                 "type": "float",
                 "title": "pixel size (i-direction)",
-                "value": null,
                 "description": "Pixel size in the i-direction."
             },
             "pixel_size_j": {
                 "type": "float",
                 "title": "pixel size (j-direction)",
-                "value": null,
                 "description": "Pixel size in the j-direction."
             },
             "pixel_size_unit": {
                 "type": "str",
                 "title": "pixel size unit",
-                "value": "m",
-                "description": "The base unit for pixel size, e.g., meters."
+                "description": "The base unit for pixel size, e.g., m."
             },
             "pixel_size_unit_display": {
                 "type": "str",
                 "title": "pixel size unit for display",
-                "value": "nm",
-                "description": "The display unit for pixel size, e.g., nanometers."
+                "description": "The display unit for pixel size, e.g., nm."
             },
             "display_unit_magnify": {
                 "type": "float",
                 "title": "display unit magnification factor",
-                "value": 1e9,
-                "description": "Magnification factor to convert from base unit to display unit, e.g., from meters to nanometers."
+                "description": "Magnification factor to convert from base unit to display unit. For example, from m to nm, this value should be 1e9."
             }
         }
     },
@@ -99,43 +84,36 @@
         "value_unit": {
             "type": "str",
             "title": "value unit",
-            "value": "N/C",
-            "description": "Base unit for measurement values, e.g., Newtons per Coulomb."
+            "description": "Base unit for measurement values, e.g., N/C for Newtons per Coulomb."
         },
         "value_unit_display": {
             "type": "str",
             "title": "value unit for display",
-            "value": "V/m",
-            "description": "Display unit for measurement values, e.g., Volts per meter."
+            "description": "Display unit for measurement values, e.g., V/m for Volts per meter."
         },
         "display_unit_magnify": {
             "type": "float",
             "title": "display unit magnification factor",
-            "value": 1.0,
             "description": "Magnification factor to convert from base unit to display unit."
         },
         "display_vmin": {
             "type": "float",
             "title": "minimum displaying value",
-            "value": null,
             "description": "Minimum displaying value for visualization."
         },
         "display_vmax": {
             "type": "float",
             "title": "maximum displaying value",
-            "value": null,
             "description": "Maximum displaying value for visualization."
         },
         "display_norm_mode": {
             "type": "str",
             "title": "displaying normalization mode",
-            "value": null,
             "description": "Normalization mode for display, e.g., 'linear' or 'logarithm'."
         },
         "display_colormap": {
             "type": "str",
             "title": "displaying colormap",
-            "value": null,
             "description": "Colormap used for displaying diffraction patterns, e.g., 'viridis'."
         }
     }
