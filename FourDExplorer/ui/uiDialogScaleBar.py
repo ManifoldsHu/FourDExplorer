@@ -25,7 +25,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(370, 348)
+        Dialog.resize(370, 425)
         self.verticalLayout_11 = QVBoxLayout(Dialog)
         self.verticalLayout_11.setObjectName(u"verticalLayout_11")
         self.tabWidget = QTabWidget(Dialog)
@@ -48,7 +48,7 @@ class Ui_Dialog(object):
         self.doubleSpinBox_bar_length = QDoubleSpinBox(self.tab_basic)
         self.doubleSpinBox_bar_length.setObjectName(u"doubleSpinBox_bar_length")
         self.doubleSpinBox_bar_length.setMinimum(0.010000000000000)
-        self.doubleSpinBox_bar_length.setMaximum(9999.989999999999782)
+        self.doubleSpinBox_bar_length.setMaximum(999999999.990000009536743)
         self.doubleSpinBox_bar_length.setValue(1.000000000000000)
 
         self.horizontalLayout_4.addWidget(self.doubleSpinBox_bar_length)
@@ -146,10 +146,10 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_12.addItem(self.horizontalSpacer_3)
 
-        self.label_28 = QLabel(self.page)
-        self.label_28.setObjectName(u"label_28")
+        self.label_bar_unit = QLabel(self.page)
+        self.label_bar_unit.setObjectName(u"label_bar_unit")
 
-        self.horizontalLayout_12.addWidget(self.label_28)
+        self.horizontalLayout_12.addWidget(self.label_bar_unit)
 
 
         self.verticalLayout_24.addLayout(self.horizontalLayout_12)
@@ -292,6 +292,7 @@ class Ui_Dialog(object):
 
         self.doubleSpinBox_bar_location_i = QDoubleSpinBox(self.tab_style)
         self.doubleSpinBox_bar_location_i.setObjectName(u"doubleSpinBox_bar_location_i")
+        self.doubleSpinBox_bar_location_i.setMaximum(9999.989999999999782)
 
         self.gridLayout_2.addWidget(self.doubleSpinBox_bar_location_i, 2, 2, 1, 1)
 
@@ -306,6 +307,7 @@ class Ui_Dialog(object):
 
         self.doubleSpinBox_bar_location_j = QDoubleSpinBox(self.tab_style)
         self.doubleSpinBox_bar_location_j.setObjectName(u"doubleSpinBox_bar_location_j")
+        self.doubleSpinBox_bar_location_j.setMaximum(9999.989999999999782)
 
         self.gridLayout_2.addWidget(self.doubleSpinBox_bar_location_j, 3, 2, 1, 1)
 
@@ -809,11 +811,11 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
 
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
         self.stackedWidget.setCurrentIndex(2)
         self.comboBox_reciprocal_unit.setCurrentIndex(0)
         self.comboBox_real_length_unit.setCurrentIndex(3)
-        self.tabWidget_2.setCurrentIndex(1)
+        self.tabWidget_2.setCurrentIndex(0)
         self.comboBox_text_font_family.setCurrentIndex(0)
 
 
@@ -838,7 +840,7 @@ class Ui_Dialog(object):
         self.comboBox_real_length_unit.setItemText(4, QCoreApplication.translate("Dialog", u"\u00c5", None))
 
         self.label_22.setText(QCoreApplication.translate("Dialog", u"Unit", None))
-        self.label_28.setText(QCoreApplication.translate("Dialog", u"pixel", None))
+        self.label_bar_unit.setText(QCoreApplication.translate("Dialog", u"pixel", None))
         self.checkBox_customize_scale.setText(QCoreApplication.translate("Dialog", u"Customize Scale", None))
         self.label_9.setText(QCoreApplication.translate("Dialog", u"Length per pixel (in custom unit)", None))
         self.label_8.setText(QCoreApplication.translate("Dialog", u"Custom unit", None))

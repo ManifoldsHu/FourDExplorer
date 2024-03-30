@@ -91,6 +91,8 @@ class PageViewVectorField(QWidget):
         self._colorbar_object = None 
         self._background_object = None
         self._image_object = None 
+        self._scale_bar = None 
+        self._scale_bar_text = None 
         self._image_max = 0
         self._image_min = 0
 
@@ -226,12 +228,15 @@ class PageViewVectorField(QWidget):
             self.setBackground(new_background_path)
 
         self._createQuiver()
+        self._createScaleBar()
         
         self.image_canvas.draw()
         self.image_canvas.flush_events()
-
-        self.ui.widget_quiver.setProcessingActionItemPath(self.data_path)
         
+        self.ui.widget_quiver.setProcessingActionItemPath(self.data_path)
+        self.ui.widget_quiver.action_scale_bar.dialog_scale_bar.initializeBarLength()
+        self.ui.widget_quiver.action_scale_bar.dialog_scale_bar.readScaleBarMeta()
+        self.ui.widget_quiver.action_scale_bar.dialog_scale_bar.updateScaleBar()
 
 
     def _createAxes(self):
@@ -310,6 +315,26 @@ class PageViewVectorField(QWidget):
 
         self.image_blit_manager['quiver'] = self._quiver_object
         
+    def _createScaleBar(self):
+        """
+        Create the scale bar and its text artist.
+        """
+        if self._scale_bar is None:
+            self._scale_bar = Rectangle((1, 1), 1, 1)
+            self.image_ax.add_patch(self._scale_bar)
+        if self._scale_bar_text is None:
+            self._scale_bar_text = self.image_ax.text(1, 1, '1')
+        self.ui.widget_quiver.setScaleBarRelatedArtists(
+            self._scale_bar, 
+            self._scale_bar_text,
+        )
+        self.image_blit_manager['scale_bar'] = self._scale_bar 
+        self.image_blit_manager['scale_bar_text'] = self._scale_bar_text 
+        self.ui.widget_quiver.setScaleBarActionUseMeta(
+            item_path = self.data_path,
+            pixel_length_meta = '/Calibration/Space/pixel_size_i',
+            unit_meta = '/Calibration/Space/pixel_size_unit',
+        )
 
     def setBackground(self, background_path: str):
         """

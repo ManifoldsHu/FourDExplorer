@@ -132,17 +132,19 @@ class UnitManager(QObject):
         returns:
             (str) the formatted unit str
         """
+        try:
+            unit = self._ureg.parse_units(unit_str)
 
-        unit = self._ureg.parse_units(unit_str)
-
-        if context in ("general", None, ''):
-            return self._formatUnitGeneral(unit, value)
-        elif context in ("tex", "TeX", "TEX", "LaTeX", "LATEX", "latex"):
-            return self._formatUnitTex(unit, value)
-        elif context in ("Unicode", "unicode", "utf-8", "UTF-8"):
-            return self._formatUnitUnicode(unit, value)
-        else:
-            raise ValueError("Invalid context for unit formatting")
+            if context in ("general", None, ''):
+                return self._formatUnitGeneral(unit, value)
+            elif context in ("tex", "TeX", "TEX", "LaTeX", "LATEX", "latex"):
+                return self._formatUnitTex(unit, value)
+            elif context in ("Unicode", "unicode", "utf-8", "UTF-8"):
+                return self._formatUnitUnicode(unit, value)
+            else:
+                raise ValueError("Invalid context for unit formatting")
+        except pint.errors.UndefinedUnitError as e:
+            return f"{value} {unit_str}"
 
     def _formatUnitGeneral(self, unit: pint.Unit, value: float = None) -> str:
         """
@@ -205,10 +207,14 @@ class UnitManager(QObject):
         returns:
             (bool) True if the unit is a length, False otherwise.
         """
-        unit = self._ureg.parse_units(unit_str)
-        dim = unit.dimensionality
-        length_dim = self._ureg.meter.dimensionality
-        return dim == length_dim 
+        try:
+            unit = self._ureg.parse_units(unit_str)
+            dim = unit.dimensionality
+            length_dim = self._ureg.meter.dimensionality
+            return dim == length_dim 
+        except pint.errors.UndefinedUnitError as e:
+            return False 
+        
     
     def isUnitSpaceFrequency(self, unit_str: str) -> bool:
         """
@@ -222,7 +228,10 @@ class UnitManager(QObject):
         """
         if '^' in unit_str:
             unit_str = unit_str.replace('^', '**')
-        unit = self._ureg.parse_units(unit_str)
-        dim = unit.dimensionality 
-        space_frequency_dim = (1 / self._ureg.meter).dimensionality
-        return dim == space_frequency_dim
+        try:
+            unit = self._ureg.parse_units(unit_str)
+            dim = unit.dimensionality 
+            space_frequency_dim = (1 / self._ureg.meter).dimensionality
+            return dim == space_frequency_dim
+        except pint.errors.UndefinedUnitError as e:
+            return False 

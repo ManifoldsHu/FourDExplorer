@@ -336,6 +336,10 @@ class PageBaseFourDSTEM(QWidget):
         self.dp_canvas.flush_events()
 
         self.ui.widget_dp.setProcessingActionItemPath(self.data_path)
+        
+        self.ui.widget_dp.action_scale_bar.dialog_scale_bar.initializeBarLength()
+        self.ui.widget_dp.action_scale_bar.dialog_scale_bar.readScaleBarMeta()
+        self.ui.widget_dp.action_scale_bar.dialog_scale_bar.updateScaleBar()
 
 
     def _createAxes(self):
@@ -405,6 +409,7 @@ class PageBaseFourDSTEM(QWidget):
             pixel_length_meta = '/Calibration/Space/du_i',
             unit_meta = '/Calibration/Space/du_i',
         )
+        
         
         
         

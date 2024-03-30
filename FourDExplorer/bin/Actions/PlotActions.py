@@ -165,9 +165,9 @@ class ActionScaleBar(ActionPlotBase):
         self._dialog = DialogScaleBar(qApp.main_window)
         self.triggered.connect(self.manageScaleBar)
 
-    # @property
-    # def dialog(self) -> DialogScaleBar:
-    #     return self._dialog
+    @property
+    def dialog_scale_bar(self) -> DialogScaleBar:
+        return self._dialog
     
     @property
     def scale_bar(self) -> Rectangle:
@@ -268,23 +268,31 @@ class ActionScaleBar(ActionPlotBase):
             unit_meta: (str) Optional, the metadata key that stores the unit 
                 of the pixel length.
         """
+        dialog = self._dialog
         if canvas is not None:
             self.setCanvas(canvas)
+            dialog.setCanvas(self.canvas)
         if figure is not None:
             self.setFigure(figure)
+            dialog.setFigure(self.figure)
         if axes is not None:
             self.setAxes(axes)
+            dialog.setAxes(self.axes)
         if blit_manager is not None:
             self.setBlitManager(blit_manager)
+            dialog.setBlitManager(self.blit_manager)
         if scale_bar is not None and scale_bar_text is not None:
             self.setArtists(scale_bar, scale_bar_text)
+            dialog.setScaleBar(self.scale_bar, self.scale_bar_text)
         if item_path:
             self.setItemPath(item_path)
+            dialog.setItemPath(self.item_path)
         if pixel_length_meta:
             self.setPixelLengthMeta(pixel_length_meta)
+            dialog.setPixelLengthMeta(self.pixel_length_meta)
         if unit_meta:
             self.setUnitMeta(unit_meta)
-        
+            dialog.setUnitMeta(self.unit_meta)
 
     def manageScaleBar(self):
         """
@@ -293,14 +301,7 @@ class ActionScaleBar(ActionPlotBase):
         pass
         # dialog = DialogScaleBar()
         dialog = self._dialog
-        dialog.setBlitManager(self.blit_manager)
-        dialog.setScaleBar(self.scale_bar, self.scale_bar_text)
-        dialog.setItemPath(self.item_path)
-        dialog.setPixelLengthMeta(self.pixel_length_meta)
-        dialog.setUnitMeta(self.unit_meta)
-        dialog.setCanvas(self.canvas)
-        dialog.setFigure(self.figure)
-        dialog.setAxes(self.axes)
+        dialog.updateScaleBar()
         dialog.show()
         
     

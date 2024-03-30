@@ -70,6 +70,7 @@ class BlitManager(QObject):
         
         self._last_update_time = time.time()
         self._min_interval = 0.1
+        self._is_updating = False 
         
 
     @property
@@ -190,13 +191,16 @@ class BlitManager(QObject):
         """
         Update the screen with animated artists.
         """
-        # paranoia in case we missed the draw event
         
+        # if self._is_updating:
+        #     return 
+        # self._is_updating = True 
         current_time = time.time()
         if current_time - self._last_update_time < self._min_interval:
             return 
         self._last_update_time = current_time
         
+        # paranoia in case we missed the draw event
         if self._background is None:
             self._onDraw(None)
         else:
@@ -207,6 +211,7 @@ class BlitManager(QObject):
             self.canvas.blit(self.figure.bbox)
         # let the GUI event loop process anything it has to do.
         self.canvas.flush_events()
+        # self._is_updating = False 
 
     def keys(self):
         return self._artists.keys()
