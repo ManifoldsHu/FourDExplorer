@@ -28,7 +28,7 @@ REQUIRED = [
     'matplotlib >= 3.5, <= 3.6',
     'pyinstaller >= 5.4, <= 5.5',
     'psutil == 5.9',
-    'pyside6 >= 6.2, <= 6.3',
+    'pyside6 == 6.2',
     'qt-material == 2.12',
     'scikit-image >= 0.18, <= 0.19',
     'scipy >= 1.8, <= 1.9',
