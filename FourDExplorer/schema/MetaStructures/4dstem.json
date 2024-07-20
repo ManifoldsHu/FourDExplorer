@@ -425,5 +425,28 @@
             "title": "displaying colormap",
             "description": "The display colormap of diffraction patterns, e.g., viridis."
         }
+    },
+    "ptychography": {
+        "scanning_angle": {
+            "type": "float",
+            "title": "rotational correction value",
+            "unit": "rad",
+            "description": "The value used to estimate probe positions on the object function during the scan."
+        },
+        "object_update": {
+            "type": "float",
+            "title": "object update factor",
+            "description": "The parameter that controls the rate of update of the object function during the ptychographic reconstruction."
+        },
+        "probe_update": {
+            "type": "float",
+            "title": "probe update factor",
+            "description": "The parameter that controls the rate of update of the probe function during the ptychographic reconstruction."
+        },
+        "iterations": {
+            "type": "int",
+            "title": "iterations",
+            "description": "The number of iterations for the ptychographic reconstruction."
+        }
     }
 }

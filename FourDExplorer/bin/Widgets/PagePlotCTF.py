@@ -51,7 +51,11 @@ from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFDataNode, HDFHandler 
 from bin.TaskManager import TaskManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
+from bin.Widgets.DialogCreateItem import DialogHDFCreate
+from Constants import HDFType
 from ui import uiPagePlotCTF
+
+from lib.Probe import OpticalSTEM
 
 class PagePlotCTF(QWidget):
     """
@@ -89,10 +93,11 @@ class PagePlotCTF(QWidget):
         self._ctf_line_ax = None 
         self._ctf_line_object = None 
 
-        self.ui.lineEdit_config_path.setReadOnly()
+        self.ui.lineEdit_config_path.setReadOnly(True)
 
         self._initUi()
         self._createAxes()
+        self._createImages()
 
     @property 
     def hdf_handler(self) -> HDFHandler:
@@ -243,7 +248,58 @@ class PagePlotCTF(QWidget):
     @property
     def task_manager(self) -> TaskManager:
         global qApp 
-        return qApp.task_manager 
+        return qApp.task_manager
+
+    @property
+    def ronchigram_data_object(self) -> h5py.Dataset:
+        dummy = np.zeros((256,256))
+        radius = 96
+        for i in range(256):
+            for j in range(256):
+                if (i-128)**2 + (j-128)**2 < radius**2:
+                    dummy[i,j] = 1         
+        return dummy#self.hdf_handler.file[self._ronchigram_data_path]
+    
+    @property
+    def probe_abs_data_object(self) -> h5py.Dataset:
+        return np.ones((128,128))#self.hdf_handler.file[self._probe_abs_data_path]
+    
+    @property
+    def probe_angle_data_object(self) -> h5py.Dataset:
+        return np.ones((128,128))#self.hdf_handler.file[self._probe_angle_data_path]
+    
+    @property
+    def ctf_image_data_object(self) -> h5py.Dataset:
+        return np.ones((1,1))#self.hdf_handler.file[self._ctf_image_data_path]
+    
+    def _initUi(self):
+        """
+        Initialise UI.
+        """
+        self.ui.pushButton_browse_probe.clicked.connect(self._browseProbe)
+
+        self.ui.comboBox_pixel_number.setCurrentIndex(0)
+        self.ui.doubleSpinBox_alpha.setValue(12.0)
+        self.ui.doubleSpinBox_voltage.setValue(200.0)
+        self.ui.doubleSpinBox_full_detector_size.setValue(25.0)
+        self.ui.doubleSpinBox_scanning_step_size.setValue(5.0)
+        self.ui.doubleSpinBox_camera_length.setValue(8.0)
+        self.ui.label_dk.setText("1")
+        self.ui.label_dx.setText("1")
+        self.ui.label_object_size.setText("1")
+        self.ui.label_reciprocal_space_size.setText("1")
+
+        self.ui.doubleSpinBox_defocus.setValue(100.0)
+        self.ui.doubleSpinBox_Cs.setValue(1.0)
+        
+        # Opens a new dialog to set higher order aberrations.
+        self.ui.pushButton_set_aberrations
+
+        self.ui.comboBox_image_modes.setCurrentIndex(0)
+        self.ui.doubleSpinBox_abf_outer_radius.setValue(20.0)
+        self.ui.doubleSpinBox_abf_inner_radius.setValue(10.0)
+
+        self.ui.pushButton_save_config_path.clicked.connect(self._saveConfigPath)
     
     def _createAxes(self):
         """
@@ -305,34 +361,188 @@ class PagePlotCTF(QWidget):
 
         if self._ctf_line_ax == None:
             self._ctf_line_ax = self.ctf_line_figure.add_subplot()
-            self.ctf_line_blit_manager.addArtist('line_axes', self._ctf_line_ax) 
+            self.ctf_line_blit_manager.addArtist('line_axes', self._ctf_line_ax)
 
-    def setOpticalConfig(self, config_path: str):
+    def _createImages(self):
         """
-        Set the config path in HDF5 file, to show the CTF.
-
-        Will set the config_path attribute. 
-
-        arguments:
-            config_path: (str) the path of the optical config data.
-
-        raises:
-            TypeError, KeyError, ValueError
+        Read the images and its attributes, and show it.
         """
-        if not isinstance(config_path, str):
-            raise TypeError("config_path must be a str, not"
-                "{0}".format(type(config_path).__name__))
+        if self._ronchigram_object in self.ronchigram_ax.images:
+            _index = self.ronchigram_ax.images.index(self._ronchigram_object)
+            self.ronchigram_ax.images.pop(_index)
+
+        ronchigram_min = np.min(self.ronchigram_data_object)
+        ronchigram_max = np.max(self.ronchigram_data_object)
+        self._ronchigram_object = self.ronchigram_ax.imshow(
+            self.ronchigram_data_object,
+            vmin=ronchigram_min,
+            vmax=ronchigram_max,
+        )
+        self.ronchigram_blit_manager['image'] = self._ronchigram_object
+
+        if self._probe_abs_object in self.probe_abs_ax.images:
+            _index = self.probe_abs_ax.images.index(self._probe_abs_object)
+            self.probe_abs_ax.images.pop(_index)
+
+        probe_abs_min = np.min(self.probe_abs_data_object)
+        probe_abs_max = np.max(self.probe_abs_data_object)
+        self._probe_abs_object = self.probe_abs_ax.imshow(
+            self.probe_abs_data_object,
+            vmin=probe_abs_min,
+            vmax=probe_abs_max,
+        )
+        self.probe_abs_blit_manager['image'] = self._probe_abs_object
+
+        if self._probe_angle_object in self.probe_angle_ax.images:
+            _index = self.probe_angle_ax.images.index(self._probe_angle_object)
+            self.probe_angle_ax.images.pop(_index)
+
+        probe_angle_min = np.min(self.probe_angle_data_object)
+        probe_angle_max = np.max(self.probe_angle_data_object)
+        self._probe_angle_object = self.probe_angle_ax.imshow(
+            self.probe_angle_data_object,
+            vmin=probe_angle_min,
+            vmax=probe_angle_max,
+        )
+        self.probe_angle_blit_manager['image'] = self._probe_angle_object
+
+        if self._ctf_image_object in self.ctf_image_ax.images:
+            _index = self.ctf_image_ax.images.index(self._ctf_image_object)
+            self.ctf_image_ax.images.pop(_index)
+
+        ctf_image_min = np.min(self.ctf_image_data_object)
+        ctf_image_max = np.max(self.ctf_image_data_object)
+        self._ctf_image_object = self.ctf_image_ax.imshow(
+            self.ctf_image_data_object,
+            vmin=ctf_image_min,
+            vmax=ctf_image_max,
+        )
+        self.ctf_image_blit_manager['image'] = self._ctf_image_object
+
+    def _createColorbar(self):
+        """
+        Create the colorbar according to the image.
+        """
+        if self._ronchigram_colorbar_object is None:
+            self._ronchigram_colorbar_object = Colorbar(
+                ax=self._ronchigram_colorbar_ax,
+                mappable=self._ronchigram_object,
+            )
+
+        else:
+            self._ronchigram_colorbar_object.update_normal(self._ronchigram_object)
+
+        if self._probe_abs_colorbar_object is None:
+            self._probe_abs_colorbar_object = Colorbar(
+                ax=self._probe_abs_colorbar_ax,
+                mappable=self._probe_abs_object,
+            )
+
+        else:
+            self._probe_abs_colorbar_object.update_normal(self._probe_abs_object)
+
+        if self._probe_angle_colorbar_object is None:
+            self._probe_angle_colorbar_object = Colorbar(
+                ax=self._probe_angle_colorbar_ax,
+                mappable=self._probe_angle_object,
+            )
+
+        else:
+            self._probe_angle_colorbar_object.update_normal(self._probe_angle_object)
+
+        if self._ctf_image_colorbar_object is None:
+            self._ctf_image_colorbar_object = Colorbar(
+                ax=self._ctf_image_colorbar_ax,
+                mappable=self._ctf_image_object,
+            )
+
+        else:
+            self._ctf_image_colorbar_object.update_normal(self._ctf_image_object)
+
+    def _browseProbe(self):
+        """
+        Browse the probe data.
+        """
+        dialog = DialogHDFChoose(self)
+        dialog_code = dialog.exec()
+        if dialog_code == dialog.accepted:
+            current_path = dialog.getCurrentPath()
+        else:
+            return 
+
+        try:
+            self._config_path = current_path
+        except (KeyError, ValueError, TypeError,) as e:
+            self.logger.error('{0}'.format(e), exc_info=True)
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('Cannot open this configuration: {0}'.format(e))
+            msg.exec()
+
+    def _saveConfigPath(self):
+        """
+        Save the config path in the HDF5 file.
+        """
+        dialog_create = DialogHDFCreate()
+        dialog_create.initNames()
+        dialog_code = dialog_create.exec()
+        if not dialog_code == dialog_create.accepted:
+            return 
+        item_type = dialog_create.getItemType()
+        parent_path = dialog_create.getParentPath()
+        name = dialog_create.getName()
+        model = self.hdf_handler.model
+        parent_index = model.indexFromPath(parent_path)
+        # TO DO: Need to specialise to the config storage format.
+        try:
+            if item_type == HDFType.Group:
+                model.insertGroup(parent_index, name) 
+            elif item_type == HDFType.Data:
+                shape = dialog_create.getShape()
+                dtype = dialog_create.getDType()
+                model.insertData(
+                    parent = parent_index, 
+                    name = name,
+                    shape = shape,
+                    dtype = dtype,
+                ) 
+        except (ValueError, KeyError) as e:
+            msg = QMessageBox()
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText('Fail to create: {0}'.format(e))
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec()
+            return False
+
+    # def setOpticalConfig(self, config_path: str):
+    #     """
+    #     Set the config path in HDF5 file, to show the CTF.
+
+    #     Will set the config_path attribute. 
+
+    #     arguments:
+    #         config_path: (str) the path of the optical config data.
+
+    #     raises:
+    #         TypeError, KeyError, ValueError
+    #     """
+    #     if not isinstance(config_path, str):
+    #         raise TypeError("config_path must be a str, not"
+    #             "{0}".format(type(config_path).__name__))
         
-        config_node = self.hdf_handler.getNode(config_path)
-        # May raise KeyError if the path does not exist
-        if not isinstance(config_node, HDFDataNode):
-            raise ValueError("Item {0} must be a Dataset".format(config_path))
+    #     config_node = self.hdf_handler.getNode(config_path)
+    #     # May raise KeyError if the path does not exist
+    #     if not isinstance(config_node, HDFDataNode):
+    #         raise ValueError("Item {0} must be a Dataset".format(config_path))
         
-        config_obj = self.hdf_handler.file[config_path]
+    #     config_obj = self.hdf_handler.file[config_path]
         
-        self._config_path = config_path 
-        self.ui.lineEdit_config_path.setText(self.config_path)
-        self.setWindowTitle("{0} - CTF".format(config_node.name))
+    #     self._config_path = config_path 
+    #     self.ui.lineEdit_config_path.setText(self.config_path)
+    #     self.setWindowTitle("{0} - CTF".format(config_node.name))
 
         #TODO read the 4D-STEM optical configuration and render the images
 
@@ -344,9 +554,14 @@ class PagePlotCTF(QWidget):
     #   - 构建 Calculator 类以及 OpticalConfig 类，用于得到 CTF 数据
 
     
-
-
-
+import sys
+from bin.app import App
+if __name__ == '__main__':
+    app = App(sys.argv)
+    app.startBackEnds()
+    ex = PagePlotCTF()
+    ex.show()
+    sys.exit(app.exec())
 
 
 
