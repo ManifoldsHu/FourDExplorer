@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_10" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,0">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
@@ -79,416 +79,348 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout_9">
-       <item>
-        <widget class="QTabWidget" name="tabWidget">
-         <property name="currentIndex">
-          <number>0</number>
-         </property>
-         <widget class="QWidget" name="tab_alignment">
-          <attribute name="title">
-           <string>Alignment</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>9</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab_diffraction_shift_alignment">
+       <attribute name="title">
+        <string>Diffraction Shift Alignment</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Alignment Method</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBox_show_alignment_method">
+            <item>
+             <property name="text">
+              <string>Manually</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Use Reference Dataset</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Use FDDNet</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QStackedWidget" name="stackedWidget_align_mode">
+          <property name="currentIndex">
+           <number>1</number>
+          </property>
+          <widget class="WidgetAlignmentManual" name="stackedWidget_align_mode_manually"/>
+          <widget class="WidgetAlignmentRef" name="stackedWidget_align_mode_reference"/>
+          <widget class="WidgetAlignmentFDDNet" name="stackedWidget_align_mode_fddnet"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_displaying_effects">
+       <attribute name="title">
+        <string>Displaying Effects</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_10">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Shift Path</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="lineEdit_current_shift_vec_path"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_browse_current_shift_vec">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Auxiliary Arrow</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_9">
            <item>
-            <widget class="QComboBox" name="comboBox_fine_tuning_mode">
-             <item>
-              <property name="text">
-               <string>Coarse Alignment</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Using Reference (CoM)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Using Translation Anchors</string>
-              </property>
-             </item>
+            <widget class="QCheckBox" name="checkBox_draw_auxiliary_arrow">
+             <property name="text">
+              <string>Draw shift arrow at the center</string>
+             </property>
             </widget>
            </item>
            <item>
-            <widget class="QStackedWidget" name="stackedWidget_align_mode">
-             <property name="currentIndex">
-              <number>2</number>
-             </property>
-             <widget class="QWidget" name="page_simple">
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_8">
+               <item>
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Arrow Color</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_15">
+                 <property name="text">
+                  <string>Arrow Width</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
-                <spacer name="verticalSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>6</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_4">
-                 <property name="text">
-                  <string>Beam spot translation</string>
-                 </property>
+                <widget class="QComboBox" name="comboBox_auxiliary_arrow_color">
+                 <item>
+                  <property name="text">
+                   <string>black</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>blue</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>cyan</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>green</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>orange</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>purple</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>red</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>white</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>yellow</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
                <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_5">
-                 <item>
-                  <widget class="QLabel" name="label_11">
-                   <property name="text">
-                    <string>Shift i-direct</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QSpinBox" name="spinBox_simple_shift_i"/>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_6">
-                 <item>
-                  <widget class="QLabel" name="label_12">
-                   <property name="text">
-                    <string>Shift j-direct</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QSpinBox" name="spinBox_simple_shift_j"/>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_2">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>28</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="checkBox_apply_coarse">
-                 <property name="text">
-                  <string>Apply Alignment</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_3">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>81</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <layout class="QGridLayout" name="gridLayout">
-                 <item row="0" column="1">
-                  <widget class="QPushButton" name="pushButton_up">
-                   <property name="text">
-                    <string>↑</string>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QPushButton" name="pushButton_left">
-                   <property name="text">
-                    <string>←</string>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QPushButton" name="pushButton_down">
-                   <property name="text">
-                    <string>↓</string>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="2">
-                  <widget class="QPushButton" name="pushButton_right">
-                   <property name="text">
-                    <string>→</string>
-                   </property>
-                   <property name="default">
-                    <bool>false</bool>
-                   </property>
-                   <property name="flat">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
+                <widget class="QDoubleSpinBox" name="doubleSpinBox_auxiliary_arrow_width"/>
                </item>
               </layout>
-             </widget>
-             <widget class="QWidget" name="page_reference">
-              <layout class="QVBoxLayout" name="verticalLayout_7">
-               <item>
-                <spacer name="verticalSpacer_5">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>63</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QLabel" name="label_9">
-                 <property name="text">
-                  <string>Reference Center of Mass</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_2">
-                 <item>
-                  <widget class="QLineEdit" name="lineEdit_reference_com"/>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="pushButton_browse_reference_com">
-                   <property name="text">
-                    <string>Browse</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_6">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>64</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="checkBox_apply_reference">
-                 <property name="text">
-                  <string>Apply Alignment</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_4">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>63</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </widget>
-             <widget class="QWidget" name="page_anchors">
-              <layout class="QVBoxLayout" name="verticalLayout_8">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <property name="rightMargin">
-                <number>0</number>
-               </property>
-               <property name="bottomMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="label_13">
-                 <property name="text">
-                  <string>Translation Anchors</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QTableView" name="tableView_anchors"/>
-               </item>
-              </layout>
-             </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Auxiliary Circle</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="WidgetMaskCircle" name="widget_auxiliary_circle" native="true"/>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_show_auxiliary_circle">
+             <property name="text">
+              <string>Show auxiliary circle</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_3">
+             <property name="text">
+              <string>Set circle center to where the shift vector point to</string>
+             </property>
             </widget>
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_display_effect">
-          <attribute name="title">
-           <string>Displaying Effect</string>
-          </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="WidgetMaskCircle" name="widget_circle" native="true"/>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-       <item>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Brightness</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QSlider" name="horizontalSlider_brightness">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="text">
-            <string>Contrast</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QSlider" name="horizontalSlider_contrast">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>Norm</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QComboBox" name="comboBox_normalize">
-           <item>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Linear</string>
+             <string>Brightness</string>
             </property>
-           </item>
-           <item>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSlider" name="horizontalSlider_brightness">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Logarithm</string>
+             <string>Contrast</string>
             </property>
-           </item>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>Color map</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QComboBox" name="comboBox_colormap">
-           <item>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="horizontalSlider_contrast">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_7">
             <property name="text">
-             <string>viridis</string>
+             <string>Norm</string>
             </property>
-           </item>
-           <item>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="comboBox_normalize">
+            <item>
+             <property name="text">
+              <string>Linear</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Logarithm</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>plasma</string>
+             <string>Color map</string>
             </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>gray</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>RdYlBu</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>twilight</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>hsv</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>jet</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Others</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="comboBox_colormap">
+            <item>
+             <property name="text">
+              <string>viridis</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>plasma</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>gray</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>RdYlBu</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>twilight</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>hsv</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>jet</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Others</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
    </item>
@@ -510,7 +442,7 @@
      <item>
       <widget class="QPushButton" name="pushButton_start">
        <property name="text">
-        <string>Start Calculation</string>
+        <string>Start Calculation (Applying Shift Vector to 4D-STEM Dataset)</string>
        </property>
       </widget>
      </item>
@@ -529,6 +461,24 @@
    <class>WidgetMaskCircle</class>
    <extends>QWidget</extends>
    <header>bin.Widgets.WidgetMasks.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetAlignmentFDDNet</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetAlignmentFDDNet.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetAlignmentRef</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetAlignmentRef.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetAlignmentManual</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetAlignmentManual.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

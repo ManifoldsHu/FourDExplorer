@@ -22,3 +22,5 @@ logs
 *.oaqs
 *.h5
 .vscode
+.config 
+.DS_Store

@@ -39,6 +39,7 @@ from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 from matplotlib.quiver import Quiver 
 from matplotlib.transforms import Affine2D
+from matplotlib.image import AxesImage 
 import numpy as np
 from scipy.ndimage import rotate
 
@@ -79,14 +80,23 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         self._quiver_scale = 1
         self._quiver_width = 0.15
         self._quiver_color = 'black'
+
+        self._axial_bf_object = None 
+        self._axial_bf_data = None 
+        self._axial_bf_path = ''
+        self._axial_bf_ax = None
+
+        self._rotation_angle = 0
+
         self._createAxes()
         self._createQuiverAxes()
+        self._createAxialBFAxes()
         self._initBaseUi()
         self._initUi()
 
     @property
     def rotation_angle(self) -> float:
-        return self.ui.doubleSpinBox_rotation_angle.value()
+        return self._rotation_angle 
 
     @property
     def task_manager(self) -> TaskManager:
@@ -142,6 +152,30 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
     def quiver_color(self) -> str:
         return self._quiver_color
 
+    @property
+    def axial_bf_ax(self) -> Axes:
+        return self._axial_bf_ax 
+    
+    @property
+    def axial_bf_object(self) -> AxesImage:
+        return self._axial_bf_object 
+    
+    @property
+    def axial_bf_data(self) -> np.ndarray:
+        return self._axial_bf_data
+    
+    @property
+    def axial_bf_canvas(self) -> FigureCanvas:
+        return self.ui.widget_axial_bf.canvas
+    
+    @property
+    def axial_bf_figure(self) -> Figure:
+        return self.ui.widget_axial_bf.figure
+    
+    @property
+    def axial_bf_blit_manager(self) -> BlitManager:
+        return self.ui.widget_axial_bf.blit_manager
+
     def setFourDSTEM(self, data_path: str):
         """
         Set the data path in HDF5 file, to show the diffraction patterns.
@@ -172,16 +206,26 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         self.ui.pushButton_calculate_rotation_angle.clicked.connect(
             self._calculateRotationAngle
         )
-        self.ui.doubleSpinBox_rotation_angle.valueChanged.connect(
-            self._updateDP 
+        self.ui.doubleSpinBox_rotation_angle_quiver.valueChanged.connect(
+            self._rotateDPAccordingToQuiver
         )
         self.ui.toolButton_refresh_quiver.clicked.connect(
             self._changeQuiverAngle 
         )
         self._updateRefreshIcon()
         self.theme_handler.theme_changed.connect(self._updateRefreshIcon)
-        self.ui.doubleSpinBox_rotation_angle.setRange(-360, 720)
+        self.ui.doubleSpinBox_rotation_angle_quiver.setRange(-360, 720)
         
+        self.ui.pushButton_browse_axial_bf.clicked.connect(self._browseAxialBF)
+        self.ui.pushButton_calculate_rotation_angle_axial_bf.clicked.connect(self._calculateRotationAngleAxialBF)
+        self.ui.doubleSpinBox_rotation_angle_axial_bf.valueChanged.connect(
+            self._rotateDPAccordingToAxialBF
+        )   # the spin box of rotation angle in axial bf tab 
+        self.ui.doubleSpinBox_rotation_angle_axial_bf.setRange(-360, 720)
+        self.ui.toolButton_refresh_axial_bf.clicked.connect(
+            self._updateDP 
+        )
+
         self.ui.pushButton_start.clicked.connect(self.startCalculation)
         self.ui.pushButton_start.setProperty('class', 'danger')
 
@@ -189,13 +233,14 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         _refresh_quiver_icon_path = ':/HDFEdit/resources/icons/refresh'
         refresh_icon=self.theme_handler.iconProvider(_refresh_quiver_icon_path)
         self.ui.toolButton_refresh_quiver.setIcon(refresh_icon)
+        self.ui.toolButton_refresh_axial_bf.setIcon(refresh_icon)
 
     def setVectorField(self, vec_path: str = '', read_attr: bool = False):
         """
         Set the vector fields path.
 
         arguments:
-            data_path: (str) the path of the vector field. If None, a new 
+            vec_path: (str) the path of the vector field. If None, a new 
                 vector field will be created.
 
             read_attr: (bool) whether display effects are from Dataset.attrs.
@@ -205,7 +250,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
             return 
             
         if not isinstance(vec_path, str):
-            raise TypeError('data_path must be a str, not '
+            raise TypeError('vec_path must be a str, not '
                 '{0}'.format(type(vec_path).__name__))
 
         img_node = self.hdf_handler.getNode(vec_path)  
@@ -296,6 +341,28 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         dp_rotate = rotate(dp, self.rotation_angle, reshape = False)
         self.dp_object.set_data(dp_rotate)
         self.dp_blit_manager.update()
+
+    def _rotateDPAccordingToQuiver(self):
+        """
+        Rotate the diffraction pattern according to the double spin box 
+        at the quiver tab.
+        """
+        self._rotation_angle = self.ui.doubleSpinBox_rotation_angle_quiver.value()
+
+        self.ui.doubleSpinBox_rotation_angle_quiver.setValue(self.rotation_angle)
+        self.ui.doubleSpinBox_rotation_angle_axial_bf.setValue(self.rotation_angle)
+        self._updateDP()
+
+    def _rotateDPAccordingToAxialBF(self):
+        """
+        Rotate the diffraction pattern according to the double spin box 
+        at the axial bf tab.
+        """
+        self._rotation_angle = self.ui.doubleSpinBox_rotation_angle_axial_bf.value()
+
+        self.ui.doubleSpinBox_rotation_angle_quiver.setValue(self.rotation_angle)
+        self.ui.doubleSpinBox_rotation_angle_axial_bf.setValue(self.rotation_angle)
+        self._updateDP()
 
     def _browseVectorField(self):
         """
@@ -418,13 +485,84 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         self.task_manager.addTask(self.task) 
 
 
-# class DialogAdjustQuiverEffect(QDialog):
-#     """
-#     用于调整矢量场箭头图的效果的对话框。
+    def setAxialBF(self, axial_bf_path: str, read_attr: bool = False):
+        """
+        Set the axial BF path.
 
-#     注意，这个类和 PageViewVectorField 中的类在 API 上具有不同。这个对话框
-#     不会试图读取
+        arguments:
+            axial_bf_path: (str) the path of the axial BF. If None, a new one will be created.
 
-#     Dialog to adjust quiver display effect.
-#     """
+            read_attr: (bool) whether to read the displaying attributes from the Axial BF image.
+        """
+        if axial_bf_path == '':
+            self._axial_bf_data = None 
+            return 
+        
+        if not isinstance(axial_bf_path, str):
+            raise TypeError('axial_bf_path should be a string, not '
+                            f'{type(axial_bf_path).__name__}')
+        
+        axial_bf_node = self.hdf_handler.getNode(axial_bf_path)
+        if not isinstance(axial_bf_node, HDFDataNode):
+            raise ValueError(f'Item {axial_bf_path} must be a Dataset')
+        axial_bf_obj = self.hdf_handler.file[axial_bf_path]
+        if not len(axial_bf_obj.shape) == 2:
+            raise ValueError(f'Data must be a 2D array')
+        
+        if read_attr:
+            pass # TODO 
+
+        self._axial_bf_data = axial_bf_obj[:]
+        self._axial_bf_path = axial_bf_path
+        self.ui.lineEdit_axial_bf_path.setText(self._axial_bf_path)
+        self._createAxialBF()
+        self.axial_bf_canvas.draw()
+        self.axial_bf_canvas.flush_events()
+
+    def _createAxialBFAxes(self):
+        """
+        Initialize the axial BF axes.
+        """
+        if self._axial_bf_ax is None:
+            self._axial_bf_ax = self.axial_bf_figure.add_subplot()
+            self._axial_bf_ax.set_aspect('equal')
+            self.axial_bf_blit_manager.addArtist('axial_bf_axes', self._axial_bf_ax)
+
+    def _createAxialBF(self):
+        """
+        Show the axial bf plot.
+        """
+        if self._axial_bf_object in self.axial_bf_ax.images:
+            _index = self.axial_bf_ax.images.index(self.axial_bf_object)
+            self.axial_bf_ax.images.pop(_index)
+
+        self._axial_bf_object = self.axial_bf_ax.imshow(self._axial_bf_data)
+        self.axial_bf_blit_manager.addArtist('axial_bf', self._axial_bf_object)
+        self.axial_bf_blit_manager.update()
+
+    def _browseAxialBF(self):
+        """
+        Open a dialog to browse which axial bright field image to set to be calibrated.
+        """
+        dialog = DialogHDFChoose(self)
+        dialog_code = dialog.exec()
+        if dialog_code == dialog.Accepted:
+            current_path = dialog.getCurrentPath()
+        try:
+            self.setAxialBF(current_path)
+        except (KeyError, ValueError, TypeError,) as e:
+            self.logger.error('{0}'.format(e), exc_info=True)
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('Cannot open this data: {0}'.format(e))
+            msg.exec()
+
+    def _calculateRotationAngleAxialBF(self):
+        """
+        TODO
+        """
+        pass 
+
 
