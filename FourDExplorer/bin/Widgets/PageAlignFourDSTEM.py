@@ -177,7 +177,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self.ui.pushButton_start.clicked.connect(self.startCalculation)
         self.ui.pushButton_start.setText('Start to Apply Alignment')
 
-        self.ui.
+        # self.ui.
 
     def _createPatches(self):
         """
