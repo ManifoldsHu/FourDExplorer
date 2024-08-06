@@ -137,36 +137,42 @@ class PageCenterOfMass(PageVirtualImage):
         Generate metadata for center of mass vector field.
         """
         meta = self._generateImageMeta()
-        meta['image_mode'] = 'Center of Mass'
-        attrs = self.data_object.attrs
         
-        if 'dp_pixel_size' in attrs:
-            meta['com_unit_per_value_i'] = attrs['dp_pixel_size']
-            meta['com_unit_per_value_j'] = attrs['dp_pixel_size']
-            meta['com_unit'] = 'rad'
-        else:
-            if 'dp_pixel_size_i' in attrs:
-                meta['com_unit_per_value_i'] = attrs['dp_pixel_size_i']
-                meta['com_unit'] = 'rad'
-            if 'dp_pixel_size_j' in attrs:
-                meta['com_unit_per_value_j'] = attrs['dp_pixel_size_j']
-                meta['com_unit'] = 'rad'
-        
+        meta['/General/notes'] = 'Center of Mass' 
         return meta 
+        
+        # meta['image_mode'] = 'Center of Mass'
+        # attrs = self.data_object.attrs
+        
+        # if 'dp_pixel_size' in attrs:
+        #     meta['com_unit_per_value_i'] = attrs['dp_pixel_size']
+        #     meta['com_unit_per_value_j'] = attrs['dp_pixel_size']
+        #     meta['com_unit'] = 'rad'
+        # else:
+        #     if 'dp_pixel_size_i' in attrs:
+        #         meta['com_unit_per_value_i'] = attrs['dp_pixel_size_i']
+        #         meta['com_unit'] = 'rad'
+        #     if 'dp_pixel_size_j' in attrs:
+        #         meta['com_unit_per_value_j'] = attrs['dp_pixel_size_j']
+        #         meta['com_unit'] = 'rad'
+        
+        # return meta 
 
     def _generateCoMiMeta(self) -> dict:
         """
         Generate metadata for vertical direction component of CoM.
         """
         meta = self._generateImageMeta()
-        meta['image_mode'] = 'Center of Mass (i-component)'
-        attrs = self.data_object.attrs 
-        if 'dp_pixel_size' in attrs:
-            meta['com_unit_per_value_i'] = attrs['dp_pixel_size']
-            meta['com_unit'] = 'rad'
-        elif 'dp_pixel_size_i' in attrs:
-            meta['com_unit_per_value_i'] = attrs['dp_pixel_size_i']
-            meta['com_unit'] = 'rad'
+        meta['/General/notes'] = 'Center of Mass (i-component)'
+         
+        # meta['image_mode'] = 'Center of Mass (i-component)'
+        # attrs = self.data_object.attrs 
+        # if 'dp_pixel_size' in attrs:
+        #     meta['com_unit_per_value_i'] = attrs['dp_pixel_size']
+        #     meta['com_unit'] = 'rad'
+        # elif 'dp_pixel_size_i' in attrs:
+        #     meta['com_unit_per_value_i'] = attrs['dp_pixel_size_i']
+        #     meta['com_unit'] = 'rad'
         return meta
 
     def _generateCoMjMeta(self) -> dict:
@@ -174,14 +180,16 @@ class PageCenterOfMass(PageVirtualImage):
         Generate metadata for horizontal direction component of CoM.
         """
         meta = self._generateImageMeta()
-        meta['image_mode'] = 'Center of Mass (j-component)'
-        attrs = self.data_object.attrs 
-        if 'dp_pixel_size' in attrs:
-            meta['com_unit_per_value_j'] = attrs['dp_pixel_size']
-            meta['com_unit'] = 'rad'
-        elif 'dp_pixel_size_j' in attrs:
-            meta['com_unit_per_value_j'] = attrs['dp_pixel_size_j']
-            meta['com_unit'] = 'rad'
+        meta['/General/notes'] = 'Center of Mass (j-component)'
+        
+        # meta['image_mode'] = 'Center of Mass (j-component)'
+        # attrs = self.data_object.attrs 
+        # if 'dp_pixel_size' in attrs:
+        #     meta['com_unit_per_value_j'] = attrs['dp_pixel_size']
+        #     meta['com_unit'] = 'rad'
+        # elif 'dp_pixel_size_j' in attrs:
+        #     meta['com_unit_per_value_j'] = attrs['dp_pixel_size_j']
+        #     meta['com_unit'] = 'rad'
         return meta
 
     def _generateDCoMMeta(self) -> dict:
@@ -189,7 +197,7 @@ class PageCenterOfMass(PageVirtualImage):
         Generate metadata for differentiated center of mass.
         """
         meta = self._generateImageMeta()
-        meta['image_mode'] = 'Differentiated Center of Mass'
+        meta['/General/notes'] = 'Differentiated Center of Mass'
         return meta 
     
     def _generateICoMMeta(self) -> dict:
@@ -197,7 +205,7 @@ class PageCenterOfMass(PageVirtualImage):
         Generate metadata for integrated center of mass.
         """
         meta = self._generateImageMeta()
-        meta['image_mode'] = 'Integrated Center of Mass'
+        meta['/General/notes'] = 'Integrated Center of Mass'
         return meta
     
 

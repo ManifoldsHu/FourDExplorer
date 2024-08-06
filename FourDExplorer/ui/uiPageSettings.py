@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiPageSettings.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -106,6 +106,11 @@ class Ui_Form(object):
         self.verticalLayout_6.addWidget(self.comboBox_theme_color)
 
         self.comboBox_theme_density = QComboBox(self.groupBox_3)
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
+        self.comboBox_theme_density.addItem("")
         self.comboBox_theme_density.addItem("")
         self.comboBox_theme_density.addItem("")
         self.comboBox_theme_density.addItem("")
@@ -304,11 +309,16 @@ class Ui_Form(object):
         self.comboBox_theme_color.setItemText(20, QCoreApplication.translate("Form", u"Yellow", None))
 
         self.comboBox_theme_density.setItemText(0, QCoreApplication.translate("Form", u"default", None))
-        self.comboBox_theme_density.setItemText(1, QCoreApplication.translate("Form", u"Large", None))
-        self.comboBox_theme_density.setItemText(2, QCoreApplication.translate("Form", u"Big", None))
-        self.comboBox_theme_density.setItemText(3, QCoreApplication.translate("Form", u"Normal", None))
-        self.comboBox_theme_density.setItemText(4, QCoreApplication.translate("Form", u"Small", None))
-        self.comboBox_theme_density.setItemText(5, QCoreApplication.translate("Form", u"Tiny", None))
+        self.comboBox_theme_density.setItemText(1, QCoreApplication.translate("Form", u"Very Huge", None))
+        self.comboBox_theme_density.setItemText(2, QCoreApplication.translate("Form", u"Huge", None))
+        self.comboBox_theme_density.setItemText(3, QCoreApplication.translate("Form", u"Very Large", None))
+        self.comboBox_theme_density.setItemText(4, QCoreApplication.translate("Form", u"Large", None))
+        self.comboBox_theme_density.setItemText(5, QCoreApplication.translate("Form", u"Big", None))
+        self.comboBox_theme_density.setItemText(6, QCoreApplication.translate("Form", u"Normal", None))
+        self.comboBox_theme_density.setItemText(7, QCoreApplication.translate("Form", u"Small", None))
+        self.comboBox_theme_density.setItemText(8, QCoreApplication.translate("Form", u"Very Small", None))
+        self.comboBox_theme_density.setItemText(9, QCoreApplication.translate("Form", u"Tiny", None))
+        self.comboBox_theme_density.setItemText(10, QCoreApplication.translate("Form", u"Very Tiny", None))
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_theme), QCoreApplication.translate("Form", u"Display", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Log Filter", None))

@@ -290,7 +290,7 @@ class PageViewImage(QWidget):
         self.image_blit_manager['scale_bar_text'] = self._scale_bar_text 
         self.ui.widget_image.setScaleBarActionUseMeta(
             item_path = self.data_path,
-            pixel_length_meta = '/Calibration/Space/pixel_size_i',
+            pixel_length_meta = '/Calibration/Space/pixel_size_j',
             unit_meta = '/Calibration/Space/pixel_size_unit',
         )
 

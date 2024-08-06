@@ -340,19 +340,31 @@ class ThemeHandler(QObject):
             return False
 
     _density_to_tool_width = {
-        UIThemeDensity.Large: 27,
+        UIThemeDensity.VeryHuge: 39,
+        UIThemeDensity.Huge: 36,
+        UIThemeDensity.VeryLarge: 33,
+        UIThemeDensity.Large: 30,
+        UIThemeDensity.VeryBig: 27,
         UIThemeDensity.Big: 24,
         UIThemeDensity.Normal: 21,
         UIThemeDensity.Small: 18,
-        UIThemeDensity.Tiny: 15,
+        UIThemeDensity.VerySmall: 15,
+        UIThemeDensity.Tiny: 12,
+        UIThemeDensity.VeryTiny: 9,
     }
 
     _density_to_tool_height = {
-        UIThemeDensity.Large: 47,
+        UIThemeDensity.VeryHuge: 59,
+        UIThemeDensity.Huge: 56,
+        UIThemeDensity.VeryLarge: 53,
+        UIThemeDensity.Large: 50,
+        UIThemeDensity.VeryBig: 47,
         UIThemeDensity.Big: 44,
         UIThemeDensity.Normal: 41,
         UIThemeDensity.Small: 38,
-        UIThemeDensity.Tiny: 35,
+        UIThemeDensity.VerySmall: 35,
+        UIThemeDensity.Tiny: 32,
+        UIThemeDensity.VeryTiny: 29,
     }
 
     def getToolBarStyleSheet(self, toolbar: QToolBar = None) -> str:

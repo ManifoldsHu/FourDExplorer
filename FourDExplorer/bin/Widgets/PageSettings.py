@@ -78,10 +78,18 @@ class PageSettings(QWidget):
         self.ui.comboBox_theme_color.currentIndexChanged.connect(
             self._applyThemeColor
         )
-
-        density_index = self.ui.comboBox_theme_density.findText(
-            self.theme_handler.theme_density.name 
-        )
+        
+        _revers_map = {
+            'VeryHuge': 'Very Huge',
+            'VeryLarge': 'Very Large',
+            'VerySmall': 'Very Small',
+            'VeryTiny': 'Very Tiny',
+        }
+        _density = self.theme_handler.theme_density.name 
+        if _density in _revers_map:
+            _density = _revers_map[_density]
+        
+        density_index = self.ui.comboBox_theme_density.findText(_density)
         self.ui.comboBox_theme_density.setCurrentIndex(density_index)
         self.ui.comboBox_theme_density.currentIndexChanged.connect(
             self._applyThemeDensity
@@ -142,6 +150,14 @@ class PageSettings(QWidget):
         Apply the changes of the theme density.
         """
         theme_density = self.ui.comboBox_theme_density.currentText()
+        _map = {
+            'Very Huge': 'VeryHuge',
+            'Very Large': 'VeryLarge',
+            'Very Small': 'VerySmall',
+            'Very Tiny': 'VeryTiny',
+        }
+        if theme_density in _map:
+            theme_density = _map[theme_density]
         self.theme_handler.applyThemeDensity(theme_density)
         self.logger.info('Applying Theme Density: {0}'.format(theme_density))
 

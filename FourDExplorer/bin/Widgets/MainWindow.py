@@ -348,11 +348,17 @@ class ControlToolBar(QToolBar):
         )
         
     density_to_button_width = {
-        UIThemeDensity.Large: 36,
+        UIThemeDensity.VeryHuge: 48,
+        UIThemeDensity.Huge: 45,
+        UIThemeDensity.VeryLarge: 42,
+        UIThemeDensity.Large: 39,
+        UIThemeDensity.VeryBig: 36,
         UIThemeDensity.Big: 33,
         UIThemeDensity.Normal: 30,
         UIThemeDensity.Small: 27,
-        UIThemeDensity.Tiny: 24,
+        UIThemeDensity.VerySmall: 24,
+        UIThemeDensity.Tiny: 21,
+        UIThemeDensity.VeryTiny: 18,
     }
 
     def _updateStyle(self):

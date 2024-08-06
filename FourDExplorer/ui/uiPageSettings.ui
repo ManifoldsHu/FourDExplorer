@@ -224,6 +224,21 @@
                 </item>
                 <item>
                  <property name="text">
+                  <string>Very Huge</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Huge</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Very Large</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Large</string>
                  </property>
                 </item>
@@ -244,7 +259,17 @@
                 </item>
                 <item>
                  <property name="text">
+                  <string>Very Small</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>Tiny</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Very Tiny</string>
                  </property>
                 </item>
                </widget>

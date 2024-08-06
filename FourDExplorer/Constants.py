@@ -177,11 +177,17 @@ class UIThemeDensity(IntEnum):
     """
     The density of ui. Default is normal.
     """
-    Large = 1
+    VeryHuge = 5
+    Huge = 4
+    VeryLarge = 3
+    Large = 2
+    VeryBig = 1
     Big = 0
     Normal = -1
     Small = -2
-    Tiny = -3
+    VerySmall = -3
+    Tiny = -4
+    VeryTiny = -5
 
     default = -1
     

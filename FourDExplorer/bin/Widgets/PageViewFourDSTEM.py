@@ -38,11 +38,13 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.patches import Annulus
+from matplotlib.patches import Rectangle
 
 from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFDataNode
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
+from bin.Widgets.DialogScaleBar import DialogScaleBar
 from ui import uiPageViewFourDSTEM
 
 class PageViewFourDSTEM(PageBaseFourDSTEM):
@@ -127,6 +129,10 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         self._preview_vcursor_object = None
         self._preview_rcursor_object = None 
         self._tracking = False
+        
+        self._preview_scale_bar_text = None 
+        self._preview_scale_bar = None 
+        self._preview_scale_bar_dialog = None 
 
         self._initBaseUi()
         self._initUi()
@@ -275,9 +281,23 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
 
         self._createPreviewImage()
         self._createPreviewCursor()
+        self._createPreviewScaleBar()
 
         self.preview_canvas.draw()
         self.preview_canvas.flush_events()
+        
+        self._preview_scale_bar_dialog.setItemPath(self.preview_path)
+        self._preview_scale_bar_dialog.setCanvas(self.preview_canvas)
+        self._preview_scale_bar_dialog.setFigure(self.preview_figure)
+        self._preview_scale_bar_dialog.setAxes(self.preview_ax)
+        self._preview_scale_bar_dialog.setScaleBar(self._preview_scale_bar, self._preview_scale_bar_text)
+        self._preview_scale_bar_dialog.setBlitManager(self.preview_blit_manager)
+        self._preview_scale_bar_dialog.setPixelLengthMeta('/Calibration/Space/pixel_size_j')
+        self._preview_scale_bar_dialog.setUnitMeta('/Calibration/Space/pixel_size_unit')
+        
+        self._preview_scale_bar_dialog.initializeBarLength()
+        self._preview_scale_bar_dialog.readScaleBarMeta()
+        self._preview_scale_bar_dialog.updateScaleBar()
     
     def _createPreviewAxes(self):
         """
@@ -357,6 +377,32 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
                 xy = (self.scan_jj, self.scan_ii)
             )
             self.preview_blit_manager.update()
+
+
+    def _createPreviewScaleBar(self):
+        """
+        Create the scale bar and its text artist.
+        """
+        if self._preview_scale_bar is None:
+            self._preview_scale_bar = Rectangle((1,1), 1, 1)
+            self.preview_ax.add_patch(self._preview_scale_bar)
+        if self._preview_scale_bar_text is None:
+            self._preview_scale_bar_text = self.preview_ax.text(1, 1, '1') 
+        # self.ui.widget_preview.setScaleBarRelatedArtists(
+        #     self._scale_bar,
+        #     self._scale_bar_text,
+        # )
+        self.preview_blit_manager['scale_bar'] = self._preview_scale_bar 
+        self.preview_blit_manager['scale_bar_text'] = self._preview_scale_bar_text  
+        # self.ui.widget_preview.setScaleBarActionUseMeta(
+        #     item_path = self.preview_path,
+        #     pixel_length_meta = '/Calibration/Space/pixel_size_j',
+        #     unit_meta = '/Calibration/Space/pixel_size_unit'
+        # )
+        
+        if self._preview_scale_bar_dialog is None:
+            self._preview_scale_bar_dialog = DialogScaleBar(self)
+            
 
     def _updateDP(self):
         """

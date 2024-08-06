@@ -53,6 +53,7 @@ import h5py
 from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFDataNode, HDFGroupNode, HDFHandler
 from bin.UIManager import ThemeHandler
+from bin.DateTimeManager import DateTimeManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from ui import uiPageBaseFourDSTEM
 
@@ -163,6 +164,12 @@ class PageBaseFourDSTEM(QWidget):
     def logger(self) -> Logger:
         global qApp
         return qApp.logger
+
+    @property
+    def datetime_manager(self) -> DateTimeManager:
+        global qApp 
+        return qApp.datetime_manager
+
 
     @property
     def dp_canvas(self) -> FigureCanvas:

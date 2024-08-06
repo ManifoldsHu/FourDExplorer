@@ -71,9 +71,11 @@ from matplotlib.patches import (
 import numpy as np
 import h5py
 
+from Constants import APP_VERSION
 from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFHandler, reValidHDFName, HDFGroupNode
 from bin.TaskManager import TaskManager
+from bin.DateTimeManager import DateTimeManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
 from lib.TaskReconstruction import TaskVirtualImage
@@ -457,32 +459,71 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         Generate the meta data saved in the reconstructed image.
         """
-        meta = {
-            'image_mode': 'Virtual Image',
-            'image_width': self.data_object.shape[1],
-            'image_height': self.data_object.shape[0],
-            'stem_path': self.data_path,
-        }
-        for key in self.data_object.attrs:
-            new_key = 'stem_' + key
-            meta[new_key] = self.data_object.attrs[key]
-            # meta.update(new_key = self.data_object.attrs[key])
         
-        meta['pixel_unit'] = 'm'
-
-        if 'scan_step_size' in self.data_object.attrs:
-            meta['pixel_size_i'] = self.data_object.attrs['scan_step_size']
-            meta['pixel_size_j'] = self.data_object.attrs['scan_step_size']
-        if 'scan_step_size_i' in self.data_object.attrs:
-            meta['pixel_size_i'] = self.data_object.attrs['scan_step_size_i']
-        if 'scan_step_size_j' in self.data_object.attrs:
-            meta['pixel_size_j'] = self.data_object.attrs['scan_step_size_j'] 
-
+        meta = {
+            '/General/title': '', 
+            '/General/original_name': self.data_path.split('/')[-1], 
+            '/General/original_path': self.data_path,
+            '/General/authors': '', 
+            '/General/notes': 'Virtual Image',
+            '/General/time': self.datetime_manager.current_time,
+            '/General/date': self.datetime_manager.current_date,
+            '/General/time_zone': self.datetime_manager.current_timezone,
+            '/General/doi': '',
+            '/General/foud_explorer_version': '.'.join([str(i) for i in APP_VERSION]),
+            # '/Calibration/Space/pixel_size_i': self.data_object.attrs['']
+        }
+        
+        # if '/Calibration/Space/scan_dr_i' in self.data_object.attrs:
+        meta['/Calibration/Space/pixel_size_i'] = self.data_object.attrs.get('/Calibration/Space/scan_dr_i')
+        meta['/Calibration/Space/pixel_size_j'] = self.data_object.attrs.get('/Calibration/Space/scan_dr_j')
+        meta['/Calibration/Space/pixel_size_unit'] = 'm'
+        meta['/Calibration/Space/pixel_size_unit_display'] = 'nm'
+        meta['/Calibration/Space/display_unit_magnify'] = 1e9,
+        
         widget = self._mask_widgets[self.mask_index]
         mask_meta = widget.generateMeta()
-        meta.update(**mask_meta)
-
+        for key in mask_meta:
+            meta['/VirtualDetector/' + key] = mask_meta[key] 
+            
+        for key in self.data_object.attrs:
+            if key[0] == '/':
+                new_key = '/FourDSTEM' + key 
+            else:
+                new_key = '/FourDSTEM/' + key 
+            meta[new_key] = self.data_object.attrs[key]
+        
         return meta 
+        
+        
+        # meta = {
+        #     'image_mode': 'Virtual Image',
+        #     'image_width': self.data_object.shape[1],
+        #     'image_height': self.data_object.shape[0],
+        #     'stem_path': self.data_path,
+        # }
+        # for key in self.data_object.attrs:
+        #     new_key = 'stem_' + key
+        #     meta[new_key] = self.data_object.attrs[key]
+        #     # meta.update(new_key = self.data_object.attrs[key])
+        
+        # meta['pixel_unit'] = 'm'
+
+        # if 'scan_step_size' in self.data_object.attrs:
+        #     meta['pixel_size_i'] = self.data_object.attrs['scan_step_size']
+        #     meta['pixel_size_j'] = self.data_object.attrs['scan_step_size']
+        # if 'scan_step_size_i' in self.data_object.attrs:
+        #     meta['pixel_size_i'] = self.data_object.attrs['scan_step_size_i']
+        # if 'scan_step_size_j' in self.data_object.attrs:
+        #     meta['pixel_size_j'] = self.data_object.attrs['scan_step_size_j'] 
+
+        # widget = self._mask_widgets[self.mask_index]
+        # mask_meta = widget.generateMeta()
+        # meta.update(**mask_meta)
+        
+        
+
+        # return meta 
 
     # def _generateMask(self) -> np.ndarray:
     #     """
