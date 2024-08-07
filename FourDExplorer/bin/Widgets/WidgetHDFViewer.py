@@ -53,6 +53,7 @@ from bin.Actions.FourDSTEMActions import ActionBackground
 from bin.Actions.FourDSTEMActions import ActionCenterOfMass
 from bin.Actions.FourDSTEMActions import ActionRotate
 from bin.Actions.FourDSTEMActions import ActionVirtualImage
+from bin.Actions.FourDSTEMActions import ActionPlotCTF
 
 from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
 from bin.Actions.VectorFieldActions import ActionSubtractReferenceVector
@@ -95,6 +96,7 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._initFileActions()
         self._initCalibrationActions()
         self._initReconstructionActions()
+        self._initAnalysisActions()
         self._initVectorFieldActions()
 
         self.hdf_handler.file_closed.connect(
@@ -135,6 +137,10 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
     @property
     def action_group_calibration(self) -> QActionGroup:
         return self._action_group_calibration
+
+    @property
+    def action_group_analysis(self) -> QActionGroup:
+        return self._action_group_analysis
 
     @property
     def action_group_new(self) -> QActionGroup:
@@ -239,6 +245,17 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         )
 
         for action in self._action_group_calibration.actions():
+            action.setLinkedTreeView(self.ui.treeView_HDF)
+
+    def _initAnalysisActions(self):
+        """
+        Initialize 4D-STEM Analysis actions.
+        """
+        self._action_plot_ctf = ActionPlotCTF(self)
+        self._action_group_analysis = QActionGroup(self)
+        self._action_group_analysis.addAction(self._action_plot_ctf)
+        
+        for action in self._action_group_analysis.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
 
     def _initFileActions(self):
@@ -514,6 +531,10 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
         self.addActionGroupAsSubMenu(
             self.hdf_viewer.action_group_reconstruction, 
             name = 'Reconstruction',
+        )
+        self.addActionGroupAsSubMenu(
+            self.hdf_viewer.action_group_analysis, 
+            name = 'Analysis',
         )
         self.addActionGroup(self.hdf_viewer.action_group_edit)
         self.addActionGroup(self.hdf_viewer.action_group_attr)

@@ -383,6 +383,7 @@ class WidgetPlotDP(WidgetPlotBase):
         from bin.Actions.FourDSTEMActions import ActionCenterOfMass
         from bin.Actions.FourDSTEMActions import ActionRotate
         from bin.Actions.FourDSTEMActions import ActionVirtualImage
+        from bin.Actions.FourDSTEMActions import ActionPlotCTF
         self.menu_processing = QMenu(self)
         self._processing_actions: dict[str,QAction] = {
             'open': ActionOpenFourDSTEM(self),
@@ -391,6 +392,7 @@ class WidgetPlotDP(WidgetPlotBase):
             'align': ActionAlign(self),
             'background': ActionBackground(self),
             'rotate': ActionRotate(self),
+            'plot_ctf': ActionPlotCTF(self),
         }
         for action in self._processing_actions.values():
             self.menu_processing.addAction(action)
@@ -399,6 +401,9 @@ class WidgetPlotDP(WidgetPlotBase):
         )
         self.menu_processing.insertSeparator(
             self._processing_actions['align']
+        )
+        self.menu_processing.insertSeparator(
+            self._processing_actions['plot_ctf']
         )
 
     def setProcessingActionItemPath(self, item_path: str):
