@@ -139,5 +139,31 @@ class ActionRotate(ActionOpenData):
         return page 
 
 
-
+class ActionPlotCTF(ActionOpenData):
+    """
+    绘制 4D-STEM 数据集相同参数的相应 CTF 曲线的页面。
+    
+    通过这个页面打开时，会使用其相应的 4D-STEM 数据集的实验参数作为计算 CTF 的参数。
+    如果不想预先给定这些参数，而是让用户手动设置的话，使用 ActionPlotCTFManual
+    
+    Action to plot CTF curves of the same parameters of 4D-STEM data.
+    
+    When opening this page, the parameters of the 4D-STEM data will be used as
+    parameters to calculate CTF. If you want to manually set the parameters, use
+    ActionPlotCTFManual instead.
+    """
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self.setText('Plot CTF')
+        
+    # def openAs(self, hdf_type: HDFType = None) -> 'PagePlotCTF':
+    #     """
+    #     Use the plot CTF page to open the Dataset.
+        
+    #     arguments:
+    #         hdf_type: (HDFType)
+    #     """
+    #     page = PagePlotCTF()
+    #     page.setFourDSTEM(self.item_path)
+    #     return page 
 

@@ -57,6 +57,7 @@ from bin.Actions.FourDSTEMActions import ActionBackground
 from bin.Actions.FourDSTEMActions import ActionCenterOfMass
 from bin.Actions.FourDSTEMActions import ActionRotate
 from bin.Actions.FourDSTEMActions import ActionVirtualImage
+from bin.Actions.FourDSTEMActions import ActionPlotCTF
 from bin.Actions.VectorFieldActions import ActionCurl
 from bin.Actions.VectorFieldActions import ActionFlipComponents
 from bin.Actions.VectorFieldActions import ActionPotential
@@ -244,6 +245,7 @@ class MainWindow(QMainWindow):
         self._action_background = ActionBackground(self)
         self._action_align = ActionAlign(self)
         self._action_rotate = ActionRotate(self)
+        self._action_plot_ctf = ActionPlotCTF(self)
         self._menu_fourdstem.addAction(self._action_open_fourdstem)
         self._menu_fourdstem.addAction(self._action_import_fourdstem)
         self._menu_fourdstem.addSeparator()
@@ -253,6 +255,8 @@ class MainWindow(QMainWindow):
         self._menu_fourdstem.addAction(self._action_background)
         self._menu_fourdstem.addAction(self._action_align)
         self._menu_fourdstem.addAction(self._action_rotate)
+        self._menu_fourdstem.addSeparator()
+        self._menu_fourdstem.addAction(self._action_plot_ctf)
 
 
     def _initCalibration(self):
