@@ -29,5 +29,5 @@ from ui import uiWidgetAlignmentRef
 class WidgetAlignmentRef(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.ui = uiWidgetAlignmentRef()
+        self.ui = uiWidgetAlignmentRef.Ui_Form()
         self.ui.setupUi(self)

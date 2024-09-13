@@ -28,7 +28,7 @@ from ui import uiWidgetAlignmentFDDNet
 class WidgetAlignmentFDDNet(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.ui = uiWidgetAlignmentFDDNet()
+        self.ui = uiWidgetAlignmentFDDNet.Ui_Form()
         self.ui.setupUi(self)
         
     

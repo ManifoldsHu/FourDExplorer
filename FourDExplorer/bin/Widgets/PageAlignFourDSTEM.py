@@ -43,6 +43,9 @@ import numpy as np
 from bin.TaskManager import TaskManager
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
 from bin.Widgets.DialogSaveFourDSTEM import DialogSaveFourDSTEM
+from bin.Widgets.WidgetAlignmentManual import WidgetAlignmentManual
+from bin.Widgets.WidgetAlignmentRef import WidgetAlignmentRef
+from bin.Widgets.WidgetAlignmentFDDNet import WidgetAlignmentFDDNet
 from lib.TaskCalibration import TaskFourDSTEMAlign
 from ui import uiPageAlignFourDSTEM
 
@@ -110,7 +113,12 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
 
 
         self._createAxes()
-        self._translation_vector = (0, 0)
+        # self._translation_vector = (0, 0)
+
+        # Initialize WidgetAlignmentManual
+        self._widget_alignment_manual = WidgetAlignmentManual(self)
+        self.ui.stackedWidget_align_mode.insertWidget(0, self._widget_alignment_manual)
+
 
     @property
     def hcursor_object(self) -> Line2D:
@@ -177,7 +185,8 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self.ui.pushButton_start.clicked.connect(self.startCalculation)
         self.ui.pushButton_start.setText('Start to Apply Alignment')
 
-        # self.ui.
+        self.ui.comboBox_show_alignment_method.currentIndexChanged.connect(self._onAlignmentMethodChanged)
+
 
     def _createPatches(self):
         """
@@ -245,6 +254,13 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
 
         # TODO: read/save the alignment attribute
 
+        # Set up WidgetAlignmentManual
+        self._widget_alignment_manual.setDPObject(self.dp_object)
+        self._widget_alignment_manual.setAxes(self.dp_ax)
+        self._widget_alignment_manual.setBlitManager(self.dp_blit_manager)
+        self._widget_alignment_manual.setDataObject(self.data_object)
+
+
 
     def _setCursorCenter(self, center: tuple):
         """
@@ -268,20 +284,35 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         if self.data_object is None:
             return None
 
-        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
-        scan_ii = max(0, min(scan_i, self.scan_ii)) # Avoid out of boundary
-        scan_jj = max(0, min(scan_j, self.scan_jj))
-        self.dp_object.set_data(
-            np.roll(
-                self.data_object[scan_ii, scan_jj, :, :], 
-                self._translation_vector,
-                axis = (0, 1),
-            )
-        )
+        # scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        # scan_ii = max(0, min(scan_i, self.scan_ii)) # Avoid out of boundary
+        # scan_jj = max(0, min(scan_j, self.scan_jj))
+        # self.dp_object.set_data(
+        #     np.roll(
+        #         self.data_object[scan_ii, scan_jj, :, :], 
+        #         self._translation_vector,
+        #         axis = (0, 1),
+        #     )
+        # )
         
         self.colorbar_object.update_normal(self.dp_object)
         self.dp_blit_manager.update()     
         
+    def _onAlignmentMethodChanged(self, index: int):
+        """
+        Handle the change of alignment method.
+
+        arguments:
+            index: (int) The index of the selected alignment method.
+        """
+        self.ui.stackedWidget_align_mode.setCurrentIndex(index)
+
+        if index == 0:
+            self._widget_alignment_manual.updateDP()
+
+
+
+
     # def _translateUp(self):
     #     self._translation_vector = (
     #         self._translation_vector[0] - 1, 
