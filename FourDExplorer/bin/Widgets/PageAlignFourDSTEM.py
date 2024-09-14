@@ -118,6 +118,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         # Initialize WidgetAlignmentManual
         self._widget_alignment_manual = WidgetAlignmentManual(self)
         self.ui.stackedWidget_align_mode.insertWidget(0, self._widget_alignment_manual)
+        
 
 
     @property
@@ -211,8 +212,8 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
 
         self.dp_ax.add_patch(self._auxiliary_circle_object)
         self.dp_blit_manager['circle_patch'] = self._auxiliary_circle_object 
-        self.ui.widget_circle.setBlitManager(self.dp_blit_manager)
-        self.ui.widget_circle.setPatch(self._auxiliary_circle_object)
+        self.ui.widget_auxiliary_circle.setBlitManager(self.dp_blit_manager)
+        self.ui.widget_auxiliary_circle.setPatch(self._auxiliary_circle_object)
         
         if self.hcursor_object is None:
             self._hcursor_object = self.dp_ax.axhline(
@@ -271,7 +272,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
                 shape.
         """
         # self.patch_circle.set_center(center)
-        self.ui.widget_circle.setCenter(center)
+        self.ui.widget_auxiliary_circle.setCenter(center)
         self.hcursor_object.set_ydata(center[0])
         self.vcursor_object.set_xdata(center[1])
         self.dp_blit_manager.update()
@@ -310,7 +311,8 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         if index == 0:
             self._widget_alignment_manual.updateDP()
 
-
+    def startCalculation(self):
+        pass 
 
 
     # def _translateUp(self):
