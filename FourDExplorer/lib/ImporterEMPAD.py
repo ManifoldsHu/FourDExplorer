@@ -238,8 +238,8 @@ class ImporterEMPAD(QObject):
 
             self.meta['/Acquisition/Microscope/step_size_i'] = step_size_i 
             self.meta['/Acquisition/Microscope/step_size_j'] = step_size_j 
-            self.meta['/Calibrate/Space/scan_dr_i'] = step_size_i 
-            self.meta['/Calibrate/Space/scan_dr_j'] = step_size_j
+            self.meta['/Calibration/Space/scan_dr_i'] = step_size_i 
+            self.meta['/Calibration/Space/scan_dr_j'] = step_size_j
 
             # self.meta['scale_factor'] = float(
             #     self._getData(full, 'scale_factor')

@@ -23,6 +23,7 @@ date:           Sep 2, 2024
 *-------------------------- WidgetAlignmentManual.py ----------------------------*
 """
 
+from logging import Logger
 
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QHeaderView
@@ -49,7 +50,6 @@ from h5py import Dataset
 
 from bin.BlitManager import BlitManager
 from bin.UIManager import ThemeHandler
-from bin.Log import Logger
 from ui import uiWidgetAlignmentManual
 
 
@@ -117,6 +117,10 @@ class WidgetAlignmentManual(QWidget):
     def scan_jj(self) -> int:
         return self._align_page.scan_jj 
 
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger
 
     def _initTableWidget(self):
         """
