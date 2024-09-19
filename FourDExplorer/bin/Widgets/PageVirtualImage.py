@@ -173,8 +173,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         Initialize the circle patch and its managers.
         """
         if self._patch_circle in self.dp_ax.patches:
-            _index = self.dp_ax.patches.index(self._patch_circle)
-            self.dp_ax.patches.pop(_index)
+            self._patch_circle.remove()
 
         self._patch_circle = Circle(
             (0, 0),
@@ -197,8 +196,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         Initialize the ring patch and its managers.
         """
         if self._patch_ring in self.dp_ax.patches:
-            _index = self.dp_ax.patches.index(self._patch_ring)
-            self.dp_ax.patches.pop(_index)
+            self._patch_ring.remove()
 
         self._patch_ring = Annulus(
             (0, 0),
@@ -222,8 +220,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         Initialize the wedge patch and its managers.
         """
         if self._patch_wedge in self.dp_ax.patches:
-            _index = self.dp_ax.patches.index(self._patch_wedge)
-            self.dp_ax.patches.pop(_index)
+            self._patch_wedge.remove()
 
         self._patch_wedge = Wedge(
             (0, 0),
@@ -249,8 +246,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         Initialize the rectangle patch and its managers.
         """
         if self._patch_rectangle in self.dp_ax.patches:
-            _index = self.dp_ax.patches.index(self._patch_rectangle)
-            self.dp_ax.patches.pop(_index)
+            self._patch_rectangle.remove()
 
         self._patch_rectangle = Rectangle(
             (0, 0),
@@ -275,8 +271,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         Initialize the ellipse patch and its managers.
         """
         if self._patch_ellipse in self.dp_ax.patches:
-            _index = self.dp_ax.patches.index(self._patch_ellipse)
-            self.dp_ax.patches.pop(_index)
+            self._patch_ellipse.remove()
 
         self._patch_ellipse = Ellipse(
             (0, 0),
@@ -305,8 +300,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         for _polygon in self._patch_polygons:
             if _polygon in self.dp_ax.patches:
-                _index = self.dp_ax.patches.index(_polygon)
-                self.dp_ax.patches.pop(_index)
+                _polygon.remove()
 
         self._patch_polygons = []
         _max_vertices = self.ui.page_polygon.max_vertices
@@ -339,8 +333,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         for _wedge in self._patch_segments:
             if _wedge in self.dp_ax.patches:
-                _index = self.dp_ax.patches.index(_wedge)
-                self.dp_ax.patches.pop(_index)
+                _wedge.remove()
 
         self._patch_segments = []
         _max_segments = self.ui.page_segment_ring.max_segments

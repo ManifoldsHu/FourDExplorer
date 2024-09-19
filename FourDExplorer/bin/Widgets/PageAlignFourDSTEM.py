@@ -223,9 +223,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         Including a circle, a horizontal line and a vertical line.
         """
         if self._auxiliary_circle_object in self.dp_ax.patches:
-            # # delete the current patch if there exists.
-            # _index = self.dp_ax.patches.index(self._auxiliary_circle_object)
-            # self.dp_ax.patches.pop(_index)
+            # delete the current patch if there exists.
             self._auxiliary_circle_object.remove()
 
         self._auxiliary_circle_object = Circle(

@@ -368,8 +368,7 @@ class PagePlotCTF(QWidget):
         Read the images and its attributes, and show it.
         """
         if self._ronchigram_object in self.ronchigram_ax.images:
-            _index = self.ronchigram_ax.images.index(self._ronchigram_object)
-            self.ronchigram_ax.images.pop(_index)
+            self._ronchigram_object.remove()
 
         ronchigram_min = np.min(self.ronchigram_data_object)
         ronchigram_max = np.max(self.ronchigram_data_object)
@@ -381,8 +380,7 @@ class PagePlotCTF(QWidget):
         self.ronchigram_blit_manager['image'] = self._ronchigram_object
 
         if self._probe_abs_object in self.probe_abs_ax.images:
-            _index = self.probe_abs_ax.images.index(self._probe_abs_object)
-            self.probe_abs_ax.images.pop(_index)
+            self._probe_abs_object.remove()
 
         probe_abs_min = np.min(self.probe_abs_data_object)
         probe_abs_max = np.max(self.probe_abs_data_object)
@@ -394,8 +392,7 @@ class PagePlotCTF(QWidget):
         self.probe_abs_blit_manager['image'] = self._probe_abs_object
 
         if self._probe_angle_object in self.probe_angle_ax.images:
-            _index = self.probe_angle_ax.images.index(self._probe_angle_object)
-            self.probe_angle_ax.images.pop(_index)
+            self._probe_angle_object.remove()
 
         probe_angle_min = np.min(self.probe_angle_data_object)
         probe_angle_max = np.max(self.probe_angle_data_object)
@@ -407,8 +404,7 @@ class PagePlotCTF(QWidget):
         self.probe_angle_blit_manager['image'] = self._probe_angle_object
 
         if self._ctf_image_object in self.ctf_image_ax.images:
-            _index = self.ctf_image_ax.images.index(self._ctf_image_object)
-            self.ctf_image_ax.images.pop(_index)
+            self._ctf_image_object.remove()
 
         ctf_image_min = np.min(self.ctf_image_data_object)
         ctf_image_max = np.max(self.ctf_image_data_object)

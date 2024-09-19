@@ -315,8 +315,7 @@ class PageViewFourDSTEM(PageBaseFourDSTEM):
         """
         if self._preview_object in self.dp_ax.images:
             # clear preview objects in the axes
-            _index = self.dp_ax.images.index(self._preview_object)
-            self.preview_ax.images.pop(_index)
+            self._preview_object.remove()
         
         self._preview_object = self.preview_ax.imshow(
                 self.hdf_handler.file[self.preview_path]

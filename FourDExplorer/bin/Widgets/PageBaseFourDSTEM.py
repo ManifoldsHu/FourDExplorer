@@ -256,50 +256,6 @@ class PageBaseFourDSTEM(QWidget):
         """
         self.ui.widget_dp.setProcessingActionItemPath(self.data_path)
 
-        # self.toolButton_processing = QToolButton(self)
-        # self.toolButton_processing.setPopupMode(QToolButton.InstantPopup)
-        # self.toolButton_processing_rc = ':/HDFItem/resources/icons/cube'
-        # self.toolButton_processing.setIcon(
-        #     self.theme_handler
-        # )
-        # self.menu_processing = QMenu(self)
-
-        # self.action_open = ActionOpenFourDSTEM(self)
-        # self.action_virtual_image = ActionVirtualImage(self)
-        # self.action_center_of_mass = ActionCenterOfMass(self)
-        # self.action_align = ActionAlign(self)
-        # self.action_background = ActionBackground(self)
-        # self.action_rotate = ActionRotate(self)
-
-        # self._process_actions = {
-        #     'open': self.action_open,
-        #     'virtual_image': self.action_virtual_image,
-        #     'center_of_mass': self.action_center_of_mass,
-        #     'background': self.action_background,
-        #     'align': self.action_align,
-        #     'rotate': self.action_rotate,
-        # }
-
-        # for action in self._process_actions.values():
-        #     self.menu_process.addAction(action)
-
-        # self.menu_process.insertSeparator(self.action_virtual_image)
-        # self.menu_process.insertSeparator(self.action_background)
-
-        # self.menu_process.addAction(self.action_open)
-        # self.menu_process.addSeparator()
-        # self.menu_process.addAction(self.action_virtual_image)
-        # self.menu_process.addAction(self.action_center_of_mass)
-        # self.menu_process.addSeparator()
-        # self.menu_process.addAction(self.action_background)
-        # self.menu_process.addAction(self.action_align)
-        # self.menu_process.addAction(self.action_rotate)
-        
-        # self.toolButton_process.setMenu(self.menu_process)
-        # self.toolButton_process.setPopupMode(QToolButton.InstantPopup)
-
-        # self.ui.widget_dp.addCustomizedWidget
-
 
     def setFourDSTEM(self, data_path: str):
         """
@@ -374,8 +330,7 @@ class PageBaseFourDSTEM(QWidget):
         """
         if self._dp_object in self.dp_ax.images:
             # clear dp objects in the axes.
-            _index = self.dp_ax.images.index(self._dp_object)
-            self.dp_ax.images.pop(_index)
+            self._dp_object.remove()
 
         self._dp_object = self.dp_ax.imshow(
             self.data_object[0, 0, :, :]

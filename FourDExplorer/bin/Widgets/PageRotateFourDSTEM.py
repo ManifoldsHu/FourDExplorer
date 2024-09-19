@@ -295,8 +295,9 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         Show the quiver plot.
         """
         if self.quiver_object in self.quiver_ax.collections:
-            _index = self.quiver_ax.collections.index(self.quiver_object)
-            self.quiver_ax.collections.pop(_index)
+            # _index = self.quiver_ax.collections.index(self.quiver_object)
+            # self.quiver_ax.collections.pop(_index)
+            self.quiver_object.remove()
 
         if self.vec_data is None:
             if 'quiver' in self.quiver_blit_manager:
@@ -533,8 +534,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         Show the axial bf plot.
         """
         if self._axial_bf_object in self.axial_bf_ax.images:
-            _index = self.axial_bf_ax.images.index(self.axial_bf_object)
-            self.axial_bf_ax.images.pop(_index)
+            self.axial_bf_object.remove()
 
         self._axial_bf_object = self.axial_bf_ax.imshow(self._axial_bf_data)
         self.axial_bf_blit_manager.addArtist('axial_bf', self._axial_bf_object)

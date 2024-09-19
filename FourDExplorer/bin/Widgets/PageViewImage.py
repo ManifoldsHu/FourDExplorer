@@ -248,8 +248,7 @@ class PageViewImage(QWidget):
         TODO: read and save attributes, like norm, cmap, alpha, etc.
         """
         if self._image_object in self.image_ax.images:
-            _index = self.image_ax.images.index(self._image_object)
-            self.image_ax.images.pop(_index)
+            self._image_object.remove()
         
         self._image_object = self.image_ax.imshow(
             self.data_object,
