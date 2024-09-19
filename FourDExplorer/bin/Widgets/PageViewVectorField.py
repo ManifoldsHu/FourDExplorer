@@ -54,7 +54,8 @@ from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFDataNode, HDFHandler
 from bin.TaskManager import TaskManager 
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
-from bin.Widgets.PageVirtualImage import DialogSaveImage
+from bin.Widgets.DialogSaveItem import DialogSaveImage
+from bin.Widgets.DialogSaveItem import DialogSaveVectorField
 from lib.TaskVectorFieldProcess import TaskCurl, TaskFlipVectorField
 from lib.TaskVectorFieldProcess import TaskDivergence
 from lib.TaskVectorFieldProcess import TaskPotential
@@ -847,26 +848,6 @@ class PageViewVectorField(QWidget):
         self.task_manager.addTask(self.task)
 
 
-class DialogSaveVectorField(DialogSaveImage):
-    """
-    选择在 HDF 文件中保存矢量场的路径。
-
-    Dialog to choose where to save the reconstructed image in the HDF file.
-    """
-    def __init__(self, parent: QWidget = None):
-        super().__init__(parent)
-    
-    def getNewName(self) -> str:
-        """
-        returns the new name of the imported dataset.
-
-        Will add '.img' automatically as the extension.
-        """
-        name = self.ui.lineEdit_name.text()
-        if '.' in name:
-            if name.split('.')[-1] == 'vec':
-                return name 
-        return name + '.vec'
 
 
 class DialogAdjustQuiverEffect(QDialog):

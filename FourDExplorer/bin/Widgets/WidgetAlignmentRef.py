@@ -26,6 +26,7 @@ date:           Sep 2, 2024
 from logging import Logger
 
 from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QMessageBox
 
 import numpy as np
 from matplotlib.axes import Axes
@@ -33,27 +34,43 @@ from matplotlib.image import AxesImage
 from h5py import Dataset
 
 from bin.BlitManager import BlitManager
+from bin.HDFManager import HDFHandler
+from bin.HDFManager import HDFDataNode 
+from bin.Widgets.DialogChooseItem import DialogHDFChoose
+from bin.Widgets.DialogSaveItem import DialogSaveVectorField
+from lib.VectorFieldOperators import CenterOfMass
+from lib.TaskReconstruction import TaskCenterOfMass
 
 from ui import uiWidgetAlignmentRef
+
 
 class WidgetAlignmentRef(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._reference_path = ''
         self.ui = uiWidgetAlignmentRef.Ui_Form()
         self.ui.setupUi(self)
-
+        
     @property
     def current_dp_location(self):
         return (self.scan_ii, self.scan_jj)
     
-    def setParentAlignPage(self, align_page: QWidget):
-        """
-        Set the parent alignment page.
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler
+    
+    @property
+    def current_ref_com(self) -> tuple[float, float]:
+        return CenterOfMass(self.reference_dataset[self.scan_ii, self.scan_jj, :, :])
+    
+    @property
+    def reference_path(self) -> str:
+        return self._reference_path
 
-        arguments:
-            align_page: (PageAlignFourDSTEM) The parent alignment page containing the 4D-STEM data and UI elements.
-        """
-        self._align_page = align_page
+    @property
+    def reference_dataset(self) -> Dataset:
+        return self.hdf_handler.file[self._reference_path]
         
     @property
     def dp_object(self) -> AxesImage:
@@ -83,3 +100,140 @@ class WidgetAlignmentRef(QWidget):
     def logger(self) -> Logger:
         global qApp
         return qApp.logger
+    
+    
+    def _initUi(self):
+        """
+        Initialize Ui and their signal slot connections.
+        """
+        self.ui.lineEdit_reference_4dstem.setReadOnly(True)
+        self.ui.pushButton_browse_reference_4dstem.clicked.connect(self._onBrowseReference4DSTEMPath)
+        self.ui.checkBox_show_shifted_dp.stateChanged.connect(self._onShowShiftedDPChanged)
+        self.ui.pushButton_generate_shift_vec.clicked.connect(self._onGenerateShiftVecClicked)
+        
+        
+    def _onBrowseReference4DSTEMPath(self):
+        """
+        Open a dialog to browse which 4D-STEM dataset to be opened as the reference.
+        """
+        dialog = DialogHDFChoose(self)
+        dialog_code = dialog.exec()
+        if dialog_code == dialog.Accepted:
+            current_path = dialog.getCurrentPath()
+        else:
+            return 
+
+        try:
+            self.setReference4DSTEM(current_path)
+        except (KeyError, ValueError, TypeError,) as e:
+            self.logger.error('{0}'.format(e), exc_info = True)
+            msg = QMessageBox(parent = self)
+            msg.setWindowTitle('Warning')
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText('Cannot open this data: {0}'.format(e))
+            msg.exec()
+
+
+    def setParentAlignPage(self, align_page: QWidget):
+        """
+        Set the parent alignment page.
+
+        arguments:
+            align_page: (PageAlignFourDSTEM) The parent alignment page containing the 4D-STEM data and UI elements.
+        """
+        self._align_page = align_page
+
+
+    def setReference4DSTEM(self, reference_path: str):
+        """
+        Set the reference 4D-STEM dataset path in HDF5 file.
+
+        Will set the reference_path attribute. The reference dataset must be
+        a 4D matrix.
+
+        arguments:
+            reference_path: (str) the 4D-STEM dataset's path in hdf5 file.
+        """
+        if not isinstance(reference_path, str):
+            raise TypeError('reference_path must be a str, not '
+                '{0}'.format(type(reference_path).__name__))
+
+        reference_node = self.hdf_handler.getNode(reference_path)
+        # May raise KeyError if the path does not exist
+        if not isinstance(reference_node, HDFDataNode):
+            raise ValueError('Item {0} must be a '
+                'Dataset'.format(reference_path))
+        
+        reference_data_obj = self.hdf_handler.file[reference_path]
+        if not len(reference_data_obj.shape) == 4:
+            raise ValueError('Data must be a 4D matrix (4D-STEM dataset)')
+
+        self._reference_path = reference_path
+        self.ui.lineEdit_reference_4dstem.setText(self.reference_path)
+        self.data_object.attrs['reference_path'] = reference_path
+    
+    
+    def _onShowShiftedDPChanged(self):
+        """
+        Handle the state change of the 'Show Shifted DP' checkbox.
+        """
+        self._align_page._updateDP()
+        
+
+    def _onGenerateShiftVecClicked(self):
+        """
+        Handle the click of the 'Generate Shift Vector' button.
+        This function will calculate the Center of Mass (CoM) for the reference 4D-STEM dataset.
+        """
+        if not self._reference_path:
+            QMessageBox.warning(self, 'No Reference Dataset', 'Please set a reference 4D-STEM dataset first.')
+            return
+
+        # Open the dialog to get the path and name for saving the Vector Field
+        dialog_save = DialogSaveVectorField(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return
+
+        parent_path = dialog_save.getParentPath()
+        com_name = dialog_save.getNewName()
+
+        # Initialize the TaskCenterOfMass with only CoM calculation
+        calc_dict = {'CoM': True}
+        names = {'CoM': com_name}
+        metas = {'CoM': self._generateCoMMeta()}
+
+        is_com_inverted = False  # Assuming no inversion for simplicity
+        is_mean_set_to_zero = True  # Assuming mean set to zero for simplicity
+
+        mask = None  # Assuming no mask for simplicity
+
+        self.task = TaskCenterOfMass(
+            item_path=self._reference_path,
+            image_parent_path=parent_path,
+            calc_dict=calc_dict,
+            names_dict=names,
+            metas_dict=metas,
+            mask=mask,
+            is_com_inverted=is_com_inverted,
+            is_mean_set_to_zero=is_mean_set_to_zero,
+        )
+
+        self.task_manager.addTask(self.task)
+
+    def _generateCoMMeta(self) -> dict:
+        """
+        Generate metadata for center of mass vector field.
+        """
+        meta = {}
+        meta['Alignment/Method'] = 'Reference Center of Mass'
+        meta['Alignment/ReferenceDatasetPath'] = self._reference_path
+        meta['Alignment/TargetDatasetPath'] = self._align_page.data_path
+        # TODO 还需要加上一些属性，例如 General 以及 Space 的一些信息
+        return meta
+    
+    
+        
+    

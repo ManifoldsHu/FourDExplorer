@@ -55,6 +55,10 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addWidget(self.checkBox_show_shifted_dp)
 
+        self.verticalSpacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        self.verticalLayout_3.addItem(self.verticalSpacer)
+
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.verticalLayout = QVBoxLayout()
@@ -148,7 +152,7 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Shift Diffraction Patterns", None))
-        self.label.setText(QCoreApplication.translate("Form", u"Measured DP shift:", None))
+        self.label.setText(QCoreApplication.translate("Form", u"Measured DP shift (manually):", None))
         self.label_measured_shift.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.checkBox_show_shifted_dp.setText(QCoreApplication.translate("Form", u"Display shifted diffraction image", None))
         self.label_13.setText(QCoreApplication.translate("Form", u"Translate DP i-direct", None))
@@ -157,7 +161,7 @@ class Ui_Form(object):
         self.pushButton_left.setText(QCoreApplication.translate("Form", u"\u2190", None))
         self.pushButton_down.setText(QCoreApplication.translate("Form", u"\u2193", None))
         self.pushButton_right.setText(QCoreApplication.translate("Form", u"\u2192", None))
-        self.groupBox_sample_records.setTitle(QCoreApplication.translate("Form", u"Sample Records", None))
-        self.pushButton_generate_shift_vec.setText(QCoreApplication.translate("Form", u"Generate Shift Vectors", None))
+        self.groupBox_sample_records.setTitle(QCoreApplication.translate("Form", u"Measured DP Shift Sample Records", None))
+        self.pushButton_generate_shift_vec.setText(QCoreApplication.translate("Form", u"Generate Shift Mapping", None))
     # retranslateUi
 

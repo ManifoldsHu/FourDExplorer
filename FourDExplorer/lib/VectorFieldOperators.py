@@ -33,6 +33,31 @@ def _getCoord(scalar: np.ndarray) -> np.ndarray:
     array_w = np.linspace(-width/2, width/2 - 1, width)
     return np.meshgrid(array_h, array_w, indexing = 'ij')
 
+def CenterOfMass(scalar: np.ndarray) -> tuple[float]:
+    """
+    Returns the center of mass vector of an image.
+    
+    arguments:
+        scalar: (np.ndarray) the scalar function, typically 2D matrix.
+        
+    returns:
+        (Tuple[float]) center of mass vector, (CoM_i, CoM_j).
+    """
+    dp_i, dp_j = scalar.shape 
+    center_i = (dp_i - 1)/2
+    center_j = (dp_j - 1)/2
+    total_mass = np.sum(scalar)
+    if total_mass == 0:
+        return (center_i, center_j)  # Default to the center if the total mass is zero
+
+    array_i = np.linspace(- center_i, dp_i - center_i - 1, dp_i)
+    array_j = np.linspace(- center_j, dp_j - center_j - 1, dp_j)
+    i_coords, j_coords = np.meshgrid(array_i, array_j, indexing = 'ij')
+    CoM_i = np.sum(i_coords * scalar) / total_mass
+    CoM_j = np.sum(j_coords * scalar) / total_mass
+    return (CoM_i, CoM_j)
+
+
 def Gradient(scalar: np.ndarray) -> tuple[np.ndarray]:
     """
     Returns the gradient vector field of a scalar function.

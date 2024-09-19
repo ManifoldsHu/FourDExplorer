@@ -25,7 +25,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Measured DP shift:</string>
+           <string>Measured DP shift (manually):</string>
           </property>
          </widget>
         </item>
@@ -57,6 +57,22 @@
          <string>Display shifted diffraction image</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Minimum</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
@@ -141,7 +157,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_sample_records">
      <property name="title">
-      <string>Sample Records</string>
+      <string>Measured DP Shift Sample Records</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
@@ -150,7 +166,7 @@
       <item>
        <widget class="QPushButton" name="pushButton_generate_shift_vec">
         <property name="text">
-         <string>Generate Shift Vectors</string>
+         <string>Generate Shift Mapping</string>
         </property>
        </widget>
       </item>

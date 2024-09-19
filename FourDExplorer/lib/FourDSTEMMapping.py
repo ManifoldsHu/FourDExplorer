@@ -134,7 +134,7 @@ def CalculateVirtualImage(
 
 def CalculateCenterOfMass(
     item_path: str,
-    mask: np.ndarray|h5py.Dataset,
+    mask: np.ndarray|h5py.Dataset|None,
     progress_signal: Signal = None,
 ) -> tuple[np.ndarray]:
     """

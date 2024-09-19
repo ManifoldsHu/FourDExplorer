@@ -22,8 +22,8 @@ from bin.Actions.EditActions import failLogging
 from bin.HDFManager import HDFType
 from bin.TaskManager import TaskManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
-from bin.Widgets.PageViewVectorField import DialogSaveVectorField
-from bin.Widgets.PageVirtualImage import DialogSaveImage
+from bin.Widgets.DialogSaveItem import DialogSaveVectorField
+from bin.Widgets.DialogSaveItem import DialogSaveImage
 from lib.TaskVectorFieldProcess import TaskCurl
 from lib.TaskVectorFieldProcess import TaskDivergence
 from lib.TaskVectorFieldProcess import TaskFlipVectorField

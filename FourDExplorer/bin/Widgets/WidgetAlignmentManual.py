@@ -54,17 +54,20 @@ from bin.BlitManager import BlitManager
 from bin.UIManager import ThemeHandler
 from bin.HDFManager import HDFHandler
 from bin.HDFManager import HDFType
-# from bin.Widgets import DialogChooseItem
-from bin.Widgets.DialogCreateItem import DialogHDFCreate
+from bin.Widgets.DialogSaveItem import DialogSaveVectorField
+# from bin.Widgets.DialogCreateItem import DialogHDFCreate
+from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from ui import uiWidgetAlignmentManual
 
 
-def strToTuple(string: str):
+def strToTuple(string: str, length: int = 2):
     """
-    Convert a string in the format "(2, -4)" to a tuple. The numbers can be either int or float.
+    Convert a string in the format "(2, -4)" to a tuple. The numbers can be either int or float. The length of the tuple must be 2 in default.
 
     arguments:
         string: (str) The string to convert.
+        
+        length: (int) The length of the tuple. Default is 2.
 
     returns:
         tuple: The converted tuple.
@@ -82,7 +85,8 @@ def strToTuple(string: str):
                 tuple_values.append(float(part))
             else:
                 tuple_values.append(int(part))
-        
+        if length != len(tuple_values): 
+            raise ValueError("Invalid tuple length")
         return tuple(tuple_values)
     except Exception as e:
         raise ValueError(f"Invalid string format for tuple conversion: {string}") from e
@@ -200,7 +204,7 @@ class WidgetAlignmentManual(QWidget):
         self.ui.pushButton_up.clicked.connect(self._onUpButtonClicked)
         self.ui.pushButton_left.clicked.connect(self._onLeftButtonClicked)
         self.ui.pushButton_right.clicked.connect(self._onRightButtonClicked)
-        self.ui.pushButton_generate_shift_vec.clicked.connect(self._onGenerateShiftVecClicked)
+        self.ui.pushButton_generate_shift_vec.clicked.connect(self.generateShiftMapping)
         
         self.ui.label_measured_shift.setText('(0, 0)')
         
@@ -232,11 +236,7 @@ class WidgetAlignmentManual(QWidget):
     def _onShowShiftedDPChanged(self):
         """
         Handle the state change of the 'Show Shifted DP' checkbox.
-
-        arguments:
-            state: (int) The state of the checkbox (Qt.Checked or Qt.Unchecked).
         """
-        
         self.ui.label_measured_shift.setText(f'({- self.current_shift_i}, {- self.current_shift_j})')
         self._align_page._updateDP()
             
@@ -289,7 +289,7 @@ class WidgetAlignmentManual(QWidget):
         self.ui.spinBox_manual_shift_j.setValue(self.ui.spinBox_manual_shift_j.value() + 1)
     
     
-    def _onGenerateShiftVecClicked(self):
+    def generateShiftMapping(self):
         """
         Handle the click of the generate shift vector button.
         
@@ -310,30 +310,29 @@ class WidgetAlignmentManual(QWidget):
                 shift_map = self._useQuadraticPolynomial()
         
         # create a new vector field to store the shift map
-        create_item_dialog = DialogHDFCreate(self)
-        create_item_dialog.initNames(
-            hdf_type=HDFType.VectorField,
-            new_name="ShiftMap",
-            parent_path=self.data_object.parent.name
-        )
-        result = create_item_dialog.exec()
+        save_dialog = DialogSaveVectorField(self)
+        save_dialog.setParentPath(self.data_object.parent.name)
+        result = save_dialog.exec()
         if result == QDialog.Accepted:
-            group_path = create_item_dialog.getParentPath()
-            item_name = create_item_dialog.getName()
+            group_path = save_dialog.getParentPath()
+            item_name = save_dialog.getNewName()
             full_path = f"{group_path}/{item_name}"
-            self.hdf_handler.addNewData(group_path, item_name, shape = (2, scan_i, scan_j))
+            self.hdf_handler.addNewData(group_path, item_name, shape=(2, scan_i, scan_j))
             shift_map_dataset = self.hdf_handler.file[full_path]
-            shift_map_dataset[:] = shift_map 
-            
+            shift_map_dataset[:] = shift_map
+
             # save the method used to generate the shift map in the attributes
-            if _dialog_generate_shift_map.radio_button_apply_current_shift_vec:
-                shift_map_dataset.attrs['Alignment/ManualMethod'] = "Shift Vector Broadcast"
-            elif _dialog_generate_shift_map.radio_button_linear_regression:
-                shift_map_dataset.attrs['Alignment/ManualMethod'] = "Linear Regression"
+            if _dialog_generate_shift_map.radio_button_apply_current_shift_vec.isChecked():
+                shift_map_dataset.attrs['Alignment/InterpolationMethod'] = "Shift Vector Broadcast"
+            elif _dialog_generate_shift_map.radio_button_linear_regression.isChecked():
+                shift_map_dataset.attrs['Alignment/InterpolationMethod'] = "Linear Regression"
                 self._saveShiftAnchorsInAttrs(shift_map_dataset)
-            elif _dialog_generate_shift_map.radio_button_quadratic_polynomial:
-                shift_map_dataset.attrs['Alignment/ManualMethod'] = "Quadratic Polynomial Regression"
+            elif _dialog_generate_shift_map.radio_button_quadratic_polynomial.isChecked():
+                shift_map_dataset.attrs['Alignment/InterpolationMethod'] = "Quadratic Polynomial Regression"
                 self._saveShiftAnchorsInAttrs(shift_map_dataset)
+            shift_map_dataset['Alignment/Method'] = "Manual"
+            shift_map_dataset['Alignment/TargetDatasetPath'] = self._align_page.data_path 
+            # TODO 还需要加上一些属性，例如 General 以及 Space 的信息
             self.logger.info(f"Shift map created at {full_path}")
             
             
@@ -652,7 +651,9 @@ class ActionExportAnchor(ActionShiftAnchorBase):
         """
         Export the anchors in the table.
         """
-        
+        return self.widget_alignment_manual.generateShiftMapping()
+
+
 
 class ActionImportAnchor(ActionShiftAnchorBase):
     """
@@ -668,9 +669,158 @@ class ActionImportAnchor(ActionShiftAnchorBase):
 
     def importItem(self):
         """
-        Import the anchors in the table.
+        Import anchors into the table.
         """
-        pass # TODO
+        dialog = DialogHDFChoose(self)
+        if dialog.exec() != QDialog.Accepted:
+            return
+        
+        dataset_path = dialog.getCurrentPath()
+        try:
+            dataset = self.hdf_handler.file[dataset_path]
+            self._validateDataset(dataset)
+            anchor_locations, anchor_shifts = self._parseAnchors(dataset)
+            self._handleExistingRecords(anchor_locations, anchor_shifts)
+        except (KeyError, ValueError, TypeError) as e:
+            self._handleError(e)
+
+    def _validateDataset(self, dataset: Dataset):
+        """
+        Validate if the dataset contains the required attributes.
+        
+        arguments:
+            dataset: (Dataset) The dataset to validate.
+        
+        raises:
+            ValueError: If the dataset does not contain the required attributes.
+        """
+        if 'Alignment/ManualMethod' not in dataset.attrs:
+            raise ValueError("The selected dataset does not contain the required attributes.")
+
+    def _parseAnchors(self, dataset: Dataset) -> tuple[list, list]:
+        """
+        Parse the anchor locations and shifts from the dataset.
+        
+        arguments:
+            dataset: (Dataset) The dataset to parse.
+        
+        returns:
+            tuple[list, list]: A tuple containing lists of anchor locations and shifts.
+        """
+        anchor_locations = [strToTuple(loc) for loc in dataset.attrs['Alignment/ManualMethod']]
+        anchor_shifts = [strToTuple(shift) for shift in dataset.attrs['Alignment/ManualMethod']]
+        return anchor_locations, anchor_shifts
+
+    def _handleExistingRecords(self, anchor_locations: list, anchor_shifts: list):
+        """
+        Handle existing records in the table.
+        
+        arguments:
+            anchor_locations: (list) List of anchor locations.
+            
+            anchor_shifts: (list) List of anchor shifts.
+        """
+        if self.table_widget.rowCount() > 0:
+            result = self._showConfirmationDialog()
+            if result == 3:  # Cancel
+                return
+            self._processImport(anchor_locations, anchor_shifts, result)
+        else:
+            self._processImport(anchor_locations, anchor_shifts, 0)  # Replace existing records
+
+    def _showConfirmationDialog(self) -> int:
+        """
+        Show a confirmation dialog to handle existing records.
+        
+        returns:
+            int: The user's choice from the dialog.
+        """
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("Confirm Import")
+        msg_box.setText("The table already contains some records. How would you like to proceed?")
+        msg_box.addButton("Replace existing records", QMessageBox.YesRole)
+        msg_box.addButton("Append and replace duplicates", QMessageBox.NoRole)
+        msg_box.addButton("Append and keep duplicates", QMessageBox.ActionRole)
+        msg_box.addButton("Cancel", QMessageBox.RejectRole)
+        return msg_box.exec()
+
+    def _processImport(self, anchor_locations: list, anchor_shifts: list, result: int):
+        """
+        Process the imported anchors based on the user's choice.
+        
+        arguments:
+            anchor_locations: (list) List of anchor locations.
+            
+            anchor_shifts: (list) List of anchor shifts.
+            
+            result: (int) The user's choice from the confirmation dialog.
+        """
+        if result == 0:  # Replace existing records
+            self.table_widget.setRowCount(0)
+        for loc, shift in zip(anchor_locations, anchor_shifts):
+            if result == 1:  # Append and replace duplicates
+                self._appendAndReplaceDuplicates(loc, shift)
+            elif result == 2:  # Append and keep duplicates
+                self._appendAndKeepDuplicates(loc, shift)
+            else:  # Replace existing records
+                self._appendNewRecord(loc, shift)
+
+    def _appendAndReplaceDuplicates(self, loc: tuple, shift: tuple):
+        """
+        Append new records and replace duplicate records.
+        
+        arguments:
+            loc: (tuple) The anchor location.
+            
+            shift: (tuple) The anchor shift.
+        """
+        for row in range(self.table_widget.rowCount()):
+            if self.table_widget.item(row, 0).text() == str(loc):
+                self.table_widget.setItem(row, 1, QTableWidgetItem(str(shift)))
+                break
+        else:
+            self._appendNewRecord(loc, shift)
+
+    def _appendAndKeepDuplicates(self, loc: tuple, shift: tuple):
+        """
+        Append new records and keep duplicate records.
+        
+        arguments:
+            loc: (tuple) The anchor location.
+            
+            shift: (tuple) The anchor shift.
+        """
+        if str(loc) not in [self.table_widget.item(row, 0).text() for row in range(self.table_widget.rowCount())]:
+            self._appendNewRecord(loc, shift)
+
+    def _appendNewRecord(self, loc: tuple, shift: tuple):
+        """
+        Append a new record.
+        
+        arguments:
+            loc: (tuple) The anchor location.
+            
+            shift: (tuple) The anchor shift.
+        """
+        self.table_widget.insertRow(self.table_widget.rowCount())
+        self.table_widget.setItem(self.table_widget.rowCount() - 1, 0, QTableWidgetItem(str(loc)))
+        self.table_widget.setItem(self.table_widget.rowCount() - 1, 1, QTableWidgetItem(str(shift)))
+
+    def _handleError(self, e: Exception):
+        """
+        Handle errors during anchor import.
+        
+        arguments:
+            e: (Exception) The exception to handle.
+        """
+        self.logger.error(f'Error importing anchors: {e}', exc_info=True)
+        msg = QMessageBox(parent=self)
+        msg.setWindowTitle('Warning')
+        msg.setIcon(QMessageBox.Warning)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setText(f'Cannot import anchors: {e}')
+        msg.exec()
+
 
 
 class ModifyAnchorDialog(QDialog):
