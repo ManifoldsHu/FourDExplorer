@@ -47,12 +47,45 @@ import numpy as np
 from matplotlib.image import AxesImage
 from matplotlib.axes import Axes 
 from h5py import Dataset
+from scipy.optimize import curve_fit
+
 
 from bin.BlitManager import BlitManager
 from bin.UIManager import ThemeHandler
+from bin.HDFManager import HDFHandler
+from bin.HDFManager import HDFType
+# from bin.Widgets import DialogChooseItem
+from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from ui import uiWidgetAlignmentManual
 
 
+def strToTuple(string: str):
+    """
+    Convert a string in the format "(2, -4)" to a tuple. The numbers can be either int or float.
+
+    arguments:
+        string: (str) The string to convert.
+
+    returns:
+        tuple: The converted tuple.
+    """
+    try:
+        # Remove the parentheses and split by comma
+        stripped_string = string.strip('()')
+        parts = stripped_string.split(',')
+        
+        # Convert each part to the appropriate type (int or float)
+        tuple_values = []
+        for part in parts:
+            part = part.strip()
+            if '.' in part:
+                tuple_values.append(float(part))
+            else:
+                tuple_values.append(int(part))
+        
+        return tuple(tuple_values)
+    except Exception as e:
+        raise ValueError(f"Invalid string format for tuple conversion: {string}") from e
 
 
 class WidgetAlignmentManual(QWidget):
@@ -68,8 +101,9 @@ class WidgetAlignmentManual(QWidget):
         self.ui.setupUi(self)
         self._shift_i_dict = {}
         self._shift_j_dict = {}
+        self._initUi()
         self._initTableWidget()
-        self._initConnections()
+        
     
     @property
     def current_dp_location(self):
@@ -82,16 +116,6 @@ class WidgetAlignmentManual(QWidget):
     @property
     def current_shift_j(self):
         return self.ui.spinBox_manual_shift_j.value()
-
-    def setParentAlignPage(self, align_page: QWidget):
-        """
-        Set the parent alignment page.
-
-        arguments:
-            align_page: (PageAlignFourDSTEM) The parent alignment page containing the 4D-STEM data and UI elements.
-        """
-        self._align_page = align_page 
-
 
     @property
     def dp_object(self) -> AxesImage:
@@ -122,6 +146,11 @@ class WidgetAlignmentManual(QWidget):
         global qApp
         return qApp.logger
 
+    @property
+    def hdf_handler(self) -> HDFHandler:
+        global qApp 
+        return qApp.hdf_handler
+
     def _initTableWidget(self):
         """
         初始化 Table widget, 添加 Action Button 以及相应的 toolbar，里面包含有增加、删除、修改按钮。其中，增加按钮可将页面当前展示的衍射图像的位置以及衍射图像对应的平移量给保存下来；删除按钮可将列表中当前选定的项给删除掉；修改按钮可修改列表中当前选定的项。
@@ -137,10 +166,15 @@ class WidgetAlignmentManual(QWidget):
         self._table_widget_toolbar = QToolBar()
 
         self._action_add = ActionAddAnchor(self)
+        self._action_add.setWidgetAlignmentManual(self)
         self._action_delete = ActionDeleteAnchor(self)
+        self._action_delete.setWidgetAlignmentManual(self)
         self._action_modify = ActionModifyAnchor(self)
+        self._action_modify.setWidgetAlignmentManual(self)
         self._action_import = ActionImportAnchor(self)
+        self._action_import.setWidgetAlignmentManual(self)
         self._action_export = ActionExportAnchor(self)
+        self._action_export.setWidgetAlignmentManual(self)
         self._table_widget_toolbar.addAction(self._action_add)
         self._table_widget_toolbar.addAction(self._action_delete)
         self._table_widget_toolbar.addAction(self._action_modify)
@@ -149,10 +183,16 @@ class WidgetAlignmentManual(QWidget):
         self.ui.groupBox_sample_records.layout().insertWidget(0, self._table_widget_toolbar)  
 
 
-    def _initConnections(self):
+    def _initUi(self):
         """
-        Initialize signal-slot connections.
+        Initialize Ui and their signal-slot connections.
         """
+        self.ui.checkBox_show_shifted_dp.setChecked(True)
+        self.ui.spinBox_manual_shift_i.setValue(0)
+        self.ui.spinBox_manual_shift_j.setValue(0)
+        self.ui.spinBox_manual_shift_i.setRange(-16384, 16384)
+        self.ui.spinBox_manual_shift_j.setRange(-16384, 16384)
+
         self.ui.checkBox_show_shifted_dp.stateChanged.connect(self._onShowShiftedDPChanged)
         self.ui.spinBox_manual_shift_i.valueChanged.connect(self._onShiftIChanged)
         self.ui.spinBox_manual_shift_j.valueChanged.connect(self._onShiftJChanged)
@@ -162,6 +202,31 @@ class WidgetAlignmentManual(QWidget):
         self.ui.pushButton_right.clicked.connect(self._onRightButtonClicked)
         self.ui.pushButton_generate_shift_vec.clicked.connect(self._onGenerateShiftVecClicked)
         
+        self.ui.label_measured_shift.setText('(0, 0)')
+        
+        
+    def setParentAlignPage(self, align_page: QWidget):
+        """
+        Set the parent alignment page.
+
+        arguments:
+            align_page: (PageAlignFourDSTEM) The parent alignment page containing the 4D-STEM data and UI elements.
+        """
+        self._align_page = align_page 
+        
+        
+    def getCurrentDPShiftVec(self):
+        """
+        Get the current shift vector of the current diffraction pattern.
+        """
+        return (self.current_shift_i, self.current_shift_j)
+    
+    
+    def getCurrentShowShiftedDP(self):
+        """
+        Get the current state of the 'Show Shifted DP' checkbox.
+        """
+        return self.ui.checkBox_show_shifted_dp.isChecked()
 
 
     def _onShowShiftedDPChanged(self):
@@ -171,17 +236,11 @@ class WidgetAlignmentManual(QWidget):
         arguments:
             state: (int) The state of the checkbox (Qt.Checked or Qt.Unchecked).
         """
-        if self.ui.checkBox_show_shifted_dp.isChecked():
-            original_data = self.data_object[self.scan_ii, self.scan_jj, :, :]
-            shifted_data = np.roll(original_data, self.current_shift_i, axis=0)
-            shifted_data = np.roll(shifted_data, self.current_shift_j, axis=1)
-            self.dp_object.set_data(shifted_data)
-            self.blit_manager.update()
-        else:
-            self.dp_object.set_data(self.data_object[self.scan_ii, self.scan_jj, :, :])
-            self.blit_manager.update()
+        
+        self.ui.label_measured_shift.setText(f'({- self.current_shift_i}, {- self.current_shift_j})')
+        self._align_page._updateDP()
+            
 
-    
     def _onShiftIChanged(self):
         """
         Handle the change of the shift i value.
@@ -190,6 +249,7 @@ class WidgetAlignmentManual(QWidget):
             value: (int) The new value of the shift i.
         """
         self._onShowShiftedDPChanged()
+    
     
     def _onShiftJChanged(self):
         """
@@ -200,11 +260,13 @@ class WidgetAlignmentManual(QWidget):
         """
         self._onShowShiftedDPChanged()
     
+    
     def _onDownButtonClicked(self):
         """
         Handle the click of the down button.
         """
         self.ui.spinBox_manual_shift_i.setValue(self.ui.spinBox_manual_shift_i.value() + 1)
+        
         
     def _onUpButtonClicked(self):
         """
@@ -212,17 +274,20 @@ class WidgetAlignmentManual(QWidget):
         """
         self.ui.spinBox_manual_shift_i.setValue(self.ui.spinBox_manual_shift_i.value() - 1)
     
+    
     def _onLeftButtonClicked(self):
         """
         Handle the click of the left button.
         """
         self.ui.spinBox_manual_shift_j.setValue(self.ui.spinBox_manual_shift_j.value() - 1)
     
+    
     def _onRightButtonClicked(self):
         """ 
         Handle the click of the right button.
         """
         self.ui.spinBox_manual_shift_j.setValue(self.ui.spinBox_manual_shift_j.value() + 1)
+    
     
     def _onGenerateShiftVecClicked(self):
         """
@@ -233,16 +298,45 @@ class WidgetAlignmentManual(QWidget):
             - Use the current anchors to generate the shift vector fields with linear regression.
             - Use the current anchors to generate the shift vector fields with quadratic polynomial.
         """
-        _dialog = GenerateShiftVectorDialog(self)
-        result = _dialog.exec()
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        _dialog_generate_shift_map = GenerateShiftVectorDialog()
+        result = _dialog_generate_shift_map.exec()
         if result == QDialog.Accepted:
-            if _dialog.radio_button_apply_current_shift_vec.isChecked():
+            if _dialog_generate_shift_map.radio_button_apply_current_shift_vec.isChecked():
                 shift_map = self._useCurrentShiftVec()
-            elif _dialog.radio_button_linear_regression.isChecked():
+            elif _dialog_generate_shift_map.radio_button_linear_regression.isChecked():
                 shift_map = self._useLinearRegression()
-            elif _dialog.radio_button_quadratic_polynomial.isChecked():
+            elif _dialog_generate_shift_map.radio_button_quadratic_polynomial.isChecked():
                 shift_map = self._useQuadraticPolynomial()
-
+        
+        # create a new vector field to store the shift map
+        create_item_dialog = DialogHDFCreate(self)
+        create_item_dialog.initNames(
+            hdf_type=HDFType.VectorField,
+            new_name="ShiftMap",
+            parent_path=self.data_object.parent.name
+        )
+        result = create_item_dialog.exec()
+        if result == QDialog.Accepted:
+            group_path = create_item_dialog.getParentPath()
+            item_name = create_item_dialog.getName()
+            full_path = f"{group_path}/{item_name}"
+            self.hdf_handler.addNewData(group_path, item_name, shape = (2, scan_i, scan_j))
+            shift_map_dataset = self.hdf_handler.file[full_path]
+            shift_map_dataset[:] = shift_map 
+            
+            # save the method used to generate the shift map in the attributes
+            if _dialog_generate_shift_map.radio_button_apply_current_shift_vec:
+                shift_map_dataset.attrs['Alignment/ManualMethod'] = "Shift Vector Broadcast"
+            elif _dialog_generate_shift_map.radio_button_linear_regression:
+                shift_map_dataset.attrs['Alignment/ManualMethod'] = "Linear Regression"
+                self._saveShiftAnchorsInAttrs(shift_map_dataset)
+            elif _dialog_generate_shift_map.radio_button_quadratic_polynomial:
+                shift_map_dataset.attrs['Alignment/ManualMethod'] = "Quadratic Polynomial Regression"
+                self._saveShiftAnchorsInAttrs(shift_map_dataset)
+            self.logger.info(f"Shift map created at {full_path}")
+            
+            
     def _useCurrentShiftVec(self):
         """
         Use the current shift vector to shift all the diffraction patterns.
@@ -254,28 +348,130 @@ class WidgetAlignmentManual(QWidget):
         shift_map[1, :, :] *= current_shift_j 
         return shift_map
 
+
     def _useLinearRegression(self):
         """
-        Use the current anchors to generate the shift vector fields with linear regression.
+        Use the current anchors in the table to generate the shift vector fields 
+        with linear regression.
         """
-        table_widget = self.ui.tableWidget_manual_sample
-        anchor_locations = [eval(table_widget.item(i, 0).text()) for i in range(table_widget.rowCount())]
-        anchor_shifts = [eval(table_widget.item(i, 1).text()) for i in range(table_widget.rowCount())]
-        shift_vec = np.zeros((2, self.scan_ii, self.scan_jj,))
-        for anchor_location, anchor_shift in zip(anchor_locations, anchor_shifts):
-            shift_vec[0, anchor_location[0], anchor_location[1]] = anchor_shift[0]
-            shift_vec[1, anchor_location[0], anchor_location[1]] = anchor_shift[1]
-        return shift_vec
+        anchor_locations, anchor_shifts = self._getAnchorLists()
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+
+        # Generate the shift map
+        shift_map = np.zeros((2, scan_i, scan_j))
+        
+        def linear_model(x, a, b, c):
+            return a * x[0] + b * x[1] + c
+
+        def fit_linear_model(locations, shifts):
+            popt, _ = curve_fit(linear_model, locations.T, shifts)
+            return popt
+
+        i_params = fit_linear_model(anchor_locations, anchor_shifts[:, 0])
+        j_params = fit_linear_model(anchor_locations, anchor_shifts[:, 1])
+
+        # Generate the shift map using the fitted models
+        i_grid, j_grid = np.meshgrid(np.arange(scan_i), np.arange(scan_j), indexing='ij')
+        locations = np.vstack([i_grid.ravel(), j_grid.ravel()]).T
+        shift_map[0] = linear_model(locations.T, *i_params).reshape(scan_i, scan_j)
+        shift_map[1] = linear_model(locations.T, *j_params).reshape(scan_i, scan_j)
+
+        return shift_map
+
 
     def _useQuadraticPolynomial(self):
         """
-        Use the current anchors to generate the shift vector fields with quadratic polynomial.
+        Use the current anchors in the table to generate the shift vector fields 
+        with quadratic polynomial.
         """
-        pass # TODO
-            
+        anchor_locations, anchor_shifts = self._getAnchorLists()
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
 
+        # Generate the shift map
+        shift_map = np.zeros((2, scan_i, scan_j))
+        
+        def quadratic_model(x, a, b, c, d, e, f):
+            return a * x[0]**2 + b * x[1]**2 + c * x[0] * x[1] + d * x[0] + e * x[1] + f
+
+        def fit_quadratic_model(locations, shifts):
+            popt, _ = curve_fit(quadratic_model, locations.T, shifts)
+            return popt
+
+        i_params = fit_quadratic_model(anchor_locations, anchor_shifts[:, 0])
+        j_params = fit_quadratic_model(anchor_locations, anchor_shifts[:, 1])
+
+        # Generate the shift map using the fitted models
+        i_grid, j_grid = np.meshgrid(np.arange(scan_i), np.arange(scan_j), indexing='ij')
+        locations = np.vstack([i_grid.ravel(), j_grid.ravel()]).T
+        shift_map[0] = quadratic_model(locations.T, *i_params).reshape(scan_i, scan_j)
+        shift_map[1] = quadratic_model(locations.T, *j_params).reshape(scan_i, scan_j)
+
+        return shift_map
+        
+            
+    def _saveShiftAnchorsInAttrs(self, vec_object: Dataset):
+        """
+        Save the current shift anchors in the attributes of the widget.
+        """
+        table_widget = self.ui.tableWidget_manual_sample
+        anchor_locations = []
+        anchor_shifts = []
+        for i in range(table_widget.rowCount()):
+            try:
+                anchor_location_str = table_widget.item(i, 0).text()
+                anchor_shift_str = table_widget.item()
+                anchor_location = strToTuple(anchor_location_str)
+                anchor_shift = strToTuple(anchor_shift_str)
+                anchor_locations.append(anchor_location)
+                anchor_shifts.append(anchor_shift)
+            except (ValueError, AttributeError):
+                self.logger.warning(
+                    f"Invalid entry at row {i + 1} in the table widget."
+                )
+            
+        # Save the anchors in the attributes
+        for anchor_location, anchor_shift in zip(anchor_locations, anchor_shifts):
+            location_str = str(anchor_location).replace(" ", "")
+            shift_str = str(anchor_shift).replace(" ", "")
+            vec_object.attrs[f"/Alignment/ShiftAnchors/{location_str}"] = shift_str
         
         
+    def _getAnchorLists(self) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Retrieve the list of anchor locations and their corresponding shift values from the table widget.
+
+        Returns:
+            (tuple[np.ndarray, np.ndarray]) A tuple containing two numpy array:
+            
+                - anchor_locations: A numpy array containing all anchor locations, which shape is (n, 2). n is the number of anchors.
+                
+                - anchor_shifts: A numpy array containing all anchor shifts, which shape is (n, 2). n is the number of anchors.
+
+        Raises:
+            ValueError: If the string format of the anchor location or shift value is invalid.
+            
+            AttributeError: If any item in the table widget is missing.
+        """
+        table_widget = self.ui.tableWidget_manual_sample
+        anchor_locations = []
+        anchor_shifts = []
+        for i in range(table_widget.rowCount()):
+            try:
+                anchor_location_str = table_widget.item(i, 0).text()
+                anchor_shift_str = table_widget.item(i, 1).text()
+                anchor_location = strToTuple(anchor_location_str)
+                anchor_shift = strToTuple(anchor_shift_str)
+                anchor_locations.append(anchor_location)
+                anchor_shifts.append(anchor_shift)
+            except ValueError:
+                self.logger.warning(f"Invalid string format at row {i + 1} in the table widget.")
+                QMessageBox.warning(self, "Invalid Entry", f"Invalid string format at row {i + 1}. Please check the format.")
+            except AttributeError:
+                self.logger.warning(f"Missing item at row {i + 1} in the table widget.")
+                QMessageBox.warning(self, "Missing Entry", f"Missing item at row {i + 1}. Please ensure all cells are filled.")
+        anchor_locations = np.array(anchor_locations)
+        anchor_shifts = np.array(anchor_shifts)
+        return anchor_locations, anchor_shifts
 
 
 class ActionShiftAnchorBase(QAction):
@@ -325,6 +521,18 @@ class ActionShiftAnchorBase(QAction):
             _path = ':/HDFEdit/resources/icons/' + self._icon_name
             icon = self.theme_handler.iconProvider(_path)
             self.setIcon(icon)
+            
+    def initIconResources(self, icon_name: str):
+        """
+        Initialize the resource of icons.
+
+        arguments:
+            icon_name: (str) the name of icon.
+        """
+        _path = ':/HDFEdit/resources/icons/' + icon_name
+        icon = self.theme_handler.iconProvider(_path)
+        self._icon_name = icon_name 
+        self.setIcon(icon)
     
 
 class ActionAddAnchor(ActionShiftAnchorBase):
@@ -341,14 +549,34 @@ class ActionAddAnchor(ActionShiftAnchorBase):
         
     def addItem(self):
         """
-        Add the current displaying item that include the diffraction pattern's location and shift.
+        Add the current displaying item that include the diffraction pattern's location and shift. If the location already exists, it will ask whether to update it.
         """
         current_location = self.widget_alignment_manual.current_dp_location
         current_shift_i = self.widget_alignment_manual.current_shift_i
         current_shift_j = self.widget_alignment_manual.current_shift_j
+        
+        current_location_str = str(current_location)
+        current_shift_str = str((- current_shift_i, - current_shift_j))
+        
+        for row in range(self.table_widget.rowCount()):
+            location_item = self.table_widget.item(row, 0)
+            shift_item = self.table_widget.item(row, 1)
+            
+            if location_item and location_item.text() == current_location_str:
+                if shift_item and shift_item.text() != current_shift_str:
+                    msgbox = QMessageBox()
+                    msgbox.setIcon(QMessageBox.Question)
+                    msgbox.setText(f'The location {current_location_str} already exists with a different shift. Do you want to update it?')
+                    msgbox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                    msgbox.setDefaultButton(QMessageBox.No)
+                    result = msgbox.exec()
+                    if result == QMessageBox.Yes:
+                        self.table_widget.setItem(row, 1, QTableWidgetItem(current_shift_str))
+                return
+        
         self.table_widget.insertRow(self.table_widget.rowCount())
-        self.table_widget.setItem(self.table_widget.rowCount() - 1, 0, QTableWidgetItem(str(current_location)))
-        self.table_widget.setItem(self.table_widget.rowCount() - 1, 1, QTableWidgetItem(str((current_shift_i, current_shift_j))))
+        self.table_widget.setItem(self.table_widget.rowCount() - 1, 0, QTableWidgetItem(current_location_str))
+        self.table_widget.setItem(self.table_widget.rowCount() - 1, 1, QTableWidgetItem(current_shift_str))
         
 
 
@@ -399,7 +627,7 @@ class ActionModifyAnchor(ActionShiftAnchorBase):
         current_index = self.table_widget.currentRow()
         if current_index < 0:
             return
-        modify_dialog = ModifyDialog(self, self.table_widget, current_index)
+        modify_dialog = ModifyAnchorDialog(parent = None, table_widget = self.table_widget, current_index = current_index)
         result = modify_dialog.exec()
         if result == QDialog.Accepted:
             shift_i = modify_dialog.shift_i_input.value()
@@ -422,9 +650,9 @@ class ActionExportAnchor(ActionShiftAnchorBase):
 
     def exportItem(self):
         """
-        Export the current selected item.
+        Export the anchors in the table.
         """
-        pass # TODO
+        
 
 class ActionImportAnchor(ActionShiftAnchorBase):
     """
@@ -440,12 +668,12 @@ class ActionImportAnchor(ActionShiftAnchorBase):
 
     def importItem(self):
         """
-        Import the current selected item.
+        Import the anchors in the table.
         """
         pass # TODO
 
 
-class ModifyDialog(QDialog):
+class ModifyAnchorDialog(QDialog):
     """
     修改锚点对话框。
     
@@ -459,9 +687,10 @@ class ModifyDialog(QDialog):
             parent: (QWidget) The parent widget.
         """
         super().__init__(parent)
-        self.initUi()
+        
         self._current_index = current_index
         self._table_widget = table_widget
+        self.initUi()
 
 
     def initUi(self):
@@ -477,13 +706,13 @@ class ModifyDialog(QDialog):
         
         shift_i_label = QLabel('Shift i:')
         shift_i_input = QSpinBox()
-        shift_i_input.setValue(int(self._table_widget.item(self._current_index, 1).text()))
+        shift_i_input.setValue(strToTuple(self._table_widget.item(self._current_index, 1).text())[0])
         layout.addWidget(shift_i_label)
         layout.addWidget(shift_i_input)
         
         shift_j_label = QLabel('Shift j:')
         shift_j_input = QSpinBox()
-        shift_j_input.setValue(int(self._table_widget.item(self._current_index, 2).text()))
+        shift_j_input.setValue(strToTuple(self._table_widget.item(self._current_index, 1).text())[1])
         layout.addWidget(shift_j_label)
         layout.addWidget(shift_j_input)
         

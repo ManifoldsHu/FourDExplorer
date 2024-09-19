@@ -31,6 +31,25 @@ class Ui_Form(object):
         self.groupBox.setObjectName(u"groupBox")
         self.verticalLayout_3 = QVBoxLayout(self.groupBox)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.label = QLabel(self.groupBox)
+        self.label.setObjectName(u"label")
+
+        self.horizontalLayout_2.addWidget(self.label)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer)
+
+        self.label_measured_shift = QLabel(self.groupBox)
+        self.label_measured_shift.setObjectName(u"label_measured_shift")
+
+        self.horizontalLayout_2.addWidget(self.label_measured_shift)
+
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
+
         self.checkBox_show_shifted_dp = QCheckBox(self.groupBox)
         self.checkBox_show_shifted_dp.setObjectName(u"checkBox_show_shifted_dp")
 
@@ -129,9 +148,11 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Shift Diffraction Patterns", None))
+        self.label.setText(QCoreApplication.translate("Form", u"Measured DP shift:", None))
+        self.label_measured_shift.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.checkBox_show_shifted_dp.setText(QCoreApplication.translate("Form", u"Display shifted diffraction image", None))
-        self.label_13.setText(QCoreApplication.translate("Form", u"Shift i-direct", None))
-        self.label_14.setText(QCoreApplication.translate("Form", u"Shift j-direct", None))
+        self.label_13.setText(QCoreApplication.translate("Form", u"Translate DP i-direct", None))
+        self.label_14.setText(QCoreApplication.translate("Form", u"Translate DP j-direct", None))
         self.pushButton_up.setText(QCoreApplication.translate("Form", u"\u2191", None))
         self.pushButton_left.setText(QCoreApplication.translate("Form", u"\u2190", None))
         self.pushButton_down.setText(QCoreApplication.translate("Form", u"\u2193", None))

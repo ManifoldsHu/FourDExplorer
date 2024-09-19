@@ -273,8 +273,9 @@ class PageViewVectorField(QWidget):
         TODO: read and save attributes, like length unit.
         """
         if self._quiver_object in self.image_ax.collections:
-            _index = self.image_ax.collections.index(self._quiver_object)
-            self.image_ax.collections.pop(_index)
+            # _index = self.image_ax.collections.index(self._quiver_object)
+            # self.image_ax.collections.pop(_index)
+            self._quiver_object.remove()
 
         _, height, width = self.data_object.shape 
         array_i = np.linspace(0, height - 1, height)
@@ -394,10 +395,17 @@ class PageViewVectorField(QWidget):
 
         TODO: read and save attributes, like norm, cmap, alpha, etc.
         """
+        # if self._background_object in self.background_ax.images:
+        #     # clear current objects in the axes
+        #     _index = self.background_ax.images.index(self._background_object)
+        #     self.background_ax.images.pop(_index)
+        # if self._background_object in self.background_ax.images:
+        #     # Remove the current _background_object from the background axes
+        #     _index = self.background_ax.images.index(self._background_object)
+        #     del self.background_ax.images[_index]
+        
         if self._background_object in self.background_ax.images:
-            # clear current objects in the axes
-            _index = self.background_ax.images.index(self._background_object)
-            self.background_ax.images.pop(_index)
+            self._background_object.remove()
 
         self._background_object = self.background_ax.imshow(
             self.hdf_handler.file[self.background_path]
@@ -406,8 +414,9 @@ class PageViewVectorField(QWidget):
 
         if self._image_object in self.image_ax.images:
             # clear current objects in the axes
-            _index = self.image_ax.images.index(self._image_object)
-            self.image_ax.images.pop(_index)
+            # _index = self.image_ax.images.index(self._image_object)
+            # self.image_ax.images.pop(_index)
+            self._image_object.remove()
         
         self._image_object = self.image_ax.imshow(
             self.hdf_handler.file[self.background_path],

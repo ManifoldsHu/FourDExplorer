@@ -39,6 +39,8 @@ from matplotlib.patches import Circle
 from matplotlib.patches import Ellipse
 from matplotlib.text import Annotation
 import numpy as np
+from skimage.transform import warp
+from skimage.transform import SimilarityTransform
 
 from bin.TaskManager import TaskManager
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
@@ -109,16 +111,23 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self._hcursor_object = None 
         self._vcursor_object = None 
         self._shift_arrow_object = None 
-        self._shift_vec = None 
+        # self._shift_vec = None 
 
 
         self._createAxes()
         # self._translation_vector = (0, 0)
 
         # Initialize WidgetAlignmentManual
-        self._widget_alignment_manual = WidgetAlignmentManual(self)
-        self.ui.stackedWidget_align_mode.insertWidget(0, self._widget_alignment_manual)
+        # self._widget_alignment_manual = WidgetAlignmentManual(self)
+        # self._widget_alignment_manual.setParentAlignPage(self)
+        # self.ui.stackedWidget_align_mode.insertWidget(0, self._widget_alignment_manual)
         
+        self._widget_alignment_manual = self.ui.stackedWidget_align_mode_manually
+        self._widget_alignment_ref = self.ui.stackedWidget_align_mode_reference
+        self._widget_alignment_fddnet = self.ui.stackedWidget_align_mode_fddnet
+        self._widget_alignment_manual.setParentAlignPage(self)
+        self._widget_alignment_ref.setParentAlignPage(self)
+        self._widget_alignment_fddnet.setParentAlignPage(self)
 
 
     @property
@@ -143,8 +152,23 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         return qApp.task_manager 
 
     @property
-    def shift_vec(self) -> np.ndarray:
-        return self._shift_vec  # 指的是当前整个数据集的平移向量
+    def shift_vec(self) -> tuple[float, float]:
+        if self.current_method == 'Manual':
+            return self._widget_alignment_manual.getCurrentDPShiftVec()
+        elif self.current_method == 'Reference':
+            return self._widget_alignment_ref.getCurrentDPShiftVec()
+        elif self.current_method == 'FDDNet':
+            return self._widget_alignment_fddnet.getCurrentDPShiftVec()
+    
+    @property
+    def current_show_shifted_dp(self) -> bool:
+        if self.current_method == 'Manual':
+            return self._widget_alignment_manual.getCurrentShowShiftedDP()
+        elif self.current_method == 'Reference':
+            return self._widget_alignment_ref.getCurrentShowShiftedDP()
+        elif self.current_method == 'FDDNet':
+            return self._widget_alignment_fddnet.getCurrentShowShiftedDP()
+    
     
     @property
     def current_shift_vec_i(self) -> float:
@@ -185,6 +209,9 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self.ui.pushButton_start.setProperty('class', 'danger')
         self.ui.pushButton_start.clicked.connect(self.startCalculation)
         self.ui.pushButton_start.setText('Start to Apply Alignment')
+        
+        self.ui.comboBox_show_alignment_method.setCurrentIndex(0)
+        self.ui.stackedWidget_align_mode.setCurrentIndex(0)
 
         self.ui.comboBox_show_alignment_method.currentIndexChanged.connect(self._onAlignmentMethodChanged)
 
@@ -196,9 +223,10 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         Including a circle, a horizontal line and a vertical line.
         """
         if self._auxiliary_circle_object in self.dp_ax.patches:
-            # delete the current patch if there exists.
-            _index = self.dp_ax.patches.index(self._auxiliary_circle_object)
-            self.dp_ax.patches.pop(_index)
+            # # delete the current patch if there exists.
+            # _index = self.dp_ax.patches.index(self._auxiliary_circle_object)
+            # self.dp_ax.patches.pop(_index)
+            self._auxiliary_circle_object.remove()
 
         self._auxiliary_circle_object = Circle(
             (0, 0),
@@ -256,10 +284,10 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         # TODO: read/save the alignment attribute
 
         # Set up WidgetAlignmentManual
-        self._widget_alignment_manual.setDPObject(self.dp_object)
-        self._widget_alignment_manual.setAxes(self.dp_ax)
-        self._widget_alignment_manual.setBlitManager(self.dp_blit_manager)
-        self._widget_alignment_manual.setDataObject(self.data_object)
+        # self._widget_alignment_manual.setDPObject(self.dp_object)
+        # self._widget_alignment_manual.setAxes(self.dp_ax)
+        # self._widget_alignment_manual.setBlitManager(self.dp_blit_manager)
+        # self._widget_alignment_manual.setDataObject(self.data_object)
 
 
 
@@ -285,16 +313,30 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         if self.data_object is None:
             return None
 
-        # scan_i, scan_j, dp_i, dp_j = self.data_object.shape
-        # scan_ii = max(0, min(scan_i, self.scan_ii)) # Avoid out of boundary
-        # scan_jj = max(0, min(scan_j, self.scan_jj))
-        # self.dp_object.set_data(
-        #     np.roll(
-        #         self.data_object[scan_ii, scan_jj, :, :], 
-        #         self._translation_vector,
-        #         axis = (0, 1),
-        #     )
-        # )
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        scan_ii = max(0, min(scan_i, self.scan_ii)) # Avoid out of boundary
+        scan_jj = max(0, min(scan_j, self.scan_jj))
+
+        shift_vec_xy = (- self.shift_vec[1], - self.shift_vec[0])
+
+        if self.current_show_shifted_dp:
+            # Create a translation matrix based on the shift vector
+            translation_matrix = SimilarityTransform(translation=shift_vec_xy)
+            
+            # Apply the translation to the diffraction pattern data
+            self.dp_object.set_data(
+                warp(
+                    self.data_object[scan_ii, scan_jj, :, :],
+                    translation_matrix,
+                    mode='constant',
+                    cval=0,
+                    preserve_range=True
+                )
+            )
+        else:
+            self.dp_object.set_data(
+                self.data_object[scan_ii, scan_jj, :, :]
+            )
         
         self.colorbar_object.update_normal(self.dp_object)
         self.dp_blit_manager.update()     
@@ -308,8 +350,8 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         """
         self.ui.stackedWidget_align_mode.setCurrentIndex(index)
 
-        if index == 0:
-            self._widget_alignment_manual.updateDP()
+        # if index == 0:
+        #     self._widget_alignment_manual.updateDP()
 
     def startCalculation(self):
         pass 

@@ -23,7 +23,17 @@ date:           Sep 2, 2024
 *-------------------------- WidgetAlignmentRef.py ----------------------------*
 """
 
+from logging import Logger
+
 from PySide6.QtWidgets import QWidget
+
+import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.image import AxesImage
+from h5py import Dataset
+
+from bin.BlitManager import BlitManager
+
 from ui import uiWidgetAlignmentRef
 
 class WidgetAlignmentRef(QWidget):
@@ -31,3 +41,45 @@ class WidgetAlignmentRef(QWidget):
         super().__init__(parent)
         self.ui = uiWidgetAlignmentRef.Ui_Form()
         self.ui.setupUi(self)
+
+    @property
+    def current_dp_location(self):
+        return (self.scan_ii, self.scan_jj)
+    
+    def setParentAlignPage(self, align_page: QWidget):
+        """
+        Set the parent alignment page.
+
+        arguments:
+            align_page: (PageAlignFourDSTEM) The parent alignment page containing the 4D-STEM data and UI elements.
+        """
+        self._align_page = align_page
+        
+    @property
+    def dp_object(self) -> AxesImage:
+        return self._align_page.dp_object
+    
+    @property
+    def ax(self) -> Axes:
+        return self._align_page.dp_ax
+    
+    @property
+    def blit_manager(self) -> BlitManager:
+        return self._align_page.dp_blit_manager
+    
+    @property
+    def data_object(self) -> Dataset:
+        return self._align_page.data_object
+    
+    @property
+    def scan_ii(self) -> int:
+        return self._align_page.scan_ii
+    
+    @property
+    def scan_jj(self) -> int:
+        return self._align_page.scan_jj
+    
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger

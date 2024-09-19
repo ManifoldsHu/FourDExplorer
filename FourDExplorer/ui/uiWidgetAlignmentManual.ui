@@ -21,6 +21,37 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Measured DP shift:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_measured_shift">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="QCheckBox" name="checkBox_show_shifted_dp">
         <property name="text">
          <string>Display shifted diffraction image</string>
@@ -34,14 +65,14 @@
           <item>
            <widget class="QLabel" name="label_13">
             <property name="text">
-             <string>Shift i-direct</string>
+             <string>Translate DP i-direct</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QLabel" name="label_14">
             <property name="text">
-             <string>Shift j-direct</string>
+             <string>Translate DP j-direct</string>
             </property>
            </widget>
           </item>
