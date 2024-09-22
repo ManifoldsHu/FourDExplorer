@@ -20,13 +20,15 @@ from logging import Logger
 from PySide6.QtCore import QObject
 from PySide6.QtCore import Signal 
 import numpy as np
+from scipy.optimize import curve_fit
 
 from bin.TaskManager import Task 
 from bin.HDFManager import HDFHandler
 from lib.FDDNetInference import mapInferenceFDDNet
 from lib.FDDNetInference import mapInferenceFDDNetAngle
 from lib.FDDNetInference import mapInferenceFDDNetEllipse
-
+from lib.DiffractionAlignment import linearModel
+from lib.DiffractionAlignment import quadraticModel
 
 class TaskFDDNetInference(Task):
     """
@@ -51,6 +53,7 @@ class TaskFDDNetInference(Task):
         calc_dict: dict,
         names_dict: dict,
         metas_dict: dict,
+        fit_models_dict: dict = None,
         parent: QObject = None, 
     ):
         """
@@ -60,22 +63,21 @@ class TaskFDDNetInference(Task):
             image_parent_path: (str) the parent path of the result dataset.
             
             calc_dict: (dict[str: bool]) which parameters of ellipse fitting to be calculated. There must be 6 entries:
-            
                 - 'center': vector field mapping, the center location of the ellipse.
-                
                 - 'ci': i component of ellipse center
-                
                 - 'cj': j component of ellipse center
-                
                 - 'a': half major axis of the ellipse
-                
                 - 'b': half minor axis of the ellipse
-                
                 - 'angle': angle of the ellipse
             
             names_dict: (dict[str: str]) the names of the result datasets.
             
             metas_dict: (dict[str: dict]) the metadata of the result datasets.
+            
+            fit_model_dict: (dict[str: str|None]) the fit model of the result datasets. 
+                - None: do not use fitting 
+                - 'Linear': use linear fitting
+                - 'Quadratic': use quadratic fitting
             
             parent: (QObject) the parent object of this task.
         """
@@ -88,14 +90,19 @@ class TaskFDDNetInference(Task):
         self._calc_dict = calc_dict
         
         for key in self._calc_dict:
-            if self._calc_dict[key] and key not in self._names_dict:
+            if self._calc_dict[key] and key not in names_dict:
                 raise ValueError(f"The key '{key}' in calc_dict is True but not found in names_dict.")
         self._names_dict = names_dict
         
         for key in self._calc_dict:
-            if self._calc_dict[key] and key not in self._metas_dict:
+            if self._calc_dict[key] and key not in metas_dict:
                 raise ValueError(f"The key '{key}' in calc_dict is True but not found in metas_dict.")
         self._metas_dict = metas_dict
+        
+        for key in self._calc_dict:
+            if self._calc_dict[key] and key not in fit_models_dict:
+                fit_models_dict[key] = None 
+        self._fit_models_dict = fit_models_dict
         
         self.comment = (
             'FDDNet inference on all diffraction images in the 4D-STEM dataset.\n'
@@ -188,6 +195,7 @@ class TaskFDDNetInference(Task):
             self._workerFDDNetInference,
         )
         
+        
     def _workerFDDNetInference(self, progress_signal: Signal = None):
         """
         Calculate the ellipse parameters of each diffraction image.
@@ -227,7 +235,28 @@ class TaskFDDNetInference(Task):
         for mode, is_calced in self._calc_dict.items():
             if is_calced:
                 data_path = self._getDataPath(mode)
+                result = result_dict[mode]
+                fit_model_name = self._fit_models_dict.get(mode, None)
+                
+                if fit_model_name is not None:
+                    i_grid, j_grid = np.meshgrid(np.arange(scan_i), np.arange(scan_j), indexing='ij')
+                    locations = np.vstack([i_grid.ravel(), j_grid.ravel()]).T
+                    values = result.ravel()
+                    
+                    params = self._fitModel(fit_model_name, locations, values)
+                    if params is not None:
+                        if fit_model_name == 'Linear':
+                            result = linearModel(locations.T, *params).reshape(scan_i, scan_j)
+                        elif fit_model_name == 'Quadratic':
+                            result = quadraticModel(locations.T, *params).reshape(scan_i, scan_j)
+                
+                self.hdf_handler.file[data_path][:] = result
+        
+        for mode, is_calced in self._calc_dict.items():
+            if is_calced:
+                data_path = self._getDataPath(mode)
                 self.hdf_handler.file[data_path][:] = result_dict[mode]
+        
         
     def _showImage(self):
         """
@@ -240,3 +269,24 @@ class TaskFDDNetInference(Task):
         """
         self.logger.debug(f"Task {self.name} completed.")
         
+        
+    def _fitModel(self, model_name: str, locations: np.ndarray, values: np.ndarray) -> np.ndarray|None:
+        """
+        Fit the model to the given locations and values.
+
+        arguments:
+            model_name: (str) The name of the model to fit ('Linear' or 'Quadratic').
+            
+            locations: (np.ndarray) The locations (coordinates) to fit the model to.
+            
+            values: (np.ndarray) The values corresponding to the locations.
+
+        returns:
+            (np.ndarray|None) The fitted parameters for the model, or None if the model name is not recognized.
+        """
+        if model_name == 'Linear':
+            return curve_fit(linearModel, locations.T, values)[0]
+        elif model_name == 'Quadratic':
+            return curve_fit(quadraticModel, locations.T, values)[0]
+        else:
+            return None

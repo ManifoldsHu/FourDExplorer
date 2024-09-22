@@ -25,6 +25,7 @@ from bin.HDFManager import HDFHandler
 from bin.Widgets.WidgetMasks import WidgetMaskBase
 from lib.FourDSTEMModifying import FilteringDiffractionPattern
 from lib.FourDSTEMModifying import RollingDiffractionPattern
+from lib.FourDSTEMModifying import TranslatingDiffractionPattern
 from lib.FourDSTEMModifying import RotatingDiffractionPattern
 
 
@@ -192,6 +193,36 @@ class TaskFourDSTEMAlign(TaskBaseFourDSTEMModify):
             translation_vector = self._translation_vector,
             result_path = self.output_path,
         )
+
+
+class TaskFourDSTEMAlignMapping(TaskBaseFourDSTEMModify):
+    """
+    使用已有的衍射盘偏移矢量分布映射，对数据集进行合轴的任务。
+    
+    Task to align the 4D-STEM dataset using an existing diffraction disk offset vector distribution map.
+    """
+    def __init__(
+        self,
+        item_path: str,
+        output_parent_path: str,
+        output_name: str,
+        shift_mapping: np.ndarray | h5py.Dataset,
+        parent: QObject = None,
+        metadata: dict = None,
+    ):
+        super().__init__(item_path, output_parent_path, output_name, parent)
+        self._shift_mapping = shift_mapping 
+        self.name = '4D-STEM Alignment With Shift Mapping'
+        
+        self.addSubtaskFuncWithProgress(
+            'Translating Diffraction Patterns',
+            TranslatingDiffractionPattern,
+            item_path = self.source_path,
+            shift_mapping = shift_mapping,
+            result_path = self.output_path
+        )
+        
+    
 
 
 class TaskFourDSTEMFiltering(TaskBaseFourDSTEMModify):

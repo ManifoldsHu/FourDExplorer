@@ -26,6 +26,7 @@ from logging import Logger
 import importlib.resources
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QDialog 
 
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
@@ -277,11 +278,19 @@ class WidgetAlignmentFDDNet(QWidget):
         
     def generateShiftMapping(self):
         """
-        Generate the shift map for the entire 4D-STEM dataset by applying inference ellipse loc to each diffraction pattern.
+        Generate the shift map for the entire 4D-STEM dataset by applying inference ellipse loc to each diffraction pattern. It will ask users for fitting model.
         
         This function will submit a background task using the task manager.
         """
 
+        # Use the DialogGenerateShiftVector to select the fit model
+        dialog_fit_model = DialogGenerateShiftVector(self)
+        result = dialog_fit_model.exec()
+        if result == QDialog.Accepted:
+            fit_model = dialog_fit_model.getSelectedModel()
+        else:
+            return
+        
         # Open the dialog to get the path and name for saving the Shift Map
         dialog_save = DialogSaveVectorField(self)
         dialog_save.setParentPath(self.data_path)
@@ -309,6 +318,10 @@ class WidgetAlignmentFDDNet(QWidget):
         metas_dict = {
             'center': centers_meta
         }
+        
+        fit_models_dict = {
+            'center': fit_model
+        }
 
         # Initialize the TaskFDDNetInference with the necessary parameters
         self.task = TaskFDDNetInference(
@@ -317,6 +330,7 @@ class WidgetAlignmentFDDNet(QWidget):
             calc_dict = calc_dict,
             names_dict = names_dict,
             metas_dict = metas_dict,
+            fit_models_dict = fit_models_dict,
         )
 
         self.task_manager.addTask(self.task)
@@ -331,3 +345,50 @@ class WidgetAlignmentFDDNet(QWidget):
         # TODO: Add more attributes as needed
         return meta
 
+
+class DialogGenerateShiftVector(QDialog):
+    """
+    A dialog to select the fit model for generating shift vectors.
+
+    This dialog allows the user to specify the fit model to be used for generating
+    shift vectors using the FDDNet model. It includes radio buttons to select the fit model.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Select Fitting Model")
+
+        # Create layout and widgets
+        layout = QVBoxLayout()
+
+        self.radio_button_apply_current_shift_vec = QRadioButton("None (Do not use fit)")
+        self.radio_button_linear_regression = QRadioButton("Linear")
+        self.radio_button_quadratic_polynomial = QRadioButton("Quadratic")
+
+        self.radio_button_apply_current_shift_vec.setChecked(True)
+
+        layout.addWidget(self.radio_button_apply_current_shift_vec)
+        layout.addWidget(self.radio_button_linear_regression)
+        layout.addWidget(self.radio_button_quadratic_polynomial)
+
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        layout.addWidget(self.button_box)
+
+        self.setLayout(layout)
+
+    def getSelectedModel(self) -> str|None:
+        """
+        Get the selected fit model.
+
+        returns:
+            (str|None) The selected fit model.
+        """
+        if self.radio_button_apply_current_shift_vec.isChecked():
+            return None
+        elif self.radio_button_linear_regression.isChecked():
+            return 'Linear'
+        elif self.radio_button_quadratic_polynomial.isChecked():
+            return 'Quadratic'
+        return None

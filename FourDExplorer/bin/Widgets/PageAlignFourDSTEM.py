@@ -238,15 +238,6 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self.ui.checkBox_set_auxiliary_circle_center_to_shift.stateChanged.connect(
             self._updateAuxiliaryCircle
         )
-        # self.ui.checkBox_draw_auxiliary_arrow.stateChanged.connect(
-        #     self._updateAuxiliaryArrow
-        # )
-        # self.ui.comboBox_auxiliary_arrow_color.currentIndexChanged.connect(
-        #     self._updateAuxiliaryArrow
-        # )
-        # self.ui.doubleSpinBox_auxiliary_arrow_width.valueChanged.connect(
-        #     self._updateAuxiliaryArrow
-        # )
         
         # hide the auxiliary arrow, since it is a useless and failure design
         self.ui.groupBox_2.setVisible(False)    
@@ -434,8 +425,6 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self.ui.stackedWidget_align_mode.setCurrentIndex(index)
         self._updateDP()
 
-        # if index == 0:
-        #     self._widget_alignment_manual.updateDP()
 
     def _updateAuxiliaryCircle(self):
         """
@@ -468,32 +457,6 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         )
         self.dp_blit_manager.update()
         
-
-
-    # def _updateAuxiliaryArrow(self):
-    #     """
-    #     Update the auxiliary arrow based on the current shift vector and user settings.
-        
-    #     DEPRECATED
-    #     """
-    #     # DEPRECATED
-    #     scan_i, scan_j, dp_i, dp_j = self.data_object.shape
-    #     shift_vec_xy = (- self.shift_vec[1], - self.shift_vec[0])
-    #     center_xy = ((dp_j-1)/2, (dp_i-1)/2)
-    #     self.shift_arrow_object.set_positions(
-    #         center_xy,  # Start at the center of the diffraction pattern
-    #         (center_xy[0] + shift_vec_xy[0], center_xy[1] + shift_vec_xy[1])  # End at the shifted position
-    #     )
-    #     self.shift_arrow_object.set_visible(
-    #         self.ui.checkBox_draw_auxiliary_arrow.isChecked()
-    #     )
-    #     self.shift_arrow_object.set_color(
-    #         self.ui.comboBox_auxiliary_arrow_color.currentText()
-    #     )
-    #     self.shift_arrow_object.set_linewidth(
-    #         self.ui.doubleSpinBox_auxiliary_arrow_width.value()
-    #     )
-    #     self.dp_blit_manager.update()
 
 
     def _onAuxiliaryCircleCenterToShiftChanged(self):
@@ -585,77 +548,36 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
 
 
     def startCalculation(self):
-        pass 
-
-
-    # def _translateUp(self):
-    #     self._translation_vector = (
-    #         self._translation_vector[0] - 1, 
-    #         self._translation_vector[1]
-    #     )
-    #     # self._translation_vector[0] -= 1
-    #     self._updateDP()
-    
-    # def _translateDown(self):
-    #     # self._translation_vector[0] += 1
-    #     self._translation_vector = (
-    #         self._translation_vector[0] + 1,
-    #         self._translation_vector[1],
-    #     )
-    #     self._updateDP()
-
-    # def _translateLeft(self):
-    #     # self._translation_vector[1] -= 1
-    #     self._translation_vector = (
-    #         self._translation_vector[0],
-    #         self._translation_vector[1] - 1,
-    #     )
-    #     self._updateDP()
-
-    # def _translateRight(self):
-    #     # self._translation_vector[1] += 1
-    #     self._translation_vector = (
-    #         self._translation_vector[0],
-    #         self._translation_vector[1] + 1,
-    #     )
-    #     self._updateDP()
-
-    # def startCalculation(self):
-    #     """
-    #     Start to apply the translation towards all the diffraction patterns.
-    #     """
-    #     dialog_save = DialogSaveFourDSTEM(self)
-    #     dialog_save.setParentPath(self.data_path)
-    #     dialog_code = dialog_save.exec()
-    #     if not dialog_code == dialog_save.Accepted:
-    #         return 
-    #     if dialog_save.getIsInplace():
-    #         data_node = self.hdf_handler.getNode(self.data_path)
-    #         output_name = data_node.name 
-    #         output_parent_path = data_node.parent.path 
-    #     else:
-    #         output_name = dialog_save.getNewName()
-    #         output_parent_path = dialog_save.getParentPath()
+        """
+        Use the chosen shift mapping to align the 4D-STEM dataset.
+        """
+        if not self.ui.lineEdit_shift_mapping_path.text():
+            QMessageBox.warning(self, "Invalid Path", "Please select a valid shift mapping path.")
+            return 
+        if not self.ui.lineEdit_data_path.text():
+            QMessageBox.warning(self, "Invalid Path", "Please select a valid 4D-STEM data path.")
         
-    #     meta = self.data_object.attrs 
-    #     if 'translation_vector_i' in meta:
-    #         meta['translation_vector_i'] += self._translation_vector[0]
-    #     else:
-    #         meta['translation_vector_i'] = self._translation_vector[0]
         
-    #     if 'translation_vector_j' in meta:
-    #         meta['translation_vector_j'] += self._translation_vector[1]
-    #     else:
-    #         meta['translation_vector_j'] = self._translation_vector[1]
-
-    #     self.task = TaskFourDSTEMAlign(
-    #         self.data_path,
-    #         output_parent_path,
-    #         output_name,
-    #         self._translation_vector,
-    #         **meta,
-    #     )
-    #     self.task_manager.addTask(self.task)
+        dialog_save = DialogSaveFourDSTEM(self)
+        dialog_save.setParentPath(self.data_path)
+        dialog_code = dialog_save.exec()
+        if not dialog_code == dialog_save.Accepted:
+            return 
+        if dialog_save.getIsInplace():
+            data_node = self.hdf_handler.getNode(self.data_path)
+            output_name = data_node.name 
+            output_parent_path = data_node.parent.path 
+        else:
+            output_name = dialog_save.getNewName()
+            output_parent_path = dialog_save.getParentPath()
+        # meta = self.data_object.attrs 
+        # TODO: add meta
         
-
-
+        self.task = TaskFourDSTEMAlign(
+            self.data_path,
+            output_parent_path,
+            output_name,
+            self.shift_mapping_dataset,
+            # **meta,
+        )
+        self.task_manager.addTask(self.task)
