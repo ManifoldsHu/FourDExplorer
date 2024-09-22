@@ -115,11 +115,11 @@ class WidgetAlignmentManual(QWidget):
     
     @property
     def current_shift_i(self):  # Current measured shift 
-        return - self.ui.spinBox_manual_shift_i.value()
+        return - self.ui.doubleSpinBox_manual_shift_i.value()
 
     @property
     def current_shift_j(self):  # Current measured shift
-        return - self.ui.spinBox_manual_shift_j.value()
+        return - self.ui.doubleSpinBox_manual_shift_j.value()
 
     @property
     def dp_object(self) -> AxesImage:
@@ -192,14 +192,14 @@ class WidgetAlignmentManual(QWidget):
         Initialize Ui and their signal-slot connections.
         """
         self.ui.checkBox_show_shifted_dp.setChecked(True)
-        self.ui.spinBox_manual_shift_i.setValue(0)
-        self.ui.spinBox_manual_shift_j.setValue(0)
-        self.ui.spinBox_manual_shift_i.setRange(-16384, 16384)
-        self.ui.spinBox_manual_shift_j.setRange(-16384, 16384)
+        self.ui.doubleSpinBox_manual_shift_i.setValue(0)
+        self.ui.doubleSpinBox_manual_shift_j.setValue(0)
+        self.ui.doubleSpinBox_manual_shift_i.setRange(-16384, 16384)
+        self.ui.doubleSpinBox_manual_shift_j.setRange(-16384, 16384)
 
         self.ui.checkBox_show_shifted_dp.stateChanged.connect(self._onShowShiftedDPChanged)
-        self.ui.spinBox_manual_shift_i.valueChanged.connect(self._onShiftIChanged)
-        self.ui.spinBox_manual_shift_j.valueChanged.connect(self._onShiftJChanged)
+        self.ui.doubleSpinBox_manual_shift_i.valueChanged.connect(self._onShiftIChanged)
+        self.ui.doubleSpinBox_manual_shift_j.valueChanged.connect(self._onShiftJChanged)
         self.ui.pushButton_down.clicked.connect(self._onDownButtonClicked)
         self.ui.pushButton_up.clicked.connect(self._onUpButtonClicked)
         self.ui.pushButton_left.clicked.connect(self._onLeftButtonClicked)
@@ -265,28 +265,28 @@ class WidgetAlignmentManual(QWidget):
         """
         Handle the click of the down button.
         """
-        self.ui.spinBox_manual_shift_i.setValue(self.ui.spinBox_manual_shift_i.value() + 1)
+        self.ui.doubleSpinBox_manual_shift_i.setValue(self.ui.doubleSpinBox_manual_shift_i.value() + 1)
         
         
     def _onUpButtonClicked(self):
         """
         Handle the click of the up button.
         """
-        self.ui.spinBox_manual_shift_i.setValue(self.ui.spinBox_manual_shift_i.value() - 1)
+        self.ui.doubleSpinBox_manual_shift_i.setValue(self.ui.doubleSpinBox_manual_shift_i.value() - 1)
     
     
     def _onLeftButtonClicked(self):
         """
         Handle the click of the left button.
         """
-        self.ui.spinBox_manual_shift_j.setValue(self.ui.spinBox_manual_shift_j.value() - 1)
+        self.ui.doubleSpinBox_manual_shift_j.setValue(self.ui.doubleSpinBox_manual_shift_j.value() - 1)
     
     
     def _onRightButtonClicked(self):
         """ 
         Handle the click of the right button.
         """
-        self.ui.spinBox_manual_shift_j.setValue(self.ui.spinBox_manual_shift_j.value() + 1)
+        self.ui.doubleSpinBox_manual_shift_j.setValue(self.ui.doubleSpinBox_manual_shift_j.value() + 1)
     
     
     def generateShiftMapping(self):
