@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
-    QHBoxLayout, QHeaderView, QLabel, QPushButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QTableWidget,
+from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox, QGridLayout,
+    QGroupBox, QHBoxLayout, QHeaderView, QLabel,
+    QPushButton, QSizePolicy, QSpacerItem, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_Form(object):
@@ -82,15 +82,15 @@ class Ui_Form(object):
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.spinBox_manual_shift_i = QSpinBox(self.groupBox)
-        self.spinBox_manual_shift_i.setObjectName(u"spinBox_manual_shift_i")
+        self.doubleSpinBox_manual_shift_i = QDoubleSpinBox(self.groupBox)
+        self.doubleSpinBox_manual_shift_i.setObjectName(u"doubleSpinBox_manual_shift_i")
 
-        self.verticalLayout_2.addWidget(self.spinBox_manual_shift_i)
+        self.verticalLayout_2.addWidget(self.doubleSpinBox_manual_shift_i)
 
-        self.spinBox_manual_shift_j = QSpinBox(self.groupBox)
-        self.spinBox_manual_shift_j.setObjectName(u"spinBox_manual_shift_j")
+        self.doubleSpinBox_manual_shift_j = QDoubleSpinBox(self.groupBox)
+        self.doubleSpinBox_manual_shift_j.setObjectName(u"doubleSpinBox_manual_shift_j")
 
-        self.verticalLayout_2.addWidget(self.spinBox_manual_shift_j)
+        self.verticalLayout_2.addWidget(self.doubleSpinBox_manual_shift_j)
 
 
         self.horizontalLayout.addLayout(self.verticalLayout_2)

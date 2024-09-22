@@ -69,7 +69,7 @@ class BlitManager(QObject):
         self._cid = self._canvas.mpl_connect('draw_event', self._onDraw)
         
         self._last_update_time = time.time()
-        self._min_interval = 0.1
+        self._min_interval = 0.01
         self._is_updating = False 
         
 

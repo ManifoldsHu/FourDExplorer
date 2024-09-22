@@ -114,12 +114,12 @@ class WidgetAlignmentManual(QWidget):
         return (self.scan_ii, self.scan_jj)
     
     @property
-    def current_shift_i(self):
-        return self.ui.spinBox_manual_shift_i.value()
+    def current_shift_i(self):  # Current measured shift 
+        return - self.ui.spinBox_manual_shift_i.value()
 
     @property
-    def current_shift_j(self):
-        return self.ui.spinBox_manual_shift_j.value()
+    def current_shift_j(self):  # Current measured shift
+        return - self.ui.spinBox_manual_shift_j.value()
 
     @property
     def dp_object(self) -> AxesImage:
@@ -221,7 +221,7 @@ class WidgetAlignmentManual(QWidget):
         
     def getCurrentDPShiftVec(self):
         """
-        Get the current shift vector of the current diffraction pattern.
+        Get the current measured shift vector of the current diffraction pattern.
         """
         return (self.current_shift_i, self.current_shift_j)
     
@@ -237,7 +237,7 @@ class WidgetAlignmentManual(QWidget):
         """
         Handle the state change of the 'Show Shifted DP' checkbox.
         """
-        self.ui.label_measured_shift.setText(f'({- self.current_shift_i}, {- self.current_shift_j})')
+        self.ui.label_measured_shift.setText(f'({self.current_shift_i}, {self.current_shift_j})')
         self._align_page._updateDP()
             
 

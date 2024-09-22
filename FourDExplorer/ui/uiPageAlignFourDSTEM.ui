@@ -81,7 +81,7 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_diffraction_shift_alignment">
        <attribute name="title">
@@ -153,15 +153,15 @@
           <item>
            <widget class="QLabel" name="label_13">
             <property name="text">
-             <string>Shift Path</string>
+             <string>Shift Mapping Path</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_current_shift_vec_path"/>
+           <widget class="QLineEdit" name="lineEdit_shift_mapping_path"/>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_browse_current_shift_vec">
+           <widget class="QPushButton" name="pushButton_browse_shift_mapping">
             <property name="text">
              <string>Browse</string>
             </property>
@@ -293,7 +293,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBox_3">
+            <widget class="QCheckBox" name="checkBox_set_auxiliary_circle_center_to_shift">
              <property name="text">
               <string>Set circle center to where the shift vector point to</string>
              </property>

@@ -50,6 +50,8 @@ class WidgetAlignmentRef(QWidget):
         self._reference_path = ''
         self.ui = uiWidgetAlignmentRef.Ui_Form()
         self.ui.setupUi(self)
+        self._initUi()
+        self._current_ref_com = None 
         
     @property
     def current_dp_location(self):
@@ -62,7 +64,8 @@ class WidgetAlignmentRef(QWidget):
     
     @property
     def current_ref_com(self) -> tuple[float, float]:
-        return CenterOfMass(self.reference_dataset[self.scan_ii, self.scan_jj, :, :])
+        self._current_ref_com = CenterOfMass(self.reference_dataset[self.scan_ii, self.scan_jj, :, :])
+        return self._current_ref_com
     
     @property
     def reference_path(self) -> str:
@@ -110,6 +113,9 @@ class WidgetAlignmentRef(QWidget):
         self.ui.pushButton_browse_reference_4dstem.clicked.connect(self._onBrowseReference4DSTEMPath)
         self.ui.checkBox_show_shifted_dp.stateChanged.connect(self._onShowShiftedDPChanged)
         self.ui.pushButton_generate_shift_vec.clicked.connect(self._onGenerateShiftVecClicked)
+        self.ui.label_measured_dp_shift.setText("(0, 0)")
+        self._align_page.ui.spinBox_scan_ii.valueChanged.connect(self._onScanChanged)
+        self._align_page.ui.spinBox_scan_jj.valueChanged.connect(self._onScanChanged)
         
         
     def _onBrowseReference4DSTEMPath(self):
@@ -168,6 +174,12 @@ class WidgetAlignmentRef(QWidget):
         reference_data_obj = self.hdf_handler.file[reference_path]
         if not len(reference_data_obj.shape) == 4:
             raise ValueError('Data must be a 4D matrix (4D-STEM dataset)')
+
+        if reference_data_obj.shape[:2] != self.data_object.shape[:2]:
+            raise ValueError(f'The first two dimensions of the reference dataset ({reference_data_obj.shape[:2]}) must match the first two dimensions of the data object ({self.data_object.shape[:2]}).')
+        
+        if reference_data_obj.shape[2:] != self.data_object.shape[2:]:
+            self.logger.warning(f'The last two dimensions of the reference dataset ({reference_data_obj.shape[2:]}) do not match the last two dimensions of the data object ({self.data_object.shape[2:]}).')
 
         self._reference_path = reference_path
         self.ui.lineEdit_reference_4dstem.setText(self.reference_path)
@@ -234,6 +246,22 @@ class WidgetAlignmentRef(QWidget):
         # TODO 还需要加上一些属性，例如 General 以及 Space 的一些信息
         return meta
     
-    
+    def getCurrentDPShiftVec(self) -> tuple[float, float]:
+        """
+        Get the current shift vector of the current diffraction pattern.
+        """
+        if not self._reference_path:
+            return (0, 0)
+        # ref_com = self.current_ref_com 
+        # self.ui.label_measured_dp_shift.setText(f'({ref_com[0]:.2f}, {ref_com[1]:.2f})')
+        return self.current_ref_com
         
+    def getCurrentShowShiftedDP(self) -> bool:
+        """
+        Get the current state of the 'Show Shifted DP' checkbox.
+        """
+        return self.ui.checkBox_show_shifted_dp.isChecked()
     
+    def _onScanChanged(self):
+        ref_com = self._current_ref_com
+        self.ui.label_measured_dp_shift.setText(f'({ref_com[0]:.2f}, {ref_com[1]:.2f})')

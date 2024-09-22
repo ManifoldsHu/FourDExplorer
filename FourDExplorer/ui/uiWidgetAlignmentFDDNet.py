@@ -109,19 +109,14 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addWidget(self.checkBox_show_shifted_dp)
 
+        self.checkBox_show_measured_ellipse = QCheckBox(self.groupBox_2)
+        self.checkBox_show_measured_ellipse.setObjectName(u"checkBox_show_measured_ellipse")
+
+        self.verticalLayout_3.addWidget(self.checkBox_show_measured_ellipse)
+
         self.verticalSpacer_2 = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.verticalLayout_3.addItem(self.verticalSpacer_2)
-
-        self.label = QLabel(self.groupBox_2)
-        self.label.setObjectName(u"label")
-
-        self.verticalLayout_3.addWidget(self.label)
-
-        self.pushButton_fddnet_inference = QPushButton(self.groupBox_2)
-        self.pushButton_fddnet_inference.setObjectName(u"pushButton_fddnet_inference")
-
-        self.verticalLayout_3.addWidget(self.pushButton_fddnet_inference)
 
 
         self.verticalLayout_5.addWidget(self.groupBox_2)
@@ -138,7 +133,7 @@ class Ui_Form(object):
 
         self.verticalLayout_5.addWidget(self.groupBox)
 
-        self.verticalSpacer = QSpacerItem(20, 28, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 54, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_5.addItem(self.verticalSpacer)
 
@@ -163,8 +158,7 @@ class Ui_Form(object):
         self.label_fddnet_elliptical_b.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.label_fddnet_elliptical_angle.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.checkBox_show_shifted_dp.setText(QCoreApplication.translate("Form", u"Display shifted diffraction image", None))
-        self.label.setText(QCoreApplication.translate("Form", u"Measure current DP shift", None))
-        self.pushButton_fddnet_inference.setText(QCoreApplication.translate("Form", u"FDDNet Inference", None))
+        self.checkBox_show_measured_ellipse.setText(QCoreApplication.translate("Form", u"Show the measured ellipse", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Inference Whole 4D-STEM Dataset", None))
         self.pushButton_generate_shift_vec.setText(QCoreApplication.translate("Form", u"Generate Shift Mapping", None))
     # retranslateUi

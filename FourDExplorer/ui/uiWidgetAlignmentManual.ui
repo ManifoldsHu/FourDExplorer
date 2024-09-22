@@ -110,10 +110,10 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QSpinBox" name="spinBox_manual_shift_i"/>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_manual_shift_i"/>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_manual_shift_j"/>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_manual_shift_j"/>
           </item>
          </layout>
         </item>

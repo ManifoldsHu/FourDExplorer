@@ -34,10 +34,13 @@ date:           May 26, 2022
 """
 
 from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QMessageBox
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
 from matplotlib.patches import Ellipse
-from matplotlib.text import Annotation
+# from matplotlib.text import Annotation
+from matplotlib.patches import FancyArrowPatch
+from h5py import Dataset
 import numpy as np
 from skimage.transform import warp
 from skimage.transform import SimilarityTransform
@@ -48,6 +51,7 @@ from bin.Widgets.DialogSaveFourDSTEM import DialogSaveFourDSTEM
 from bin.Widgets.WidgetAlignmentManual import WidgetAlignmentManual
 from bin.Widgets.WidgetAlignmentRef import WidgetAlignmentRef
 from bin.Widgets.WidgetAlignmentFDDNet import WidgetAlignmentFDDNet
+from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from lib.TaskCalibration import TaskFourDSTEMAlign
 from ui import uiPageAlignFourDSTEM
 
@@ -112,7 +116,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self._vcursor_object = None 
         self._shift_arrow_object = None 
         # self._shift_vec = None 
-
+        self._fddnet_ellipse = None 
 
         self._createAxes()
         # self._translation_vector = (0, 0)
@@ -128,6 +132,15 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self._widget_alignment_manual.setParentAlignPage(self)
         self._widget_alignment_ref.setParentAlignPage(self)
         self._widget_alignment_fddnet.setParentAlignPage(self)
+        
+        
+        self._doubleSpinBox_circle_center_i = self.ui.widget_auxiliary_circle.ui.doubleSpinBox_circle_center_i 
+        self._doubleSpinBox_circle_center_j = self.ui.widget_auxiliary_circle.ui.doubleSpinBox_circle_center_j 
+        self._doubleSpinBox_circle_radius = self.ui.widget_auxiliary_circle.ui.doubleSpinBox_circle_radius
+
+        # self._updateDP()
+        self._updateAuxiliaryCircle()
+        # self._updateAuxiliaryArrow()
 
 
     @property
@@ -197,8 +210,12 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         return self._method[self.ui.comboBox_show_alignment_method.currentIndex()]
 
     @property
-    def shift_arrow(self) -> Annotation:
+    def shift_arrow_object(self) -> FancyArrowPatch:
         return self._shift_arrow_object 
+    
+    @property
+    def shift_mapping_dataset(self) -> Dataset:
+        return self.hdf_handler.file[self.ui.lineEdit_shift_mapping_path]
 
     def _initUi(self):
         """
@@ -214,6 +231,43 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self.ui.stackedWidget_align_mode.setCurrentIndex(0)
 
         self.ui.comboBox_show_alignment_method.currentIndexChanged.connect(self._onAlignmentMethodChanged)
+        
+        self.ui.checkBox_show_auxiliary_circle.stateChanged.connect(
+            self._updateAuxiliaryCircle
+        )
+        self.ui.checkBox_set_auxiliary_circle_center_to_shift.stateChanged.connect(
+            self._updateAuxiliaryCircle
+        )
+        # self.ui.checkBox_draw_auxiliary_arrow.stateChanged.connect(
+        #     self._updateAuxiliaryArrow
+        # )
+        # self.ui.comboBox_auxiliary_arrow_color.currentIndexChanged.connect(
+        #     self._updateAuxiliaryArrow
+        # )
+        # self.ui.doubleSpinBox_auxiliary_arrow_width.valueChanged.connect(
+        #     self._updateAuxiliaryArrow
+        # )
+        
+        # hide the auxiliary arrow, since it is a useless and failure design
+        self.ui.groupBox_2.setVisible(False)    
+        
+        self.ui.checkBox_draw_auxiliary_arrow.setChecked(False)
+        self.ui.checkBox_set_auxiliary_circle_center_to_shift.setChecked(False)
+        self.ui.checkBox_set_auxiliary_circle_center_to_shift.setEnabled(False)
+        self.ui.checkBox_show_auxiliary_circle.setChecked(True)
+        
+        self.ui.checkBox_set_auxiliary_circle_center_to_shift.stateChanged.connect(
+            self._onAuxiliaryCircleCenterToShiftChanged
+        )
+        
+        self.ui.pushButton_browse_shift_mapping.clicked.connect(self._browseShiftMapping)
+        
+        self.ui.spinBox_scan_ii.valueChanged.connect(self._changeAuxiliaryCircleWithShift)
+        self.ui.spinBox_scan_jj.valueChanged.connect(self._changeAuxiliaryCircleWithShift)
+        
+        self.ui.tabWidget.setCurrentIndex(0)
+        self.ui.stackedWidget_align_mode.setCurrentIndex(0)
+        self.ui.comboBox_show_alignment_method.setCurrentIndex(0)
 
 
     def _createPatches(self):
@@ -256,6 +310,42 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
                 linewidth = 1,
             )
             self.dp_blit_manager['vcursor'] = self.vcursor_object
+            
+        if self._shift_arrow_object in self.dp_ax.patches:
+            self._shift_arrow_object.remove()
+
+        self._shift_arrow_object = FancyArrowPatch(
+            posA=(0, 0),
+            posB=(0, 0),
+            arrowstyle='->',
+            color='green',
+            mutation_scale=20,
+            visible=False,
+        )
+
+        self.dp_ax.add_patch(self._shift_arrow_object)
+        self.dp_blit_manager['shift_arrow'] = self._shift_arrow_object
+            
+            
+        if self._fddnet_ellipse in self.dp_ax.patches:
+            self._fddnet_ellipse.remove()
+
+        self._fddnet_ellipse = Ellipse(
+            xy = (0, 0),
+            width = 0,
+            height = 0,
+            angle = 0,
+            color = 'red',
+            alpha = 0.5,
+            fill = False,
+            visible = False,
+        )
+        
+        self.dp_ax.add_patch(self._fddnet_ellipse)
+        self.dp_blit_manager['fddnet_ellipse'] = self._fddnet_ellipse
+        self.ui.stackedWidget_align_mode_fddnet.setBlitManager(self.dp_blit_manager)
+        self.ui.stackedWidget_align_mode_fddnet.setEllipsePatch(self._fddnet_ellipse)
+       
 
     def setFourDSTEM(self, data_path: str):
         """
@@ -280,12 +370,6 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         )
 
         # TODO: read/save the alignment attribute
-
-        # Set up WidgetAlignmentManual
-        # self._widget_alignment_manual.setDPObject(self.dp_object)
-        # self._widget_alignment_manual.setAxes(self.dp_ax)
-        # self._widget_alignment_manual.setBlitManager(self.dp_blit_manager)
-        # self._widget_alignment_manual.setDataObject(self.data_object)
 
 
 
@@ -315,7 +399,8 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         scan_ii = max(0, min(scan_i, self.scan_ii)) # Avoid out of boundary
         scan_jj = max(0, min(scan_j, self.scan_jj))
 
-        shift_vec_xy = (- self.shift_vec[1], - self.shift_vec[0])
+        shift_vec_xy = (self.shift_vec[1], self.shift_vec[0])
+        center_xy = ((dp_j-1)/2, (dp_i-1)/2)
 
         if self.current_show_shifted_dp:
             # Create a translation matrix based on the shift vector
@@ -326,7 +411,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
                 warp(
                     self.data_object[scan_ii, scan_jj, :, :],
                     translation_matrix,
-                    mode='constant',
+                    mode='edge',
                     cval=0,
                     preserve_range=True
                 )
@@ -335,7 +420,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
             self.dp_object.set_data(
                 self.data_object[scan_ii, scan_jj, :, :]
             )
-        
+
         self.colorbar_object.update_normal(self.dp_object)
         self.dp_blit_manager.update()     
         
@@ -347,9 +432,157 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
             index: (int) The index of the selected alignment method.
         """
         self.ui.stackedWidget_align_mode.setCurrentIndex(index)
+        self._updateDP()
 
         # if index == 0:
         #     self._widget_alignment_manual.updateDP()
+
+    def _updateAuxiliaryCircle(self):
+        """
+        Update the auxiliary circle based on the current settings and shift vector.
+
+        This method adjusts the center of the auxiliary circle according to the 
+        user's choice to either set it to the shift vector or keep it at the 
+        original center of the diffraction pattern. The visibility of the circle 
+        is also updated based on the user's settings.
+        """
+        if not self.ui.lineEdit_data_path.text():
+            return 
+        
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+        original_center_xy = ((dp_j-1)/2, (dp_i-1)/2)
+        shift_center_xy = (
+            - self._doubleSpinBox_circle_center_j.value(), 
+            - self._doubleSpinBox_circle_center_i.value()
+        )
+        
+        if self.ui.checkBox_set_auxiliary_circle_center_to_shift.isChecked():
+            self.auxiliary_circle_object.set_center((
+                shift_center_xy[0] + original_center_xy[0], 
+                shift_center_xy[1] + original_center_xy[1]
+            ))
+        else:
+            self.auxiliary_circle_object.set_center(original_center_xy)
+        self.auxiliary_circle_object.set_visible(
+            self.ui.checkBox_show_auxiliary_circle.isChecked()
+        )
+        self.dp_blit_manager.update()
+        
+
+
+    # def _updateAuxiliaryArrow(self):
+    #     """
+    #     Update the auxiliary arrow based on the current shift vector and user settings.
+        
+    #     DEPRECATED
+    #     """
+    #     # DEPRECATED
+    #     scan_i, scan_j, dp_i, dp_j = self.data_object.shape
+    #     shift_vec_xy = (- self.shift_vec[1], - self.shift_vec[0])
+    #     center_xy = ((dp_j-1)/2, (dp_i-1)/2)
+    #     self.shift_arrow_object.set_positions(
+    #         center_xy,  # Start at the center of the diffraction pattern
+    #         (center_xy[0] + shift_vec_xy[0], center_xy[1] + shift_vec_xy[1])  # End at the shifted position
+    #     )
+    #     self.shift_arrow_object.set_visible(
+    #         self.ui.checkBox_draw_auxiliary_arrow.isChecked()
+    #     )
+    #     self.shift_arrow_object.set_color(
+    #         self.ui.comboBox_auxiliary_arrow_color.currentText()
+    #     )
+    #     self.shift_arrow_object.set_linewidth(
+    #         self.ui.doubleSpinBox_auxiliary_arrow_width.value()
+    #     )
+    #     self.dp_blit_manager.update()
+
+
+    def _onAuxiliaryCircleCenterToShiftChanged(self):
+        """
+        Handle the state change of the 'Set Auxiliary Circle Center to Shift' checkbox.
+
+        This function ensures that the checkbox is only enabled when a valid shift mapping is selected.
+        If the checkbox is checked, the double spin boxes for circle center i and j are disabled,
+        and their values are updated based on the shift mapping corresponding to the current scan position.
+        If the checkbox is unchecked, the double spin boxes are enabled for manual adjustment.
+        """
+        shift_mapping_path = self.ui.lineEdit_shift_mapping_path.text()
+        if not shift_mapping_path:
+            self.ui.checkBox_set_auxiliary_circle_center_to_shift.setChecked(False)
+            self.ui.checkBox_set_auxiliary_circle_center_to_shift.setEnabled(False)
+            self._doubleSpinBox_circle_center_i.setEnabled(True)
+            self._doubleSpinBox_circle_center_j.setEnabled(True)
+            return
+
+        self.ui.checkBox_set_auxiliary_circle_center_to_shift.setEnabled(True)
+        if self.ui.checkBox_set_auxiliary_circle_center_to_shift.isChecked():
+            self._doubleSpinBox_circle_center_i.setEnabled(False)
+            self._doubleSpinBox_circle_center_j.setEnabled(False)
+            scan_ii = self.ui.spinBox_scan_ii.value()
+            scan_jj = self.ui.spinBox_scan_jj.value()
+            shift_mapping = self.hdf_handler.file[shift_mapping_path]
+            if shift_mapping.shape[:2] == self.data_object.shape[:2]:
+                shift_i = shift_mapping[scan_ii, scan_jj, 0]
+                shift_j = shift_mapping[scan_ii, scan_jj, 1]
+                self._doubleSpinBox_circle_center_i.setValue(shift_i)
+                self._doubleSpinBox_circle_center_j.setValue(shift_j)
+            else:
+                self.logger.warning("Shift mapping shape does not match data object shape.")
+        else:
+            self._doubleSpinBox_circle_center_i.setEnabled(True)
+            self._doubleSpinBox_circle_center_j.setEnabled(True)
+
+    
+    def _browseShiftMapping(self):
+        """
+        Opens a dialog to browse and select a shift mapping path.
+        
+        Validates the selected path and updates the UI accordingly.
+        
+        raise::
+            KeyError: If the selected path is not a valid HDF5 dataset.
+        """
+        dialog = DialogHDFChoose(self)
+        dialog_code = dialog.exec()
+        if dialog_code != dialog.Accepted:
+            return
+
+        current_path = dialog.getCurrentPath()
+        try:
+            shift_mapping = self.hdf_handler.file[current_path]
+            if not isinstance(shift_mapping, Dataset):
+                self.logger.error("Invalid Shift Mapping: The selected path is not a valid HDF5 dataset.")
+                QMessageBox.warning(self, "Invalid Shift Mapping", "The selected path is not a dataset.")
+                return
+
+            scan_i, scan_j = self.data_object.shape[:2]
+            if shift_mapping.shape != (2, scan_i, scan_j):
+                self.logger.error(f"Invalid Shift Mapping: The selected shift mapping does not have the expected shape (2, {scan_i}, {scan_j}).")
+                QMessageBox.warning(self, "Invalid Shift Mapping", "The selected shift mapping does not have the expected shape (2, scan_i, scan_j).")
+                return
+
+            self.ui.lineEdit_shift_mapping_path.setText(current_path)
+            
+            self.ui.checkBox_set_auxiliary_circle_center_to_shift.setEnabled(True)
+        except KeyError:
+            QMessageBox.warning(self, "Invalid Path", "The selected path does not exist in the HDF file.")
+
+
+    def _changeAuxiliaryCircleWithShift(self):
+        """
+        Updates the auxiliary circle center to the shift values from the shift mapping dataset.
+
+        This method is called when the 'Set Auxiliary Circle Center to Shift' checkbox is checked.
+        It retrieves the shift values from the shift mapping dataset for the current scan indices
+        and sets the auxiliary circle center to these values.
+        """
+        if not self.ui.checkBox_set_auxiliary_circle_center_to_shift.isChecked():
+            return 
+        if not self.ui.lineEdit_shift_mapping_path.text():
+            return 
+        self._doubleSpinBox_circle_center_i.setValue(self.shift_mapping_dataset[0, self.scan_ii, self.scan_jj])
+        self._doubleSpinBox_circle_center_j.setValue(self.shift_mapping_dataset[1, self.scan_ii, self.scan_jj])
+        
+
 
     def startCalculation(self):
         pass 

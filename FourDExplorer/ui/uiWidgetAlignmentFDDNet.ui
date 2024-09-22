@@ -130,6 +130,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkBox_show_measured_ellipse">
+        <property name="text">
+         <string>Show the measured ellipse</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -144,20 +151,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>Measure current DP shift</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButton_fddnet_inference">
-        <property name="text">
-         <string>FDDNet Inference</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>
@@ -186,7 +179,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>28</height>
+       <height>54</height>
       </size>
      </property>
     </spacer>

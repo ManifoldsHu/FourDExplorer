@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiPageAlignFourDSTEM.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -158,15 +158,15 @@ class Ui_Form(object):
 
         self.horizontalLayout_8.addWidget(self.label_13)
 
-        self.lineEdit_current_shift_vec_path = QLineEdit(self.tab_displaying_effects)
-        self.lineEdit_current_shift_vec_path.setObjectName(u"lineEdit_current_shift_vec_path")
+        self.lineEdit_shift_mapping_path = QLineEdit(self.tab_displaying_effects)
+        self.lineEdit_shift_mapping_path.setObjectName(u"lineEdit_shift_mapping_path")
 
-        self.horizontalLayout_8.addWidget(self.lineEdit_current_shift_vec_path)
+        self.horizontalLayout_8.addWidget(self.lineEdit_shift_mapping_path)
 
-        self.pushButton_browse_current_shift_vec = QPushButton(self.tab_displaying_effects)
-        self.pushButton_browse_current_shift_vec.setObjectName(u"pushButton_browse_current_shift_vec")
+        self.pushButton_browse_shift_mapping = QPushButton(self.tab_displaying_effects)
+        self.pushButton_browse_shift_mapping.setObjectName(u"pushButton_browse_shift_mapping")
 
-        self.horizontalLayout_8.addWidget(self.pushButton_browse_current_shift_vec)
+        self.horizontalLayout_8.addWidget(self.pushButton_browse_shift_mapping)
 
 
         self.verticalLayout_10.addLayout(self.horizontalLayout_8)
@@ -245,10 +245,10 @@ class Ui_Form(object):
 
         self.verticalLayout_5.addWidget(self.checkBox_show_auxiliary_circle)
 
-        self.checkBox_3 = QCheckBox(self.groupBox)
-        self.checkBox_3.setObjectName(u"checkBox_3")
+        self.checkBox_set_auxiliary_circle_center_to_shift = QCheckBox(self.groupBox)
+        self.checkBox_set_auxiliary_circle_center_to_shift.setObjectName(u"checkBox_set_auxiliary_circle_center_to_shift")
 
-        self.verticalLayout_5.addWidget(self.checkBox_3)
+        self.verticalLayout_5.addWidget(self.checkBox_set_auxiliary_circle_center_to_shift)
 
 
         self.verticalLayout_10.addWidget(self.groupBox)
@@ -337,7 +337,7 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         self.stackedWidget_align_mode.setCurrentIndex(1)
 
 
@@ -356,8 +356,8 @@ class Ui_Form(object):
         self.comboBox_show_alignment_method.setItemText(2, QCoreApplication.translate("Form", u"Use FDDNet", None))
 
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_diffraction_shift_alignment), QCoreApplication.translate("Form", u"Diffraction Shift Alignment", None))
-        self.label_13.setText(QCoreApplication.translate("Form", u"Shift Path", None))
-        self.pushButton_browse_current_shift_vec.setText(QCoreApplication.translate("Form", u"Browse", None))
+        self.label_13.setText(QCoreApplication.translate("Form", u"Shift Mapping Path", None))
+        self.pushButton_browse_shift_mapping.setText(QCoreApplication.translate("Form", u"Browse", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Auxiliary Arrow", None))
         self.checkBox_draw_auxiliary_arrow.setText(QCoreApplication.translate("Form", u"Draw shift arrow at the center", None))
         self.label_14.setText(QCoreApplication.translate("Form", u"Arrow Color", None))
@@ -374,7 +374,7 @@ class Ui_Form(object):
 
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Auxiliary Circle", None))
         self.checkBox_show_auxiliary_circle.setText(QCoreApplication.translate("Form", u"Show auxiliary circle", None))
-        self.checkBox_3.setText(QCoreApplication.translate("Form", u"Set circle center to where the shift vector point to", None))
+        self.checkBox_set_auxiliary_circle_center_to_shift.setText(QCoreApplication.translate("Form", u"Set circle center to where the shift vector point to", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Contrast", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"Norm", None))

@@ -97,7 +97,7 @@ def MapFourDSTEM(
             for result, filter in zip(results, filters):
                 with result_lock:
                     result[ii, jj] = np.sum(dp*filter)
-        progress_signal.emit(int(ii/scan_i*100))
+        progress_signal.emit(int((ii+1)/scan_i*100))
 
     return results
 
