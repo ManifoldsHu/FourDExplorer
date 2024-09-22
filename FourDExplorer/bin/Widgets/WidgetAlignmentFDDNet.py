@@ -27,6 +27,11 @@ import importlib.resources
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtWidgets import QDialog 
+from PySide6.QtWidgets import QVBoxLayout
+from PySide6.QtWidgets import QRadioButton
+from PySide6.QtWidgets import QDialogButtonBox
+
+
 
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage

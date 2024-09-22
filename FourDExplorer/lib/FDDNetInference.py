@@ -276,7 +276,8 @@ def mapInferenceFDDNet(
         for jj in range(scan_j):
             dp = np.asarray(dataset[ii, jj, :, :])
             with result_lock:
-                ci[ii, jj], cj[ii, jj], a[ii, jj], b[ii, jj] = inferEllipseLoc(fddnet_model)
+                ci[ii, jj], cj[ii, jj], a[ii, jj], b[ii, jj] = inferEllipseLoc(
+                    dp, fddnet_model)
         progress_signal.emit(int((ii + 1) / scan_i * 100))
             
     return ci, cj, a, b 

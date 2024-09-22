@@ -51,7 +51,6 @@ class WidgetAlignmentRef(QWidget):
         self.ui = uiWidgetAlignmentRef.Ui_Form()
         self.ui.setupUi(self)
         self._initUi()
-        self._current_ref_com = None 
         
     @property
     def current_dp_location(self):
@@ -64,8 +63,9 @@ class WidgetAlignmentRef(QWidget):
     
     @property
     def current_ref_com(self) -> tuple[float, float]:
-        self._current_ref_com = CenterOfMass(self.reference_dataset[self.scan_ii, self.scan_jj, :, :])
-        return self._current_ref_com
+        if not self.reference_path: 
+            return (0, 0)
+        return CenterOfMass(self.reference_dataset[self.scan_ii, self.scan_jj, :, :])
     
     @property
     def reference_path(self) -> str:
@@ -114,8 +114,7 @@ class WidgetAlignmentRef(QWidget):
         self.ui.checkBox_show_shifted_dp.stateChanged.connect(self._onShowShiftedDPChanged)
         self.ui.pushButton_generate_shift_vec.clicked.connect(self._onGenerateShiftVecClicked)
         self.ui.label_measured_dp_shift.setText("(0, 0)")
-        self._align_page.ui.spinBox_scan_ii.valueChanged.connect(self._onScanChanged)
-        self._align_page.ui.spinBox_scan_jj.valueChanged.connect(self._onScanChanged)
+
         
         
     def _onBrowseReference4DSTEMPath(self):
@@ -149,6 +148,8 @@ class WidgetAlignmentRef(QWidget):
             align_page: (PageAlignFourDSTEM) The parent alignment page containing the 4D-STEM data and UI elements.
         """
         self._align_page = align_page
+        self._align_page.ui.spinBox_scan_ii.valueChanged.connect(self._onScanChanged)
+        self._align_page.ui.spinBox_scan_jj.valueChanged.connect(self._onScanChanged)
 
 
     def setReference4DSTEM(self, reference_path: str):
@@ -183,7 +184,7 @@ class WidgetAlignmentRef(QWidget):
 
         self._reference_path = reference_path
         self.ui.lineEdit_reference_4dstem.setText(self.reference_path)
-        self.data_object.attrs['reference_path'] = reference_path
+        
     
     
     def _onShowShiftedDPChanged(self):
@@ -263,5 +264,5 @@ class WidgetAlignmentRef(QWidget):
         return self.ui.checkBox_show_shifted_dp.isChecked()
     
     def _onScanChanged(self):
-        ref_com = self._current_ref_com
+        ref_com = self.current_ref_com
         self.ui.label_measured_dp_shift.setText(f'({ref_com[0]:.2f}, {ref_com[1]:.2f})')

@@ -85,7 +85,7 @@ class TaskFDDNetInference(Task):
         self._item_path = item_path 
         self._image_parent_path = image_parent_path
         
-        if not set(self._calc_dict.keys()).issubset(self._available_modes):
+        if not set(calc_dict.keys()).issubset(self._available_modes):
             raise ValueError(f"calc_dict keys must be a subset of {self._available_modes}")
         self._calc_dict = calc_dict
         
@@ -110,6 +110,7 @@ class TaskFDDNetInference(Task):
             f'Inference results are saved in: {self._image_parent_path}\n'
         )
         
+        self.name = "FDDNet Inference"
         self.setPrepare(self._createImages)
         self._bindSubtask()
         self.setFollow(self._showImage)
@@ -241,21 +242,34 @@ class TaskFDDNetInference(Task):
                 if fit_model_name is not None:
                     i_grid, j_grid = np.meshgrid(np.arange(scan_i), np.arange(scan_j), indexing='ij')
                     locations = np.vstack([i_grid.ravel(), j_grid.ravel()]).T
-                    values = result.ravel()
                     
-                    params = self._fitModel(fit_model_name, locations, values)
-                    if params is not None:
-                        if fit_model_name == 'Linear':
-                            result = linearModel(locations.T, *params).reshape(scan_i, scan_j)
-                        elif fit_model_name == 'Quadratic':
-                            result = quadraticModel(locations.T, *params).reshape(scan_i, scan_j)
+                    if mode in ['ci', 'cj', 'a', 'b', 'angle']:
+                        values = result.ravel()
+                        params = self._fitModel(fit_model_name, locations, values)
+                        if params is not None:
+                            if fit_model_name == 'Linear':
+                                result = linearModel(locations.T, *params).reshape(scan_i, scan_j)
+                            elif fit_model_name == 'Quadratic':
+                                result = quadraticModel(locations.T, *params).reshape(scan_i, scan_j)
+                    elif mode == 'center':
+                        ci_values = result_dict['ci'].ravel()
+                        cj_values = result_dict['cj'].ravel()
+                        
+                        ci_params = self._fitModel(fit_model_name, locations, ci_values)
+                        cj_params = self._fitModel(fit_model_name, locations, cj_values)
+                        
+                        if ci_params is not None and cj_params is not None:
+                            if fit_model_name == 'Linear':
+                                ci_result = linearModel(locations.T, *ci_params).reshape(scan_i, scan_j)
+                                cj_result = linearModel(locations.T, *cj_params).reshape(scan_i, scan_j)
+                            elif fit_model_name == 'Quadratic':
+                                ci_result = quadraticModel(locations.T, *ci_params).reshape(scan_i, scan_j)
+                                cj_result = quadraticModel(locations.T, *cj_params).reshape(scan_i, scan_j)
+                            
+                            result = np.stack([ci_result, cj_result], axis=0)
                 
                 self.hdf_handler.file[data_path][:] = result
         
-        for mode, is_calced in self._calc_dict.items():
-            if is_calced:
-                data_path = self._getDataPath(mode)
-                self.hdf_handler.file[data_path][:] = result_dict[mode]
         
         
     def _showImage(self):

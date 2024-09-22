@@ -215,7 +215,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
     
     @property
     def shift_mapping_dataset(self) -> Dataset:
-        return self.hdf_handler.file[self.ui.lineEdit_shift_mapping_path]
+        return self.hdf_handler.file[self.ui.lineEdit_shift_mapping_path.text()]
 
     def _initUi(self):
         """
@@ -440,18 +440,22 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         
         scan_i, scan_j, dp_i, dp_j = self.data_object.shape
         original_center_xy = ((dp_j-1)/2, (dp_i-1)/2)
+        # shift_center_xy = (
+        #     - self._doubleSpinBox_circle_center_j.value(), 
+        #     - self._doubleSpinBox_circle_center_i.value()
+        # )
         shift_center_xy = (
-            - self._doubleSpinBox_circle_center_j.value(), 
-            - self._doubleSpinBox_circle_center_i.value()
+            self._doubleSpinBox_circle_center_j.value(),
+            self._doubleSpinBox_circle_center_i.value()
         )
         
-        if self.ui.checkBox_set_auxiliary_circle_center_to_shift.isChecked():
-            self.auxiliary_circle_object.set_center((
-                shift_center_xy[0] + original_center_xy[0], 
-                shift_center_xy[1] + original_center_xy[1]
-            ))
-        else:
-            self.auxiliary_circle_object.set_center(original_center_xy)
+        # if self.ui.checkBox_set_auxiliary_circle_center_to_shift.isChecked():
+        self.auxiliary_circle_object.set_center((
+            shift_center_xy[0] + original_center_xy[0], 
+            shift_center_xy[1] + original_center_xy[1]
+        ))
+        # else:
+            # self.auxiliary_circle_object.set_center(original_center_xy)
         self.auxiliary_circle_object.set_visible(
             self.ui.checkBox_show_auxiliary_circle.isChecked()
         )
@@ -483,9 +487,9 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
             scan_ii = self.ui.spinBox_scan_ii.value()
             scan_jj = self.ui.spinBox_scan_jj.value()
             shift_mapping = self.hdf_handler.file[shift_mapping_path]
-            if shift_mapping.shape[:2] == self.data_object.shape[:2]:
-                shift_i = shift_mapping[scan_ii, scan_jj, 0]
-                shift_j = shift_mapping[scan_ii, scan_jj, 1]
+            if shift_mapping.shape[1:3] == self.data_object.shape[:2]:
+                shift_i = shift_mapping[0, scan_ii, scan_jj,]
+                shift_j = shift_mapping[1, scan_ii, scan_jj,]
                 self._doubleSpinBox_circle_center_i.setValue(shift_i)
                 self._doubleSpinBox_circle_center_j.setValue(shift_j)
             else:
@@ -544,6 +548,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
             return 
         self._doubleSpinBox_circle_center_i.setValue(self.shift_mapping_dataset[0, self.scan_ii, self.scan_jj])
         self._doubleSpinBox_circle_center_j.setValue(self.shift_mapping_dataset[1, self.scan_ii, self.scan_jj])
+        self._updateAuxiliaryCircle()
         
 
 
