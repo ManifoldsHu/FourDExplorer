@@ -555,7 +555,7 @@ class ActionAddAnchor(ActionShiftAnchorBase):
         current_shift_j = self.widget_alignment_manual.current_shift_j
         
         current_location_str = str(current_location)
-        current_shift_str = str((- current_shift_i, - current_shift_j))
+        current_shift_str = str((current_shift_i, current_shift_j))
         
         for row in range(self.table_widget.rowCount()):
             location_item = self.table_widget.item(row, 0)

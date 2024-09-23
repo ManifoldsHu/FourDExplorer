@@ -81,7 +81,7 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_diffraction_shift_alignment">
        <attribute name="title">
@@ -286,16 +286,47 @@
             <widget class="WidgetMaskCircle" name="widget_auxiliary_circle" native="true"/>
            </item>
            <item>
-            <widget class="QCheckBox" name="checkBox_show_auxiliary_circle">
-             <property name="text">
-              <string>Show auxiliary circle</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Current Auxiliary Circle Center Shift</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_current_auxiliary_circle_center">
+               <property name="text">
+                <string>(0, 0)</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <widget class="QCheckBox" name="checkBox_set_auxiliary_circle_center_to_shift">
              <property name="text">
               <string>Set circle center to where the shift vector point to</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_show_auxiliary_circle">
+             <property name="text">
+              <string>Show auxiliary circle</string>
              </property>
             </widget>
            </item>

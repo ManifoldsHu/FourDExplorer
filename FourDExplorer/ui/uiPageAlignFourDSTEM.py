@@ -240,15 +240,34 @@ class Ui_Form(object):
 
         self.verticalLayout_5.addWidget(self.widget_auxiliary_circle)
 
-        self.checkBox_show_auxiliary_circle = QCheckBox(self.groupBox)
-        self.checkBox_show_auxiliary_circle.setObjectName(u"checkBox_show_auxiliary_circle")
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.label_9 = QLabel(self.groupBox)
+        self.label_9.setObjectName(u"label_9")
 
-        self.verticalLayout_5.addWidget(self.checkBox_show_auxiliary_circle)
+        self.horizontalLayout_2.addWidget(self.label_9)
+
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
+
+        self.label_current_auxiliary_circle_center = QLabel(self.groupBox)
+        self.label_current_auxiliary_circle_center.setObjectName(u"label_current_auxiliary_circle_center")
+
+        self.horizontalLayout_2.addWidget(self.label_current_auxiliary_circle_center)
+
+
+        self.verticalLayout_5.addLayout(self.horizontalLayout_2)
 
         self.checkBox_set_auxiliary_circle_center_to_shift = QCheckBox(self.groupBox)
         self.checkBox_set_auxiliary_circle_center_to_shift.setObjectName(u"checkBox_set_auxiliary_circle_center_to_shift")
 
         self.verticalLayout_5.addWidget(self.checkBox_set_auxiliary_circle_center_to_shift)
+
+        self.checkBox_show_auxiliary_circle = QCheckBox(self.groupBox)
+        self.checkBox_show_auxiliary_circle.setObjectName(u"checkBox_show_auxiliary_circle")
+
+        self.verticalLayout_5.addWidget(self.checkBox_show_auxiliary_circle)
 
 
         self.verticalLayout_10.addWidget(self.groupBox)
@@ -373,8 +392,10 @@ class Ui_Form(object):
         self.comboBox_auxiliary_arrow_color.setItemText(8, QCoreApplication.translate("Form", u"yellow", None))
 
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Auxiliary Circle", None))
-        self.checkBox_show_auxiliary_circle.setText(QCoreApplication.translate("Form", u"Show auxiliary circle", None))
+        self.label_9.setText(QCoreApplication.translate("Form", u"Current Circle Center", None))
+        self.label_current_auxiliary_circle_center.setText(QCoreApplication.translate("Form", u"(0, 0)", None))
         self.checkBox_set_auxiliary_circle_center_to_shift.setText(QCoreApplication.translate("Form", u"Set circle center to where the shift vector point to", None))
+        self.checkBox_show_auxiliary_circle.setText(QCoreApplication.translate("Form", u"Show auxiliary circle", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Contrast", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"Norm", None))
