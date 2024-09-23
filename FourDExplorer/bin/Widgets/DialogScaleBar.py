@@ -297,6 +297,7 @@ class DialogScaleBar(QDialog):
         """
         Initialize UIs.
         """
+        self.setWindowTitle("Scale Bar Settings")
         self.ui.tabWidget.setCurrentIndex(0)                # basic
         self.ui.checkBox_customize_scale.stateChanged.connect(
             self._setCustomizeScaleAvailable
