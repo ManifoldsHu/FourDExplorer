@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiMainWindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -85,8 +85,6 @@ class Ui_MainWindow(object):
         self.menuFile_F.setObjectName(u"menuFile_F")
         self.menuEdit_E = QMenu(self.menubar)
         self.menuEdit_E.setObjectName(u"menuEdit_E")
-        self.menuTask_T = QMenu(self.menubar)
-        self.menuTask_T.setObjectName(u"menuTask_T")
         self.menuView_V = QMenu(self.menubar)
         self.menuView_V.setObjectName(u"menuView_V")
         self.menuDataset_D = QMenu(self.menubar)
@@ -102,7 +100,6 @@ class Ui_MainWindow(object):
 
         self.menubar.addAction(self.menuFile_F.menuAction())
         self.menubar.addAction(self.menuEdit_E.menuAction())
-        self.menubar.addAction(self.menuTask_T.menuAction())
         self.menubar.addAction(self.menuView_V.menuAction())
         self.menubar.addAction(self.menuDataset_D.menuAction())
         self.menubar.addAction(self.menuSettings_S.menuAction())
@@ -122,7 +119,6 @@ class Ui_MainWindow(object):
         self.actionOpen_HDF5.setText(QCoreApplication.translate("MainWindow", u"Open HDF5...", None))
         self.menuFile_F.setTitle(QCoreApplication.translate("MainWindow", u"File(&F)", None))
         self.menuEdit_E.setTitle(QCoreApplication.translate("MainWindow", u"Edit(&E)", None))
-        self.menuTask_T.setTitle(QCoreApplication.translate("MainWindow", u"Task(&T)", None))
         self.menuView_V.setTitle(QCoreApplication.translate("MainWindow", u"View(&V)", None))
         self.menuDataset_D.setTitle(QCoreApplication.translate("MainWindow", u"Dataset(&D)", None))
         self.menuSettings_S.setTitle(QCoreApplication.translate("MainWindow", u"Settings(&S)", None))

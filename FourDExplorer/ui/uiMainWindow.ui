@@ -72,11 +72,6 @@
      <string>Edit(&amp;E)</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuTask_T">
-    <property name="title">
-     <string>Task(&amp;T)</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuView_V">
     <property name="title">
      <string>View(&amp;V)</string>
@@ -99,7 +94,6 @@
    </widget>
    <addaction name="menuFile_F"/>
    <addaction name="menuEdit_E"/>
-   <addaction name="menuTask_T"/>
    <addaction name="menuView_V"/>
    <addaction name="menuDataset_D"/>
    <addaction name="menuSettings_S"/>
