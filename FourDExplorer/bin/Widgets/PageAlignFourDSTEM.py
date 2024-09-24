@@ -706,10 +706,6 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         arguments:
             data_path: (str) the path of the 4D-STEM data.
         """
-        # if not data_path:
-        #     return 
-        # if data_path == self.data_path:
-        #     return 
         super(PageAlignFourDSTEM, self).setFourDSTEM(data_path)
         
         self._createAuxiliaryCircle()
@@ -717,7 +713,6 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         self._createAuxiliaryArrow()
         self._createFDDNetEllipse()
 
-        
         scan_i, scan_j, dp_i, dp_j = self.hdf_handler.file[data_path].shape 
         self._setCursorCenter(((dp_i - 1)/2, (dp_j - 1)/2))
         
