@@ -84,7 +84,7 @@ class DialogScaleBar(QDialog):
         'text_font_style': 'normal',
         'text_color': 'white',
         'text_alpha': 1,
-        'text_bg_fill_visible': True,
+        'text_bg_fill_visible': False,
         'text_bg_fill_alpha': 0.1,
         'text_bg_edge_width': 0,
         'text_bg_fill_color': 'black',
@@ -178,6 +178,10 @@ class DialogScaleBar(QDialog):
         The length unit of the pixel. Usually it can be read from metadata.
         """
         if not self.ui.checkBox_customize_scale.isChecked():
+            meta = self.hdf_handler.file[self.item_path].attrs 
+            pixel_length = meta.get(self._pixel_length_meta)
+            if pixel_length is None:
+                return 'pix'
             if self._unit_meta in self.meta_manager.listSchemaKeys():
                 # If unit_meta is defined in the schema and it is a float/int 
                 # field that has its own unit, we will use its unit. This 
@@ -186,7 +190,7 @@ class DialogScaleBar(QDialog):
                 unit = self.meta_manager.getSchemaUnit(self._unit_meta)
                 if unit is not None:
                     return unit 
-            meta = self.hdf_handler.file[self.item_path].attrs 
+            
             pixel_length_unit = meta.get(self._unit_meta)
             if pixel_length_unit is None:
                 # If no pixel length is available, unit is set to pixel number
@@ -197,6 +201,7 @@ class DialogScaleBar(QDialog):
             return 'pix'
         else:
             return unit_text
+
     
     def setBlitManager(self, blit_manager: BlitManager):
         """
@@ -407,7 +412,7 @@ class DialogScaleBar(QDialog):
         self.ui.comboBox_text_font_style.setCurrentText('normal')
         self.ui.comboBox_text_color.setCurrentText('white') 
         self.ui.doubleSpinBox_text_alpha.setValue(1)
-        self.ui.checkBox_text_bg_fill_visible.setChecked(True)
+        self.ui.checkBox_text_bg_fill_visible.setChecked(False)
         self.ui.doubleSpinBox_text_bg_fill_alpha.setValue(0.1)
         self.ui.doubleSpinBox_text_bg_edge_width.setValue(0)
         self.ui.comboBox_text_bg_fill_color.setCurrentText('black')
