@@ -18,15 +18,22 @@ date:               Feb 24, 2022
 import sys
 import os
 
-
 from PySide6.QtWidgets import QMainWindow 
 from PySide6.QtWidgets import QToolBar
 from PySide6.QtWidgets import QWidget 
 from PySide6.QtWidgets import QToolButton 
 from PySide6.QtWidgets import QSizePolicy
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtWidgets import QProgressBar
+from PySide6.QtWidgets import QLabel
+from PySide6.QtCore import Qt
+from PySide6.QtCore import QSize
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon
-from Constants import ROOT_PATH, UIThemeDensity
+
+from Constants import ROOT_PATH
+from Constants import UIThemeDensity
+
+import psutil
 
 from bin.Actions.ControlActions import ActionSettings
 from bin.Actions.ControlActions import ControlActionGroup
@@ -72,13 +79,11 @@ from bin.Actions.HelpActions import ActionAbout
 
 from bin.TabViewManager import TabViewManager
 from bin.UIManager import ThemeHandler
+from bin.TaskManager import TaskManager
 from bin.Widgets.PageHome import PageHome
 from bin.Widgets.PageSettings import PageSettings
 from ui.uiMainWindow import Ui_MainWindow
 from ui import icon_rc
-
-
-
 
 
 class MainWindow(QMainWindow):
@@ -121,6 +126,8 @@ class MainWindow(QMainWindow):
         self.ui.tab_pages.initModel()
         self.tabview_manager.signal_tab_closed.connect(self.ui.tab_pages.initModel)
         self.tabview_manager.signal_tab_opened.connect(self.ui.tab_pages.initModel)
+        self._status_bar = self.statusBar()
+        self._initStatusBar()
     
     @property
     def tabview_manager(self) -> TabViewManager:
@@ -130,6 +137,11 @@ class MainWindow(QMainWindow):
     def theme_handler(self) -> ThemeHandler:
         global qApp 
         return qApp.theme_handler
+    
+    @property
+    def task_manager(self) -> TaskManager:
+        global qApp 
+        return qApp.task_manager
         
     def _initControlPanel(self):
         """
@@ -280,6 +292,94 @@ class MainWindow(QMainWindow):
         self._tabview_manager = TabViewManager(self)
         self._tabview_manager.setTabWidget(self.ui.tabWidget_view)
         self._tabview_manager.initializeTabView()
+
+        
+    def _initStatusBar(self):
+        """
+        Initialize the status bar to show the current progress of task (from 
+        TaskManager) and system information.
+        """
+        self._status_label = QLabel("Ready")
+        self._status_bar.addWidget(self._status_label)
+        
+        self._task_progress_bar = QProgressBar()
+        self._task_progress_bar.setMaximumWidth(200)
+        self._task_progress_bar.setMaximumHeight(10)
+        self._task_progress_bar.setVisible(False)
+        self._status_bar.addWidget(self._task_progress_bar)
+        
+        self.task_manager.task_info_refresh.connect(self._updateTaskStatus)
+        self.task_manager.progress_updated.connect(self._updateTaskStatus)
+        self.task_manager.task_exception.connect(self._updateTaskStatus)
+        
+        # Add system information widget
+        self._system_info_label = QLabel("CPU: 0%  Memory: 0%  Disk: 0%")
+        self._status_bar.addPermanentWidget(self._system_info_label)
+        
+        disk_io = psutil.disk_io_counters()
+        if hasattr(disk_io, 'read_bytes') and hasattr(disk_io, 'write_bytes'):
+            self._last_read_bytes = disk_io.read_bytes
+            self._last_write_bytes = disk_io.write_bytes
+        else:
+            self._last_read_bytes = 0
+            self._last_write_bytes = 0
+        
+        # Set up a timer to update system information periodically
+        self._system_info_timer = QTimer(self)
+        self._system_info_timer.timeout.connect(self._updateSystemInfo)
+        self._system_info_timer.start(1000)  # Update every 1000 ms (1 second)
+        
+        
+        
+    def _updateSystemInfo(self):
+        """
+        Update the system information labels in the status bar.
+        """
+        # Update CPU usage
+        cpu_percent = psutil.cpu_percent()
+        
+        # Update memory usage
+        memory = psutil.virtual_memory()
+        memory_percent = memory.percent
+        
+        # Update disk usage
+        disk_usage = psutil.disk_usage(os.getcwd())
+        disk_percent = disk_usage.percent
+        
+        # Update IO rate
+        disk_io = psutil.disk_io_counters()
+        if hasattr(disk_io, 'read_bytes') and hasattr(disk_io, 'write_bytes'):
+            read_rate = (disk_io.read_bytes - self._last_read_bytes) / 2**20
+            write_rate = (disk_io.write_bytes - self._last_write_bytes) / 2**20
+            io_rate = read_rate + write_rate
+            self._last_read_bytes = disk_io.read_bytes
+            self._last_write_bytes = disk_io.write_bytes
+            io_info = f"  IO: {io_rate:.1f} MiB/s"
+        else:
+            io_info = ""
+        
+        self._system_info_label.setText(f"CPU: {cpu_percent:.0f}%  Memory: {memory_percent:.0f}%  Disk: {disk_percent:.0f}%{io_info}")
+        
+
+    def _updateTaskStatus(self):
+        """
+        Update the status bar to show the current progress of the task.
+        """
+        if self.task_manager.current_task is None:
+            self._task_progress_bar.setVisible(False)
+            self._status_label.setText("Ready")
+        else:
+            self._status_label.setText("Executing Task")
+            self._task_progress_bar.setVisible(True)
+            self._task_progress_bar.setValue(self.task_manager.current_task.progress)
+
+            if self.task_manager.current_task.hasProgress():
+                self._task_progress_bar.setRange(0, 100)  # Percentage of step
+            else:
+                self._task_progress_bar.setRange(0, 0)  # Busy indicator
+        
+        
+
 
     def close(self) -> bool:
         self._app.cleanResources()
