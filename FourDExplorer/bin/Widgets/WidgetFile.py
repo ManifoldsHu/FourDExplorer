@@ -84,6 +84,8 @@ class WidgetFile(QWidget):
         self.ui.listView_working_directory.setRootIndex(
             self._file_model.index(os.getcwd())
         )
+        self._hdf_handler.file_closed.connect(self.changeStateByFileState)
+        self._hdf_handler.file_opened.connect(self.changeStateByFileState)
         
 
     def _initHDF(self):
@@ -129,25 +131,12 @@ class WidgetFile(QWidget):
         Reactions (Slot) of file widgets if the file state is changed 
         (opened or close). 
         """
-        if self._hdf_handler.isFileOpened():
-            self.ui.lineEdit_working_directory.setText(
-                os.getcwd()
-            )
-            self.ui.listView_working_directory.setRootIndex(
-                self._file_model.index(os.getcwd())
-            )
-
-            self.ui.pushButton_import_data.setDisabled(False)
-            self.ui.pushButton_export_data.setDisabled(False)
-            self.ui.pushButton_new_file.setVisible(False)
-            self.ui.pushButton_close_file.setVisible(True)
-
-        else:
-            self.ui.pushButton_import_data.setDisabled(True)
-            self.ui.pushButton_export_data.setDisabled(True)
-            self.ui.pushButton_new_file.setVisible(True)
-            self.ui.pushButton_close_file.setVisible(False)
-
+        self.ui.lineEdit_working_directory.setText(
+            os.getcwd()
+        )
+        self.ui.listView_working_directory.setRootIndex(
+            self._file_model.index(os.getcwd())
+        )
 
 
     def openFile(self):

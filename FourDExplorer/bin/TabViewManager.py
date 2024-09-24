@@ -53,7 +53,9 @@ class TabViewManager(QObject):
         super().__init__(parent)
         self._tabWidget_view = None
         self._page_home = PageHome(self.parent())   # parent is MainWindow
-        self._tab_history = []
+        
+        # DEPRECATED: keep tab widget objects in list will cause memory leak
+        self._tab_history = []      
         self._tab_history_max = 0
         self.hdf_handler.file_about_to_close.connect(
             self.pageWaitForFileClose
@@ -76,7 +78,7 @@ class TabViewManager(QObject):
         return self._page_home
 
     @property
-    def tab_history(self) -> List[QWidget]:
+    def tab_history(self) -> List[QWidget]: # DEPRECATED
         return self._tab_history
 
     @property
@@ -116,7 +118,11 @@ class TabViewManager(QObject):
         self.tabWidget_view.removeTab(tab_index)
         tab.close()
         self.signal_tab_closed.emit(tab.windowTitle())
-        tab.deleteLater()
+        
+        if tab is not self._page_home:
+            tab.deleteLater()
+            
+        # If there is no tab opened, open home page automatically
         if self.tabWidget_view.count() == 0:
             self.openTab(self.page_home)
         
