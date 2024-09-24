@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>252</width>
+    <height>276</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Artist:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_patch_kind">
+       <property name="text">
+        <string>Patch</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>1</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Alpha</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Edge Color</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Face Color</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Hatch</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>Line Style</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Line Width</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QDoubleSpinBox" name="doubleSpinBox_alpha">
+           <property name="maximum">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.010000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_edge_color">
+           <item>
+            <property name="text">
+             <string>black</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>white</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>blue</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>orange</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>green</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>red</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>purple</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>brown</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>pink</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>gray</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>olive</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cyan</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>others</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_face_color">
+           <item>
+            <property name="text">
+             <string>black</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>white</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>blue</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>orange</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>green</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>red</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>purple</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>brown</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>pink</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>gray</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>olive</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cyan</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>others</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_hatch">
+           <item>
+            <property name="text">
+             <string>none</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>diagonal hatching (/)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>back diagonal (\)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>vertical (|)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>horizontal (-)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>crossed (+)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>crossed diagonal (x)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>small circle (o)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>large circle (O)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>dots (.)</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>stars (*)</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="comboBox_line_style">
+           <item>
+            <property name="text">
+             <string>solid</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>dashed</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>dashdot</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>dotted</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>none</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="doubleSpinBox_line_width">
+           <property name="value">
+            <double>2.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBox_fill">
+       <property name="text">
+        <string>Fill</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>2</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_ok">
+       <property name="text">
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_cancel">
+       <property name="text">
+        <string>Cancle</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

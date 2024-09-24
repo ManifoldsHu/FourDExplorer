@@ -52,6 +52,7 @@ from matplotlib.axes import Axes
 import numpy as np
 
 from bin.BlitManager import BlitManager
+from bin.Widgets.DialogAdjustPatchEffects import DialogAdjustPatchEffects
 from ui import uiWidgetMaskCircle
 from ui import uiWidgetMaskRing
 from ui import uiWidgetMaskWedge
@@ -107,7 +108,7 @@ class WidgetMaskBase(QWidget):
         if not isinstance(patch, Patch):
             raise TypeError('patch must be Patch object, not '
                 '{0}'.format(type(patch).__name__))
-        self._patch = patch
+        self._patch = patch 
     
     def setBlitManager(self, blit_manager: BlitManager):
         """
@@ -258,6 +259,14 @@ class WidgetMaskCircle(WidgetMaskBase):
             )
         
         self.ui.doubleSpinBox_circle_radius.setValue(patch.radius)
+    
+    def openAdjustEffectsDialog(self):
+        """
+        Open the dialog to adjust patch effects.
+        """
+        dialog = DialogAdjustPatchEffects(self)
+        dialog.initialize(self.patch, self.blit_manager)
+        dialog.exec()
 
     
     def _initUi(self):
@@ -279,6 +288,9 @@ class WidgetMaskCircle(WidgetMaskBase):
         )
         self.ui.doubleSpinBox_circle_center_j.valueChanged.connect(
             self._updateLocation
+        )
+        self.ui.pushButton_adjust_effects.clicked.connect(
+            self.openAdjustEffectsDialog
         )
         
     def _updateShape(self):
@@ -389,6 +401,9 @@ class WidgetMaskRing(WidgetMaskBase):
         self.ui.doubleSpinBox_ring_center_j.valueChanged.connect(
             self._updateLocation
         )
+        self.ui.pushButton_adjust_effects.clicked.connect(
+            self.openAdjustEffectsDialog
+        )
 
     def _updateInner(self):
         """
@@ -453,6 +468,15 @@ class WidgetMaskRing(WidgetMaskBase):
         width = patch.get_width()
         self.ui.doubleSpinBox_ring_inner.setValue(radii[0] - width)
         self.ui.doubleSpinBox_ring_outer.setValue(radii[0])
+
+    
+    def openAdjustEffectsDialog(self):
+        """
+        Open the dialog to adjust patch effects.
+        """
+        dialog = DialogAdjustPatchEffects(self)
+        dialog.initialize(self.patch, self.blit_manager)
+        dialog.exec()
 
     def isContained(self, loc: np.ndarray) -> np.ndarray:
         """
@@ -577,6 +601,9 @@ class WidgetMaskWedge(WidgetMaskBase):
         self.ui.doubleSpinBox_wedge_center_j.valueChanged.connect(
             self._updateLocation
         )
+        self.ui.pushButton_adjust_effects.clicked.connect(
+            self.openAdjustEffectsDialog
+        )
 
     def _updateInner(self):
         """
@@ -679,6 +706,15 @@ class WidgetMaskWedge(WidgetMaskBase):
         self.ui.doubleSpinBox_wedge_rotate_angle.setValue(theta_1)
         self.ui.doubleSpinBox_wedge_open_angle.setValue(theta_2 - theta_1)
         
+    
+    def openAdjustEffectsDialog(self):
+        """
+        Open the dialog to adjust patch effects.
+        """
+        dialog = DialogAdjustPatchEffects(self)
+        dialog.initialize(self.patch, self.blit_manager)
+        dialog.exec()
+        
     def generateMeta(self) -> dict:
         """
         Generate the patch's metadata as a dict.
@@ -765,6 +801,9 @@ class WidgetMaskRectangle(WidgetMaskBase):
         )
         self.ui.doubleSpinBox_rectangle_center_j.valueChanged.connect(
             self._updateLocation
+        )
+        self.ui.pushButton_adjust_effects.clicked.connect(
+            self.openAdjustEffectsDialog
         )
 
     def _updateWidth(self):
@@ -868,6 +907,15 @@ class WidgetMaskRectangle(WidgetMaskBase):
         self.ui.doubleSpinBox_rectangle_height.setValue(height)
         self.ui.doubleSpinBox_rectangle_rotation_angle.setValue(angle)
 
+    
+    def openAdjustEffectsDialog(self):
+        """
+        Open the dialog to adjust patch effects.
+        """
+        dialog = DialogAdjustPatchEffects(self)
+        dialog.initialize(self.patch, self.blit_manager)
+        dialog.exec()
+
     def generateMeta(self) -> dict:
         """
         Generate the patch's metadata as a dict.
@@ -954,6 +1002,9 @@ class WidgetMaskEllipse(WidgetMaskBase):
         self.ui.doubleSpinBox_ellipse_center_j.valueChanged.connect(
             self._updateLocation
         )
+        self.ui.pushButton_adjust_effects.clicked.connect(
+            self.openAdjustEffectsDialog
+        )
 
     def _updateWidth(self):
         """
@@ -1021,6 +1072,14 @@ class WidgetMaskEllipse(WidgetMaskBase):
         self.ui.doubleSpinBox_ellipse_width.setValue(width)
         self.ui.doubleSpinBox_ellipse_height.setValue(height)
         self.ui.doubleSpinBox_ellipse_rotation_angle.setValue(angle)
+    
+    def openAdjustEffectsDialog(self):
+        """
+        Open the dialog to adjust patch effects.
+        """
+        dialog = DialogAdjustPatchEffects(self)
+        dialog.initialize(self.patch, self.blit_manager)
+        dialog.exec()
 
     def _resetPatchCenter(self):
         """
@@ -1124,6 +1183,9 @@ class WidgetMaskPolygon(WidgetMaskBase):
         self.ui.doubleSpinBox_polygon_rotate_angle.valueChanged.connect(
             self._updateRotationAngle
         )
+        self.ui.pushButton_adjust_effects.clicked.connect(
+            self.openAdjustEffectsDialog
+        )
 
     def _updateVertices(self):
         """
@@ -1188,6 +1250,15 @@ class WidgetMaskPolygon(WidgetMaskBase):
         self.ui.doubleSpinBox_polygon_radius.setValue(radius)
         self.ui.doubleSpinBox_polygon_rotate_angle.setValue(angle)
         self.ui.spinBox_vertices_number.setValue(3)
+
+    
+    def openAdjustEffectsDialog(self):
+        """
+        Open the dialog to adjust patch effects.
+        """
+        dialog = DialogAdjustPatchEffects(self)
+        dialog.initialize(self.patch, self.blit_manager)
+        dialog.exec()
 
     def _resetPatchCenter(self):
         """
@@ -1353,6 +1424,9 @@ class WidgetMaskSegment(WidgetMaskBase):
         self.ui.doubleSpinBox_segment_center_j.valueChanged.connect(
             self._updateLocation
         )
+        self.ui.pushButton_adjust_effects.clicked.connect(
+            self.openAdjustEffectsDialog
+        )
 
     def _updateNumSegments(self):
         """
@@ -1466,6 +1540,15 @@ class WidgetMaskSegment(WidgetMaskBase):
         self.ui.doubleSpinBox_segment_inner.setValue(radius - width)
         self.ui.doubleSpinBox_segment_rotate_angle.setValue(theta_1)
         self.ui.doubleSpinBox_segment_open_angle.setValue(theta_2 - theta_1)
+
+    
+    def openAdjustEffectsDialog(self):
+        """
+        Open the dialog to adjust patch effects.
+        """
+        dialog = DialogAdjustPatchEffects(self)
+        dialog.initialize(self.patch, self.blit_manager)
+        dialog.exec()
 
     def setMaskActivate(self, is_activated: bool):
         """
