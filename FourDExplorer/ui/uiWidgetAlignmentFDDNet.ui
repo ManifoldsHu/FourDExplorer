@@ -137,6 +137,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_adjust_ellipse_effects">
+        <property name="text">
+         <string>Adjust Ellipse Effects...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="verticalSpacer_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>

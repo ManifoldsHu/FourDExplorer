@@ -114,6 +114,11 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addWidget(self.checkBox_show_measured_ellipse)
 
+        self.pushButton_adjust_ellipse_effects = QPushButton(self.groupBox_2)
+        self.pushButton_adjust_ellipse_effects.setObjectName(u"pushButton_adjust_ellipse_effects")
+
+        self.verticalLayout_3.addWidget(self.pushButton_adjust_ellipse_effects)
+
         self.verticalSpacer_2 = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.verticalLayout_3.addItem(self.verticalSpacer_2)
@@ -159,6 +164,7 @@ class Ui_Form(object):
         self.label_fddnet_elliptical_angle.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.checkBox_show_shifted_dp.setText(QCoreApplication.translate("Form", u"Display shifted diffraction image", None))
         self.checkBox_show_measured_ellipse.setText(QCoreApplication.translate("Form", u"Show the measured ellipse", None))
+        self.pushButton_adjust_ellipse_effects.setText(QCoreApplication.translate("Form", u"Adjust Ellipse Effects...", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Inference Whole 4D-STEM Dataset", None))
         self.pushButton_generate_shift_vec.setText(QCoreApplication.translate("Form", u"Generate Shift Mapping", None))
     # retranslateUi

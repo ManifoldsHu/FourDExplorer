@@ -48,6 +48,7 @@ from lib.FDDNetInference import inferEllipseAngle
 from lib.FDDNetInference import inferEllipse
 from lib.TaskFDDNetInference import TaskFDDNetInference
 from bin.Widgets.DialogSaveItem import DialogSaveVectorField
+from bin.Widgets.DialogAdjustPatchEffects import DialogAdjustPatchEffects
 from ui import uiWidgetAlignmentFDDNet
 
 class WidgetAlignmentFDDNet(QWidget):
@@ -140,6 +141,7 @@ class WidgetAlignmentFDDNet(QWidget):
         self.ui.pushButton_generate_shift_vec.clicked.connect(self.generateShiftMapping)
         self.ui.checkBox_show_shifted_dp.clicked.connect(self._onShowShiftedDPChanged)
         self.ui.checkBox_show_measured_ellipse.stateChanged.connect(self._updateEllipsePatch)
+        self.ui.pushButton_adjust_ellipse_effects.clicked.connect(self.adjustEllipseEffects)
         
 
     def inference(self) -> tuple[float]:
@@ -349,6 +351,14 @@ class WidgetAlignmentFDDNet(QWidget):
         meta['Alignment/TargetDatasetPath'] = self.data_path
         # TODO: Add more attributes as needed
         return meta
+    
+    def adjustEllipseEffects(self):
+        """
+        Open the adjust ellipse effects dialog and adjust its style.
+        """
+        dialog = DialogAdjustPatchEffects(self)
+        dialog.initialize(self.ellipse_patch, self.blit_manager)
+        dialog.exec()
 
 
 class DialogGenerateShiftVector(QDialog):

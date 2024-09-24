@@ -436,8 +436,8 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
             width = 0,
             height = 0,
             angle = 0,
-            color = 'red',
-            alpha = 0.5,
+            color = 'tab:red',
+            alpha = 1,
             fill = False,
             visible = False,
         )
