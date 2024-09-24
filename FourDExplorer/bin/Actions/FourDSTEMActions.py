@@ -18,6 +18,7 @@ from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QWidget 
 
 from bin.Actions.EditActions import failLogging
+from bin.Actions.EditActions import ActionEditBase
 from bin.Actions.DataActions import ActionOpenFourDSTEM
 from bin.Actions.DataActions import ActionOpenData
 from bin.HDFManager import HDFType
@@ -28,6 +29,7 @@ from bin.Widgets.PageCenterOfMass import PageCenterOfMass
 from bin.Widgets.PageRotateFourDSTEM import PageRotateFourDSTEM
 from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
 from bin.Widgets.PageVirtualImage import PageVirtualImage
+from bin.Widgets.DialogEditParaFourDSTEM import DialogEditParaFourDSTEM
 
 class ActionVirtualImage(ActionOpenData):
     """
@@ -167,3 +169,31 @@ class ActionPlotCTF(ActionOpenData):
     #     page.setFourDSTEM(self.item_path)
     #     return page 
 
+
+class ActionEditParam(ActionEditBase):
+    """
+    引导用户编辑 4D-STEM Dataset 的属性的对话框。
+    
+    Action to guide user to edit the parameters of 4D-STEM dataset.
+    """
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+        self.setText("Edit 4D-STEM Parameters")
+        self.initIconResources('attributes')
+        self.triggered.connect(lambda: self.viewParaFourDSTEM(self))
+        
+    @failLogging
+    def viewParaFourDSTEM(self):
+        """
+        Shows a dialog to view attributes of 4D-STEM dataset.
+        """
+        if self._treeview is not None:
+            self.setItemPathFromIndex(self._treeview.currentIndex())
+            
+        # Here we must bind the dialog to the main window, in case it is 
+        # garbage collected.
+        global qApp 
+        dialog_para = DialogEditParaFourDSTEM(qApp.main_window)
+        dialog_para.setFourDSTEM(self.item_path)
+        dialog_para.show()
+        

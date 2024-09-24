@@ -54,6 +54,7 @@ from bin.Actions.FourDSTEMActions import ActionCenterOfMass
 from bin.Actions.FourDSTEMActions import ActionRotate
 from bin.Actions.FourDSTEMActions import ActionVirtualImage
 from bin.Actions.FourDSTEMActions import ActionPlotCTF
+from bin.Actions.FourDSTEMActions import ActionEditParam
 
 from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
 from bin.Actions.VectorFieldActions import ActionSubtractReferenceVector
@@ -229,11 +230,15 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         """
         Initialize 4D-STEM calibration actions.
         """
+        # self._action_edit_param = ActionEditParam(self)
         self._action_background = ActionBackground(self)
         self._action_alignment = ActionAlign(self)
         self._action_rotate = ActionRotate(self)
         
         self._action_group_calibration = QActionGroup(self)
+        # self._action_group_calibration.addAction(
+        #     self._action_edit_param
+        # )
         self._action_group_calibration.addAction(
             self._action_background
         )

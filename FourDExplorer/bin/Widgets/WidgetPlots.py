@@ -381,6 +381,7 @@ class WidgetPlotDP(WidgetPlotBase):
         from bin.Actions.FourDSTEMActions import ActionAlign
         from bin.Actions.FourDSTEMActions import ActionBackground
         from bin.Actions.FourDSTEMActions import ActionCenterOfMass
+        from bin.Actions.FourDSTEMActions import ActionEditParam
         from bin.Actions.FourDSTEMActions import ActionRotate
         from bin.Actions.FourDSTEMActions import ActionVirtualImage
         from bin.Actions.FourDSTEMActions import ActionPlotCTF
@@ -389,6 +390,7 @@ class WidgetPlotDP(WidgetPlotBase):
             'open': ActionOpenFourDSTEM(self),
             'virtual_image': ActionVirtualImage(self),
             'center_of_mass': ActionCenterOfMass(self),
+            # 'edit_param': ActionEditParam(self),
             'align': ActionAlign(self),
             'background': ActionBackground(self),
             'rotate': ActionRotate(self),

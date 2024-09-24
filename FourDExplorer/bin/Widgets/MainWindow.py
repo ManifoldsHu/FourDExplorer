@@ -65,6 +65,7 @@ from bin.Actions.FourDSTEMActions import ActionCenterOfMass
 from bin.Actions.FourDSTEMActions import ActionRotate
 from bin.Actions.FourDSTEMActions import ActionVirtualImage
 from bin.Actions.FourDSTEMActions import ActionPlotCTF
+from bin.Actions.FourDSTEMActions import ActionEditParam
 from bin.Actions.VectorFieldActions import ActionCurl
 from bin.Actions.VectorFieldActions import ActionFlipComponents
 from bin.Actions.VectorFieldActions import ActionPotential
@@ -258,12 +259,14 @@ class MainWindow(QMainWindow):
         self._action_align = ActionAlign(self)
         self._action_rotate = ActionRotate(self)
         self._action_plot_ctf = ActionPlotCTF(self)
+        # self._action_edit_param = ActionEditParam(self)
         self._menu_fourdstem.addAction(self._action_open_fourdstem)
         self._menu_fourdstem.addAction(self._action_import_fourdstem)
         self._menu_fourdstem.addSeparator()
         self._menu_fourdstem.addAction(self._action_virtual_image)
         self._menu_fourdstem.addAction(self._action_center_of_mass)
         self._menu_fourdstem.addSeparator()
+        # self._menu_fourdstem.addAction(self._action_edit_param)
         self._menu_fourdstem.addAction(self._action_background)
         self._menu_fourdstem.addAction(self._action_align)
         self._menu_fourdstem.addAction(self._action_rotate)

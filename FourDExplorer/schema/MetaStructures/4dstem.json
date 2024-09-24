@@ -404,6 +404,92 @@
             "description": "6-fold astigmatism (A6)."
         }
     },
+    "AberrationAngle": {
+        "C1": {
+            "type": "float",
+            "title": "defocus (C1) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "Defocus (C1) angle. (Useless due to symmetry)"
+        },
+        "A1": {
+            "type": "float",
+            "title": "2-fold astigmatism (A1) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "2-fold astigmatism (A1) angle."
+        },
+        "B2": {
+            "type": "float",
+            "title": "axial coma (B2) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "Axial coma (B2) angle."
+        },
+        "A2": {
+            "type": "float",
+            "title": "3-fold astigmatism (A2) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "3-fold astigmatism (A2) angle."
+        },
+        "C3": {
+            "type": "float",
+            "title": "spherical aberration (C3) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "Spherical aberration (C3) angle. (Useless due to symmetry)"
+        },
+        "S3": {
+            "type": "float",
+            "title": "star aberration (S3) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "Star aberration (S3) angle."
+        },
+        "A3": {
+            "type": "float",
+            "title": "4-fold astigmatism (A3) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "4-fold astigmatism (A3) angle."
+        },
+        "B4": {
+            "type": "float",
+            "title": "axial coma (B4) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "Axial coma (B4) angle."
+        },
+        "D4": {
+            "type": "float",
+            "title": "3 lobe aberration (D4) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "3 lobe aberration (D4) angle."
+        },
+        "A4": {
+            "type": "float",
+            "title": "5-fold astigmatism (A4) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "5-fold astigmatism (A4) angle."
+        },
+        "C5": {
+            "type": "float",
+            "title": "spherical aberration (C5) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "Spherical aberration (C5) angle. (Useless due to symmetry)"
+        },
+        "A5": {
+            "type": "float",
+            "title": "6-fold astigmatism (A6) angle",
+            "unit": "rad",
+            "display_unit": "deg",
+            "description": "6-fold astigmatism (A6) angle."
+        }
+    },
     "Quantify": {
         "display_vmin": {
             "type": "float",
