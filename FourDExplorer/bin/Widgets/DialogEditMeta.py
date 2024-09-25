@@ -140,8 +140,8 @@ class DialogEditMeta(QDialog):
         # if self.meta_manager is not None:
         if meta_key in self.meta_manager.listSchemaKeys():
             msg_box_ask = QMessageBox(self)
-            msg_box_ask.setWindowTitle("Metadata Modification Warning")
-            msg_box_ask.setIcon(QMessageBox.Warning)
+            msg_box_ask.setWindowTitle("Metadata Modification")
+            msg_box_ask.setIcon(QMessageBox.Information)
             msg_box_ask.setText(f"Modifying this metadata may affect how the software works.")
             msg_box_ask.setInformativeText(
                 f"<code>{meta_key}</code> is a predefined metadata item that may have actual physical meaning or be involved in the computation. Please double check before making any changes."
