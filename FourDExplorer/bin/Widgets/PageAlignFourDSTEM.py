@@ -765,7 +765,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
             output_parent_path,
             output_name,
             self.shift_mapping_dataset,
-            # **meta,
+            **meta,
         )
         self.task_manager.addTask(self.task)
         
