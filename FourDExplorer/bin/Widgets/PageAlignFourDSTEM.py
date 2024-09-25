@@ -45,6 +45,7 @@ import numpy as np
 from skimage.transform import warp
 from skimage.transform import SimilarityTransform
 
+from Constants import APP_VERSION
 from bin.TaskManager import TaskManager
 from bin.Widgets.PageBaseFourDSTEM import PageBaseFourDSTEM
 from bin.Widgets.DialogSaveFourDSTEM import DialogSaveFourDSTEM
@@ -757,6 +758,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
             output_parent_path = dialog_save.getParentPath()
         # meta = self.data_object.attrs 
         # TODO: add meta
+        meta = self._generateShiftedMeta(output_name)
         
         self.task = TaskFourDSTEMAlignMapping(
             self.data_path,
@@ -766,6 +768,48 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
             # **meta,
         )
         self.task_manager.addTask(self.task)
+        
+    def _generateShiftedMeta(self, output_name: str) -> dict:
+        """
+        Generate metadata for the aligned 4D-STEM dataset.
+        
+        This method generates metadata for the aligned 4D-STEM dataset, including 
+        the shift mapping dataset path, the shift vector, and the current 
+        alignment method. It also includes the original metadata from the 
+        original 4D-STEM dataset.
+        
+        arguments:
+            output_name: (str) the name of the output dataset.
+        
+        returns:
+            (dict) a dictionary containing the metadata for the aligned dataset.
+        """
+        meta = {}
+        meta['/Calibration/DiffractionAlignment/method'] = 'Shift by Mapping'
+        meta['/Calibration/DiffractionAlignment/shift_mapping_path'] = self.shift_mapping_dataset.path
+        # meta['/Calibration/ShiftCorrection/shift_vector'] = self.shift_vec
+        meta['/Calibration/DiffractionAlignment/original_dataset_path'] = self.data_path
+        
+        # Add general and space information
+        meta['/General/title'] = output_name if output_name else 'Aligned 4D-STEM Dataset'
+        meta['/General/time'] = self.datetime_manager.current_time
+        meta['/General/date'] = self.datetime_manager.current_date
+        meta['/General/time_zone'] = self.datetime_manager.current_timezone
+        meta['/General/fourd_explorer_version'] = '.'.join(APP_VERSION)
+        
+        # Add space calibration information
+        for key, value in self.data_object.attrs.items():
+            if key.startswith('/Calibration/Space/'):
+                meta[key] = value
+            elif key.startswith('/Acquisition/'):
+                meta[key] = value
+            elif key.startswith('/Quantify/'):
+                meta[key] = value
+        
+        return meta
+
+
+
         
         
     def _updateDP(self):

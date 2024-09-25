@@ -311,7 +311,7 @@
                 "title": "translation pixel of diffraction pattern (j-direction)",
                 "description": "Translation pixel of diffraction pattern in j-direction (x direction) to centering the diffraction pattern."
             },
-            "alignment_moving_path": {
+            "shift_mapping_path": {
                 "type": "str",
                 "title": "path of alignment translation vectors",
                 "description": "Record the path of the vector field that records the center of the diffraction pattern should be moved at each scanning point."

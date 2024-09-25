@@ -44,6 +44,7 @@ from matplotlib.text import Text
 import numpy as np
 import h5py
 
+from Constants import APP_VERSION
 # from bin.Actions.DataActions import ActionOpenFourDSTEM
 # from bin.Actions.FourDSTEMActions import ActionAlign
 # from bin.Actions.FourDSTEMActions import ActionBackground
