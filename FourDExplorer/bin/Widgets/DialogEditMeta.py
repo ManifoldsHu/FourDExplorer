@@ -66,17 +66,8 @@ class DialogEditMeta(QDialog):
 
     @property 
     def meta_manager(self) -> MetaManager:
-        # return self._meta_manager 
         global qApp 
         return qApp.requireMetaManager(self.item_path)
-    
-    # @property
-    # def meta_tree(self) -> MetaTree:
-    #     return self.meta_manager.meta_tree
-    
-    # @property
-    # def meta_tree_model(self) -> MetaTreeModel:
-    #     return self.meta_manager.meta_tree_model
     
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -95,15 +86,6 @@ class DialogEditMeta(QDialog):
     def logger(self) -> Logger:
         global qApp 
         return qApp.logger
-    
-    # def setMetaManager(self, meta_manager: MetaManager):
-    #     """
-    #     Set the meta manager that manages this item.
-
-    #     arguments:
-    #         meta_manager: (MetaManager)
-    #     """
-    #     self._meta_manager = meta_manager
     
     def _initEditDialog(self):
         """

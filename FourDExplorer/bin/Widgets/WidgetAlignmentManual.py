@@ -49,11 +49,12 @@ from matplotlib.axes import Axes
 from h5py import Dataset
 from scipy.optimize import curve_fit
 
-
+from Constants import APP_VERSION
 from bin.BlitManager import BlitManager
 from bin.UIManager import ThemeHandler
 from bin.HDFManager import HDFHandler
 from bin.HDFManager import HDFType
+from bin.DateTimeManager import DateTimeManager
 from bin.Widgets.DialogSaveItem import DialogSaveVectorField
 # from bin.Widgets.DialogCreateItem import DialogHDFCreate
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
@@ -136,6 +137,10 @@ class WidgetAlignmentManual(QWidget):
     @property
     def data_object(self) -> Dataset:
         return self._align_page.data_object
+    
+    @property
+    def data_path(self) -> str:
+        return self._align_page.data_path
 
     @property
     def scan_ii(self) -> int:
@@ -154,6 +159,11 @@ class WidgetAlignmentManual(QWidget):
     def hdf_handler(self) -> HDFHandler:
         global qApp 
         return qApp.hdf_handler
+    
+    @property
+    def datetime_manager(self) -> DateTimeManager:
+        global qApp 
+        return qApp.datetime_manager
 
     def _initTableWidget(self):
         """
@@ -330,11 +340,70 @@ class WidgetAlignmentManual(QWidget):
             elif _dialog_generate_shift_map.radio_button_quadratic_polynomial.isChecked():
                 shift_map_dataset.attrs['Alignment/InterpolationMethod'] = "Quadratic Polynomial Regression"
                 self._saveShiftAnchorsInAttrs(shift_map_dataset)
-            shift_map_dataset['Alignment/Method'] = "Manual"
-            shift_map_dataset['Alignment/TargetDatasetPath'] = self._align_page.data_path 
-            # TODO 还需要加上一些属性，例如 General 以及 Space 的信息
+            # shift_map_dataset['Alignment/Method'] = "Manual"
+            # shift_map_dataset['Alignment/TargetDatasetPath'] = self._align_page.data_path 
+            shift_map_meta = self._generateShiftMapMeta(
+                name=item_name,
+                fit_model_name=shift_map_dataset.attrs['Alignment/InterpolationMethod'],
+            )
+            for key, value in shift_map_meta.items():
+                shift_map_dataset.attrs[key] = value
+            
             self.logger.info(f"Shift map created at {full_path}")
             
+            
+    def _generateShiftMapMeta(self, name = None, fit_model_name = None,) -> dict:
+        """
+        Generate metadata for the shift map.
+        
+        arguments:
+            name: (str|None) the name of the generated map dataset
+            
+            fit_model_name: (str|None) the name of the fit model used to generate the shift map
+        
+        returns:
+            (dict) the metadata for the shift map
+        """
+        meta = {}
+        meta['/ShiftMapping/method'] = 'Manual'
+        if fit_model_name:
+            meta['/ShiftMapping/fit_method'] = fit_model_name
+        meta['ShiftMapping/Target/dataset_path'] = self.data_path 
+        meta['/ShiftMapping/Target/dataset_type'] = '4D-STEM'
+        
+        # read metadata from 4D-STEM dataset 
+        for key in self.data_object.attrs:
+            if isinstance(key, str):
+                _available_keys = (
+                    '/General/', 
+                    '/Acquisition/Microscope/', 
+                    '/Acquisition/Camera/',
+                    '/Acquisition/Stage',
+                    '/Calibration/Space',
+                    '/Aberration/',
+                    '/AberrationAngle/',
+                )
+                if key.startswith(_available_keys):
+                    meta['/ShiftMapping/Target' + key] = self.data_object.attrs[key]
+        
+        if name:
+            meta['/General/title'] = name 
+        meta['/General/time'] = self.datetime_manager.current_time
+        meta['/General/date'] = self.datetime_manager.current_date
+        meta['/General/time_zone'] = self.datetime_manager.current_timezone
+        meta['/General/foud_explorer_version'] = '.'.join(APP_VERSION)
+        if '/Calibration/Space/scan_dr_i' in self.data_object.attrs:
+            meta['/Calibration/Space/pixel_size_i'] = self.data_object.attrs['/Calibration/Space/scan_dr_i']
+        if '/Calibration/Space/scan_dr_j' in self.data_object.attrs:
+            meta['/Calibration/Space/pixel_size_j'] = self.data_object.attrs['/Calibration/Space/scan_dr_j']
+        meta['/Calibration/Space/pixel_size_unit'] = 'm'
+        meta['/Calibration/Space/pixel_size_unit_display'] = 'nm'
+        meta['/Calibration/Space/display_unit_magnify'] = 1e9
+        meta['/Calibration/Quantify/value_unit'] = 'pix'
+        meta['/Calibration/Quantify/value_unit_display'] = 'pix'
+        meta['/Calibration/Quantify/display_unit_magnify'] = 1
+        meta['/Calibration/Quantify/display_norm_mode'] = 'linear'
+
             
     def _useCurrentShiftVec(self):
         """

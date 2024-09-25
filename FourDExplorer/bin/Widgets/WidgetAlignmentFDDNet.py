@@ -39,8 +39,10 @@ from matplotlib.patches import Ellipse
 import onnxruntime as ort
 from h5py import Dataset
 
+from Constants import APP_VERSION
 from bin.BlitManager import BlitManager
 from bin.TaskManager import TaskManager
+from bin.DateTimeManager import DateTimeManager
 from lib.FDDNetInference import loadFDDNetModel 
 from lib.FDDNetInference import loadFDDNetAngleModel
 from lib.FDDNetInference import inferEllipseLoc
@@ -126,6 +128,11 @@ class WidgetAlignmentFDDNet(QWidget):
     @property
     def data_path(self) -> str:
         return self._align_page.data_path
+    
+    @property
+    def datetime_manager(self) -> DateTimeManager:
+        global qApp 
+        return qApp.datetime_manager
     
     def _initUi(self):
         """
@@ -321,7 +328,7 @@ class WidgetAlignmentFDDNet(QWidget):
             'center': shift_map_name,
         }
         
-        centers_meta = self._generateShiftMapMeta()
+        centers_meta = self._generateShiftMapMeta(name = shift_map_name, fit_model_name = fit_model)
         metas_dict = {
             'center': centers_meta
         }
@@ -342,15 +349,62 @@ class WidgetAlignmentFDDNet(QWidget):
 
         self.task_manager.addTask(self.task)
 
-    def _generateShiftMapMeta(self) -> dict:
+
+    def _generateShiftMapMeta(self, name = None, fit_model_name = None) -> dict:
         """
         Generate metadata for the shift map.
+        
+        arguments:
+            name: (str|None) the name of the generated map dataset 
+            
+            fit_model_name: (str|None) the name of the fitting method. Now 
+                supports 'linear', 'quadratic' and None
+                
+        returns:
+            (dict) the metadata of generated shift mapping.
         """
         meta = {}
-        meta['Alignment/Method'] = 'FDDNet Inference'
-        meta['Alignment/TargetDatasetPath'] = self.data_path
-        # TODO: Add more attributes as needed
+        meta['/ShiftMapping/method'] = 'FDDNet Inference'
+        if fit_model_name:
+            meta['/ShiftMapping/fit_method'] = fit_model_name
+        meta['/ShiftMapping/Target/dataset_path'] = self.data_path 
+        meta['/ShiftMapping/Target/dataset_type'] = '4D-STEM'
+        
+        # read metadata from 4D-STEM dataset 
+        for key in self.data_object.attrs:
+            if isinstance(key, str):
+                _available_keys = (
+                    '/General/', 
+                    '/Acquisition/Microscope/', 
+                    '/Acquisition/Camera/',
+                    '/Acquisition/Stage',
+                    '/Calibration/Space',
+                    '/Aberration/',
+                    '/AberrationAngle/',
+                )
+                if key.startswith(_available_keys):
+                    meta['/ShiftMapping/Target' + key] = self.data_object.attrs[key]
+        
+        if name:
+            meta['/General/title'] = name 
+        meta['/General/time'] = self.datetime_manager.current_time
+        meta['/General/date'] = self.datetime_manager.current_date
+        meta['/General/time_zone'] = self.datetime_manager.current_timezone
+        meta['/General/foud_explorer_version'] = '.'.join(APP_VERSION)
+        if '/Calibration/Space/scan_dr_i' in self.data_object.attrs:
+            meta['/Calibration/Space/pixel_size_i'] = self.data_object.attrs['/Calibration/Space/scan_dr_i']
+        if '/Calibration/Space/scan_dr_j' in self.data_object.attrs:
+            meta['/Calibration/Space/pixel_size_j'] = self.data_object.attrs['/Calibration/Space/scan_dr_j']
+        meta['/Calibration/Space/pixel_size_unit'] = 'm'
+        meta['/Calibration/Space/pixel_size_unit_display'] = 'nm'
+        meta['/Calibration/Space/display_unit_magnify'] = 1e9
+        meta['/Calibration/Quantify/value_unit'] = 'pix'
+        meta['/Calibration/Quantify/value_unit_display'] = 'pix'
+        meta['/Calibration/Quantify/display_unit_magnify'] = 1
+        meta['/Calibration/Quantify/display_norm_mode'] = 'linear'
+
         return meta
+    
     
     def adjustEllipseEffects(self):
         """
@@ -403,7 +457,7 @@ class DialogGenerateShiftVector(QDialog):
         if self.radio_button_apply_current_shift_vec.isChecked():
             return None
         elif self.radio_button_linear_regression.isChecked():
-            return 'Linear'
+            return 'linear'
         elif self.radio_button_quadratic_polynomial.isChecked():
-            return 'Quadratic'
+            return 'quadratic'
         return None

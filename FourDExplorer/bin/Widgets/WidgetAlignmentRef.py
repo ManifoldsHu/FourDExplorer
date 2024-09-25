@@ -33,9 +33,11 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from h5py import Dataset
 
+from Constants import APP_VERSION
 from bin.BlitManager import BlitManager
 from bin.HDFManager import HDFHandler
 from bin.HDFManager import HDFDataNode 
+from bin.DateTimeManager import DateTimeManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.DialogSaveItem import DialogSaveVectorField
 from lib.VectorFieldOperators import CenterOfMass
@@ -103,6 +105,11 @@ class WidgetAlignmentRef(QWidget):
     def logger(self) -> Logger:
         global qApp
         return qApp.logger
+    
+    @property
+    def datetime_manager(self) -> DateTimeManager:
+        global qApp 
+        return qApp.datetime_manager
     
     
     def _initUi(self):
@@ -236,7 +243,7 @@ class WidgetAlignmentRef(QWidget):
 
         self.task_manager.addTask(self.task)
 
-    def _generateCoMMeta(self) -> dict:
+    def _generateCoMMeta(self, name: str = None) -> dict:
         """
         Generate metadata for center of mass vector field.
         """
@@ -244,7 +251,27 @@ class WidgetAlignmentRef(QWidget):
         meta['Alignment/Method'] = 'Reference Center of Mass'
         meta['Alignment/ReferenceDatasetPath'] = self._reference_path
         meta['Alignment/TargetDatasetPath'] = self._align_page.data_path
-        # TODO 还需要加上一些属性，例如 General 以及 Space 的一些信息
+        
+        # Add general and space information
+        meta['/General/title'] = name if name else 'Reference CoM Vector Field'
+        meta['/General/time'] = self.datetime_manager.current_time
+        meta['/General/date'] = self.datetime_manager.current_date
+        meta['/General/time_zone'] = self.datetime_manager.current_timezone
+        meta['/General/foud_explorer_version'] = '.'.join(APP_VERSION)
+        
+        # Add space calibration information
+        if '/Calibration/Space/scan_dr_i' in self.data_object.attrs:
+            meta['/Calibration/Space/pixel_size_i'] = self.data_object.attrs['/Calibration/Space/scan_dr_i']
+        if '/Calibration/Space/scan_dr_j' in self.data_object.attrs:
+            meta['/Calibration/Space/pixel_size_j'] = self.data_object.attrs['/Calibration/Space/scan_dr_j']
+        meta['/Calibration/Space/pixel_size_unit'] = 'm'
+        meta['/Calibration/Space/pixel_size_unit_display'] = 'nm'
+        meta['/Calibration/Space/display_unit_magnify'] = 1e9
+        meta['/Calibration/Quantify/value_unit'] = 'pix'
+        meta['/Calibration/Quantify/value_unit_display'] = 'pix'
+        meta['/Calibration/Quantify/display_unit_magnify'] = 1
+        meta['/Calibration/Quantify/display_norm_mode'] = 'linear'
+        
         return meta
     
     def getCurrentDPShiftVec(self) -> tuple[float, float]:
