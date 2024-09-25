@@ -43,10 +43,12 @@ from matplotlib.image import AxesImage
 import numpy as np
 from scipy.ndimage import rotate
 
+from Constants import APP_VERSION
 from bin.BlitManager import BlitManager 
 from bin.TaskManager import TaskManager 
 from bin.HDFManager import HDFDataNode
 from bin.UIManager import ThemeHandler
+from bin.DateTimeManager import DateTimeManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.DialogFindRotationAngle import DialogFindRotationAngle
 from bin.Widgets.DialogSaveFourDSTEM import DialogSaveFourDSTEM
@@ -175,6 +177,11 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
     @property
     def axial_bf_blit_manager(self) -> BlitManager:
         return self.ui.widget_axial_bf.blit_manager
+    
+    @property
+    def datetime_manager(self) -> DateTimeManager:
+        global qApp 
+        return qApp.datetime_manager
 
     def setFourDSTEM(self, data_path: str):
         """
@@ -470,11 +477,12 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
             output_name = dialog_save.getNewName()
             output_parent_path = dialog_save.getParentPath()
 
-        meta = self.data_object.attrs
-        if 'calibrated_rotation_angle' in meta:
-            meta['calibrated_rotation_angle'] += self.rotation_angle
-        else:
-            meta['calibrated_rotation_angle'] = self.rotation_angle 
+        # meta = self.data_object.attrs
+        # if 'calibrated_rotation_angle' in meta:
+        #     meta['calibrated_rotation_angle'] += self.rotation_angle
+        # else:
+        #     meta['calibrated_rotation_angle'] = self.rotation_angle 
+        meta = self._generateMeta(output_name)
 
         self.task = TaskFourDSTEMRotate(
             self.data_path,
@@ -484,6 +492,41 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
             **meta,
         )
         self.task_manager.addTask(self.task) 
+
+
+    def _generateMeta(self, name: str = None) -> dict:
+        """
+        Generate metadata for the rotated 4D-STEM dataset.
+
+        arguments:
+            name: (str) the name of the dataset.
+
+        returns:
+            (dict) the metadata dictionary.
+        """
+        meta = {}
+        # meta['/Calibration/RotationalOffsetCorrection/method'] = 'Rotation by Angle'
+        meta['/Calibration/RotationalOffsetCorrection/scan_rotation'] = self.rotation_angle
+        # meta['/Calibration/RotationalOffsetCorrection/AngleUnit'] = 'degrees'
+        # meta['/Calibration/RotationalOffsetCorrection/OriginalDatasetPath'] = self.data_path
+        
+        # Add general and space information
+        meta['/General/title'] = name if name else 'Rotated 4D-STEM Dataset'
+        meta['/General/time'] = self.datetime_manager.current_time
+        meta['/General/date'] = self.datetime_manager.current_date
+        meta['/General/time_zone'] = self.datetime_manager.current_timezone
+        meta['/General/fourd_explorer_version'] = '.'.join(APP_VERSION)
+        
+        # Add space calibration information
+        for key, value in self.data_object.attrs.items():
+            if key.startswith('/Calibration/Space/'):
+                meta[key] = value
+            elif key.startswith('/Acquisition/'):
+                meta[key] = value
+            elif key.startswith('/Quantify/'):
+                meta[key] = value
+        
+        return meta
 
 
     def setAxialBF(self, axial_bf_path: str, read_attr: bool = False):
