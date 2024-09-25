@@ -16,9 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QDialog, QGroupBox, QHBoxLayout,
-    QLabel, QLineEdit, QPlainTextEdit, QPushButton,
-    QScrollArea, QSizePolicy, QSpacerItem, QStackedWidget,
-    QVBoxLayout, QWidget)
+    QLabel, QLineEdit, QPushButton, QScrollArea,
+    QSizePolicy, QSpacerItem, QStackedWidget, QVBoxLayout,
+    QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -115,66 +115,238 @@ class Ui_Dialog(object):
 
         self.horizontalLayout.addWidget(self.label_2)
 
-        self.lineEdit_dataset_title = QLineEdit(self.groupBox_2)
-        self.lineEdit_dataset_title.setObjectName(u"lineEdit_dataset_title")
+        self.horizontalSpacer_58 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout.addWidget(self.lineEdit_dataset_title)
+        self.horizontalLayout.addItem(self.horizontalSpacer_58)
 
-        self.pushButton_edit_dataset_title = QPushButton(self.groupBox_2)
-        self.pushButton_edit_dataset_title.setObjectName(u"pushButton_edit_dataset_title")
+        self.label_general_title = QLabel(self.groupBox_2)
+        self.label_general_title.setObjectName(u"label_general_title")
 
-        self.horizontalLayout.addWidget(self.pushButton_edit_dataset_title)
+        self.horizontalLayout.addWidget(self.label_general_title)
+
+        self.pushButton_edit_general_title = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_title.setObjectName(u"pushButton_edit_general_title")
+
+        self.horizontalLayout.addWidget(self.pushButton_edit_general_title)
 
 
         self.verticalLayout_2.addLayout(self.horizontalLayout)
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.label_3 = QLabel(self.groupBox_2)
-        self.label_3.setObjectName(u"label_3")
+        self.label_48 = QLabel(self.groupBox_2)
+        self.label_48.setObjectName(u"label_48")
 
-        self.horizontalLayout_5.addWidget(self.label_3)
+        self.horizontalLayout_5.addWidget(self.label_48)
 
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_59 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout_5.addItem(self.horizontalSpacer_3)
+        self.horizontalLayout_5.addItem(self.horizontalSpacer_59)
 
-        self.pushButton_edit_authors = QPushButton(self.groupBox_2)
-        self.pushButton_edit_authors.setObjectName(u"pushButton_edit_authors")
+        self.label_general_data_path = QLabel(self.groupBox_2)
+        self.label_general_data_path.setObjectName(u"label_general_data_path")
 
-        self.horizontalLayout_5.addWidget(self.pushButton_edit_authors)
+        self.horizontalLayout_5.addWidget(self.label_general_data_path)
+
+        self.pushButton_edit_general_data_path = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_data_path.setObjectName(u"pushButton_edit_general_data_path")
+
+        self.horizontalLayout_5.addWidget(self.pushButton_edit_general_data_path)
 
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_5)
 
-        self.plainTextEdit_authors = QPlainTextEdit(self.groupBox_2)
-        self.plainTextEdit_authors.setObjectName(u"plainTextEdit_authors")
-
-        self.verticalLayout_2.addWidget(self.plainTextEdit_authors)
-
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.label_4 = QLabel(self.groupBox_2)
-        self.label_4.setObjectName(u"label_4")
+        self.label_49 = QLabel(self.groupBox_2)
+        self.label_49.setObjectName(u"label_49")
 
-        self.horizontalLayout_6.addWidget(self.label_4)
+        self.horizontalLayout_6.addWidget(self.label_49)
 
-        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_60 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout_6.addItem(self.horizontalSpacer_4)
+        self.horizontalLayout_6.addItem(self.horizontalSpacer_60)
 
-        self.pushButton_edit_notes = QPushButton(self.groupBox_2)
-        self.pushButton_edit_notes.setObjectName(u"pushButton_edit_notes")
+        self.label_general_header_path = QLabel(self.groupBox_2)
+        self.label_general_header_path.setObjectName(u"label_general_header_path")
 
-        self.horizontalLayout_6.addWidget(self.pushButton_edit_notes)
+        self.horizontalLayout_6.addWidget(self.label_general_header_path)
+
+        self.pushButton_edit_general_header_path = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_header_path.setObjectName(u"pushButton_edit_general_header_path")
+
+        self.horizontalLayout_6.addWidget(self.pushButton_edit_general_header_path)
 
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
 
-        self.plainTextEdit_notes = QPlainTextEdit(self.groupBox_2)
-        self.plainTextEdit_notes.setObjectName(u"plainTextEdit_notes")
+        self.horizontalLayout_61 = QHBoxLayout()
+        self.horizontalLayout_61.setObjectName(u"horizontalLayout_61")
+        self.label_50 = QLabel(self.groupBox_2)
+        self.label_50.setObjectName(u"label_50")
 
-        self.verticalLayout_2.addWidget(self.plainTextEdit_notes)
+        self.horizontalLayout_61.addWidget(self.label_50)
+
+        self.horizontalSpacer_61 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_61.addItem(self.horizontalSpacer_61)
+
+        self.label_general_time = QLabel(self.groupBox_2)
+        self.label_general_time.setObjectName(u"label_general_time")
+
+        self.horizontalLayout_61.addWidget(self.label_general_time)
+
+        self.pushButton_edit_general_time = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_time.setObjectName(u"pushButton_edit_general_time")
+
+        self.horizontalLayout_61.addWidget(self.pushButton_edit_general_time)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_61)
+
+        self.horizontalLayout_62 = QHBoxLayout()
+        self.horizontalLayout_62.setObjectName(u"horizontalLayout_62")
+        self.label_51 = QLabel(self.groupBox_2)
+        self.label_51.setObjectName(u"label_51")
+
+        self.horizontalLayout_62.addWidget(self.label_51)
+
+        self.horizontalSpacer_62 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_62.addItem(self.horizontalSpacer_62)
+
+        self.label_general_date = QLabel(self.groupBox_2)
+        self.label_general_date.setObjectName(u"label_general_date")
+
+        self.horizontalLayout_62.addWidget(self.label_general_date)
+
+        self.pushButton_edit_general_date = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_date.setObjectName(u"pushButton_edit_general_date")
+
+        self.horizontalLayout_62.addWidget(self.pushButton_edit_general_date)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_62)
+
+        self.horizontalLayout_63 = QHBoxLayout()
+        self.horizontalLayout_63.setObjectName(u"horizontalLayout_63")
+        self.label_52 = QLabel(self.groupBox_2)
+        self.label_52.setObjectName(u"label_52")
+
+        self.horizontalLayout_63.addWidget(self.label_52)
+
+        self.horizontalSpacer_63 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_63.addItem(self.horizontalSpacer_63)
+
+        self.label_general_time_zone = QLabel(self.groupBox_2)
+        self.label_general_time_zone.setObjectName(u"label_general_time_zone")
+
+        self.horizontalLayout_63.addWidget(self.label_general_time_zone)
+
+        self.pushButton_edit_general_time_zone = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_time_zone.setObjectName(u"pushButton_edit_general_time_zone")
+
+        self.horizontalLayout_63.addWidget(self.pushButton_edit_general_time_zone)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_63)
+
+        self.horizontalLayout_64 = QHBoxLayout()
+        self.horizontalLayout_64.setObjectName(u"horizontalLayout_64")
+        self.label_53 = QLabel(self.groupBox_2)
+        self.label_53.setObjectName(u"label_53")
+
+        self.horizontalLayout_64.addWidget(self.label_53)
+
+        self.horizontalSpacer_64 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_64.addItem(self.horizontalSpacer_64)
+
+        self.label_general_doi = QLabel(self.groupBox_2)
+        self.label_general_doi.setObjectName(u"label_general_doi")
+
+        self.horizontalLayout_64.addWidget(self.label_general_doi)
+
+        self.pushButton_edit_general_doi = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_doi.setObjectName(u"pushButton_edit_general_doi")
+
+        self.horizontalLayout_64.addWidget(self.pushButton_edit_general_doi)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_64)
+
+        self.horizontalLayout_65 = QHBoxLayout()
+        self.horizontalLayout_65.setObjectName(u"horizontalLayout_65")
+        self.label_3 = QLabel(self.groupBox_2)
+        self.label_3.setObjectName(u"label_3")
+
+        self.horizontalLayout_65.addWidget(self.label_3)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_65.addItem(self.horizontalSpacer_3)
+
+        self.label_general_authors = QLabel(self.groupBox_2)
+        self.label_general_authors.setObjectName(u"label_general_authors")
+
+        self.horizontalLayout_65.addWidget(self.label_general_authors)
+
+        self.pushButton_edit_general_authors = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_authors.setObjectName(u"pushButton_edit_general_authors")
+
+        self.horizontalLayout_65.addWidget(self.pushButton_edit_general_authors)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_65)
+
+        self.horizontalLayout_66 = QHBoxLayout()
+        self.horizontalLayout_66.setObjectName(u"horizontalLayout_66")
+        self.label_4 = QLabel(self.groupBox_2)
+        self.label_4.setObjectName(u"label_4")
+
+        self.horizontalLayout_66.addWidget(self.label_4)
+
+        self.horizontalSpacer_4 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_66.addItem(self.horizontalSpacer_4)
+
+        self.label_general_notes = QLabel(self.groupBox_2)
+        self.label_general_notes.setObjectName(u"label_general_notes")
+
+        self.horizontalLayout_66.addWidget(self.label_general_notes)
+
+        self.pushButton_edit_general_notes = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_notes.setObjectName(u"pushButton_edit_general_notes")
+
+        self.horizontalLayout_66.addWidget(self.pushButton_edit_general_notes)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_66)
+
+        self.horizontalLayout_67 = QHBoxLayout()
+        self.horizontalLayout_67.setObjectName(u"horizontalLayout_67")
+        self.label_55 = QLabel(self.groupBox_2)
+        self.label_55.setObjectName(u"label_55")
+
+        self.horizontalLayout_67.addWidget(self.label_55)
+
+        self.horizontalSpacer_65 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_67.addItem(self.horizontalSpacer_65)
+
+        self.label_general_fourd_explorer_version = QLabel(self.groupBox_2)
+        self.label_general_fourd_explorer_version.setObjectName(u"label_general_fourd_explorer_version")
+
+        self.horizontalLayout_67.addWidget(self.label_general_fourd_explorer_version)
+
+        self.pushButton_edit_general_fourd_explorer_version = QPushButton(self.groupBox_2)
+        self.pushButton_edit_general_fourd_explorer_version.setObjectName(u"pushButton_edit_general_fourd_explorer_version")
+
+        self.horizontalLayout_67.addWidget(self.pushButton_edit_general_fourd_explorer_version)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_67)
 
 
         self.verticalLayout_3.addWidget(self.groupBox_2)
@@ -1580,7 +1752,7 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Dialog)
@@ -1596,11 +1768,35 @@ class Ui_Dialog(object):
         self.pushButton_next.setText(QCoreApplication.translate("Dialog", u"Next \u2192", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Dialog", u"Basic Information", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Dataset Title", None))
-        self.pushButton_edit_dataset_title.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_general_title.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_title.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_48.setText(QCoreApplication.translate("Dialog", u"Original Dataset Path", None))
+        self.label_general_data_path.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_data_path.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_49.setText(QCoreApplication.translate("Dialog", u"Original Header Path", None))
+        self.label_general_header_path.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_header_path.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_50.setText(QCoreApplication.translate("Dialog", u"Created Time", None))
+        self.label_general_time.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_time.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_51.setText(QCoreApplication.translate("Dialog", u"Created Date", None))
+        self.label_general_date.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_date.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_52.setText(QCoreApplication.translate("Dialog", u"Created Time Zone", None))
+        self.label_general_time_zone.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_time_zone.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_53.setText(QCoreApplication.translate("Dialog", u"DOI", None))
+        self.label_general_doi.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_doi.setText(QCoreApplication.translate("Dialog", u"Edit", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"Authors", None))
-        self.pushButton_edit_authors.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_general_authors.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_authors.setText(QCoreApplication.translate("Dialog", u"Edit", None))
         self.label_4.setText(QCoreApplication.translate("Dialog", u"Notes", None))
-        self.pushButton_edit_notes.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_general_notes.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_notes.setText(QCoreApplication.translate("Dialog", u"Edit", None))
+        self.label_55.setText(QCoreApplication.translate("Dialog", u"4D-Explorer Version", None))
+        self.label_general_fourd_explorer_version.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))
+        self.pushButton_edit_general_fourd_explorer_version.setText(QCoreApplication.translate("Dialog", u"Edit", None))
         self.groupBox.setTitle(QCoreApplication.translate("Dialog", u"Microscope", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"Name", None))
         self.label_microscope_name.setText(QCoreApplication.translate("Dialog", u"TextLabel", None))

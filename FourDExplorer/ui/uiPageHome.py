@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiPageHome.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -121,6 +121,11 @@ class Ui_Form(object):
 
         self.verticalLayout_2.addWidget(self.pushButton_import_fourDSTEM)
 
+        self.pushButton_open_fourDSTEM = QPushButton(self.groupBox_2)
+        self.pushButton_open_fourDSTEM.setObjectName(u"pushButton_open_fourDSTEM")
+
+        self.verticalLayout_2.addWidget(self.pushButton_open_fourDSTEM)
+
 
         self.horizontalLayout.addWidget(self.groupBox_2)
 
@@ -137,10 +142,20 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addItem(self.verticalSpacer_3)
 
-        self.pushButton_calibration = QPushButton(self.groupBox_3)
-        self.pushButton_calibration.setObjectName(u"pushButton_calibration")
+        self.pushButton_background_subtraction = QPushButton(self.groupBox_3)
+        self.pushButton_background_subtraction.setObjectName(u"pushButton_background_subtraction")
 
-        self.verticalLayout_3.addWidget(self.pushButton_calibration)
+        self.verticalLayout_3.addWidget(self.pushButton_background_subtraction)
+
+        self.pushButton_rotational_correction = QPushButton(self.groupBox_3)
+        self.pushButton_rotational_correction.setObjectName(u"pushButton_rotational_correction")
+
+        self.verticalLayout_3.addWidget(self.pushButton_rotational_correction)
+
+        self.pushButton_diffraction_alignment = QPushButton(self.groupBox_3)
+        self.pushButton_diffraction_alignment.setObjectName(u"pushButton_diffraction_alignment")
+
+        self.verticalLayout_3.addWidget(self.pushButton_diffraction_alignment)
 
 
         self.horizontalLayout.addWidget(self.groupBox_3)
@@ -183,14 +198,17 @@ class Ui_Form(object):
         self.commandLinkButton_work.setText(QCoreApplication.translate("Form", u"How does 4D-STEM work?", None))
         self.groupBox.setTitle(QCoreApplication.translate("Form", u"Start Work", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt;\">Start work by getting </span></p><p><span style=\" font-size:12pt;\">an HDF5 file.</span></p><p><br/></p></body></html>", None))
-        self.pushButton_new_file.setText(QCoreApplication.translate("Form", u"New File", None))
-        self.pushButton_open_file.setText(QCoreApplication.translate("Form", u"Open File", None))
+        self.pushButton_new_file.setText(QCoreApplication.translate("Form", u"New HDF5 File", None))
+        self.pushButton_open_file.setText(QCoreApplication.translate("Form", u"Open HDF5 File", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Form", u"Import Data", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt;\">Import data, </span></p><p><span style=\" font-size:12pt;\">view them,</span></p><p><span style=\" font-size:12pt;\">and analyze.</span></p></body></html>", None))
         self.pushButton_import_image.setText(QCoreApplication.translate("Form", u"Import Image", None))
         self.pushButton_import_fourDSTEM.setText(QCoreApplication.translate("Form", u"Import 4D-STEM Data", None))
+        self.pushButton_open_fourDSTEM.setText(QCoreApplication.translate("Form", u"View 4D-STEM Data", None))
         self.groupBox_3.setTitle(QCoreApplication.translate("Form", u"Calibration", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"<html><head/><body><p><span style=\" font-size:12pt;\">Calibrate,</span></p><p><span style=\" font-size:12pt;\">makes accurate</span></p></body></html>", None))
-        self.pushButton_calibration.setText(QCoreApplication.translate("Form", u"Start Calibration", None))
+        self.pushButton_background_subtraction.setText(QCoreApplication.translate("Form", u"Background Subtraction", None))
+        self.pushButton_rotational_correction.setText(QCoreApplication.translate("Form", u"Rotational Offset Correction", None))
+        self.pushButton_diffraction_alignment.setText(QCoreApplication.translate("Form", u"Diffraction Alignment", None))
     # retranslateUi
 

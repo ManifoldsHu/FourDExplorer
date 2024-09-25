@@ -22,12 +22,16 @@ from PySide6.QtWidgets import QDialog
 from PySide6.QtWidgets import QWidget 
 
 from bin.MetaManager import MetaManager
+from bin.Widgets.WidgetMetaViewer import WidgetMetaViewer
 
 from ui import uiDialogMetaViewer
 
 class DialogMetaViewer(QDialog):
     """
     用于查看属性值的对话框。
+    
+    提升部件: 
+    self.ui.widget: WidgetMetaViewer 
 
     Dialog to view the metadata (keys and values).
     """

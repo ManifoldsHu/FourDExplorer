@@ -189,7 +189,16 @@ class ActionEditParam(ActionEditBase):
         """
         if self._treeview is not None:
             self.setItemPathFromIndex(self._treeview.currentIndex())
-            
+        
+        if not self._item_path:
+            dialog_choose_dataset = DialogHDFChoose()
+            dialog_choose_dataset.setWindowTitle('Choose a 4D-STEM dataset')
+            dialog_code = dialog_choose_dataset.exec()
+            if dialog_code == dialog_choose_dataset.Accepted:
+                self.setItemPath(dialog_choose_dataset.getCurrentPath())
+            else:
+                return
+
         # Here we must bind the dialog to the main window, in case it is 
         # garbage collected.
         global qApp 

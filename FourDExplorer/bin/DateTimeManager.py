@@ -77,4 +77,4 @@ class DateTimeManager(QObject):
             offset_minutes = int((utc_offset.total_seconds() % 3600) // 60)
             return f"UTC{offset_hours:+03d}:{offset_minutes:02d}"
         else:
-            return "UTC"
+            return "Unknown"

@@ -99,6 +99,11 @@ class DialogEditParaFourDSTEM(QDialog):
         global qApp 
         return qApp.datetime_manager
     
+    @property
+    def logger(self) -> Logger:
+        global qApp 
+        return qApp.logger
+    
     def _initMainUi(self):
         self.ui.lineEdit_dataset_path.setReadOnly(True)
         self.ui.stackedWidget.setCurrentIndex(0)
@@ -174,7 +179,7 @@ class DialogEditParaFourDSTEM(QDialog):
         self._initPageLowOrderAberration()
         
 
-    def _setMetaValue(self, key, widget):
+    def _setMetaValue(self, key: str, widget: QWidget):
         """
         Set the initial value for the widget. Note that when this function is 
         called, the 4D-STEM dataset should have been assigned (because 
@@ -182,6 +187,7 @@ class DialogEditParaFourDSTEM(QDialog):
 
         arguments:
             key: (str) The key of the metadata.
+            
             widget: (QWidget) The widget to set the value.
         """
         if key not in self.meta_manager.listSchemaKeys():
@@ -211,44 +217,97 @@ class DialogEditParaFourDSTEM(QDialog):
             widget.setDate(QDate.fromString(str(meta_value), "yyyy-MM-dd"))
         
 
-    def _editMeta(self, key, display_widget):
+    def _editMeta(self, key: str, display_widget: QWidget):
         """
         Open the edit metadata dialog for the given key.
 
         arguments:
             key: (str) The key of the metadata.
+            
             display_widget: (QWidget) The widget to display the value.
         """
         dialog = DialogEditMeta(self)
         dialog.setItemPath(self._dataset_path)
         dialog.setMetaKey(key)
-        dialog.readMetaFromFile()
+        if self.meta_manager.getValue(key):
+            dialog.readMetaFromFile()
+        else:
+            dialog.readMetaFromSchema()
+        
         if dialog.exec() == QDialog.Accepted:
             self._setMetaValue(key, display_widget)
+            self.logger.info(f"Edited metadata {key}: {self.meta_manager.getValue(key)}")
+            
+    def _editMetaWrapper(self, key: str, widgets: dict):
+        """
+        Wrapper function to connect the edit button to the metadata editing 
+        dialog.
+
+        This function returns a lambda function that, when called, will open 
+        the metadata editing dialog for the specified key and display widget.
+
+        arguments:
+            key: (str) The key of the metadata.
+            
+            widgets: (dict) A dictionary containing the display widget under the key 'display'.
+
+        returns:
+            (function) A lambda function that calls _editMeta with the specified 
+                key and display widget.
+        """
+        return lambda k = key, w = widgets: self._editMeta(key, widgets['display'])
 
 
     def _initPageGeneral(self):
         self.general_metadata_map = {
             '/General/title': {
-                'display': self.ui.lineEdit_dataset_title,
-                'edit': self.ui.pushButton_edit_dataset_title,
+                'display': self.ui.label_general_title,
+                'edit': self.ui.pushButton_edit_general_title,
             },
             '/General/authors': {
-                'display': self.ui.plainTextEdit_authors,
-                'edit': self.ui.pushButton_edit_authors,
+                'display': self.ui.label_general_authors,
+                'edit': self.ui.pushButton_edit_general_authors,
             },
             '/General/notes': {
-                'display': self.ui.plainTextEdit_notes,
-                'edit': self.ui.pushButton_edit_notes,
-             }
+                'display': self.ui.label_general_notes,
+                'edit': self.ui.pushButton_edit_general_notes,
+            },
+            '/General/data_path': {
+                'display': self.ui.label_general_data_path,
+                'edit': self.ui.pushButton_edit_general_data_path,
+            },
+            '/General/header_path': {
+                'display': self.ui.label_general_header_path,
+                'edit': self.ui.pushButton_edit_general_header_path,
+            },
+            '/General/time': {
+                'display': self.ui.label_general_time,
+                'edit': self.ui.pushButton_edit_general_time,
+            },
+            '/General/date': {
+                'display': self.ui.label_general_date,
+                'edit': self.ui.pushButton_edit_general_date,
+            },
+            '/General/time_zone': {
+                'display': self.ui.label_general_time_zone,
+                'edit': self.ui.pushButton_edit_general_time_zone,
+            },
+            '/General/doi': {
+                'display': self.ui.label_general_doi,
+                'edit': self.ui.pushButton_edit_general_doi,
+            },
+            '/General/fourd_explorer_version': {
+                'display': self.ui.label_general_fourd_explorer_version,
+                'edit': self.ui.pushButton_edit_general_fourd_explorer_version,
+            }
         }
 
         for key, widgets in self.general_metadata_map.items():
-            widgets['edit'].clicked.connect(
-                lambda k=key, w=widgets: self._editMeta(k, w['display'])
-            )
+            widgets['edit'].clicked.connect(self._editMetaWrapper(key, widgets))
             widgets['display'].setToolTip(self.meta_manager.getSchemaDescription(key))
+            widgets['display'].setText("(None)")
             self._setMetaValue(key, widgets['display'])
+
 
 
     
@@ -257,6 +316,10 @@ class DialogEditParaFourDSTEM(QDialog):
             '/Acquisition/Microscope/name': {
                 'display': self.ui.label_microscope_name,
                 'edit': self.ui.pushButton_edit_microscope_name,
+            },
+            '/Acquisition/Microscope/manufacturer': {
+                'display': self.ui.label_microscope_manufacturer,
+                'edit': self.ui.pushButton_edit_microscope_manufacturer,
             },
             '/Acquisition/Microscope/accelerate_voltage': {
                 'display': self.ui.label_accelerate_voltage,
@@ -303,13 +366,16 @@ class DialogEditParaFourDSTEM(QDialog):
                 'edit': self.ui.pushButton_edit_acquisition_timezone,
             },
         }
-
+        self.ui.label_microscope_manufacturer.setText("(None)")
+        self.ui.label_microscope_name.setText("(None)")
+        self.ui.label_acquisition_location.setText("(None)")
+        self.ui.label_acquisition_date.setText("(None)")
+        self.ui.label_acquisition_timezone.setText("(None)")
         for key, widgets in self.microscope_metadata_map.items():
-            widgets['edit'].clicked.connect(
-                lambda _, k=key, w=widgets: self._editMeta(k, w['display'])
-            )
+            widgets['edit'].clicked.connect(self._editMetaWrapper(key, widgets))
             widgets['display'].setToolTip(self.meta_manager.getSchemaDescription(key))
             self._setMetaValue(key, widgets['display'])
+
         
     
         
@@ -340,14 +406,14 @@ class DialogEditParaFourDSTEM(QDialog):
                 'edit': self.ui.pushButton_edit_camera_pixel_size_j,
             },
         }
-        
+        self.ui.label_camera_name.setText("(None)")
+        self.ui.label_camera_manufacturer.setText("(None)")
         for key, widgets in self.camera_metadata_map.items():
-            widgets['edit'].clicked.connect(
-                lambda _, k=key, w=widgets: self._editMeta(k, w['display'])
-            )
+            widgets['edit'].clicked.connect(self._editMetaWrapper(key, widgets))
             widgets['display'].setToolTip(self.meta_manager.getSchemaDescription(key))
             self._setMetaValue(key, widgets['display'])
-    
+
+        
 
     def _initPageSpace(self):
         self.space_metadata_map = {
@@ -358,6 +424,14 @@ class DialogEditParaFourDSTEM(QDialog):
             '/Calibration/Space/scan_dr_j': {
                 'display': self.ui.label_scan_dr_j,
                 'edit': self.ui.pushButton_edit_scan_dr_j,
+            },
+            '/Calibration/Space/du_i': {
+                'display': self.ui.label_du_i,
+                'edit': self.ui.pushButton_edit_du_i,
+            },
+            '/Calibration/Space/du_j': {
+                'display': self.ui.label_du_j,
+                'edit': self.ui.pushButton_edit_du_j,
             },
             '/Calibration/Space/dr_i': {
                 'display': self.ui.label_dr_i,
@@ -387,9 +461,7 @@ class DialogEditParaFourDSTEM(QDialog):
         
         for key, widgets in self.space_metadata_map.items():
             if widgets['edit'] is not None:
-                widgets['edit'].clicked.connect(
-                    lambda _, k=key, w=widgets: self._editMeta(k, w['display'])
-                )
+                widgets['edit'].clicked.connect(self._editMetaWrapper(key, widgets))
                 widgets['display'].setToolTip(self.meta_manager.getSchemaDescription(key))
             self._setMetaValue(key, widgets['display'])
     
@@ -426,9 +498,7 @@ class DialogEditParaFourDSTEM(QDialog):
             },
         }
         for key, widgets in self.low_order_aberration_metadata_map.items():
-            widgets['edit'].clicked.connect(
-                lambda _, k=key, w=widgets: self._editMeta(k, w['display'])
-            )
+            widgets['edit'].clicked.connect(self._editMetaWrapper(key, widgets))
             widgets['display'].setToolTip(self.meta_manager.getSchemaDescription(key))
             self._setMetaValue(key, widgets['display'])
             
@@ -463,9 +533,7 @@ class DialogEditParaFourDSTEM(QDialog):
             },
         }
         for key, widgets in self.low_order_aberration_angle_metadata_map.items():
-            widgets['edit'].clicked.connect(
-                lambda _, k=key, w=widgets: self._editMeta(k, w['display'])
-            )
+            widgets['edit'].clicked.connect(self._editMetaWrapper(key, widgets))
             widgets['display'].setToolTip(self.meta_manager.getSchemaDescription(key))
             self._setMetaValue(key, widgets['display'])
         
@@ -495,9 +563,7 @@ class DialogEditParaFourDSTEM(QDialog):
             },
         }
         for key, widgets in self.high_order_aberration_metadata_map.items():
-            widgets['edit'].clicked.connect(
-                lambda _, k=key, w=widgets: self._editMeta(k, w['display'])
-            )
+            widgets['edit'].clicked.connect(self._editMetaWrapper(key, widgets))
             widgets['display'].setToolTip(self.meta_manager.getSchemaDescription(key))
             self._setMetaValue(key, widgets['display'])
         self.high_order_aberration_angle_metadata_map = {
@@ -523,12 +589,9 @@ class DialogEditParaFourDSTEM(QDialog):
             },
         }
         for key, widgets in self.high_order_aberration_angle_metadata_map.items():
-            widgets['edit'].clicked.connect(
-                lambda _, k=key, w=widgets: self._editMeta(k, w['display'])
-            )
+            widgets['edit'].clicked.connect(self._editMetaWrapper(key, widgets))
             widgets['display'].setToolTip(self.meta_manager.getSchemaDescription(key))
             self._setMetaValue(key, widgets['display'])
-        
     
 
 

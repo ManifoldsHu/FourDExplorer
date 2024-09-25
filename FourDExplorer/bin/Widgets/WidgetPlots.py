@@ -390,7 +390,7 @@ class WidgetPlotDP(WidgetPlotBase):
             'open': ActionOpenFourDSTEM(self),
             'virtual_image': ActionVirtualImage(self),
             'center_of_mass': ActionCenterOfMass(self),
-            # 'edit_param': ActionEditParam(self),
+            'edit_param': ActionEditParam(self),
             'align': ActionAlign(self),
             'background': ActionBackground(self),
             'rotate': ActionRotate(self),
@@ -402,7 +402,7 @@ class WidgetPlotDP(WidgetPlotBase):
             self._processing_actions['virtual_image']
         )
         self.menu_processing.insertSeparator(
-            self._processing_actions['align']
+            self._processing_actions['edit_param']
         )
         self.menu_processing.insertSeparator(
             self._processing_actions['plot_ctf']

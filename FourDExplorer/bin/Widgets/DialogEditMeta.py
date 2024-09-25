@@ -43,6 +43,10 @@ import numpy as np
 from bin.MetaManager import MetaManager 
 from bin.MetaManager import MetaTree 
 from bin.MetaManager import MetaTreeModel 
+from bin.MetaManager import MetadataFieldBase
+from bin.MetaManager import IntField
+from bin.MetaManager import FloatField
+from bin.MetaManager import StringField
 from bin.HDFManager import HDFHandler
 from bin.UIManager import ThemeHandler
 
@@ -165,13 +169,13 @@ class DialogEditMeta(QDialog):
         else:
             QMessageBox.information(self, 'Success', 'Metadata saved successfully.')
             self.meta_manager.refreshModel()
-            self.close()
+            self.accept()
 
     def _slotCancelClicked(self):
         """
         Slot for Cancel button clicked. Close the dialog without saving.
         """
-        self.close()
+        self.reject()
 
     def _slotChangeDtypeClicked(self):
         """
@@ -284,6 +288,64 @@ class DialogEditMeta(QDialog):
             self.ui.plainTextEdit_note.setPlainText(
                 'This is a parameter whose physical meaning and default units have been predefined.\n\n'+self.meta_manager.getSchemaDescription(meta_key)
             )
+            
+    def readMetaFromSchema(self):
+        """
+        If there is no key in the attrs of item, read the metadata (defines and 
+        descriptions) from the schema.
+        """
+        meta_key = self.meta_key
+        if meta_key not in self.meta_manager.listSchemaKeys():
+            QMessageBox.warning(self, 'Warning', f'The key "{meta_key}" is not predefined in the schema.')
+            return
+
+        schema_info: MetadataFieldBase = self.meta_manager.getSchemaField(meta_key)
+        
+        if schema_info is None:
+            return
+
+        # Extract schema information
+        schema_description = schema_info.description
+
+        # Set the appropriate widget based on the schema type
+        if isinstance(schema_info, IntField):
+            self.ui.stackedWidget_set_value.setCurrentIndex(0)
+            self.ui.spinBox_edit_integer.setValue(0)  # Default value
+            self.ui.label_current_dtype.setText('Integer')
+            if schema_info.unit:
+                self.ui.label_unit_int_hint.setVisible(True)
+                self.ui.label_unit_int.setVisible(True)
+                self.ui.label_unit_int.setText(schema_info.unit)
+            else:
+                self.ui.label_unit_int_hint.setVisible(False)
+                self.ui.label_unit_int.setVisible(False)
+        elif isinstance(schema_info, FloatField):
+            self.ui.stackedWidget_set_value.setCurrentIndex(1)
+            self.ui.doubleSpinBox_float_decimal.setValue(0.0)  # Default value
+            self.ui.spinBox_float_exp.setValue(0)  # Default value
+            self.ui.label_current_dtype.setText('Float')
+            if schema_info.unit:
+                self.ui.label_unit_float_hint.setVisible(True)
+                self.ui.label_unit_float.setVisible(True)
+                self.ui.label_unit_float.setText(schema_info.unit)
+            else:
+                self.ui.label_unit_float_hint.setVisible(False)
+                self.ui.label_unit_float.setVisible(False)
+        elif isinstance(schema_info, StringField):
+            self.ui.stackedWidget_set_value.setCurrentIndex(2)
+            self.ui.plainTextEdit_edit_string.setPlainText('')  # Default value
+            self.ui.label_current_dtype.setText('String')
+            self.ui.label_unit_int_hint.setVisible(False)
+            self.ui.label_unit_int.setVisible(False)
+            self.ui.label_unit_float_hint.setVisible(False)
+            self.ui.label_unit_float.setVisible(False)
+        else:
+            QMessageBox.warning(self, 'Warning', f'Unsupported schema data type: {type(schema_info).__name__}')
+
+        # Set the description from the schema
+        self.ui.plainTextEdit_note.setPlainText(
+            'This is a parameter whose physical meaning and default units have been predefined.\n\n' + schema_description
+        )
         
 
 class DialogTypeSelection(QDialog):

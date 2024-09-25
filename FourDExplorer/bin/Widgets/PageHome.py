@@ -22,6 +22,10 @@ from bin.Actions.EditActions import ActionImportFourDSTEM
 from bin.Actions.EditActions import ActionImportImage
 from bin.Actions.FileActions import ActionNewFile 
 from bin.Actions.FileActions import ActionOpenFile 
+from bin.Actions.DataActions import ActionOpenFourDSTEM
+from bin.Actions.FourDSTEMActions import ActionAlign
+from bin.Actions.FourDSTEMActions import ActionRotate 
+from bin.Actions.FourDSTEMActions import ActionBackground
 
 from ui import uiPageHome
 
@@ -55,6 +59,18 @@ class PageHome(QWidget):
         self.ui.pushButton_import_image.clicked.connect(
             self._importImage
         )
+        self.ui.pushButton_diffraction_alignment.clicked.connect(
+            self._diffractionAlignment
+        )
+        self.ui.pushButton_rotational_correction.clicked.connect(
+            self._rotationalCorrection
+        )
+        self.ui.pushButton_open_fourDSTEM.clicked.connect(
+            self._openFourDSTEM
+        )
+        
+        self.ui.pushButton_import_image.setVisible(False)
+        self.ui.pushButton_background_subtraction.setVisible(False)
 
         # Connect signals to update button states
         self.hdf_handler.file_opened.connect(self._onFileOpened)
@@ -79,6 +95,10 @@ class PageHome(QWidget):
         self.ui.pushButton_import_image.setEnabled(is_file_opened)
         self.ui.pushButton_new_file.setEnabled(True)
         self.ui.pushButton_open_file.setEnabled(True)
+        self.ui.pushButton_background_subtraction.setEnabled(is_file_opened)
+        self.ui.pushButton_diffraction_alignment.setEnabled(is_file_opened)
+        self.ui.pushButton_open_fourDSTEM.setEnabled(is_file_opened)
+        self.ui.pushButton_rotational_correction.setEnabled(is_file_opened)
 
     def _onFileOpened(self):
         self._updateButtonStates()
@@ -101,3 +121,21 @@ class PageHome(QWidget):
     def _importFourDSTEM(self):
         self.import_action = ActionImportFourDSTEM(self)
         self.import_action.trigger()
+        
+    def _backgroundSubtraction(self):
+        self.background_subtraction_action = ActionBackground(self)
+        self.background_subtraction_action.trigger()
+
+    def _diffractionAlignment(self):
+        self.diffraction_alignment_action = ActionAlign(self)
+        self.diffraction_alignment_action.trigger()
+
+    def _openFourDSTEM(self):
+        self.open_fourDSTEM_action = ActionOpenFourDSTEM(self)
+        self.open_fourDSTEM_action.trigger()
+
+    def _rotationalCorrection(self):
+        self.rotational_correction_action = ActionRotate(self)
+        self.rotational_correction_action.trigger()
+
+

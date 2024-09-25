@@ -17,10 +17,10 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_56">
      <property name="leftMargin">
-      <number>18</number>
+      <number>9</number>
      </property>
      <property name="rightMargin">
-      <number>18</number>
+      <number>9</number>
      </property>
      <item>
       <widget class="QLabel" name="label_71">
@@ -44,10 +44,10 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <property name="leftMargin">
-      <number>18</number>
+      <number>9</number>
      </property>
      <property name="rightMargin">
-      <number>18</number>
+      <number>9</number>
      </property>
      <item>
       <widget class="QLabel" name="label">
@@ -123,7 +123,7 @@
        <item>
         <widget class="QStackedWidget" name="stackedWidget">
          <property name="currentIndex">
-          <number>1</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="page_general">
           <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -149,10 +149,27 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_dataset_title"/>
+                 <spacer name="horizontalSpacer_58">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_edit_dataset_title">
+                 <widget class="QLabel" name="label_general_title">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_title">
                   <property name="text">
                    <string>Edit</string>
                   </property>
@@ -162,6 +179,234 @@
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <widget class="QLabel" name="label_48">
+                  <property name="text">
+                   <string>Original Dataset Path</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_59">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_general_data_path">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_data_path">
+                  <property name="text">
+                   <string>Edit</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <item>
+                 <widget class="QLabel" name="label_49">
+                  <property name="text">
+                   <string>Original Header Path</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_60">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_general_header_path">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_header_path">
+                  <property name="text">
+                   <string>Edit</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_61">
+                <item>
+                 <widget class="QLabel" name="label_50">
+                  <property name="text">
+                   <string>Created Time</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_61">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_general_time">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_time">
+                  <property name="text">
+                   <string>Edit</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_62">
+                <item>
+                 <widget class="QLabel" name="label_51">
+                  <property name="text">
+                   <string>Created Date</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_62">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_general_date">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_date">
+                  <property name="text">
+                   <string>Edit</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_63">
+                <item>
+                 <widget class="QLabel" name="label_52">
+                  <property name="text">
+                   <string>Created Time Zone</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_63">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_general_time_zone">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_time_zone">
+                  <property name="text">
+                   <string>Edit</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_64">
+                <item>
+                 <widget class="QLabel" name="label_53">
+                  <property name="text">
+                   <string>DOI</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_64">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_general_doi">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_doi">
+                  <property name="text">
+                   <string>Edit</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_65">
                 <item>
                  <widget class="QLabel" name="label_3">
                   <property name="text">
@@ -183,7 +428,14 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_edit_authors">
+                 <widget class="QLabel" name="label_general_authors">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_authors">
                   <property name="text">
                    <string>Edit</string>
                   </property>
@@ -192,10 +444,7 @@
                </layout>
               </item>
               <item>
-               <widget class="QPlainTextEdit" name="plainTextEdit_authors"/>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <layout class="QHBoxLayout" name="horizontalLayout_66">
                 <item>
                  <widget class="QLabel" name="label_4">
                   <property name="text">
@@ -217,7 +466,14 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton_edit_notes">
+                 <widget class="QLabel" name="label_general_notes">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_notes">
                   <property name="text">
                    <string>Edit</string>
                   </property>
@@ -226,7 +482,42 @@
                </layout>
               </item>
               <item>
-               <widget class="QPlainTextEdit" name="plainTextEdit_notes"/>
+               <layout class="QHBoxLayout" name="horizontalLayout_67">
+                <item>
+                 <widget class="QLabel" name="label_55">
+                  <property name="text">
+                   <string>4D-Explorer Version</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_65">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_general_fourd_explorer_version">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_edit_general_fourd_explorer_version">
+                  <property name="text">
+                   <string>Edit</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -1074,7 +1365,7 @@
                 <item>
                  <widget class="QLabel" name="label_du_i">
                   <property name="text">
-                   <string>1 1/nm</string>
+                   <string>0 1/nm</string>
                   </property>
                  </widget>
                 </item>
@@ -1112,7 +1403,7 @@
                 <item>
                  <widget class="QLabel" name="label_du_j">
                   <property name="text">
-                   <string>1 1/nm</string>
+                   <string>0 1/nm</string>
                   </property>
                  </widget>
                 </item>
@@ -1150,7 +1441,7 @@
                 <item>
                  <widget class="QLabel" name="label_dr_i">
                   <property name="text">
-                   <string>1 nm</string>
+                   <string>0 nm</string>
                   </property>
                  </widget>
                 </item>
@@ -1188,7 +1479,7 @@
                 <item>
                  <widget class="QLabel" name="label_dr_j">
                   <property name="text">
-                   <string>1 nm</string>
+                   <string>0 nm</string>
                   </property>
                  </widget>
                 </item>
@@ -1226,7 +1517,7 @@
                 <item>
                  <widget class="QLabel" name="label_scan_dr_i">
                   <property name="text">
-                   <string>1 nm</string>
+                   <string>0 nm</string>
                   </property>
                  </widget>
                 </item>
@@ -1264,7 +1555,7 @@
                 <item>
                  <widget class="QLabel" name="label_scan_dr_j">
                   <property name="text">
-                   <string>1 nm</string>
+                   <string>0 nm</string>
                   </property>
                  </widget>
                 </item>
@@ -1311,7 +1602,7 @@
                 <item>
                  <widget class="QLabel" name="label_scan_i">
                   <property name="text">
-                   <string>1</string>
+                   <string>0</string>
                   </property>
                  </widget>
                 </item>
@@ -1342,7 +1633,7 @@
                 <item>
                  <widget class="QLabel" name="label_scan_j">
                   <property name="text">
-                   <string>1</string>
+                   <string>0</string>
                   </property>
                  </widget>
                 </item>
@@ -1373,7 +1664,7 @@
                 <item>
                  <widget class="QLabel" name="label_dp_i">
                   <property name="text">
-                   <string>1</string>
+                   <string>0</string>
                   </property>
                  </widget>
                 </item>
@@ -1404,7 +1695,7 @@
                 <item>
                  <widget class="QLabel" name="label_dp_j">
                   <property name="text">
-                   <string>1</string>
+                   <string>0</string>
                   </property>
                  </widget>
                 </item>
@@ -1717,13 +2008,6 @@
               <string>Low Order Aberration Coefficients (Angle)</string>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_19">
-              <item>
-               <widget class="QLabel" name="label_47">
-                <property name="text">
-                 <string>Defocus (C1) Angle</string>
-                </property>
-               </widget>
-              </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_39">
                 <item>

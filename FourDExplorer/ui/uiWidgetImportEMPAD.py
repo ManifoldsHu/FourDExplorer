@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiWidgetImportEMPAD.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -53,7 +53,7 @@ class Ui_Form(object):
 
         self.gridLayout.addWidget(self.lineEdit_raw_path, 2, 1, 1, 1)
 
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.gridLayout.addItem(self.horizontalSpacer, 2, 2, 1, 1)
 

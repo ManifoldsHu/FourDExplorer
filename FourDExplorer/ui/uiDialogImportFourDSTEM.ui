@@ -103,7 +103,7 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>8</number>
         </property>
         <widget class="WidgetImportEMPAD" name="page_empad"/>
         <widget class="WidgetImportEMPAD_NJU" name="page_empad_nju"/>
@@ -113,7 +113,7 @@
         <widget class="QWidget" name="page_mat_folder"/>
         <widget class="QWidget" name="page_npy"/>
         <widget class="QWidget" name="page_npy_folder"/>
-        <widget class="QWidget" name="page_dm"/>
+        <widget class="WidgetImportDM4" name="page_dm4"/>
        </widget>
       </item>
      </layout>
@@ -236,6 +236,12 @@
    <class>WidgetImportMerlin</class>
    <extends>QWidget</extends>
    <header>bin.Widgets.WidgetImportMerlin.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetImportDM4</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetImportDM4.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

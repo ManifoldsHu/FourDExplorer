@@ -131,14 +131,14 @@
           <item>
            <widget class="QPushButton" name="pushButton_new_file">
             <property name="text">
-             <string>New File</string>
+             <string>New HDF5 File</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_open_file">
             <property name="text">
-             <string>Open File</string>
+             <string>Open HDF5 File</string>
             </property>
            </widget>
           </item>
@@ -185,6 +185,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_open_fourDSTEM">
+            <property name="text">
+             <string>View 4D-STEM Data</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -215,9 +222,23 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_calibration">
+           <widget class="QPushButton" name="pushButton_background_subtraction">
             <property name="text">
-             <string>Start Calibration</string>
+             <string>Background Subtraction</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_rotational_correction">
+            <property name="text">
+             <string>Rotational Offset Correction</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_diffraction_alignment">
+            <property name="text">
+             <string>Diffraction Alignment</string>
             </property>
            </widget>
           </item>

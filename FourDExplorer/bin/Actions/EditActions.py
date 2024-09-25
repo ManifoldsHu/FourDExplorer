@@ -35,6 +35,7 @@ from bin.Widgets.DialogCopyItem import DialogHDFCopy
 # from bin.Widgets.DialogAttrViewer import DialogAttrViewer
 from bin.Widgets.DialogMetaViewer import DialogMetaViewer
 from bin.Widgets.DialogImportImage import DialogImportImage
+from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.WidgetImportEMPAD import WidgetImportEMPAD
 from bin.Widgets.WidgetImportMerlin import WidgetImportMerlin 
 from bin.Widgets.WidgetImportRaw import WidgetImportRaw 
@@ -338,6 +339,15 @@ class ActionDelete(ActionEditBase):
         """
         if self._treeview is not None:
             self.setItemPathFromIndex(self._treeview.currentIndex())
+        if not self.item_path:
+            dialog = DialogHDFChoose()
+            dialog.setWindowTitle('Choose an item to delete')
+            dialog_code = dialog.exec()
+            if dialog_code == dialog.Accepted:
+                self.setItemPath(dialog.getCurrentPath())
+            else:
+                return
+            
         dialog_delete = QMessageBox()
         dialog_delete.setIcon(QMessageBox.Question)
         dialog_delete.setWindowTitle('Delete Item')
@@ -421,6 +431,16 @@ class ActionAttributes(ActionEditBase):
         """
         if self._treeview is not None:
             self.setItemPathFromIndex(self._treeview.currentIndex())
+        
+        if not self._item_path:
+            dialog_choose_dataset = DialogHDFChoose()
+            dialog_choose_dataset.setWindowTitle('Choose an item')
+            dialog_code = dialog_choose_dataset.exec()
+            if dialog_code == dialog_choose_dataset.Accepted:
+                self.item_path = dialog_choose_dataset.getCurrentPath()
+            else:
+                return
+        
         # Here we must bind the dialog to the main window. Otherwise,
         # the lifetime of the dialog will be ended just after this 
         # function is ended. 

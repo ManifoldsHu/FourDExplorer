@@ -230,15 +230,15 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         """
         Initialize 4D-STEM calibration actions.
         """
-        # self._action_edit_param = ActionEditParam(self)
+        self._action_edit_param = ActionEditParam(self)
         self._action_background = ActionBackground(self)
         self._action_alignment = ActionAlign(self)
         self._action_rotate = ActionRotate(self)
         
         self._action_group_calibration = QActionGroup(self)
-        # self._action_group_calibration.addAction(
-        #     self._action_edit_param
-        # )
+        self._action_group_calibration.addAction(
+            self._action_edit_param
+        )
         self._action_group_calibration.addAction(
             self._action_background
         )
