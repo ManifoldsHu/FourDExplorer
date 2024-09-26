@@ -65,7 +65,7 @@ class DialogEditParaFourDSTEM(QDialog):
         self._dataset_path = ''
         self._navigation_label = " >> ".join(self.page_names)
         self._initMainUi()
-
+        
     @property
     def dataset_path(self) -> str:
         return self._dataset_path
@@ -111,6 +111,8 @@ class DialogEditParaFourDSTEM(QDialog):
         self.ui.pushButton_browse.clicked.connect(self._browse)
         self.ui.pushButton_next.clicked.connect(self._nextPage)
         self.ui.pushButton_back.clicked.connect(self._backPage)
+        self.ui.pushButton_cancel.setVisible(False)
+        self.ui.pushButton_ok.clicked.connect(self.accept)
         
         
     def _updateNavigationLabel(self):
