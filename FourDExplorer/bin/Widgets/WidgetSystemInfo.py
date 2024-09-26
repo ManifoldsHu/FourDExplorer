@@ -125,14 +125,14 @@ class WidgetSystemInfo(QWidget):
         self.ui.progressBar_disk_percent.setValue(
             disk_usage.percent
         )
-        app_disk_io = self._process.io_counters()
+        app_disk_io = psutil.disk_io_counters()
         app_read_rate = (
             (app_disk_io.read_bytes - self._last_app_read_bytes)
-                /self._interval * 1000 / 2**20
+                / self._interval * 1000 / 2**20
         )
         app_write_rate = (
             (app_disk_io.write_bytes - self._last_app_write_bytes)
-                /self._interval * 1000 / 2**20
+                / self._interval * 1000 / 2**20
         )
         self.ui.label_app_disk_read.setText(
             '{0:.2f}'.format(app_read_rate) + ' MiB/s'
