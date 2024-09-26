@@ -261,16 +261,47 @@ class PagePlotCTF(QWidget):
         return dummy#self.hdf_handler.file[self._ronchigram_data_path]
     
     @property
-    def probe_abs_data_object(self) -> h5py.Dataset:
-        return np.ones((128,128))#self.hdf_handler.file[self._probe_abs_data_path]
-    
-    @property
-    def probe_angle_data_object(self) -> h5py.Dataset:
-        return np.ones((128,128))#self.hdf_handler.file[self._probe_angle_data_path]
+    def probe_data_object(self) -> h5py.Dataset:
+        optics = self._setOpticalSTEM()
+        return optics.getProbe()#self.hdf_handler.file[self._probe_abs_data_path]
     
     @property
     def ctf_image_data_object(self) -> h5py.Dataset:
         return np.ones((1,1))#self.hdf_handler.file[self._ctf_image_data_path]
+    
+    def _updateConfigObject(self):
+        """
+        Update the config object based on the inputs.
+        """
+        config_object = self.config_object
+
+        config_object.attrs["accelerate_voltage"] = self.ui.doubleSpinBox_voltage.value() * 1e3
+        config_object.attrs["alpha"] = self.ui.doubleSpinBox_alpha.value() * 1e-3
+        config_object.attrs["camera_length"] = self.ui.doubleSpinBox_camera_length.value() * 1e-3
+        config_object.attrs["scan_step_size"] = self.ui.doubleSpinBox_scanning_step_size.value() * 1e-9
+        config_object.attrs["detector_shape"] = [int(self.ui.comboBox_pixel_number.currentText()), int(self.ui.comboBox_pixel_number.currentText())]
+        # estimate the real space pixel size from small angle approximation: dx = CL * full_detector_size / N
+        config_object.attrs["detector_pixel_size"] = self.config_object.attrs["camera_length"] * self.ui.doubleSpinBox_full_detector_size.value() * 1e-3 / int(self.ui.comboBox_pixel_number.currentText())
+
+        config_object.attrs["defocus"] = self.ui.doubleSpinBox_defocus.value() * 1e-9
+        config_object.attrs["Cs"] = self.ui.doubleSpinBox_Cs.value() * 1e-3
+
+    def _setOpticalSTEM(self):
+        optics =  OpticalSTEM(
+            accelerate_voltage=self.config_object.attrs["accelerate_voltage"],
+            alpha=self.config_object.attrs["alpha"],
+            camera_length=self.config_object.attrs["camera_length"],
+            scan_step_size=self.config_object.attrs["scan_step_size"],
+            detector_shape=self.config_object.attrs["detector_shape"],
+            detector_pixel_size=self.config_object.attrs["detector_pixel_size"],
+            defocus=self.config_object.attrs["defocus"],
+            Cs=self.config_object.attrs["Cs"],
+        )
+        wavelength = optics.wave_length
+        bright_field_disk_radius = optics.alpha * optics.dp_N * optics.dx / wavelength
+        optics.setBrightFieldDiskRadius(bright_field_disk_radius)
+
+        return optics
     
     def _initUi(self):
         """
@@ -300,6 +331,8 @@ class PagePlotCTF(QWidget):
         self.ui.doubleSpinBox_abf_inner_radius.setValue(10.0)
 
         self.ui.pushButton_save_config_path.clicked.connect(self._saveConfigPath)
+
+        self._updateConfigObject()
     
     def _createAxes(self):
         """
@@ -382,10 +415,11 @@ class PagePlotCTF(QWidget):
         if self._probe_abs_object in self.probe_abs_ax.images:
             self._probe_abs_object.remove()
 
-        probe_abs_min = np.min(self.probe_abs_data_object)
-        probe_abs_max = np.max(self.probe_abs_data_object)
+        probe_abs_data_object = np.abs(self.probe_data_object)
+        probe_abs_min = np.min(probe_abs_data_object)
+        probe_abs_max = np.max(probe_abs_data_object)
         self._probe_abs_object = self.probe_abs_ax.imshow(
-            self.probe_abs_data_object,
+            probe_abs_data_object,
             vmin=probe_abs_min,
             vmax=probe_abs_max,
         )
@@ -394,10 +428,11 @@ class PagePlotCTF(QWidget):
         if self._probe_angle_object in self.probe_angle_ax.images:
             self._probe_angle_object.remove()
 
-        probe_angle_min = np.min(self.probe_angle_data_object)
-        probe_angle_max = np.max(self.probe_angle_data_object)
+        probe_angle_data_object = np.angle(self.probe_data_object)
+        probe_angle_min = np.min(probe_angle_data_object)
+        probe_angle_max = np.max(probe_angle_data_object)
         self._probe_angle_object = self.probe_angle_ax.imshow(
-            self.probe_angle_data_object,
+            probe_angle_data_object,
             vmin=probe_angle_min,
             vmax=probe_angle_max,
         )
@@ -549,15 +584,14 @@ class PagePlotCTF(QWidget):
     #   - 添加对于 .ctf 类型数据的支持 (于 HDFManager 中)
     #   - 构建 Calculator 类以及 OpticalConfig 类，用于得到 CTF 数据
 
-    
-import sys
-from bin.app import App
-if __name__ == '__main__':
-    app = App(sys.argv)
-    app.startBackEnds()
-    ex = PagePlotCTF()
-    ex.show()
-    sys.exit(app.exec())
+# import sys
+# from bin.app import App
+# if __name__ == '__main__':
+#     app = App(sys.argv)
+#     app.startBackEnds()
+#     ex = PagePlotCTF()
+#     ex.show()
+#     sys.exit(app.exec())
 
 
 
