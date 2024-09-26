@@ -31,6 +31,8 @@ from bin.Widgets.PageViewFourDSTEM import PageViewFourDSTEM
 from bin.Widgets.PageVirtualImage import PageVirtualImage
 from bin.Widgets.DialogEditParaFourDSTEM import DialogEditParaFourDSTEM
 
+from bin.Widgets.PagePlotCTF import PagePlotCTF
+
 class ActionVirtualImage(ActionOpenData):
     """
     计算 4D-STEM 虚拟成像的 Action。
@@ -158,16 +160,16 @@ class ActionPlotCTF(ActionOpenData):
         super().__init__(parent)
         self.setText('Plot CTF')
         
-    # def openAs(self, hdf_type: HDFType = None) -> 'PagePlotCTF':
-    #     """
-    #     Use the plot CTF page to open the Dataset.
+    def openAs(self, hdf_type: HDFType = None) -> 'PagePlotCTF':
+        """
+        Use the plot CTF page to open the Dataset.
         
-    #     arguments:
-    #         hdf_type: (HDFType)
-    #     """
-    #     page = PagePlotCTF()
-    #     page.setFourDSTEM(self.item_path)
-    #     return page 
+        arguments:
+            hdf_type: (HDFType)
+        """
+        page = PagePlotCTF()
+        page.setFourDSTEM(self.item_path)
+        return page 
 
 
 class ActionEditParam(ActionEditBase):

@@ -96,8 +96,6 @@ class PagePlotCTF(QWidget):
         self.ui.lineEdit_config_path.setReadOnly(True)
 
         self._initUi()
-        self._createAxes()
-        self._createImages()
 
     @property 
     def hdf_handler(self) -> HDFHandler:
@@ -287,15 +285,15 @@ class PagePlotCTF(QWidget):
         config_object.attrs["Cs"] = self.ui.doubleSpinBox_Cs.value() * 1e-3
 
     def _setOpticalSTEM(self):
-        optics =  OpticalSTEM(
-            accelerate_voltage=self.config_object.attrs["accelerate_voltage"],
-            alpha=self.config_object.attrs["alpha"],
-            camera_length=self.config_object.attrs["camera_length"],
-            scan_step_size=self.config_object.attrs["scan_step_size"],
-            detector_shape=self.config_object.attrs["detector_shape"],
-            detector_pixel_size=self.config_object.attrs["detector_pixel_size"],
-            defocus=self.config_object.attrs["defocus"],
-            Cs=self.config_object.attrs["Cs"],
+        optics = OpticalSTEM(
+            accelerate_voltage=self.config_object.attrs.get("/Acquisition/Microscope/accelerate_voltage", 200e3),
+            alpha=self.config_object.attrs.get("/Acquisition/Microscope/convergence_angle", 12e-3),
+            camera_length=self.config_object.attrs.get("/Acquisition/Microscope/camera_length", 8e-3),
+            scan_step_size=self.config_object.attrs.get("/Calibration/Space/scan_dr_i", 5e-9),
+            detector_shape=self.config_object.attrs.get("detector_shape", (256, 256)),
+            detector_pixel_size=self.config_object.attrs.get("/Acquisition/Camera/pixel_size_i", 1e-10),
+            defocus=self.config_object.attrs.get("/Aberration/C1", 100e-9),
+            Cs=self.config_object.attrs.get("/Aberration/C3", 1e-3),
         )
         wavelength = optics.wave_length
         bright_field_disk_radius = optics.alpha * optics.dp_N * optics.dx / wavelength
@@ -332,8 +330,39 @@ class PagePlotCTF(QWidget):
 
         self.ui.pushButton_save_config_path.clicked.connect(self._saveConfigPath)
 
-        self._updateConfigObject()
+        # self._updateConfigObject()
     
+    def setFourDSTEM(self, data_path: str):
+        """
+        Set the config path in HDF5 file, and load the appropriate optical configurations.
+
+        arguments:
+            data_path: (str) the path of the image or data
+
+        raise:
+            TypeError, KeyError, ValueError
+        """
+        if not isinstance(data_path, str):
+            raise TypeError('data_path must be a str, not '
+                '{0}'.format(type(data_path).__name__))
+
+        data_node = self.hdf_handler.getNode(data_path)
+        # May raise KeyError is the path does not exist
+        if not isinstance(data_node, HDFDataNode):
+            raise ValueError('Item {0} must be a Dataset'.format(data_path))
+        
+        data_obj = self.hdf_handler.file[data_path]
+        if not len(data_obj.shape) == 4:
+            raise ValueError('Data must be a 4D matrix (4D-STEM dataset)')
+        
+        self._config_path = data_path
+        self.ui.lineEdit_config_path.setText(self._config_path)
+
+        self._createAxes()
+        self._createImages()
+        self._createColorbar()
+
+
     def _createAxes(self):
         """
         Create the axes that contains images, colorbars, lines respectively.
