@@ -386,7 +386,7 @@ class HDFHandler(QObject):
         root = file['/']
         root.attrs['4D-Explorer'] = True
         root.attrs['FileCreateTime'] = '{0}'.format(datetime.now())
-        root.attrs['Version'] = str(APP_VERSION)
+        root.attrs['Version'] = '.'.join(str(v) for v in APP_VERSION)
         
         self.logger.debug('Initialize file')
     

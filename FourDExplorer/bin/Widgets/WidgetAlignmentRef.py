@@ -257,7 +257,7 @@ class WidgetAlignmentRef(QWidget):
         meta['/General/time'] = self.datetime_manager.current_time
         meta['/General/date'] = self.datetime_manager.current_date
         meta['/General/time_zone'] = self.datetime_manager.current_timezone
-        meta['/General/foud_explorer_version'] = '.'.join(APP_VERSION)
+        meta['/General/foud_explorer_version'] = '.'.join([str(v) for v in APP_VERSION])
         
         # Add space calibration information
         if '/Calibration/Space/scan_dr_i' in self.data_object.attrs:

@@ -515,7 +515,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         meta['/General/time'] = self.datetime_manager.current_time
         meta['/General/date'] = self.datetime_manager.current_date
         meta['/General/time_zone'] = self.datetime_manager.current_timezone
-        meta['/General/fourd_explorer_version'] = '.'.join(APP_VERSION)
+        meta['/General/fourd_explorer_version'] = '.'.join(str(v) for v in APP_VERSION)
         
         # Add space calibration information
         for key, value in self.data_object.attrs.items():

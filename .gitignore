@@ -25,3 +25,9 @@ logs
 .config 
 .DS_Store
 test_AlignmentReference.py
+
+# Sphinx Documentation Build Output
+docs/_build
+docs/_static
+docs/_templates
+docs/.nojekyll

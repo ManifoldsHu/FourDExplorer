@@ -42,6 +42,6 @@ class DialogAbout(QDialog):
         #     "border-image: url(:/WindowIcon/resources/icons/4D.png;"
         # )
 
-        version = '.'.join([str(v) for v in (APP_VERSION)])
+        version = '.'.join([str(v) for v in APP_VERSION])
         self.ui.label_version.setText(version)
         self.ui.label_version_en.setText(version)
