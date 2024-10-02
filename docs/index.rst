@@ -13,12 +13,3 @@ Welcome to 4D-Explorer's documentation!
    getting_started
    usage
 
-
-Language
-========
-
-.. raw:: html
-
-   <div style="text-align: left; margin-top: 20px;">
-     <a href="./zh/index.html">中文</a>
-   </div>

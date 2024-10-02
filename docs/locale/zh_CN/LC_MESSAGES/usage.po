@@ -1,0 +1,115 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, Hu Yiming
+# This file is distributed under the same license as the 4D-Explorer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 4D-Explorer \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-10-02 15:07+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#: ../../usage.rst:2 be8e61cbff7541e0917e54d3ec9971af
+msgid "Usage Guide"
+msgstr "使用指南"
+
+#: ../../usage.rst:5 6ef5239c7afd441f9f52eab7f130d0a8
+msgid "Data manipulation"
+msgstr "数据操作"
+
+#: ../../usage.rst:7 877e779ef0054db899a724ef8efb1754
+msgid ""
+"4D-Explorer is based on [HDF5](https://www.hdfgroup.org/solutions/hdf5). "
+"To create a new HDF5 file, find the 'File' menu, and click the 'New HDF5 "
+"File' option. Then, click 'Open HDF5 File' to open the created file "
+"before."
+msgstr ""
+"4D-Explorer 基于 [HDF5](https://www.hdfgroup.org/solutions/hdf5)。要创建一个新的 HDF5 文件，找到 '文件' 菜单，并点击 '新建 HDF5 文件' 选项。然后，点击 '打开 HDF5 文件' 以打开之前创建的文件。"
+
+#: ../../usage.rst:-1 e220e86536d047d483dfb8b9e454e0bd
+msgid "Create a New File"
+msgstr "创建新文件"
+
+#: ../../usage.rst:12 d1d3a7e944db4f5694583b6a4f46e4f9
+msgid "There are three groups initialized:"
+msgstr "有三个组已初始化："
+
+#: ../../usage.rst:14 87c50b63c6794b09abb96b8f6e8206f9
+msgid "Calibration"
+msgstr "校准"
+
+#: ../../usage.rst:15 3f3596e94a0a435785e82688e0bb96aa
+msgid "Reconstruction"
+msgstr "重建"
+
+#: ../../usage.rst:16 1257b51abeba49edb6a2de9fb8e99995
+msgid "temp"
+msgstr "临时"
+
+#: ../../usage.rst:18 b4d9ab46c4564589b1275e10622375ce
+msgid ""
+"which is shown on the 'File' page of the left control panel. In an HDF5 "
+"file, groups are like folders or directories, and datasets are like "
+"files, and they are editable just like what we do in our operating "
+"system. All of the groups and datasets in the HDF5 file will be displayed"
+" here."
+msgstr ""
+"这显示在左侧控制面板的 '文件' 页面上。在 HDF5 文件中，组类似于文件夹或目录，数据集类似于文件，它们可以像我们在操作系统中那样进行编辑。HDF5 文件中的所有组和数据集都将显示在这里。"
+
+#: ../../usage.rst:-1 9ed1ce2cc010448c942f517e6ca04c55
+msgid "Open H5"
+msgstr "打开 H5"
+
+#: ../../usage.rst:23 952452be98574aceaccd228d89c0d6d7
+msgid ""
+"Right-click one of these groups and open a context menu. There are "
+"options available for this group, including:"
+msgstr ""
+"右键点击其中一个组并打开上下文菜单。该组有以下可用选项："
+
+#: ../../usage.rst:25 ba83b33f8d42495291a2cce90988073b
+msgid "'New' to create a subgroup or a dataset"
+msgstr "'新建' 以创建子组或数据集"
+
+#: ../../usage.rst:26 4630687522af46c184202bddbebd7dbe
+msgid "'Import 4D-STEM dataset' to import a 4D-STEM dataset into this group."
+msgstr "'导入 4D-STEM 数据集' 以将 4D-STEM 数据集导入到该组中。"
+
+#: ../../usage.rst:27 ebc333fa949e4809ad40b412b0e569f7
+msgid "'Move/Copy/Rename/Delete' Edit this group."
+msgstr "'移动/复制/重命名/删除' 编辑该组。"
+
+#: ../../usage.rst:28 313dac0dda3e4080beb35ed58ed01e04
+msgid "'Attributes' view the attributes of this group."
+msgstr "'属性' 查看该组的属性。"
+
+#: ../../usage.rst:-1 45dee6db6faf43d5aa8036f55c183ccd
+msgid "Create a New Group 1"
+msgstr "创建新组 1"
+
+#: ../../usage.rst:-1 99ae1e4afc4d43a693d40424393c510c
+msgid "Create a New Group 2"
+msgstr "创建新组 2"
+
+#: ../../usage.rst:36 1c0dc02a50a54a68bbfedec08325da66
+msgid ""
+"You can also create, move, copy, rename or delete these groups as you "
+"like, just note that undo may be NOT available."
+msgstr ""
+"您也可以根据需要创建、移动、复制、重命名或删除这些组，但请注意，撤销操作可能不可用。"
+
+#: ../../usage.rst:38 a0efef09c61b41d798cf977c957c1115
+msgid "> Be careful when you delete something."
+msgstr "> 删除内容时请小心。"
+

@@ -31,3 +31,5 @@ docs/_build
 docs/_static
 docs/_templates
 docs/.nojekyll
+# Sphinx I18N, Auto-generated Templates
+docs/locale/pot/

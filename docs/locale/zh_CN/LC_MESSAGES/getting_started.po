@@ -1,0 +1,76 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, Hu Yiming
+# This file is distributed under the same license as the 4D-Explorer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 4D-Explorer \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-10-02 15:07+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh_CN\n"
+"Language-Team: zh_CN <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#: ../../getting_started.rst:2 a4345423b85845a5aa6751f2aaa0b7e8
+msgid "Getting Started"
+msgstr "入门指南"
+
+#: ../../getting_started.rst:5 1ce9ea70c6824263ad81f5eca2a4ba60
+msgid "Installation"
+msgstr "安装"
+
+#: ../../getting_started.rst:8 47419341f4ab4dbc8f8583ef513f8cd4
+msgid "From Executable"
+msgstr "从可执行文件"
+
+#: ../../getting_started.rst:10 3e00cb0936714d6da1fa0d238b8c40c7
+msgid ""
+"From releases, we download packages according to the operating system. "
+"Currently, only Windows is available. For Linux, see Installation "
+"FourDExplorer from Source instead."
+msgstr ""
+"从发布版本中，我们根据操作系统下载相应的安装包。目前仅支持 Windows。对于 Linux，请参阅从源代码安装 FourDExplorer。"
+
+#: ../../getting_started.rst:12 70684a220e5449fcb308eff0bc3d739b
+msgid ""
+"Next, unzip the downloaded packages, and execute 4D-Explorer.exe to open "
+"the software."
+msgstr ""
+"接下来，解压下载的安装包，并执行 4D-Explorer.exe 以打开软件。"
+
+#: ../../getting_started.rst:15 24a4e9e9634449a79236abeae3e91336
+msgid "From PyPI"
+msgstr "从 PyPI"
+
+#: ../../getting_started.rst:17 c3386d14231e48b58e53a8bc18178dcd
+msgid "It is recommended to use Anaconda to set up the programming environment:"
+msgstr "建议使用 Anaconda 来设置编程环境："
+
+#: ../../getting_started.rst:26 77055bf07f9d419387f8c241228bb367
+msgid "Then, run python"
+msgstr "然后，运行 python"
+
+#: ../../getting_started.rst:32 9130d8ee9b2b4ec5b39c54e9f703879c
+msgid "Now, we import the FourDExplorer module and run the GUI:"
+msgstr "现在，我们导入 FourDExplorer 模块并运行 GUI："
+
+#: ../../getting_started.rst:40 c723540512f7482caf20f4f00f49525d
+msgid "Test Data"
+msgstr "测试数据"
+
+#: ../../getting_started.rst:42 d289166ffa1c4582a36a3bb63607dd66
+msgid ""
+"Test 4D-STEM data will be available soon. You can use 4D-Explorer to open"
+" any HDF5 file directly."
+msgstr ""
+"测试 4D-STEM 数据即将可用。您可以使用 4D-Explorer 直接打开任何 HDF5 文件。"
+

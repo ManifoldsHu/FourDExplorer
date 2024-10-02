@@ -53,7 +53,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
-locale_dirs = ['locale/']
-gettext_compact = False 
-
+# Locale settings for internationalization
+locale_dirs = ['locale/']  # Directory where translation files are stored
+gettext_compact = False # Do not merge multiple .po files into one
+gettext_uuid = True  # Enable UUID generation for better tracking of changes
 
