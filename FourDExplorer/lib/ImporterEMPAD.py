@@ -310,8 +310,8 @@ class ImporterEMPAD(QObject):
             time_node = root.getElementsByTagName('timestamp')[0]
             iso_string = time_node.getAttribute('isoformat')
             parsed_datetime = datetime.datetime.fromisoformat(iso_string)
-            self.meta['/Acquisition/acquisition_time'] = parsed_datetime.strftime("%H:%M:%S")   
-            self.meta['/Acquisition/acquisition_date'] = parsed_datetime.strftime("%Y-%m-%d")   
+            self.meta['/Acquisition/Microscope/acquisition_time'] = parsed_datetime.strftime("%H:%M:%S")   
+            self.meta['/Acquisition/Microscope/acquisition_date'] = parsed_datetime.strftime("%Y-%m-%d")   
         except Exception as e:
             self.logger.error('Failed to parse acquire_datetime item.\n'
                 '{0}'.format(e), exc_info = True)
@@ -510,8 +510,8 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
             time_node = root.getElementsByTagName('timestamp')[0]
             iso_string = time_node.getAttribute('isoformat')
             parsed_datetime = datetime.datetime.fromisoformat(iso_string)
-            self.meta['/Acquisition/acquisition_time'] = parsed_datetime.strftime("%H:%M:%S")   
-            self.meta['/Acquisition/acquisition_date'] = parsed_datetime.strftime("%Y-%m-%d")  
+            self.meta['/Acquisition/Microscope/acquisition_time'] = parsed_datetime.strftime("%H:%M:%S")   
+            self.meta['/Acquisition/Microscope/acquisition_date'] = parsed_datetime.strftime("%Y-%m-%d")  
         except Exception as e:
             self.logger.error('Failed to parse acquire_datetime item.\n'
                 '{0}'.format(e), exc_info = True)
