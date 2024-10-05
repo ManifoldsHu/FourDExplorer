@@ -526,6 +526,8 @@ class ActionImportFourDSTEM(ActionEditBase):
                 offset_to_first_image = page.getOffsetToFirstImage(),
                 gap_between_images = page.getGapBetweenImages(),
                 little_endian = page.getLittleEndian(),
+                rotate_90 = page.getRotate90(),
+                is_flipped = page.getIsFlip(),
             )
             # meta = {
             #     '/General/original_path': page.getRawPath(),

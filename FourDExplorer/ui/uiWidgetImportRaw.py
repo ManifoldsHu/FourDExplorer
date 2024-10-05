@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiWidgetImportRaw.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,15 +15,16 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QSizePolicy,
-    QSpacerItem, QSpinBox, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFrame,
+    QHBoxLayout, QLabel, QLineEdit, QPushButton,
+    QSizePolicy, QSpacerItem, QSpinBox, QVBoxLayout,
+    QWidget)
 
 class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(400, 316)
+        Form.resize(569, 808)
         self.verticalLayout_5 = QVBoxLayout(Form)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.horizontalLayout_3 = QHBoxLayout()
@@ -178,6 +179,37 @@ class Ui_Form(object):
 
         self.verticalLayout_5.addWidget(self.checkBox_little_endian)
 
+        self.line = QFrame(Form)
+        self.line.setObjectName(u"line")
+        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShadow(QFrame.Sunken)
+
+        self.verticalLayout_5.addWidget(self.line)
+
+        self.checkBox_is_flip = QCheckBox(Form)
+        self.checkBox_is_flip.setObjectName(u"checkBox_is_flip")
+
+        self.verticalLayout_5.addWidget(self.checkBox_is_flip)
+
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.label_10 = QLabel(Form)
+        self.label_10.setObjectName(u"label_10")
+
+        self.horizontalLayout_4.addWidget(self.label_10)
+
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer)
+
+        self.spinBox_rotate90 = QSpinBox(Form)
+        self.spinBox_rotate90.setObjectName(u"spinBox_rotate90")
+
+        self.horizontalLayout_4.addWidget(self.spinBox_rotate90)
+
+
+        self.verticalLayout_5.addLayout(self.horizontalLayout_4)
+
         self.verticalSpacer = QSpacerItem(20, 11, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_5.addItem(self.verticalSpacer)
@@ -210,5 +242,7 @@ class Ui_Form(object):
         self.label_8.setText(QCoreApplication.translate("Form", u"Offset to first Image (bytes)", None))
         self.label_9.setText(QCoreApplication.translate("Form", u"Gap between Images (bytes)", None))
         self.checkBox_little_endian.setText(QCoreApplication.translate("Form", u"Little-endian byte order", None))
+        self.checkBox_is_flip.setText(QCoreApplication.translate("Form", u"Flip diffraction patterns (exchange i, j coordinates)", None))
+        self.label_10.setText(QCoreApplication.translate("Form", u"Rotate n\u00d790\u00b0 (clock-wise)", None))
     # retranslateUi
 

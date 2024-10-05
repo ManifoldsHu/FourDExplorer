@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>316</height>
+    <width>569</width>
+    <height>808</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -139,7 +139,7 @@
        <item>
         <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>Offset to first Image (bytes)</string>
+          <string>Offset to First Image (bytes)</string>
          </property>
         </widget>
        </item>
@@ -215,7 +215,55 @@
    <item>
     <widget class="QCheckBox" name="checkBox_little_endian">
      <property name="text">
-      <string>Little-endian byte order</string>
+      <string>Little-endian Byte Order</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="checkBox_is_flip">
+     <property name="text">
+      <string>Flip Diffraction Patterns (Transpose)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_10">
+       <property name="text">
+        <string>Rotate n×90°</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="spinBox_rotate90"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_11">
+     <property name="text">
+      <string>Each diffraction image will be first flipped, and then rotated 90° counter-clockwise n times.</string>
      </property>
     </widget>
    </item>

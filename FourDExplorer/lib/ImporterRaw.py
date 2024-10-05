@@ -86,6 +86,8 @@ class ImporterRawFourDSTEM(QObject):
         offset_to_first_image: int,
         gap_between_images: int,
         little_endian: bool,
+        rotate_90: int,
+        is_flipped: bool,
     ):
         self._raw_path = raw_path 
         self._scalar_type = scalar_type
@@ -97,6 +99,8 @@ class ImporterRawFourDSTEM(QObject):
         self._offset_to_first_images = offset_to_first_image
         self._gap_between_images = gap_between_images
         self._little_endian = little_endian
+        self._rotate_90 = rotate_90
+        self._is_flipped = is_flipped
 
         self.meta['/General/fourd_explorer_version'] = '.'.join([str(i) for i in APP_VERSION])
         self.meta['/General/data_path'] = raw_path 
@@ -124,8 +128,8 @@ class ImporterRawFourDSTEM(QObject):
             scalar_type = self._scalar_type,
             scalar_size = self._scalar_size,
             little_endian = self._little_endian,
-            is_flipped = False,
-            rotate90 = 0,
+            is_flipped = self._is_flipped,
+            rotate90 = self._rotate_90,
             parent = self, 
             **self.meta,
         )

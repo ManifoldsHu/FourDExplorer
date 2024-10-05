@@ -30,7 +30,11 @@ date:           Mar 30, 2022
 *-------------------------- PageViewFourDSTEM.py -----------------------------*
 """
 
-from PySide6.QtWidgets import QWidget, QMessageBox
+from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QMessageBox
+
+import numpy as np 
+import h5py 
 from matplotlib.backend_bases import MouseEvent
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure

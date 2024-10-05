@@ -34,6 +34,10 @@ class WidgetImportRaw(QWidget):
         self.ui.lineEdit_raw_path.setReadOnly(True)
         self.ui.pushButton_browse.clicked.connect(self._chooseRawFile)
         self.ui.checkBox_little_endian.setChecked(True)
+        self.ui.spinBox_rotate90.setValue(0)
+        self.ui.spinBox_rotate90.setRange(0, 3)
+        self.ui.checkBox_is_flip.setChecked(False)
+        
 
     def _chooseRawFile(self):
         """
@@ -89,3 +93,9 @@ class WidgetImportRaw(QWidget):
 
     def getLittleEndian(self) -> bool:
         return self.ui.checkBox_little_endian.isChecked()
+    
+    def getRotate90(self) -> int:
+        return self.ui.spinBox_rotate90.value()
+    
+    def getIsFlip(self) -> bool:
+        return self.ui.checkBox_is_flip.isChecked()
