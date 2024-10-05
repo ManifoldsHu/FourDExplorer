@@ -56,12 +56,10 @@ All rights reserved.
 *------------------------------- HDFManager.py -------------------------------*
 """
 
-# import sys
 import os
 from datetime import datetime
 import re
 import threading
-import traceback
 from collections.abc import Mapping
 from typing import Iterator
 from logging import Logger
@@ -69,36 +67,77 @@ from logging import Logger
 import h5py
 import numpy as np
 
-from PySide6.QtCore import (
-    QAbstractItemModel, 
-    QModelIndex, 
-    Qt, 
-    Signal, 
-    QObject, 
-    QAbstractTableModel,
-    # QSize,
-)
-# from PySide6.QtGui import QIcon
+from PySide6.QtCore import QAbstractItemModel
+from PySide6.QtCore import QModelIndex 
+from PySide6.QtCore import Qt 
+from PySide6.QtCore import Signal
+from PySide6.QtCore import QObject
+from PySide6.QtCore import QAbstractTableModel
 
-
-# from PySide6.QtWidgets import QApplication 
-
-# from bin.Log import LogUtil
 
 from Constants import APP_VERSION, ItemDataRoles, HDFType
 from bin.TaskManager import Task, TaskManager
-# from ui.resources import icon_rc
 
 
-# from bin import DataReaderEMPAD
-# from bin.BackEnd import BackEnd
-# from bin.Preview import PreviewHandler
+"""
+reValidHDFName: 正则表达式用于验证 HDF5 Group 或 Dataset 的合法命名。
 
-# log_util = LogUtil(__name__)
-# logger = log_util.logger 
+规则：
+1. 名称不能以空格开头或结尾。
+2. 名称不能以点号 `.` 结尾。
+3. 名称不能包含以下字符：
+   - `*` (星号)
+   - `|` (竖线)
+   - `"` (双引号)
+   - `'` (单引号)
+   - `:` (冒号)
+   - `/` (正斜杠)
+   - `\` (反斜杠)
+   - `<` (小于号)
+   - `>` (大于号)
+   - `?` (问号)
+   - `[` `]` (方括号)
+   - `{` `}` (花括号)
+   - 控制字符（ASCII 值 0x00 - 0x1F）
+4. 支持中英文及其他 Unicode 字符。
+5. 允许中间的下划线 `_`、连字符 `-` 和加号 `+` 等无害符号。
+6. 名称不能包含不可见控制字符。
+
+示例：
+- 有效：`Dataset_1`、`数据集`、`Valid-Name+123`
+- 无效：`Invalid/Name`、`Name.`、`Invalid*Name`
+
+reValidHDFName: regular expression used to validate HDF5 Group or Dataset names.
+
+Rule:
+1. The name cannot start or end with a space.
+2. The name cannot end with a period `.`.
+3. The name cannot contain the following characters:
+   - `*` (star)
+   - `|` (vertical bar)
+   - `"` (double quote)
+   - `'` (single quote)
+   - `:` (colon)
+   - `/` (forward slash)
+   - `\` (backslash)
+   - `<` (lessthan)
+   - `>` (greaterthan)
+   - `?` (question mark)
+   - `[` `]` (square brackets)
+   - `{` `}` (curly brackets)
+   - control characters (ASCII values 0x00 - 0x1F)
+4. Support Chinese, English, and other Unicode characters.
+5. Allow underscores `_`, hyphens `-`, and plus signs `+` etc.
+6. The name cannot contain invisible control characters.
+
+Examples:
+- Valid: `Dataset_1`, `数据集`, `Valid-Name+ 123`
+- Invalid: `Invalid/Name`, `Name.`, `Invalid*Name`
+"""
 reValidHDFName = re.compile(
-    r'[0-9a-zA-Z\_\-\.][0-9a-zA-Z\_\-\.\s]*$'
-)   # A valid hdf_name must be able to match this regular expression.
+    r'^(?!\.{1,2}$)[^\s\x00-\x1F*|"\'/:\\<>?\[\]\{\}][^\x00-\x1F*|"\'/:\\<>?\[\]\{\}]*[^\s\x00-\x1F*|"\'/:\\<>?\[\]\{\}\.]$'
+)
+
 
 class HDFHandler(QObject):
     """

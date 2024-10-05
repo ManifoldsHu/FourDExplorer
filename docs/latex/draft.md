@@ -47,5 +47,15 @@ TODO
 
 [![Create a New File](https://iili.io/QkZiiP.png)](https://freeimage.host/i/QkZiiP)
 
-在新创建的 HDF5 文件中空无一物，因而在左边控制面板的 File 栏里，只有一个 mydata.h5 的项，表示刚刚新建的 HDF5 文件。我们先创建一个群组，以放置我们将要导入的数据集。要创建群组，在左边的面板中，右击 mydata.h5，在弹出的菜单中选择 'New' (带有 + 号的图标)。
+在新创建的 HDF5 文件中空无一物，因而在左边控制面板的 File 栏里，只有一个 mydata.h5 的项，表示刚刚新建的 HDF5 文件。我们先创建一个群组，以放置我们将要导入的数据集。要创建群组，在左边的面板中，右击 mydata.h5，在弹出的菜单中选择 'New' (带有 + 号的图标)。在打开的创建项 (Create Item) 对话框中，有三个需要填写的地方：
+- Location，也就是需要把群组创建在哪个群组下面。默认是 '/'，熟悉 Unix/Linux 的同学应该知道这表示根目录，而在 HDF5 文件中这也表示我们正在创建的项在根目录下，而不隶属于任何群组。点击 Browse... 按钮可以浏览并选择群组，从而把新创建的项放进这个群组中。不过，目前我们的 h5 文件中还没有任何群组，所以只能选择根目录。
+- Name，也就是新建群组的名字。默认是 untitled，这里我们把它改成我们想要的名字，比如 gold_nanoparticle。注意，名字中不能包含斜杠 /、反斜杠 \ 、冒号 : 、星号 * 、问号 ? 、引号 " 、单引号 '、小于号 <、大于号 >、竖线 | 等特殊字符，不能以空格开头或结尾，也不能将点号 . 或者两个点号 .. 作为名字。总之，取名的限制和操作系统中文件名的限制差不多，建议选择不容易出错的取名方式，比如用下划线连接两个单词。
+- Type，这里选 Group，也就是我们需要创建的是群组，而不是数据集 (Dataset)。
+
+[![Create a New Group 1](https://iili.io/QkZLf1.png)](https://freeimage.host/i/QkZLf1)
+
+[![Create a New Group 2](https://iili.io/QkZPWB.png)](https://freeimage.host/i/QkZPWB)
+
+如果一切顺利的话，这时在左边控制面板的 File 栏里，应该能看到 mydata.h5 下面多挂了一个 gold_nanoparticle，并且图标是文件夹的项了。这就是我们刚刚创建的群组。鼠标右击这个群组，可以看到和刚刚差不多的菜单，里面有对一个群组可以进行的操作，包括：
+
 
