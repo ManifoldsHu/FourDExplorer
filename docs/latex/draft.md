@@ -4,11 +4,12 @@
 
 4D-Explorer 是一款用于分析四维扫描透射电子显微镜 (4D-STEM) 数据的软件。它可以导入、存储 4D-STEM 数据集及其元数据，校正，并生成在实空间中的重构像。关于 4D-STEM 技术，见综述文章 [Colin Ohpus, 2019](https://www.cambridge.org/core/journals/microscopy-and-microanalysis/article/fourdimensional-scanning-transmission-electron-microscopy-4dstem-from-scanning-nanodiffraction-to-ptychography-and-beyond/A7E922A2C5BFD7FD3F208C537B872B7A)
 
-## 可执行文件安装
+## 安装方法
+### 可执行文件安装
 
 在仓库的发布 (Release) 页面，根据操作系统下载包含可执行文件的压缩包。目前仅支持 Windows 及 MacOS。若您使用的是 Linux，请使用 PyPI 安装。下载好压缩包后解压，找到 4D-Explorer.exe 即可运行。
 
-## 使用 PyPI 安装 
+### 使用 PyPI 安装 
 
 推荐使用 Anaconda 来设置 python 的虚拟环境，要求使用 python 3.10 版本：
 
@@ -134,3 +135,16 @@ TODO
 
 之后，我们就可以在4维相空间里探索该 4D-STEM 数据集了。
 
+## 校正 4D-STEM 数据集 
+
+对于精确的、定量化的 4D-STEM 成像而言，细致的校正往往是很重要的。目前 4D-Explorer 内置了四个校正 4D-STEM 数据集的步骤，分别是：
+- 完善数据集的实验参数
+- 去除背景噪声
+- 扫描旋转校正
+- 衍射合轴
+
+### 完善数据集的实验参数 
+
+### 去除背景噪声 
+
+我们提供两种去除背景噪声的办法，分别是

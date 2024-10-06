@@ -316,6 +316,23 @@
                 "title": "path of alignment translation vectors",
                 "description": "Record the path of the vector field that records the center of the diffraction pattern should be moved at each scanning point."
             }
+        },
+        "BackgroundSubtraction": {
+            "reference_path": {
+                "type": "str",
+                "title": "path of background reference",
+                "description": "Record the path of the background reference."
+            },
+            "filter_window_maximum": {
+                "type": "float",
+                "title": "filter window max value",
+                "description": "Filter window maximum value for background subtraction."
+            },
+            "filter_window_minimum": {
+                "type": "float",
+                "title": "filter window min value",
+                "description": "Filter window minimum value for background subtraction."
+            }
         }
     },
     "Aberration": {

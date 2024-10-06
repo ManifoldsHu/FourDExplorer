@@ -163,7 +163,7 @@ def FilteringDiffractionPattern(
                 if window_min is not None:
                     dp[dp < window_min] = 0
                 result_object[ii, jj, :, :] = dp 
-        progress_signal.emit(int(ii/scan_i*100))
+        progress_signal.emit(int((ii+1)/scan_i*100))
 
     return result_object 
 
@@ -207,7 +207,52 @@ def RotatingDiffractionPattern(
                 dp = data_object[ii, jj, :, :]
                 dp_rotate = rotate(dp, rotation_angle, reshape = False)
                 result_object[ii, jj, :, :] = dp_rotate 
-        progress_signal.emit(int(ii/scan_i*100))
+        progress_signal.emit(int((ii+1)/scan_i*100))
 
     return result_object
 
+def SubtractBackground(
+    item_path: str,
+    background_path: str,
+    result_path: str,
+    progress_signal = None,
+):
+    """
+    Subtract background for each diffraction pattern.
+    
+    arguments:
+        item_path: (str) the 4D-STEM data's path in HDF5 file.
+        
+        background_path: (str) the background dataset path.
+        
+        result_path: (str) the HDF object path to store the result.
+        
+        progress_signal: (Signal) the progress signal.
+    """
+    global qApp 
+    hdf_handler = qApp.hdf_handler
+    result_object = hdf_handler.file[result_path]
+    background_object = hdf_handler.file[background_path]
+    data_object = hdf_handler.file[item_path]
+    
+    if not isinstance(data_object, (h5py.Dataset, np.ndarray)):
+        raise TypeError('data object must be a np.ndarray or '
+            'h5py.Dataset, not {0}'.format(type(data_object).__name__))
+    if not isinstance(result_object, (h5py.Dataset, np.ndarray)):
+        raise TypeError('result object must be a np.ndarray or '
+            'h5py.Dataset, not {0}'.format(type(result_object).__name__))
+
+    if result_object.shape != data_object.shape:
+        raise ValueError('result object\'s shape must be the same as the '
+            'source data object\'s shape.')
+    scan_i, scan_j, dp_i, dp_j = data_object.shape 
+    
+    result_lock = Lock()
+    for ii in range(scan_i):
+        for jj in range(scan_j):
+            with result_lock:
+                dp = data_object[ii, jj, :, :] - background_object[:, :]
+                dp[dp < 0] = 0
+                result_object[ii, jj, :, :] = dp
+        progress_signal.emit(int((ii+1)/scan_i*100))
+    return result_object 

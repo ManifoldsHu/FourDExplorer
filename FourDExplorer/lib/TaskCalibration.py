@@ -27,6 +27,7 @@ from lib.FourDSTEMModifying import FilteringDiffractionPattern
 from lib.FourDSTEMModifying import RollingDiffractionPattern
 from lib.FourDSTEMModifying import TranslatingDiffractionPattern
 from lib.FourDSTEMModifying import RotatingDiffractionPattern
+from lib.FourDSTEMModifying import SubtractBackground
 
 
 class TaskBaseFourDSTEMModify(Task):
@@ -41,7 +42,7 @@ class TaskBaseFourDSTEMModify(Task):
         output_parent_path: str,
         output_name: str,
         parent: QObject = None,
-        **meta
+        meta: dict = None 
     ):
         """
         arguments:
@@ -61,7 +62,9 @@ class TaskBaseFourDSTEMModify(Task):
         self._item_path = item_path 
         self._output_parent_path = output_parent_path
         self._output_name = output_name 
-        self._meta = meta 
+        self._meta = {}
+        if meta:
+            self._meta.update(meta) 
         self.name = '4D-STEM Modifying'
         self.comment = (
             '4D-STEM Modifying.\n'
@@ -156,7 +159,7 @@ class TaskFourDSTEMAlign(TaskBaseFourDSTEMModify):
         output_name: str,
         translation_vector: tuple,
         parent: QObject = None,
-        **meta,
+        meta: dict = None,
     ):
         """
         arguments:
@@ -180,7 +183,7 @@ class TaskFourDSTEMAlign(TaskBaseFourDSTEMModify):
             output_parent_path, 
             output_name, 
             parent, 
-            **meta
+            meta,
         )
         self._translation_vector = translation_vector
         
@@ -208,9 +211,9 @@ class TaskFourDSTEMAlignMapping(TaskBaseFourDSTEMModify):
         output_name: str,
         shift_mapping: np.ndarray | h5py.Dataset,
         parent: QObject = None,
-        metadata: dict = None,
+        meta: dict = None,
     ):
-        super().__init__(item_path, output_parent_path, output_name, parent)
+        super().__init__(item_path, output_parent_path, output_name, parent, meta)
         self._shift_mapping = shift_mapping 
         self.name = '4D-STEM Alignment With Shift Mapping'
         
@@ -239,7 +242,7 @@ class TaskFourDSTEMFiltering(TaskBaseFourDSTEMModify):
         window_min: float = None,
         window_max: float = None,
         parent: QObject = None,
-        **meta,
+        meta: dict = None,
     ):
         """
         arguments:
@@ -268,7 +271,7 @@ class TaskFourDSTEMFiltering(TaskBaseFourDSTEMModify):
             output_parent_path, 
             output_name, 
             parent, 
-            **meta
+            meta
         )
 
         self.name = '4D-STEM Background Subtraction'
@@ -297,7 +300,7 @@ class TaskFourDSTEMRotate(TaskBaseFourDSTEMModify):
         output_name: str,
         rotation_angle: float,
         parent: QObject = None,
-        **meta,
+        meta: dict = None,
     ):
         """
         arguments:
@@ -321,7 +324,7 @@ class TaskFourDSTEMRotate(TaskBaseFourDSTEMModify):
             output_parent_path, 
             output_name, 
             parent, 
-            **meta
+            meta
         )
         self.name = '4D-STEM Rotate'
         self._rotation_angle = rotation_angle
@@ -330,6 +333,54 @@ class TaskFourDSTEMRotate(TaskBaseFourDSTEMModify):
             RotatingDiffractionPattern,
             item_path = self.source_path,
             rotation_angle = self._rotation_angle,
+            result_path = self.output_path,
+        )
+
+
+class TaskFourDSTEMSubtractRef(TaskBaseFourDSTEMModify):
+    """
+    对 4D-STEM 数据集进行背景减去任务
+    
+    Task to subtract background for 4D-STEM dataset.
+    """
+    def __init__(
+        self,
+        item_path: str,
+        output_parent_path: str,
+        output_name: str,
+        background_path: str,
+        parent: QObject = None,
+        meta: dict = None,
+    ):
+        """
+        arguments:
+            item_path: (str) the source 4D-STEM dataset path.
+            
+            output_parent_path: (str) the parent group's path of the modified 
+                4D-STEM dataset.
+            
+            output_name: (str) the new modified 4D-STEM dataset's name.
+            
+            background_path: (str) the background dataset path.
+            
+            parent: (QObject)
+            
+            meta: (key word arguments) other meta data that should be stored
+                in the attrs of reconstructed HDF5 object
+        """
+        super().__init__(
+            item_path, 
+            output_parent_path, 
+            output_name, 
+            parent, 
+            meta
+        )
+        self.name = '4D-STEM Background Subtraction'
+        self.addSubtaskFuncWithProgress(
+            'Subtract Background',
+            SubtractBackground,
+            item_path = self.source_path,
+            background_path = background_path,
             result_path = self.output_path,
         )
 
