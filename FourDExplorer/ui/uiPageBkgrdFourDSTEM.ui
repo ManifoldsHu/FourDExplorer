@@ -13,13 +13,13 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_7" stretch="1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_8">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1,0">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
@@ -79,244 +79,250 @@
        </item>
       </layout>
      </widget>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Background Subtraction</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_6">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Background Path</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="lineEdit_background_path"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_browse_background">
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="checkBox_apply_subtraction">
-          <property name="text">
-           <string>Apply Background Subtraction</string>
-          </property>
+     <widget class="QWidget" name="">
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QTabWidget" name="tabWidget">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tab">
+          <attribute name="title">
+           <string>Subtract Reference</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Background Path</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit_background_path"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_browse_background">
+               <property name="text">
+                <string>Browse</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_apply_subtraction">
+             <property name="text">
+              <string>Apply Background Subtraction</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>447</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>447</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
+         <widget class="QWidget" name="tab_window_filter">
+          <attribute name="title">
+           <string>Select Window Filter</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,0,0,0,0">
+             <item>
+              <widget class="WidgetPlotHist" name="widget_hist" native="true"/>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_6">
+               <item>
+                <widget class="QLabel" name="label_9">
+                 <property name="text">
+                  <string>Window Min Value</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="doubleSpinBox_window_min"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QLabel" name="label_10">
+                 <property name="text">
+                  <string>Window Max Value</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="doubleSpinBox_window_max"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_apply_window_min">
+               <property name="text">
+                <string>Applying Window (Min Constrain)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_apply_window_max">
+               <property name="text">
+                <string>Applying Window (Max Constrain)</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Brightness</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QSlider" name="horizontalSlider_brightness">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Contrast</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QSlider" name="horizontalSlider_contrast">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_7">
+           <property name="text">
+            <string>Norm</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="comboBox_normalize">
+           <item>
             <property name="text">
-             <string>Brightness</string>
+             <string>Linear</string>
             </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSlider" name="horizontalSlider_brightness">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_6">
+           </item>
+           <item>
             <property name="text">
-             <string>Contrast</string>
+             <string>Logarithm</string>
             </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSlider" name="horizontalSlider_contrast">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_7">
+           </item>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Color map</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="comboBox_colormap">
+           <item>
             <property name="text">
-             <string>Norm</string>
+             <string>viridis</string>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="comboBox_normalize">
-            <item>
-             <property name="text">
-              <string>Linear</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Logarithm</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_8">
+           </item>
+           <item>
             <property name="text">
-             <string>Color map</string>
+             <string>plasma</string>
             </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="comboBox_colormap">
-            <item>
-             <property name="text">
-              <string>viridis</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>plasma</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>gray</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>RdYlBu</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>twilight</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>hsv</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>jet</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Others</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_window_filter">
-       <attribute name="title">
-        <string>Select Window Filter</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_5">
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,0,0,0,0">
-          <item>
-           <widget class="WidgetPlotHist" name="widget_hist" native="true"/>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>Window Min Value</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_window_min"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QLabel" name="label_10">
-              <property name="text">
-               <string>Window Max Value</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_window_max"/>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="checkBox_apply_window_min">
+           </item>
+           <item>
             <property name="text">
-             <string>Applying Window (Min Constrain)</string>
+             <string>gray</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="checkBox_apply_window_max">
+           </item>
+           <item>
             <property name="text">
-             <string>Applying Window (Max Constrain)</string>
+             <string>RdYlBu</string>
             </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
+           </item>
+           <item>
+            <property name="text">
+             <string>twilight</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>hsv</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>jet</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Others</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

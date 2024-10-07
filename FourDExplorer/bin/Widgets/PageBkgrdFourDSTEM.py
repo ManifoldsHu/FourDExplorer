@@ -187,7 +187,7 @@ class PageBkgrdFourDSTEM(PageBaseFourDSTEM):
         self.setWindowTitle('4D-STEM Filtering')
         self.ui.pushButton_start.setProperty('class', 'danger')
         self.ui.pushButton_start.clicked.connect(self.startCalculation)
-        self.ui.pushButton_start.setText('Start to Apply Filter Window')
+        self.ui.pushButton_start.setText('Start Background Subtraction')
 
         self.hist_ax.set_axis_on()
         self.ui.doubleSpinBox_window_min.setRange(-2147483648, 2147483647)

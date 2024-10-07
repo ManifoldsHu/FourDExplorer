@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiPageBkgrdFourDSTEM.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.2
+## Created by: Qt User Interface Compiler version 6.3.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -28,29 +28,29 @@ class Ui_Form(object):
         if not Form.objectName():
             Form.setObjectName(u"Form")
         Form.resize(896, 704)
-        self.verticalLayout_7 = QVBoxLayout(Form)
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.verticalLayout_8 = QVBoxLayout(Form)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.splitter = QSplitter(Form)
         self.splitter.setObjectName(u"splitter")
         self.splitter.setOrientation(Qt.Horizontal)
-        self.widget = QWidget(self.splitter)
-        self.widget.setObjectName(u"widget")
-        self.verticalLayout_3 = QVBoxLayout(self.widget)
+        self.layoutWidget = QWidget(self.splitter)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.verticalLayout_3 = QVBoxLayout(self.layoutWidget)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.label = QLabel(self.widget)
+        self.label = QLabel(self.layoutWidget)
         self.label.setObjectName(u"label")
 
         self.horizontalLayout.addWidget(self.label)
 
-        self.lineEdit_data_path = QLineEdit(self.widget)
+        self.lineEdit_data_path = QLineEdit(self.layoutWidget)
         self.lineEdit_data_path.setObjectName(u"lineEdit_data_path")
 
         self.horizontalLayout.addWidget(self.lineEdit_data_path)
 
-        self.pushButton_browse = QPushButton(self.widget)
+        self.pushButton_browse = QPushButton(self.layoutWidget)
         self.pushButton_browse.setObjectName(u"pushButton_browse")
 
         self.horizontalLayout.addWidget(self.pushButton_browse)
@@ -58,7 +58,7 @@ class Ui_Form(object):
 
         self.verticalLayout_3.addLayout(self.horizontalLayout)
 
-        self.widget_dp = WidgetPlotDP(self.widget)
+        self.widget_dp = WidgetPlotDP(self.layoutWidget)
         self.widget_dp.setObjectName(u"widget_dp")
 
         self.verticalLayout_3.addWidget(self.widget_dp)
@@ -67,12 +67,12 @@ class Ui_Form(object):
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.label_2 = QLabel(self.widget)
+        self.label_2 = QLabel(self.layoutWidget)
         self.label_2.setObjectName(u"label_2")
 
         self.verticalLayout.addWidget(self.label_2)
 
-        self.label_3 = QLabel(self.widget)
+        self.label_3 = QLabel(self.layoutWidget)
         self.label_3.setObjectName(u"label_3")
 
         self.verticalLayout.addWidget(self.label_3)
@@ -82,12 +82,12 @@ class Ui_Form(object):
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.spinBox_scan_ii = QSpinBox(self.widget)
+        self.spinBox_scan_ii = QSpinBox(self.layoutWidget)
         self.spinBox_scan_ii.setObjectName(u"spinBox_scan_ii")
 
         self.verticalLayout_2.addWidget(self.spinBox_scan_ii)
 
-        self.spinBox_scan_jj = QSpinBox(self.widget)
+        self.spinBox_scan_jj = QSpinBox(self.layoutWidget)
         self.spinBox_scan_jj.setObjectName(u"spinBox_scan_jj")
 
         self.verticalLayout_2.addWidget(self.spinBox_scan_jj)
@@ -99,8 +99,13 @@ class Ui_Form(object):
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
 
         self.verticalLayout_3.setStretch(1, 1)
-        self.splitter.addWidget(self.widget)
-        self.tabWidget = QTabWidget(self.splitter)
+        self.splitter.addWidget(self.layoutWidget)
+        self.widget = QWidget(self.splitter)
+        self.widget.setObjectName(u"widget")
+        self.verticalLayout_7 = QVBoxLayout(self.widget)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.tabWidget = QTabWidget(self.widget)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tab = QWidget()
         self.tab.setObjectName(u"tab")
@@ -134,63 +139,6 @@ class Ui_Form(object):
         self.verticalSpacer = QSpacerItem(20, 447, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout_6.addItem(self.verticalSpacer)
-
-        self.gridLayout = QGridLayout()
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.label_5 = QLabel(self.tab)
-        self.label_5.setObjectName(u"label_5")
-
-        self.gridLayout.addWidget(self.label_5, 0, 0, 1, 1)
-
-        self.horizontalSlider_brightness = QSlider(self.tab)
-        self.horizontalSlider_brightness.setObjectName(u"horizontalSlider_brightness")
-        self.horizontalSlider_brightness.setOrientation(Qt.Horizontal)
-
-        self.gridLayout.addWidget(self.horizontalSlider_brightness, 0, 1, 1, 1)
-
-        self.label_6 = QLabel(self.tab)
-        self.label_6.setObjectName(u"label_6")
-
-        self.gridLayout.addWidget(self.label_6, 1, 0, 1, 1)
-
-        self.horizontalSlider_contrast = QSlider(self.tab)
-        self.horizontalSlider_contrast.setObjectName(u"horizontalSlider_contrast")
-        self.horizontalSlider_contrast.setOrientation(Qt.Horizontal)
-
-        self.gridLayout.addWidget(self.horizontalSlider_contrast, 1, 1, 1, 1)
-
-        self.label_7 = QLabel(self.tab)
-        self.label_7.setObjectName(u"label_7")
-
-        self.gridLayout.addWidget(self.label_7, 2, 0, 1, 1)
-
-        self.comboBox_normalize = QComboBox(self.tab)
-        self.comboBox_normalize.addItem("")
-        self.comboBox_normalize.addItem("")
-        self.comboBox_normalize.setObjectName(u"comboBox_normalize")
-
-        self.gridLayout.addWidget(self.comboBox_normalize, 2, 1, 1, 1)
-
-        self.label_8 = QLabel(self.tab)
-        self.label_8.setObjectName(u"label_8")
-
-        self.gridLayout.addWidget(self.label_8, 3, 0, 1, 1)
-
-        self.comboBox_colormap = QComboBox(self.tab)
-        self.comboBox_colormap.addItem("")
-        self.comboBox_colormap.addItem("")
-        self.comboBox_colormap.addItem("")
-        self.comboBox_colormap.addItem("")
-        self.comboBox_colormap.addItem("")
-        self.comboBox_colormap.addItem("")
-        self.comboBox_colormap.addItem("")
-        self.comboBox_colormap.addItem("")
-        self.comboBox_colormap.setObjectName(u"comboBox_colormap")
-
-        self.gridLayout.addWidget(self.comboBox_colormap, 3, 1, 1, 1)
-
-
-        self.verticalLayout_6.addLayout(self.gridLayout)
 
         self.tabWidget.addTab(self.tab, "")
         self.tab_window_filter = QWidget()
@@ -257,9 +205,69 @@ class Ui_Form(object):
         self.verticalLayout_5.addLayout(self.verticalLayout_4)
 
         self.tabWidget.addTab(self.tab_window_filter, "")
-        self.splitter.addWidget(self.tabWidget)
 
-        self.verticalLayout_7.addWidget(self.splitter)
+        self.verticalLayout_7.addWidget(self.tabWidget)
+
+        self.gridLayout = QGridLayout()
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.label_5 = QLabel(self.widget)
+        self.label_5.setObjectName(u"label_5")
+
+        self.gridLayout.addWidget(self.label_5, 0, 0, 1, 1)
+
+        self.horizontalSlider_brightness = QSlider(self.widget)
+        self.horizontalSlider_brightness.setObjectName(u"horizontalSlider_brightness")
+        self.horizontalSlider_brightness.setOrientation(Qt.Horizontal)
+
+        self.gridLayout.addWidget(self.horizontalSlider_brightness, 0, 1, 1, 1)
+
+        self.label_6 = QLabel(self.widget)
+        self.label_6.setObjectName(u"label_6")
+
+        self.gridLayout.addWidget(self.label_6, 1, 0, 1, 1)
+
+        self.horizontalSlider_contrast = QSlider(self.widget)
+        self.horizontalSlider_contrast.setObjectName(u"horizontalSlider_contrast")
+        self.horizontalSlider_contrast.setOrientation(Qt.Horizontal)
+
+        self.gridLayout.addWidget(self.horizontalSlider_contrast, 1, 1, 1, 1)
+
+        self.label_7 = QLabel(self.widget)
+        self.label_7.setObjectName(u"label_7")
+
+        self.gridLayout.addWidget(self.label_7, 2, 0, 1, 1)
+
+        self.comboBox_normalize = QComboBox(self.widget)
+        self.comboBox_normalize.addItem("")
+        self.comboBox_normalize.addItem("")
+        self.comboBox_normalize.setObjectName(u"comboBox_normalize")
+
+        self.gridLayout.addWidget(self.comboBox_normalize, 2, 1, 1, 1)
+
+        self.label_8 = QLabel(self.widget)
+        self.label_8.setObjectName(u"label_8")
+
+        self.gridLayout.addWidget(self.label_8, 3, 0, 1, 1)
+
+        self.comboBox_colormap = QComboBox(self.widget)
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.addItem("")
+        self.comboBox_colormap.setObjectName(u"comboBox_colormap")
+
+        self.gridLayout.addWidget(self.comboBox_colormap, 3, 1, 1, 1)
+
+
+        self.verticalLayout_7.addLayout(self.gridLayout)
+
+        self.splitter.addWidget(self.widget)
+
+        self.verticalLayout_8.addWidget(self.splitter)
 
         self.horizontalLayout_7 = QHBoxLayout()
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
@@ -273,9 +281,8 @@ class Ui_Form(object):
         self.horizontalLayout_7.addWidget(self.pushButton_start)
 
 
-        self.verticalLayout_7.addLayout(self.horizontalLayout_7)
+        self.verticalLayout_8.addLayout(self.horizontalLayout_7)
 
-        self.verticalLayout_7.setStretch(0, 1)
 
         self.retranslateUi(Form)
 
@@ -294,6 +301,12 @@ class Ui_Form(object):
         self.label_4.setText(QCoreApplication.translate("Form", u"Background Path", None))
         self.pushButton_browse_background.setText(QCoreApplication.translate("Form", u"Browse", None))
         self.checkBox_apply_subtraction.setText(QCoreApplication.translate("Form", u"Apply Background Subtraction", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("Form", u"Subtract Reference", None))
+        self.label_9.setText(QCoreApplication.translate("Form", u"Window Min Value", None))
+        self.label_10.setText(QCoreApplication.translate("Form", u"Window Max Value", None))
+        self.checkBox_apply_window_min.setText(QCoreApplication.translate("Form", u"Applying Window (Min Constrain)", None))
+        self.checkBox_apply_window_max.setText(QCoreApplication.translate("Form", u"Applying Window (Max Constrain)", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_window_filter), QCoreApplication.translate("Form", u"Select Window Filter", None))
         self.label_5.setText(QCoreApplication.translate("Form", u"Brightness", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Contrast", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"Norm", None))
@@ -310,12 +323,6 @@ class Ui_Form(object):
         self.comboBox_colormap.setItemText(6, QCoreApplication.translate("Form", u"jet", None))
         self.comboBox_colormap.setItemText(7, QCoreApplication.translate("Form", u"Others", None))
 
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("Form", u"Background Subtraction", None))
-        self.label_9.setText(QCoreApplication.translate("Form", u"Window Min Value", None))
-        self.label_10.setText(QCoreApplication.translate("Form", u"Window Max Value", None))
-        self.checkBox_apply_window_min.setText(QCoreApplication.translate("Form", u"Applying Window (Min Constrain)", None))
-        self.checkBox_apply_window_max.setText(QCoreApplication.translate("Form", u"Applying Window (Max Constrain)", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_window_filter), QCoreApplication.translate("Form", u"Select Window Filter", None))
         self.pushButton_start.setText(QCoreApplication.translate("Form", u"Start Calculation", None))
     # retranslateUi
 
