@@ -34,7 +34,22 @@ conda activate FourDExplorerVenv
 
 ## 测试数据 
 
-TODO 
+我们提供三套测试数据，分别为 gold_nanoparticle_06, gold_nanoparticle_07 和 MoS2_14。三套测试数据的下载地址分别在以下连接：
+- Google Drive: TODO
+- 百度网盘: TODO 
+
+这三套数据集的参数如下：
+
+### gold_nanoparticle_06
+
+扫描尺寸：256 x 256 
+衍射图像: 128 x 128
+采集电镜型号: Thermofisher FEI Titan G2 60-300
+电子相机型号: Thermofisher EMPAD
+加速电压 (U): 60 kV
+相机长度 (CL): 576.6 mm 
+会聚半角 ($\alpha$): 22.5 mrad
+扫描步长: 1.31 nm
 
 ## 快速上手 
 
@@ -144,6 +159,19 @@ TODO
 - 衍射合轴
 
 ### 完善数据集的实验参数 
+
+在左侧右键点击对应的 4D-STEM 数据集，在菜单中找到编辑 4D-STEM 参数 (Edit 4D-STEM Parameters)，点击即可打开编辑 4D-STEM 实验参数的对话框。在这里，可以根据引导一步步地调整 4D-STEM 数据集的参数，或者说元数据 (metadata)。
+
+在对话框的上方可以看到各个步骤，包括：
+- General, 一般的、通用的参数
+- Microscope, 透射电镜设备的参数
+- Camera, 电子相机的参数
+- Space, 对扫描空间以及衍射空间进行定量化的参数
+- Low Order Aberration, 低阶像差系数 (离焦量、球差系数等)
+- High Order Aberration, 高阶像差系数 (四阶以上的像差)
+可以通过按下 "←Back" 按钮回到上一个步骤，也可以按下 "Next→" 按钮前往下一个步骤。
+
+首先，我们可以给数据集起一个名字。这里的名字不同于出现在 HDF5 文件中的名字，它仅仅作为标识使用。
 
 ### 去除背景噪声 
 

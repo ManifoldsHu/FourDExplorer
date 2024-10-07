@@ -440,7 +440,7 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
                 full_scan_field_of_view_j * scan_size * 2 / self.scan_j
             )
             self.meta['/Acquisition/Microscope/step_size_i'] = self.meta['/Calibration/Space/scan_dr_i']
-            self.meta['/Acquisition/Microscope/step_size_i'] = self.meta['/Calibration/Space/scan_dr_j']
+            self.meta['/Acquisition/Microscope/step_size_j'] = self.meta['/Calibration/Space/scan_dr_j']
 
         except Exception as e:
             self.logger.error('Failed to parse scanning_step_size items.\n'
