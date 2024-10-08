@@ -327,7 +327,12 @@ class WidgetAlignmentManual(QWidget):
             group_path = save_dialog.getParentPath()
             item_name = save_dialog.getNewName()
             full_path = f"{group_path}/{item_name}"
-            self.hdf_handler.addNewData(group_path, item_name, shape=(2, scan_i, scan_j))
+            try:
+                self.hdf_handler.addNewData(group_path, item_name, shape=(2, scan_i, scan_j))
+            except ValueError as e:
+                self.logger.error(f"{e}")
+                QMessageBox.warning(self, "Error", "Failed to save the shift map!")
+                return
             shift_map_dataset = self.hdf_handler.file[full_path]
             shift_map_dataset[:] = shift_map
 
@@ -487,7 +492,7 @@ class WidgetAlignmentManual(QWidget):
         for i in range(table_widget.rowCount()):
             try:
                 anchor_location_str = table_widget.item(i, 0).text()
-                anchor_shift_str = table_widget.item()
+                anchor_shift_str = table_widget.item(i, 1).text()
                 anchor_location = strToTuple(anchor_location_str)
                 anchor_shift = strToTuple(anchor_shift_str)
                 anchor_locations.append(anchor_location)
