@@ -492,6 +492,8 @@ class ImporterEMPAD_NJU(ImporterEMPAD):
             )
             self.meta['/Calibration/Space/du_i'] = du_in_rad / wave_length 
             self.meta['/Calibration/Space/du_j'] = du_in_rad / wave_length 
+            self.meta['/Calibration/Space/dr_i'] = self.dp_i / self.meta['/Calibration/Space/du_i']
+            self.meta['/Calibration/Space/dr_j'] = self.dp_j / self.meta['/Calibration/Space/du_j']
         except Exception as e:
             self.logger.error('Failed to parse reciprocal_pixel_size item.\n'
                 '{0}'.format(e), exc_info = True)

@@ -225,6 +225,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         
         self.ui.pushButton_browse_axial_bf.clicked.connect(self._browseAxialBF)
         self.ui.pushButton_calculate_rotation_angle_axial_bf.clicked.connect(self._calculateRotationAngleAxialBF)
+        self.ui.pushButton_calculate_rotation_angle_axial_bf.setVisible(False)  # TODO
         self.ui.doubleSpinBox_rotation_angle_axial_bf.valueChanged.connect(
             self._rotateDPAccordingToAxialBF
         )   # the spin box of rotation angle in axial bf tab 
@@ -427,7 +428,7 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         rotate_dialog.setVectorField(self.vec_path)
         dialog_code = rotate_dialog.exec()
         if dialog_code == rotate_dialog.Accepted:
-            self.ui.doubleSpinBox_rotation_angle.setValue(
+            self.ui.doubleSpinBox_rotation_angle_quiver.setValue(
                 rotate_dialog.getRotationAngle()
             )
         else:
@@ -455,8 +456,8 @@ class PageRotateFourDSTEM(PageBaseFourDSTEM):
         vec_i = original_data[0, :, :]
         vec_j = original_data[1, :, :]
         angle_rad = self.rotation_angle * np.pi / 180
-        new_vec_i = vec_i * np.cos(angle_rad) + vec_j * np.sin(angle_rad)
-        new_vec_j = - vec_i * np.sin(angle_rad) + vec_j * np.cos(angle_rad)
+        new_vec_i = vec_i * np.cos(angle_rad) - vec_j * np.sin(angle_rad)
+        new_vec_j = vec_i * np.sin(angle_rad) + vec_j * np.cos(angle_rad)
         self.vec_data[0, :, :] = new_vec_i 
         self.vec_data[1, :, :] = new_vec_j
 

@@ -10,31 +10,12 @@ from typing import Iterator, Iterable
 
 import numpy as np
 from scipy.special import j0 as bessel_j0
-# import matplotlib.pyplot as plt
 
 # Constants as defined in CODATA 2022
 h = 6.62607015e-34                # 普朗克常量
 e = 1.602176634e-19                 # 元电荷
 m = 9.1093837139e-31                 # 电子静质量
 c = 299792458                   # 光速
-
-# class AberrationTypes(Enum):
-#     """
-#     Valid Types of Aberrations.
-#     """
-#     C1 = 10     # defocus
-#     A1 = 11     # two-fold astigmatism
-#     B2 = 22     # axial coma
-#     A2 = 21     # three-fold astigmatism
-#     C3 = 30     # spherical aberration
-#     S3 = 34     # star aberration
-#     A3 = 31     # four-fold astigmatism
-#     B4 = 42     # axial coma
-#     D4 = 45     # three lobe aberration
-#     A4 = 41     # five-fold astigmatism
-#     C5 = 50     # spherical aberration
-#     A5 = 51     # sixfold astigmatism
-   
 
 class AberrationDict(Mapping):
     """
