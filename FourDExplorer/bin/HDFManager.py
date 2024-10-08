@@ -333,14 +333,6 @@ class HDFHandler(QObject):
         arguments:
             file: (h5py.File) the file object being initialized.
         """
-                    
-        # if 'Reconstruction' not in file:
-        #     file.create_group('Reconstruction')
-        # if 'Calibration' not in file:
-        #     file.create_group('Calibration')
-        # if 'tmp' not in file:
-        #     file.create_group('tmp')
-
         root = file['/']
         root.attrs['/4D-Explorer'] = True
         root.attrs['/General/date'] = datetime.now().strftime('%Y-%m-%d')

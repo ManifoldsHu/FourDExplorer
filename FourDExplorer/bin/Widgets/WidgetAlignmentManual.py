@@ -315,9 +315,21 @@ class WidgetAlignmentManual(QWidget):
             if _dialog_generate_shift_map.radio_button_apply_current_shift_vec.isChecked():
                 shift_map = self._useCurrentShiftVec()
             elif _dialog_generate_shift_map.radio_button_linear_regression.isChecked():
-                shift_map = self._useLinearRegression()
+                try:
+                    shift_map = self._useLinearRegression()
+                except IndexError as e:
+                    self.logger.error(f"{e}")
+                    QMessageBox.warning(self, "Error", "There must be at least 3 anchors!")
+                    return
             elif _dialog_generate_shift_map.radio_button_quadratic_polynomial.isChecked():
-                shift_map = self._useQuadraticPolynomial()
+                try:
+                    shift_map = self._useQuadraticPolynomial()
+                except IndexError as e:
+                    self.logger.error(f"{e}")
+                    QMessageBox.warning(self, "Error", "There must be at least 6 anchors!")
+                    return
+        else:
+            return 
         
         # create a new vector field to store the shift map
         save_dialog = DialogSaveVectorField(self)
@@ -327,6 +339,8 @@ class WidgetAlignmentManual(QWidget):
             group_path = save_dialog.getParentPath()
             item_name = save_dialog.getNewName()
             full_path = f"{group_path}/{item_name}"
+            if group_path == '/':
+                full_path = f"/{item_name}"
             try:
                 self.hdf_handler.addNewData(group_path, item_name, shape=(2, scan_i, scan_j))
             except ValueError as e:
@@ -345,8 +359,7 @@ class WidgetAlignmentManual(QWidget):
             elif _dialog_generate_shift_map.radio_button_quadratic_polynomial.isChecked():
                 shift_map_dataset.attrs['Alignment/InterpolationMethod'] = "Quadratic Polynomial Regression"
                 self._saveShiftAnchorsInAttrs(shift_map_dataset)
-            # shift_map_dataset['Alignment/Method'] = "Manual"
-            # shift_map_dataset['Alignment/TargetDatasetPath'] = self._align_page.data_path 
+
             shift_map_meta = self._generateShiftMapMeta(
                 name=item_name,
                 fit_model_name=shift_map_dataset.attrs['Alignment/InterpolationMethod'],
@@ -408,15 +421,17 @@ class WidgetAlignmentManual(QWidget):
         meta['/Calibration/Quantify/value_unit_display'] = 'pix'
         meta['/Calibration/Quantify/display_unit_magnify'] = 1
         meta['/Calibration/Quantify/display_norm_mode'] = 'linear'
+        return meta
 
             
     def _useCurrentShiftVec(self):
         """
         Use the current shift vector to shift all the diffraction patterns.
         """
+        scan_i, scan_j, dp_i, dp_j = self.data_object.shape
         current_shift_i = self.current_shift_i
         current_shift_j = self.current_shift_j
-        shift_map = np.ones((2, self.scan_ii, self.scan_jj,)) 
+        shift_map = np.ones((2, scan_i, scan_j,)) 
         shift_map[0, :, :] *= current_shift_i
         shift_map[1, :, :] *= current_shift_j 
         return shift_map
