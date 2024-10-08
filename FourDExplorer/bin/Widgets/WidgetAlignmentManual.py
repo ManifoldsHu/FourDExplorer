@@ -974,6 +974,7 @@ class GenerateShiftVectorDialog(QDialog):
         radio_button_apply_current_shift_vec = QRadioButton('Apply the current shift vector to all the diffraction patterns.')
         radio_button_linear_regression = QRadioButton('Linear Regression')
         radio_button_quadratic_polynomial = QRadioButton('Quadratic Polynomial Regression')
+        radio_button_linear_regression.setChecked(True)
         layout.addWidget(radio_button_apply_current_shift_vec)
         layout.addWidget(radio_button_linear_regression)
         layout.addWidget(radio_button_quadratic_polynomial)
