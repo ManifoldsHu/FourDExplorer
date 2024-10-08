@@ -35,6 +35,7 @@ from h5py import Dataset
 
 from Constants import APP_VERSION
 from bin.BlitManager import BlitManager
+from bin.TaskManager import TaskManager
 from bin.HDFManager import HDFHandler
 from bin.HDFManager import HDFDataNode 
 from bin.DateTimeManager import DateTimeManager
@@ -82,6 +83,18 @@ class WidgetAlignmentRef(QWidget):
         return self._align_page.dp_object
     
     @property
+    def data_path(self) -> str:
+        return self._align_page.data_path
+
+    @property
+    def scan_ii(self) -> int:
+        return self._align_page.scan_ii 
+    
+    @property
+    def scan_jj(self) -> int:
+        return self._align_page.scan_jj 
+    
+    @property
     def ax(self) -> Axes:
         return self._align_page.dp_ax
     
@@ -110,7 +123,11 @@ class WidgetAlignmentRef(QWidget):
     def datetime_manager(self) -> DateTimeManager:
         global qApp 
         return qApp.datetime_manager
-    
+
+    @property
+    def task_manager(self) -> TaskManager:
+        global qApp 
+        return qApp.task_manager
     
     def _initUi(self):
         """
@@ -225,10 +242,9 @@ class WidgetAlignmentRef(QWidget):
         names = {'CoM': com_name}
         metas = {'CoM': self._generateCoMMeta()}
 
-        is_com_inverted = False  # Assuming no inversion for simplicity
-        is_mean_set_to_zero = True  # Assuming mean set to zero for simplicity
-
-        mask = None  # Assuming no mask for simplicity
+        is_com_inverted = False
+        is_mean_set_to_zero = False 
+        mask = None
 
         self.task = TaskCenterOfMass(
             item_path=self._reference_path,

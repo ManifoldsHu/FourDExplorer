@@ -786,7 +786,7 @@ class PageAlignFourDSTEM(PageBaseFourDSTEM):
         """
         meta = {}
         meta['/Calibration/DiffractionAlignment/method'] = 'Shift by Mapping'
-        meta['/Calibration/DiffractionAlignment/shift_mapping_path'] = self.shift_mapping_dataset.path
+        meta['/Calibration/DiffractionAlignment/shift_mapping_path'] = self.ui.lineEdit_shift_mapping_path.text()
         # meta['/Calibration/ShiftCorrection/shift_vector'] = self.shift_vec
         meta['/Calibration/DiffractionAlignment/original_dataset_path'] = self.data_path
         

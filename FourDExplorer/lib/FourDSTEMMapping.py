@@ -173,7 +173,7 @@ def CalculateCenterOfMass(
     loc_i, loc_j = np.meshgrid(array_i, array_j, indexing = 'ij')
 
     if mask is None:
-        mask = np.ones(dp_i, dp_j)
+        mask = np.ones((dp_i, dp_j))
 
     # To calculate center of mass, we should calculate
     #       Σrm(r)/Σm(r)
