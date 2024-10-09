@@ -14,8 +14,11 @@ date:           Sept 20, 2024
 *-------------------------- DialogSaveItem.py --------------------------------*
 """
 
+from logging import Logger
+
 from PySide6.QtWidgets import QDialog 
 from PySide6.QtWidgets import QWidget 
+from PySide6.QtWidgets import QMessageBox
 from PySide6.QtGui import QRegularExpressionValidator
 
 from bin.HDFManager import HDFHandler
@@ -46,7 +49,11 @@ class DialogSaveImage(QDialog):
         self.ui.lineEdit_name.setText('Untitled')
         self._validateNewName()
 
-        
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger    
+    
     @property
     def hdf_handler(self) -> HDFHandler:
         global qApp
@@ -114,6 +121,22 @@ class DialogSaveImage(QDialog):
         self.re_validator = QRegularExpressionValidator()
         self.re_validator.setRegularExpression(reValidHDFName.pattern)
         self.ui.lineEdit_name.setValidator(self.re_validator)
+        
+    def accept(self):
+        """
+        Accept the dialog. Check if the name is valid.
+        """
+        new_name = self.getNewName()
+        parent_path = self.getParentPath()
+        if parent_path == '/':
+            path = '/' + new_name
+        else:
+            path = parent_path + '/' + new_name
+        if path in self.hdf_handler.file:
+            self.logger.error('Image already exists!')
+            QMessageBox.warning(self, 'Error', 'Image already exists!')
+            return
+        super().accept()
 
 
 
@@ -142,3 +165,18 @@ class DialogSaveVectorField(DialogSaveImage):
                 return name 
         return name + '.vec'
 
+    def accept(self):
+        """
+        Accept the dialog. Check if the name is valid.
+        """
+        new_name = self.getNewName()
+        parent_path = self.getParentPath()
+        if parent_path == '/':
+            path = '/' + new_name
+        else:
+            path = parent_path + '/' + new_name
+        if path in self.hdf_handler.file:
+            self.logger.error('Vector field already exists!')
+            QMessageBox.warning(self, 'Error', 'Vector field already exists!')
+            return
+        super().accept()

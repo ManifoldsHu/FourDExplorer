@@ -1257,7 +1257,7 @@ class WidgetMaskPolygon(WidgetMaskBase):
         Open the dialog to adjust patch effects.
         """
         dialog = DialogAdjustPatchEffects(self)
-        dialog.initialize(self.patch, self.blit_manager)
+        dialog.initializePatches(self.patch, self.blit_manager)
         dialog.exec()
 
     def _resetPatchCenter(self):
@@ -1547,7 +1547,7 @@ class WidgetMaskSegment(WidgetMaskBase):
         Open the dialog to adjust patch effects.
         """
         dialog = DialogAdjustPatchEffects(self)
-        dialog.initialize(self.patch, self.blit_manager)
+        dialog.initializePatches(self.patch, self.blit_manager)
         dialog.exec()
 
     def setMaskActivate(self, is_activated: bool):

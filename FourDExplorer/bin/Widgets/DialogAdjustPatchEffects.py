@@ -86,6 +86,7 @@ class DialogAdjustPatchEffects(QDialog):
         self.initial_line_style = '-'
         self.initial_line_width = 2
         self.initial_fill = False 
+        self._patches = []
         
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
@@ -94,6 +95,10 @@ class DialogAdjustPatchEffects(QDialog):
     @property 
     def patch(self) -> Patch:
         return self._patch 
+    
+    @property
+    def patches(self) -> list[Patch]:
+        return self._patches
     
     @property
     def axes(self) -> Axes:
@@ -124,7 +129,8 @@ class DialogAdjustPatchEffects(QDialog):
         """
         if patch not in blit_manager.artists():
             raise RuntimeError("patch not in blit manager")
-        self._patch = patch 
+        self._patches.append(patch)
+        self._patch = patch
         self._blit_manager = blit_manager
         
         # Set dialog name and label artist name according to the kind of the patch
@@ -148,6 +154,44 @@ class DialogAdjustPatchEffects(QDialog):
         self.ui.label_patch_kind.setText(patch_name)
         
         self.initialize_effects()
+        
+    def initializePatches(self, patches: list[Patch], blit_manager: BlitManager):
+        """
+        Set the patches and blit manager.
+        
+        arguments:
+            patches: (list[Patch]) the patches to be adjusted.
+            
+            blit_manager: (BlitManager) the blit manager to be used.
+        """
+        for p in patches:
+            if p not in blit_manager.artists():
+                raise RuntimeError(f"patch not in blit manager: {p}")
+            self._patches.append(p) 
+        self._patch = patches[0]
+        self._blit_manager = blit_manager 
+        
+        # Set dialog name and label artist name according to the kind of the patch
+        patch_type_mapping = {
+            Arc: "Arc",
+            Polygon: "Polygon",
+            Circle: "Circle",
+            Annulus: "Ring",
+            Wedge: "Wedge",
+            Rectangle: "Rectangle",
+            Ellipse: "Ellipse",
+            RegularPolygon: "Regular Polygon",
+            CirclePolygon: "Circle Polygon",
+            Patch: "Patch",
+        }
+        patch_type = type(patches[0])
+        patch_name = patch_type_mapping.get(patch_type, "Patch")
+        
+        self.setWindowTitle(f"Adjust {patch_name} Effects")
+        self.ui.label_patch_kind.setText(patch_name)
+        
+        self.initialize_effects()
+            
         
         
     def _initUi(self):
@@ -203,61 +247,67 @@ class DialogAdjustPatchEffects(QDialog):
 
     def update_alpha(self):
         """
-        Update the alpha value of the patch.
+        Update the alpha value of each patch in self.patches.
 
         This method retrieves the current value from the doubleSpinBox_alpha UI 
-        element and sets it as the alpha value of the patch. It then updates the 
-        blit manager to reflect the changes.
+        element and sets it as the alpha value of each patch in self.patches. 
+        It then updates the blit manager to reflect the changes.
         """
         alpha = self.ui.doubleSpinBox_alpha.value()
-        self.patch.set_alpha(alpha)
+        for patch in self.patches:
+            patch.set_alpha(alpha)
         self.blit_manager.update()
 
 
     def update_edge_color(self):
         """
-        Update the edge color of the patch.
+        Update the edge color of each patch in self.patches.
 
         This method retrieves the current value from the comboBox_edge_color UI 
-        element and sets it as the edge color of the patch. It then updates the 
-        blit manager to reflect the changes. Note that the color is prefixed 
-        with 'tab:' to ensure it is recognized by the matplotlib color system.
+        element and sets it as the edge color of each patch in self.patches. 
+        It then updates the blit manager to reflect the changes. Note that the 
+        color is prefixed with 'tab:' to ensure it is recognized by the 
+        matplotlib color system.
         """
         color = self.ui.comboBox_edge_color.currentText()
         if color == 'others':
             return 
         if color not in ('black', 'white',):
             color = 'tab:' + color 
-        self.patch.set_edgecolor(color)
+        for patch in self.patches:
+            patch.set_edgecolor(color)
         self.blit_manager.update()
 
 
     def update_face_color(self):
         """
-        Update the face color of the patch.
+        Update the face color of each patch in self.patches.
 
         This method retrieves the current value from the comboBox_face_color UI 
-        element and sets it as the face color of the patch. It then updates the 
-        blit manager to reflect the changes. Note that the color is prefixed 
-        with 'tab:' to ensure it is recognized by the matplotlib color system.
+        element and sets it as the face color of each patch in self.patches. 
+        It then updates the blit manager to reflect the changes. Note that the 
+        color is prefixed with 'tab:' to ensure it is recognized by the 
+        matplotlib color system.
         """
         color = self.ui.comboBox_face_color.currentText()
         if color == 'others':
             return 
         if color not in ('black', 'white',):
             color = 'tab:' + color 
-        self.patch.set_facecolor(color)
+        for patch in self.patches:
+            patch.set_facecolor(color)
         self.blit_manager.update()
 
 
     def update_hatch(self):
         """
-        Update the hatch pattern of the patch.
+        Update the hatch pattern of each patch in self.patches.
 
         This method retrieves the current value from the comboBox_hatch UI 
-        element and sets it as the hatch pattern of the patch. It then updates 
-        the blit manager to reflect the changes. The hatch pattern is mapped 
-        from the UI text to the corresponding matplotlib hatch symbol.
+        element and sets it as the hatch pattern of each patch in self.patches. 
+        It then updates the blit manager to reflect the changes. The hatch 
+        pattern is mapped from the UI text to the corresponding matplotlib 
+        hatch symbol.
         """
         hatch_map = {
             'none': '',
@@ -273,50 +323,55 @@ class DialogAdjustPatchEffects(QDialog):
             'stars (*)': '*'
         }
         hatch = self.ui.comboBox_hatch.currentText()
-        self.patch.set_hatch(hatch_map[hatch])
+        for patch in self.patches:
+            patch.set_hatch(hatch_map[hatch])
         self.blit_manager.update()
 
 
     def update_line_style(self):
         """
-        Update the line style of the patch.
+        Update the line style of each patch in self.patches.
 
         This method retrieves the current value from the comboBox_line_style UI 
-        element and sets it as the line style of the patch. It then updates the 
-        blit manager to reflect the changes. The line style is directly set 
-        based on the UI text, which should match the matplotlib linestyle 
-        options.
+        element and sets it as the line style of each patch in self.patches. 
+        It then updates the blit manager to reflect the changes. The line style 
+        is directly set based on the UI text, which should match the matplotlib 
+        linestyle options.
         """
         style = self.ui.comboBox_line_style.currentText()
-        self.patch.set_linestyle(style)
+        for patch in self.patches:
+            patch.set_linestyle(style)
         self.blit_manager.update()
 
 
     def update_line_width(self):
         """
-        Update the line width of the patch.
+        Update the line width of each patch in self.patches.
 
         This method retrieves the current value from the doubleSpinBox_line_width UI 
-        element and sets it as the line width of the patch. It then updates the 
-        blit manager to reflect the changes. The line width is directly set 
-        based on the UI value.
+        element and sets it as the line width of each patch in self.patches. 
+        It then updates the blit manager to reflect the changes. The line width 
+        is directly set based on the UI value.
         """
         line_width = self.ui.doubleSpinBox_line_width.value()
-        self.patch.set_linewidth(line_width)
+        for patch in self.patches:
+            patch.set_linewidth(line_width)
         self.blit_manager.update()
 
 
     def update_fill(self):
         """
-        Update the fill status of the patch.
+        Update the fill status of each patch in self.patches.
 
         This method retrieves the current value from the checkBox_fill UI 
-        element and sets the fill status of the patch accordingly. If the 
-        checkbox is checked, the patch will be filled; otherwise, it will not 
-        be filled. The blit manager is then updated to reflect the changes.
+        element and sets the fill status of each patch in self.patches 
+        accordingly. If the checkbox is checked, the patch will be filled; 
+        otherwise, it will not be filled. The blit manager is then updated to 
+        reflect the changes.
         """
         is_fill = self.ui.checkBox_fill.isChecked()
-        self.patch.set_fill(is_fill)
+        for patch in self.patches:
+            patch.set_fill(is_fill)
         self.blit_manager.update()
     
     def ok(self):
@@ -329,14 +384,15 @@ class DialogAdjustPatchEffects(QDialog):
         """
         Reject the changes, recover the initial state, and close the dialog.
         """
-        # Recover the initial state of the patch
-        self.patch.set_alpha(self.initial_alpha)
-        self.patch.set_edgecolor(self.initial_edge_color)
-        self.patch.set_facecolor(self.initial_face_color)
-        self.patch.set_hatch(self.initial_hatch)
-        self.patch.set_linestyle(self.initial_line_style)
-        self.patch.set_linewidth(self.initial_line_width)
-        self.patch.set_fill(self.initial_fill)
+        # Recover the initial state of the patches
+        for patch in self.patches:
+            patch.set_alpha(self.initial_alpha)
+            patch.set_edgecolor(self.initial_edge_color)
+            patch.set_facecolor(self.initial_face_color)
+            patch.set_hatch(self.initial_hatch)
+            patch.set_linestyle(self.initial_line_style)
+            patch.set_linewidth(self.initial_line_width)
+            patch.set_fill(self.initial_fill)
         
         # Update the blit manager to reflect the changes
         self.blit_manager.update()

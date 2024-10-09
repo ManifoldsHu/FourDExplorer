@@ -420,7 +420,7 @@
      <item>
       <widget class="QPushButton" name="pushButton_cancel">
        <property name="text">
-        <string>Cancle</string>
+        <string>Cancel</string>
        </property>
       </widget>
      </item>
