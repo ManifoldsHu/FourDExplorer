@@ -15,6 +15,9 @@ date:           Mar 25, 2022
 """
 
 from PySide6.QtWidgets import QWidget
+from PySide6.QtGui import QDesktopServices
+from PySide6.QtCore import QUrl
+
 from bin.TaskManager import TaskManager
 from bin.HDFManager import HDFHandler
 
@@ -71,6 +74,9 @@ class PageHome(QWidget):
         
         self.ui.pushButton_import_image.setVisible(False)
         self.ui.pushButton_background_subtraction.setVisible(False)
+        self.ui.commandLinkButton_tutorials.setVisible(True)
+        self.ui.commandLinkButton_tutorials.clicked.connect(self._openTutorialsWebsite)
+        self.ui.commandLinkButton_work.setVisible(False)    # TODO
 
         # Connect signals to update button states
         self.hdf_handler.file_opened.connect(self._onFileOpened)
@@ -137,5 +143,6 @@ class PageHome(QWidget):
     def _rotationalCorrection(self):
         self.rotational_correction_action = ActionRotate(self)
         self.rotational_correction_action.trigger()
-
-
+    
+    def _openTutorialsWebsite(self):
+        QDesktopServices.openUrl(QUrl("https://fourdexplorer.readthedocs.io/en/latest/"))
