@@ -346,7 +346,13 @@ class MetaManager(QObject):
         returns:
             (str) The value of the metadata.
         """
-        return self.hdf_handler.file[self.item_path].attrs.get(key)
+        # return self.hdf_handler.file[self.item_path].attrs.get(key)
+        data_object = self.hdf_handler.file.get(self.item_path)
+        if data_object:
+            return data_object.attrs.get(key)
+        else:
+            return None 
+        
     
     def getNode(self, key: str) -> 'MetaTreeNode':
         """

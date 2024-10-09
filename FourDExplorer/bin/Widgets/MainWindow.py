@@ -110,6 +110,7 @@ class MainWindow(QMainWindow):
         icon_path = os.path.join(ROOT_PATH, 'ui', 'resources', 'icons', '4D.ico')
         icon.addFile(icon_path)
         self.setWindowIcon(icon)
+        self.showMaximized()
 
         self._initControlPanel()
         
