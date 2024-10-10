@@ -51,6 +51,8 @@ conda activate FourDExplorerVenv
 - 离焦量: 正焦
 - 备注: 这套数据集是在正焦拍摄下的金纳米颗粒，嵌于 DNA 上。其在采集时预先设置了 30° 的扫描旋转角度，并且具有一定的衍射漂移幅度。这套数据集可以用来演示通过计算 CoM 的旋度的方法来进行扫描旋转校正 (Rotational Offset Correction)，并且通过 FDDNet 来测量各个衍射盘的偏移量以进行衍射漂移合轴校正 (Diffraction Shift Alignment) 的过程。 
 
+> 在 Google Drive 中，这套数据集被分为了多个压缩文件，以 .z01, .z02 等结尾。需要下载全部的压缩文件，然后才能正确解压。
+
 ## gold_nanoparticle_07
 
 - 扫描点数目: 128 x 128 
@@ -79,26 +81,32 @@ conda activate FourDExplorerVenv
 
 # 快速上手 
 
-[![Main Window](/docs/fig/InitWindow.png)]
+![Main Window](/docs/fig/InitWindow.png)
 
 ## 数据管理 
 
 4D-Explorer 基于 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 文件格式。HDF5 文件由群组 (Groups) 和数据集 (Datasets) 组成，类似于电脑操作系统中的文件夹和文件。群组可以包含其他群组和数据集，形成一个层次结构，便于组织和管理复杂的数据。
 
-要创建一个新的 HDF5 文件，请在主界面的左上角打开 'File' 菜单，然后按下 'New HDF5 File' 按钮。之后，会自动弹出选择 HDF5 文件的对话框，此时选择刚刚创建的新 HDF5 文件即可打开。
+要创建一个新的 HDF5 文件，请在主界面的左上角打开 'File' 菜单，然后按下 'New HDF5 File' 按钮，即可打开选择创建 HDF5 文件的名字以及存放路径的对话框。我们将新建的 HDF5 名字设为 4D-Explorer-test-dataset.h5。之后，会自动弹出选择 HDF5 文件的对话框，此时选择刚刚创建的新 HDF5 文件即可打开。
 
-[![Create a New File](https://iili.io/QkZiiP.png)](https://freeimage.host/i/QkZiiP)
+![Create a New File](/docs/fig/CreateH5.png)
 
-在新创建的 HDF5 文件中空无一物，因而在左边控制面板的 File 栏里，只有一个 mydata.h5 的项，表示刚刚新建的 HDF5 文件。我们先创建一个群组，以放置我们将要导入的数据集。要创建群组，在左边的面板中，右击 mydata.h5，在弹出的菜单中选择 'New' (带有 + 号的图标)。在打开的创建项 (Create Item) 对话框中，有三个需要填写的地方：
+在新创建的 HDF5 文件中空无一物，因而在左边控制面板的 File 栏里，只有一个 4D-Explorer-test-dataset.h5 的项，表示刚刚新建的 HDF5 文件。我们先创建一个群组，以放置我们将要导入的数据集。要创建群组，在左边的面板中，右击 4D-Explorer-test-dataset.h5，在弹出的菜单中选择 'New' (带有 + 号的图标)。
+
+![Create a New Group 1](/docs/fig/NewGroup.png)
+
+在打开的创建项 (Create Item) 对话框中，有三个需要填写的地方：
 - Location，也就是需要把群组创建在哪个群组下面。默认是 '/'，熟悉 Unix/Linux 的同学应该知道这表示根目录，而在 HDF5 文件中这也表示我们正在创建的项在根目录下，而不隶属于任何群组。点击 Browse... 按钮可以浏览并选择群组，从而把新创建的项放进这个群组中。不过，目前我们的 h5 文件中还没有任何群组，所以只能选择根目录。
 - Name，也就是新建群组的名字。默认是 untitled，这里我们把它改成我们想要的名字，比如 gold_nanoparticle。
 - Type，这里选 Group，也就是我们需要创建的是群组，而不是数据集 (Dataset)。
 
-[![Create a New Group 1](https://iili.io/QkZLf1.png)](https://freeimage.host/i/QkZLf1)
+![Create a New Group 2](/docs/fig/NewGroup2.png)
 
-[![Create a New Group 2](https://iili.io/QkZPWB.png)](https://freeimage.host/i/QkZPWB)
+如果一切顺利的话，这时在左边控制面板的 File 栏里，应该能看到 4D-Explorer-test-dataset.h5 下面多挂了一个 gold_nanoparticle_06，并且图标是文件夹的项了。这就是我们刚刚创建的群组。
 
-如果一切顺利的话，这时在左边控制面板的 File 栏里，应该能看到 mydata.h5 下面多挂了一个 gold_nanoparticle，并且图标是文件夹的项了。这就是我们刚刚创建的群组。鼠标右击这个群组，可以看到和刚刚差不多的菜单，里面有对一个群组可以进行的操作，包括：
+我们提供了三套测试数据集，因此在这里分别创建三个群组，并命名为 gold_nanoparticle_06、gold_nanoparticle_07 以及 MoS2_14
+
+鼠标右击群组，可以看到和刚刚差不多的菜单，里面有对一个群组可以进行的操作，包括：
 - 'New' 在该群组下新建一个群组或者数据集。
 - 'Import 4D-STEM dataset' 在该群组下导入一个 4D-STEM 数据集
 - 'Move/Copy/Rename/Delete' 编辑这个群组(移动、复制、重命名、删除).
@@ -111,70 +119,61 @@ conda activate FourDExplorerVenv
 ## 导入 4D-STEM 数据集 
 现在假如说我们已经有了一个二进制的 4D-STEM 数据集文件 (raw 文件) 想要导入到 HDF5 中。选好一个群组 (也可以点到根目录上)，右键，点击 'Import 4D-STEM Dataset'，这就打开了加载 4D-STEM 数据集的对话框。
 
-[![Group Context Menu](https://iili.io/QkZQ0F.png)](https://freeimage.host/i/QkZQ0F)
+![Group Context Menu](/docs/fig/Import4DSTEM.png)
 
-[![Import Raw Data](https://iili.io/QkZDJa.png)](https://freeimage.host/i/QkZDJa)
+对于所提供的测试数据集，选择 'EMPAD v0.51 (for NJU)'，然后点 'browse' 按钮选择我们要导入的 EMPAD 文件 (应当选择数据集文件夹中的 .xml 文件)。
 
-选择 'General Raw Data'，然后点 'browse' 按钮选择我们要导入的 raw 文件。在这里，我们选择测试数据集 gold nanoparticle 中所提供的 scan_x256_y256.raw 文件。然后设定正确的参数，包括： 
-- Scalar Type, 4D-STEM 数据集的像素值类型，这里选择 float。
-- Scalar Size, 4D-STEM 数据集的像素值大小，这里选择 32 bit。
-- Image Width, 衍射图像的宽度，这里设置为 128。
-- Image Height, 衍射图像的高度，这里设置为 128。
-- Number of Scanning Columns (scan_i), i 方向扫描的数目，这里设置为 256。
-- Number of Scanning Rows (scan_j), j 方向扫描的数目，这里设置为 256。
-- Offset to First Image (bytes), 第一张衍射图像的偏移量，以字节为单位，这里设置为 0。
-- Gap Between Images, 每张衍射图像之间的间隔，以字节为单位，这里设置为 1024。 
-- Little-endian Byte Order, 数据集的存储顺序，这里勾选上
+![Import 4D-STEM Dataset](/docs/fig/ImportEMPAD.png)
 
-接下来还要选取在读取时需要进行旋转和翻转的操作。对于提供的测试数据集 gold nanoparticle，进行如下设定： 
-- Flip Diffraction Pattern (Transpose) 将衍射图像翻转，即沿着从左上到右下的线翻转，这里勾选上
-- Rotate n×90° 将衍射图像进行逆时针旋转 90° 的次数。旋转 3 次等效于顺时针旋转 90°，这里设为 1。
+然后，给我们要导入的数据集起一个名字叫 'gold_nanoparticle_06'。最后，点 OK 按钮。
 
-然后，给我们要导入的数据集起一个名字叫 'gnp_01'。最后，点 OK 按钮。
+根据同样的步骤，依次在三个群组中导入测试数据集，并给予其相应的名字。
 
 ## 执行任务 
 在我们加载数据集的时候，可以在左侧控制面板中的 'Task' 栏中查看进度、任务细节以及历史任务。
 
+![Task Manager](/docs/fig/TaskManager.png)
+
 ## 数据集的扩展名
-现在我们可以在控制面板中的 'File' 栏里看到一个新的项 'gnp_01.4dstem'，就是我们刚刚导入的 4D-STEM 数据集。它有自己的图标和扩展名，4D-Explorer 就是通过这些扩展名来识别数据集的用途的。当然，扩展名不是必须的，就像我们平时在操作系统中识别文件一样。目前 4D-Explorer 可以识别这几种扩展名：
+现在我们可以在控制面板中的 'File' 栏里看到一个新的项 'gold_nanoparticle_06.4dstem'，就是我们刚刚导入的 4D-STEM 数据集。它有自己的图标和扩展名 '.4dstem'，4D-Explorer 就是通过这些扩展名来识别数据集的用途的。当然，扩展名不是必须的，就像我们平时在操作系统中识别文件一样。目前 4D-Explorer 可以识别这几种扩展名：
 - .4dstem : 4D-STEM 数据集，必须是 4 维数组
 - .img : 灰度图像，必须是 2 维数组。不支持 RGB 彩色图像或其他多通道图像。
 - .vec : 二维矢量场，具有两个分量。每个分量各自是一张灰度图像。
 - .line : 一条线，必须是 1 维的。
 
 ## 查看 4D-STEM 数据集 
-双击那个 gnp_01.4dstem 数据集即可打开。我们可以看到右边打开了一个页面。
+右键点击 gold_nanoparticle_06.4dstem 数据集，即可打开该数据集的菜单，选择第一个 Open 即可打开。我们可以看到右边打开了一个页面。
 
-[![View Dataset](https://iili.io/QktFgn.png)](https://freeimage.host/i/QktFgn)
+![View 4D-STEM Dataset](/docs/fig/Open4DSTEM.png)
 
-> 提示：你可以拖动各个组件之间的边界，免得某些区域太小而显示得不好。
-
-[![Set ADF](https://iili.io/QktJsI.png)](https://freeimage.host/i/QktJsI)
+> 提示：你可以拖动各个组件之间的边界，免得某些区域太小而显示得不好。也可以再按下最左侧的控制面板按钮，即可隐藏左侧的面板。
 
 页面里面有两个图像，其中中间的是衍射图样，右边的是实空间的重构像。由于我们现在还没有重构，所以右边啥也没有，但我们还是可以点击右边的图像，这样游标就会跟随鼠标移动，左边就会显示不同位置的衍射斑。
 
 ## 重构
-现在我们要赶紧重构一个看看效果。对着数据集点右键，找到 'Reconstruction' 菜单，然后选 'Virtual Image'。现在，右边打开了一个新的页面，用于选定 Virtual Image 的参数。现在，我们先重构一个环形暗场像 (ADF) 试试。
+现在我们赶紧重构一个看看效果。在左侧找到 gold_nanoparticle_06.4dstem 数据集，点右键，然后找到 'Reconstruction' 菜单，选 'Virtual Image'。现在，右边打开了一个新的页面，用于选定 Virtual Image 的参数。现在，我们先重构一个环形暗场像 (ADF) 试试。
 
-[![Open Virtual Image](https://iili.io/QktHWN.png)](https://freeimage.host/i/QktHWN)
+![Set Annular Dark Field Region](/docs/fig/SetReconstructionRegion.png)
 
-选好参数后，点最下面 'START CALCULATION' 那个红色按钮。然后一个新的对话框就会问在哪里存储重构的图像。
+在这里我们选择环 (Ring) 作为积分区域，然后设置内径为 45 像素，外径为 60 像素。对于积分区域的位置，设置水平偏移为 2，垂直偏移为 -1。选好参数后，点最下面 'START CALCULATION' 那个红色按钮。然后一个新的对话框就会问在哪里存储重构的图像。
 
 > 假如说你没有看到红色的按钮，可以试试把最右边的滚动条往下拉。
 
-[![Start Computing ADF](https://iili.io/Qkt2ft.png)](https://freeimage.host/i/Qkt2ft)
+![Start Computing ADF](/docs/fig/StartComputingADF.png)
 
-都准备好后就开始计算，和之前加载数据集的时候一样，这种长时间的任务都可以在左边的 'Task' 栏里查看细节。
+都准备好后就开始计算，和之前加载数据集的时候一样，这种长时间的任务都可以在左边的 'Task' 栏里查看细节。等计算好之后，可以像之前打开 4D-STEM 一样，右键点击 ADF.img，在菜单中选择 'Open'，即可打开查看图像的页面。
 
-[![View ADF](https://iili.io/Qkt30X.png)](https://freeimage.host/i/Qkt30X)
+![View ADF](/docs/fig/ViewADF.png)
 
 ## 使用重构像作为预览
 
 现在我们终于有了一个重构像，可以回到刚才的 4D-STEM 查看的页面了。我们可以点击 'BROWSE PREVIEW' 按钮，然后选刚才我们创建的重构像。
 
-[![Browse Prevew](https://iili.io/QkZZUg.png)](https://freeimage.host/i/QkZZUg)
+![Browse Prevew](/docs/fig/BrowsePreview.png)
 
 之后，我们就可以在4维相空间里探索该 4D-STEM 数据集了。
+
+> 你可能注意到 gold_nanoparticle_06 群组下多了一个 gold_nanoparticle_06_preview.img 的图像。那是一个空的图像，起到占位作用。现在我们已经将预览图像设置为我们重构的图像了，因此可以删掉这个空的图像。
 
 
 # 文件与数据操作 
@@ -265,24 +264,34 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 
 最后，在导入数据集目标位置 (Import Dataset to Location) 处，可以浏览选择导入数据集的 Group，而在下面的名称 (Name) 处则可以填写导入数据集的名称。
 
-> 作为示例，对于测试数据集 MoS2_14 而言，以上参数分别是：
-> - 数据类型：float
-> - 数据位数：32 bit
-> - 衍射图像宽度：128
-> - 衍射图像高度：128
-> - 扫描列数：128
-> - 扫描行数：128
-> - 第一张图的偏移量：0
-> - 每两张图之间的间隔：1024
-> - 小端字节序：是
-> - 翻转衍射图像：是
-> - 旋转 90° 的次数：3
+作为示例，测试数据集可以通过以下参数导入 (在选择文件时，应当选择数据文件夹中的 .raw 文件)：
+
+
+| 参数名称           | gold_nanoparticle_06 | gold_nanoparticle_07 | MoS2_14 |
+|--------------------|----------------------|----------------------|---------|
+| 数据类型           | float                | float                | float   |
+| 数据位数           | 32 bit               | 32 bit               | 32 bit  |
+| 衍射图像宽度       | 256                  | 128                  | 128     |
+| 衍射图像高度       | 256                  | 128                  | 128     |
+| 扫描列数           | 128                  | 128                  | 128     |
+| 扫描行数           | 128                  | 128                  | 128     |
+| 第一张图的偏移量   | 0                    | 0                    | 0       |
+| 每两张图之间的间隔 | 1024                 | 1024                 | 1024    |
+| 小端字节序         | 是                   | 是                   | 是      |
+| 翻转衍射图像       | 是                   | 是                   | 是      |
+| 旋转 90° 的次数    | 3                    | 3                    | 3       |
+
+
+
+通过这种方式导入的数据集缺失了很多实验参数，因此在导入后应尽快手动填写这些实验参数。
 
 ## 导出数据
 
 目前 4D-Explorer 只支持以 HDF5 文件为导出目标。未来将会添加导出其他格式数据的方法。
 
 ## 4D-Explorer 的元数据管理方式
+
+> 使用 4D-Explorer 测试数据集中的 gold_particle_06 重构出来的环形暗场像作为演示
 
 4D-Explorer 基于 HDF5 所提供的元数据功能来管理实验参数，元数据以键值对的形式存储。进一步地，4D-Explorer 内置了一套元数据规范，规定了对于某种扩展名的数据而言，特定键的用途、单位、描述以及数据类型。这些键都是以斜杠开头的路径风格的字符串，例如：
 ```
@@ -292,6 +301,8 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 
 要修改元数据，在左侧数据集列表中，找到对应的数据集，右键打开菜单，点击最底下的属性 (Attributes) 。在弹出的对话框中，可以看到这些元数据都已经按照分组以树状的形式列出来了，其中左侧显示的是元数据名称 (注意，这里的名称是 4D-Explorer 根据内置的元数据规范所提供的，并不等同于键)，右侧显示的是值以及内置的单位。
 
+![View Metadata](/docs/fig/ViewMetadata.png)
+
 在列表中选定某项元数据，右键打开菜单，即可增加、修改或删除元数据。点击修改元数据 (Edit) 后，会打开修改元数据的对话框。里面从上到下依次表示：
 - 当前元数据所属的数据集或群组的路径 (Item Path)
 - 元数据的键 (Metadata Key)
@@ -299,11 +310,17 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 - 值 (Value)。对于字符串而言，值可以任意输入；对于浮点数类型的元数据而言，填写数值的输入框依照科学计数法的约定，分为小数部分和指数部分。在输入框下面还会显示该输入所约定的单位。
 - 注意事项 (Note)。对于 4D-Explorer 内置规范中所包含的键，在注意事项中会提示其用途。修改这些元数据的值时也会提出额外警告，以提醒用户小心修改。
 
+![Edit Metadata](/docs/fig/EditMetadata.png)
+
 # 显示数据
+
+> 使用 4D-Explorer 测试数据集中的 gold_particle_06 重构出来的环形暗场像作为演示
 
 目前 4D-Explorer 支持显示 4D-STEM 数据、图像 (单通道二维图像) 以及矢量场 (双通道二维图像，第一个通道为 i 方向的矢量分量，第二个通道为 j 方向的矢量分量)。4D-Explorer 绘图基于 matplotlib 库，matplotlib 是一个用于创建静态、动画和交互式可视化的 Python 库。它提供了广泛的绘图功能，包括线图、散点图、柱状图、直方图、等高线图、3D 图等。通过使用 matplotlib，4D-Explorer 能够以高质量和灵活的方式显示各种类型的数据。
 
 > matplotlib 注重于出版级质量的绘图，其动画性能及效果有一定的局限性。在 4D-Explorer 用鼠标拖拽或者滚轮拖动某些部件可以对图像进行动态调整，但请不要长时间保持动画效果，因为这可能会导致软件不稳定。
+
+## 工具栏
 
 在图像显示的上方，可能会有一行工具栏，其上的按钮可以方便地对图像的效果进行调整。它通常包括 10 个按钮，分别为：
 - 返回初始状态 (Home)
@@ -316,7 +333,11 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 - 保存。点击该按钮后，可以将当前显示的图片以 .png 或 .jpg 等格式保存。注意，这里输出的是渲染后的图像，包含了颜色条、坐标轴等信息，而不是原始的数据。
 - 标尺。点击该按钮后可以调整标尺的属性。
 
+![Adjust Viewing Data](/docs/fig/ViewData.png)
+
 > 如果没有显示 10 个按钮，可能是因为可供展示的空间不够宽。尝试最大化软件窗口、隐藏左侧面板或调整页面中间和右边所占的空间比例。
+
+> 如果空间足够宽，那么在按钮的右侧还会显示当前鼠标所对应的坐标位置。
 
 ## 显示 4D-STEM 数据
 
@@ -328,23 +349,33 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 
 > 预览图像的尺寸应当和 4D-STEM 数据集的扫描步数相同。
 
+![View 4D-STEM Dataset](/docs/fig/View4DSTEM_MoS2.png)
+
 在页面右侧扫描图像下面有滑动条和选择框，可以调节衍射图像的亮度 (Brightness)、对比度 (Contrast)、数据标度 (Norm, 线性或对数)、颜色映射 (Color map)。
 
 在页面中间衍射图像下面，可以调整当前显示的扫描位置。
 
 ## 显示二维图像的数据
 
+> 使用 4D-Explorer 测试数据集中的 gold_particle_06 重构出来的环形暗场像作为演示
+
 在界面左侧的数据集列表中，找到需要显示的二维图像 (.img 数据)，右键点击 Open，即可打开显示该图像的页面。在页面的右边显示的是该图像的直方图。
 
-在页面右侧扫描图像下面有滑动条和选择框，可以调节衍射图像的亮度 (Brightness)、对比度 (Contrast)、数据标度 (Norm, 线性或对数)、颜色映射 (Color map)。
+![Adjust Viewing Data](/docs/fig/ViewData.png)
+
+在页面右侧扫描图像下面有滑动条和选择框，可以调节衍射图像的亮度 (Brightness)、对比度 (Contrast)、数据标度 (Norm, 线性或对数)、颜色映射 (Color map)。在上面的图中我们就调整了亮度、对比度，并修改颜色映射为 plasma。我们还使用缩放按钮，将图像拖动、放大到某个特定的区域。
 
 ## 显示矢量场的数据
+
+> 使用 4D-Explorer 测试数据集中的 MoS2_14 重构出来的 iCoM 图像作为演示
 
 在界面左侧的数据集列表中，找到需要显示的矢量场 (.vec 数据)，右键点击 Open，即可打开显示该矢量场的页面。此时，4D-Explorer 自动创建了一个空的二维图像，名字为 {矢量场名字}_bkgrd.img。其具有和矢量场相同的宽度和高度，但值为零。其用途是在页面右侧表示矢量场的背景。
 
 若对该矢量场有在相同空间下的图像 (如，对于 CoM 矢量场，此时已经有 iCoM 图像或者环形暗场图像)，则可以点击浏览背景 (Browse Background) 按钮，选择合适的背景图像，来代替空的图像。这样可以更加直观地展示矢量场各个矢量所对应的位置附近的样品信息。此时，便可将临时创建的空矢量场背景图删去。
 
 若发现矢量场的箭头尺寸不合适 (整体过长、过短、过粗、过细) 或者想更换其颜色，那么可以点击调整箭头图效果 (Adjust Quiver Effects) 按钮来进行调整。
+
+![View Vector Field](/docs/fig/ViewVectorField.png)
 
 > 在调整矢量场效果的对话框中，箭头长度比例 (Arrow Length Scale) 用于调整箭头的长度。和直觉相反，它的值越高，每个箭头的长度越短。
 
@@ -354,7 +385,7 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 
 点击该按钮，会弹出一个对话框。对于已经校正过实验参数的 4D-STEM 数据集及其导出的图像、矢量场而言，标尺会读取其参数，并自动选择合适的长度及显示单位。在弹出的对话框中，可以自行设置其在给定单位下的长度。
 
-但如果数据集缺乏相关的元数据，标尺则会以像素数 (pix) 作为单位。此时，可以勾选定制化比例尺 (Customize Scale)，然后填写每个像素格子的长度以及该长度所对应的单位。
+但如果数据集缺乏相关的元数据，标尺则会以像素数 (pix) 作为单位。此时，可以勾选定制化比例尺 (Customize Scale)，然后手动填写每个像素格子的长度以及该长度所对应的单位。
 
 在对话框的顶部还可以选择其他两个面板，分别是标尺的显示效果 (Bar Style) 以及文字的显示效果 (Text Style)，可以对标尺及文字的颜色、大小、方向、透明度、字体等进行调整。
 
@@ -369,6 +400,8 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 
 ## 完善数据集的实验参数 
 
+> 使用 4D-Explorer 测试数据集中的 gold_particle_06 作为演示
+
 在左侧控制面板中，右键点击对应的 4D-STEM 数据集，在菜单中找到校准 (Calibration)，然后在子菜单中找到编辑 4D-STEM 参数 (Edit 4D-STEM Parameters)，点击即可打开编辑 4D-STEM 实验参数的对话框。在这里，可以根据引导一步步地调整 4D-STEM 数据集的参数，或者说元数据 (metadata)。
 
 在对话框的上方可以看到各个步骤，包括：
@@ -380,6 +413,8 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 - High Order Aberration, 高阶像差系数 (四阶以上的像差)
 可以通过按下 "←Back" 按钮回到上一个步骤，也可以按下 "Next→" 按钮前往下一个步骤。
 
+![Edit 4D-STEM Parameters](/docs/fig/Edit4DSTEMParameters.png)
+
 ### 通用参数
 第一页是 General 通用参数。
 
@@ -389,6 +424,10 @@ Merlin Medipix3 所采集的数据集为 .mib 格式，并且一般还会附带 
 我们可以顺次修改这些元数据。当第一页 General 修改完了之后 (当然，有些元数据留空也没问题)，点击 Next→ 按钮，进入第二页，也就是 Microscope 页面。在这里，可以填写一些关于电镜的一些信息，例如我们将电镜的名字改为 Thermofisher FEI Titan G2 60-300。
 
 接下来则有几个关键的参数，包括电子束流 (Beam Current)、加速电压 (Accelerate Voltage)、相机长度 (Camera Length)、会聚(半) 角 (Convergence Angle, $\alpha$)、停留时间 (Dwell Time) 以及扫描步长 (Step Size)。这些参数决定了数据集的量化分析结果，因此非常重要，需要谨慎修改。其中部分参数，比如相机长度以及会聚角，一般需要使用标准样品进行标定之后才能确定。
+
+![Edit Convergence Angle](/docs/fig/EditConvergenceAngle.png)
+
+在这里，我们编辑会聚角。测试实验数据 gold_nanoparticle_06 的会聚角为 22.5 mard，因此我们在 Value 处用科学计数法填写 2.25 x 10^-2 rad。然后点 OK 按钮，并在弹出的对话框中再次点击 OK 按钮。
 
 ### 相机参数
 Camera 页的参数则是和相机有关的。其中，像素数目指的是相机的像素数目，这个数值和数据集中衍射图像的尺寸不一定是一致的 (因为我们可以人为地裁剪或者填充衍射图像，但却无法更改作为硬件的相机的底片)，而传感器像素尺寸则指的是相机像素在物理上的尺寸，就是我们可以把相机拆下来放在放大镜下用直尺量出来的那个像素尺寸。
@@ -406,19 +445,27 @@ $\Delta r$ 表示实空间的像素格子长度，这里的实空间和衍射空
 
 ### 像差系数 
 最后两页则是和像差有关的参数，具体来说是各阶像差系数，其意义包括：
-- `C1` 离焦 (defocus)
-- `A1` 二重像散 (two-fold astigmatism)
-- `B2` 轴向彗差 (axial coma)
-- `A2` 三重像散 (three-fold astigmatism)
-- `C3` 球差 (spherical aberration)
-- `S3` 星形像差 (star aberration)
-- `A3` 四重像散 (four-fold astigmatism)
-- `B4` 轴向彗差 (axial coma)
-- `D4` 三叶像差 (three lobe aberration)
-- `A4` 五重像散 (five-fold astigmatism)
-- `C5` 球差 (spherical aberration)
-- `A5` 六重像散 (sixfold astigmatism)
-这里的像差，遵从 S. Uhlemann, M. Haider Ultramicroscopy, 78(1999): 1-11 所给出的约定。除了可以设定其像差大小之外，还可以设置各级像差的角度。不过，离焦量和球差都是对称的，所以设置角度不会对它们产生影响。
+
+| 符号 | 描述 |
+|------|------|
+| `C1` | 离焦 (defocus) |
+| `A1` | 二重像散 (two-fold astigmatism) |
+| `B2` | 轴向彗差 (axial coma) |
+| `A2` | 三重像散 (three-fold astigmatism) |
+| `C3` | 球差 (spherical aberration) |
+| `S3` | 星形像差 (star aberration) |
+| `A3` | 四重像散 (four-fold astigmatism) |
+| `B4` | 轴向彗差 (axial coma) |
+| `D4` | 三叶像差 (three lobe aberration) |
+| `A4` | 五重像散 (five-fold astigmatism) |
+| `C5` | 球差 (spherical aberration) |
+| `A5` | 六重像散 (sixfold astigmatism) |
+
+这里的像差符号及意义，遵从 
+`S. Uhlemann, M. Haider Ultramicroscopy, 78(1999): 1-11` 
+所给出的约定。
+
+除了可以设定其像差大小之外，还可以设置各级像差的角度。不过，离焦量和球差都是对称的，所以设置角度不会对它们产生影响。
 
 设置了这些像差之后，可以用于模拟出其电子探针 (Probe) 以及真空衍射斑的形状，并可以计算在当前像差条件下虚拟成像以及质心成像的衬度传递函数。
 
@@ -457,9 +504,13 @@ $\Delta r$ 表示实空间的像素格子长度，这里的实空间和衍射空
 
 在打开的旋转校正页面中，右侧上方初始时就是使用质心旋度法进行扫描旋转校正。首先，可以点击矢量场路径 (Vector Field Path) 所对应的浏览 (Browse) 按钮，来选择当前 4D-STEM 数据集的质心重构矢量场数据集。如果还没有，可以先重构一个看看效果。选定矢量场后，在页面右侧即可显示该矢量场。如果矢量场的显示效果不好，可以点击下面的调整箭头图效果 (Adjust Quiver Effect) 按钮，调整箭头的长度、宽度和颜色等。
 
+![Rotational Offset Correction Using CoM Method](/docs/fig/DiffractionRotation.png)
+
 矢量场的下面有可以调节旋转角度的输入框，输入框右侧有刷新按钮，点击后即可显示当前矢量场中的每个矢量都被旋转一定角度之后的样子。
 
 点击下面的计算旋转角度 (Calculate Rotation Angle) 按钮，可以打开一个对话框，里面显示了各个旋转角度所对应的旋度以及散度的平方和。在曲线的下方会自动填写当前曲线中取得最小旋度的那个角度。点击确认，可以将这个角度应用回页面中矢量场图像，以观察此时的质心分布是否是有源无旋场。
+
+![Minimize Curl of CoM](/docs/fig/MinimizeCurl.png)
 
 确认一个角度后，可以点击页面最下方的应用旋转并开始计算 (Apply Rotation and Start Calculation) 的红色按钮 (如果没有看见这个按钮，它可能被藏在了页面底部，需要鼠标滚动一下或者拖动页面最右边的滚动条)。选择好输出的 4D-STEM 数据集的路径和名字之后，就会将 4D-STEM 中的所有衍射图像都旋转这个角度，并组成新的 4D-STEM 数据集。
 
@@ -481,7 +532,11 @@ $\Delta r$ 表示实空间的像素格子长度，这里的实空间和衍射空
 
 在打开的旋转校正页面中，右侧上方可以选择近轴明场像法 (Axial BF Method)，即可打开相应的操作面板。点击右侧上方对应于近轴明场像路径 (Axial BF Path) 的浏览 (Browse) 按钮，即可进入选择这套数据集对应的重构像的页面。如果还没有，可以先在虚拟成像中重构一个看看效果，记得在虚拟成像页面中选用点状的探测器，也就是把明场探测器的半径缩小到1个像素左右。
 
+![Rotational Offset Correction Using Defocused Axial BF Image](/docs/fig/RotationWithAxialBF.png)
+
 选好近轴明场像后，即可显示近轴明场像。通过调整旋转角度 (Rotation Angle) 所对应的输入框，可以查看页面中间衍射图像旋转后的效果。当衍射图像旋转后与右边近轴明场像平行，就意味着找到了扫描坐标与衍射坐标之间的旋转角度。
+
+![Rotate Diffraction Pattern](/docs/fig/RotationWithAxialBF2.png)
 
 确认一个角度后，可以点击页面最下方的应用旋转并开始计算 (Apply Rotation and Start Calculation) 的红色按钮 (如果没有看见这个按钮，它可能被藏在了页面底部，需要鼠标滚动一下或者拖动页面最右边的滚动条)。选择好输出的 4D-STEM 数据集的路径和名字之后，就会将 4D-STEM 中的所有衍射图像都旋转这个角度，并组成新的 4D-STEM 数据集。
 
@@ -522,15 +577,25 @@ $\Delta r$ 表示实空间的像素格子长度，这里的实空间和衍射空
 
 在手动测量前，可以先进行一些准备工作。在页面右边的顶部，可以切换到显示效果 (Displaying Effects) 栏，在辅助圆 (Auxiliary Circle) 部分，可以调整圆的半径以及中心位置。建议可以将圆的半径调整到和明场衍射盘同等大小。注意在下方要勾选显示辅助圆 (Show auxiliary circle)。
 
-然后，在右边顶部切换回衍射漂移校正 (Diffraction Shift Alignment) 栏。首先，对于 (0, 0) 的扫描位置，设置 i 方向的平移为 1，j 方向的平移为 -2.7，即可让衍射盘移动到图像的正中心。此时，在右边下半部分，有一个列表，可以记录下我们在不同位置处所测量的偏移值。表格上方有四个按钮，从左到右分别表示添加、删除、修改和导入。这里，我们点击添加按钮，表格中即添加了一行记录，Location 为 (0,0)，而 Shift 为 (-1.0, -2.7)。
+![Diffraction Shift Alignment Manually](/docs/fig/DiffractionAlignmentManual.png)
+
+然后，在右边顶部切换回衍射漂移校正 (Diffraction Shift Alignment) 栏。首先，对于 (0, 0) 的扫描位置，设置 i 方向的平移为 1，j 方向的平移为 -2.7，即可让衍射盘移动到图像的正中心。此时，在右边下半部分，有一个列表，可以记录下我们在不同位置处所测量的偏移值。表格上方有四个按钮，从左到右分别表示添加、删除、修改和导入。这里，我们点击添加按钮，表格中即添加了一行记录，Location 为 (0,0)，而 Shift 为 (-1.0, 2.7)。
 
 > 当平移量设置为带有小数部分，衍射图像可能会看起来变模糊一些，这是因为进行亚像素的平移时需要进行插值。尽管看上去衍射盘变模糊了，但插值在大多数情况下不会对最终的重构结果造成严重影响。
 
 接下来，移动到扫描范围的四个角落，即 (255, 0), (0, 255), (255, 255)，分别重复上面的操作，我们就可以得到了四条记录。对于 (255, 255)，我们发现衍射图像的多重散射效应严重，不适合测量，那么也可以用附近的扫描位置，比如 (253, 254) 来代替。此外，也可以再多选几个扫描点，特别是在扫描范围内均匀分布的点，测量相应的明场衍射盘偏移量。
 
+![Generate Shift Alignment Manually](/docs/fig/DiffractionAlignmentManual2.png)
+
 测量完成后，点击下面的生成偏移分布 (Generate Shift Mapping) 按钮，则可以打开一个对话框，里面需要选择一种生成偏移分布的拟合办法。这里我们选择线性回归 (Linear Regression)。点击确认，然后再选择需要保存的数据集的路径和名字即可。
 
 生成偏移分布后，可以在右边顶部选择显示效果 (Displaying Effects) 栏，在偏移分布路径 (Shift Mapping Path) 部分，就可以选择刚刚生成的偏移分布。此时，在辅助圆部分，下面的设置圆中心至偏移矢量指向的位置 (Set circle to where the shift vector point to) 变得可选。我们勾选这个选项，就可以看到圆心位置被设置为测量得到的偏移分布所指向的位置了。当我们调整扫描位置时，可以观察到辅助圆随着衍射盘的位置变化而发生位置变化，从而检验测量得到的偏移分布是否正确。在使用滚轮调整扫描位置时，这种效果会更加明显。
+
+![View Shift Mapping](/docs/fig/DiffractionAlignmentManual3.png)
+
+> 查看用辅助圆来查看偏移分布的效果时，记得先回到 Diffraction Alignment 界面，取消勾选 Display shifted diffraction image，让衍射盘回到未经过手动平移的原始状态。 
+
+在图中，衍射盘明显偏移了图像的中心，而辅助圆根据刚刚手动生成的平移分布设置圆心位置，使得圆心也偏离了图像的中心，并与衍射盘的中心重合。
 
 当确认偏移分布无误之后，即可点击页面下方开始应用合轴 (Start to apply alignment) 的红色按钮。选择输出数据集的路径并填好名称后，点 OK 即可。
 
@@ -562,9 +627,13 @@ FDDNet 是一个基于深度学习的衍射明场衍射盘轮廓估计模型，�
 
 如果觉得椭圆的显示效果不好 (例如太粗或太细，颜色不喜欢等)，可以点击调整椭圆效果 (Adjust Ellipse Effects) 按钮进行调整。
 
+![Diffraction Shift Alignment Using FDDNet](/docs/fig/DiffractionAlignmentFDDNet.png)
+
 之后，可以点击生成偏移分布 (Generate Shift Mapping) 即可生成偏移分布。对于一般规模的 4D-STEM 数据集，这个过程所需的时间可能会稍长一点，因为这会对每一张衍射图像都应用 FDDNet 模型进行推理。可以在左边切换到任务面板，即可查看处理的进度条。
 
 生成偏移分布后，可以在右边顶部选择显示效果 (Displaying Effects) 栏，在偏移分布路径 (Shift Mapping Path) 部分，就可以选择刚刚生成的偏移分布。此时，在辅助圆部分，下面的设置圆中心至偏移矢量指向的位置 (Set circle to where the shift vector point to) 变得可选。我们勾选这个选项，就可以看到圆心位置被设置为测量得到的偏移分布所指向的位置了。当我们调整扫描位置时，可以观察到辅助圆随着衍射盘的位置变化而发生位置变化，从而检验测量得到的偏移分布是否正确。在使用滚轮调整扫描位置时，这种效果会更加明显。
+
+![View Shift Mapping from FDDNet](/docs/fig/DiffractionAlignmentFDDNet2.png)
 
 当确认偏移分布无误之后，即可点击页面下方开始应用合轴 (Start to apply alignment) 的红色按钮。选择输出数据集的路径并填好名称后，点 OK 即可。
 
@@ -575,9 +644,13 @@ FDDNet 是一个基于深度学习的衍射明场衍射盘轮廓估计模型，�
 
 ## 虚拟成像
 
+> 使用 4D-Explorer 测试数据集中的 MoS2 作为演示
+
 虚拟成像 (Virtual Imaging) 是一种从 4D-STEM 数据集中重构出样品图像的方法。其原理是通过在衍射空间中选择一个特定的区域（例如可以选择一个环形区域，即为环形暗场像，ADF），然后对每个扫描位置的衍射图像进行积分，得到一个二维的样品图像。这个过程模拟了在传统透射电子显微镜中使用环形暗场探测器获取图像的方式。虚拟成像的优势在于可以灵活地选择不同的散射角度范围，从而得到不同衬度传递函数和分辨率的样品图像。此外，由于是在软件中进行处理，可以方便地进行参数调整和优化。
 
 在左侧面板中找到想要重构的 4D-STEM 数据集并右键点击，在打开的菜单中选择重构 (Reconstruction) -> 虚拟成像 (Virtual Imaging)。在右上角的区域类型选择框 (Domain Shape) 中可以选择重构所需的区域类型，例如圆形区域 (可以用来计算近轴明场像 Axial BF 和明场像 BF)、环形区域 (可以用来计算环形明场像 ABF 和环形暗场像 ADF)、扇形区域等等。选择好区域类型后，可以在下面调整区域的参数，如圆形的半径以及圆心坐标等。
+
+![Adjust Displaying Style of Integral Regions](/docs/fig/AdjustReconstructionEffects.png)
 
 如果不喜欢区域的显示效果 (如颜色、透明度等)，可以点击调整效果... (Adjust Effects...) 按钮，在打开的对话框中可以调整积分区域的透明度 (Alpha)、边缘颜色 (Edge Color)、内部颜色 (Face Color)、填充纹理 (Hatch)、边的线型 (Line Style)、线宽 (Line Width) 等，还可以选择是否需要填充区域。
 
@@ -585,11 +658,15 @@ FDDNet 是一个基于深度学习的衍射明场衍射盘轮廓估计模型，�
 
 ## 质心成像
 
+> 使用 4D-Explorer 测试数据集中的 MoS2 作为演示
+
 质心成像 (CoM, Center of Mass Imaging) 是一种从 4D-STEM 数据集中重构出样品图像的方法。其科学原理是基于样品电场对电子束的偏转作用。当电子束穿过样品时，样品的电场会使电子束发生偏转，这种偏转作用可以通过计算衍射图像的质心来量化。质心即为样品投影电场分布的反映。具体来说，质心成像通过计算每个扫描位置的衍射图像的质心（即重心），然后将这些质心位置映射到样品空间中，从而得到一个二维的样品图像。质心成像对于弱散射信号具有较高的灵敏度。此外，还可以计算 iCoM (Integrated CoM) 和 dCoM (Differential CoM)，分别对应于样品的电势和电荷密度。iCoM 是通过积分衍射图像的质心来获取样品的电势分布，而 dCoM 是通过微分衍射图像的质心来获取样品的电荷密度分布。
 
 在左侧面板中找到想要重构的 4D-STEM 数据集并右键点击，在打开的菜单中选择重构 (Reconstruction) -> 质心成像 (Center of Mass Imaging)。在右上角的区域类型选择框 (Domain Shape) 中可以选择参与计算质心的图像区域形状，例如圆形区域、环形区域等。选择好区域类型后，可以在下面调整区域的参数，如圆形的半径以及圆心坐标等。当然，对于质心成像而言，圆形区域一般至少要覆盖明场衍射盘，或者也可以将区域半径设得很大以覆盖整个衍射图像。
 
 如果不喜欢区域的显示效果 (如颜色、透明度等)，可以点击调整效果... (Adjust Effects...) 按钮，在打开的对话框中可以调整积分区域的透明度 (Alpha)、边缘颜色 (Edge Color)、内部颜色 (Face Color)、填充纹理 (Hatch)、边的线型 (Line Style)、线宽 (Line Width) 等，还可以选择是否需要填充区域。
+
+![Start Computing CoM](/docs/fig/StartComputingCoM.png)
 
 选择好积分区域后，点击页面下方的开始计算 (Start Calculation) 红色按钮，即选择输出图像的路径并填好名称。注意，这里可以一次性生成多种图像，包括 CoM 矢量场、两个方向的分量 (作为二维图片)、iCoM 以及 dCoM 等等。每个图像类型右边的框中表示希望输出的这张图像的名字。对话框的顶部可以设置这些图像输出在哪个 群组 (Group) 下面。而在对话框的下面可以勾选使用质心映射 (Use Center of Mass mapping) 还是使用投影电场映射 (Use projected electric field mapping)。这两者之间相差一个符号，对于投影电场映射来说，矢量场从高电势的地方指向低电势的方向，和我们印象中的电场强度一致。还可以勾选归一化，即设置平均场强为零，以避免出现均匀的、具有一定方向的电场背景，从而影响 iCoM 的成像效果。将这些设置好后，点 OK 即可开始计算。
 
