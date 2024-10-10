@@ -51,6 +51,11 @@ class Ui_Form(object):
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.commandLinkButton_tutorials = QCommandLinkButton(Form)
         self.commandLinkButton_tutorials.setObjectName(u"commandLinkButton_tutorials")
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.commandLinkButton_tutorials.sizePolicy().hasHeightForWidth())
+        self.commandLinkButton_tutorials.setSizePolicy(sizePolicy)
 
         self.verticalLayout_4.addWidget(self.commandLinkButton_tutorials)
 
@@ -58,6 +63,10 @@ class Ui_Form(object):
         self.commandLinkButton_work.setObjectName(u"commandLinkButton_work")
 
         self.verticalLayout_4.addWidget(self.commandLinkButton_work)
+
+        self.verticalSpacer_8 = QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_4.addItem(self.verticalSpacer_8)
 
 
         self.horizontalLayout_2.addLayout(self.verticalLayout_4)

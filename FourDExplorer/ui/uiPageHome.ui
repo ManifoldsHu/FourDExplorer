@@ -68,6 +68,12 @@
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
           <widget class="QCommandLinkButton" name="commandLinkButton_tutorials">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>Watch tutorials about 4D-Explorer</string>
            </property>
@@ -79,6 +85,19 @@
             <string>How does 4D-STEM work?</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>10</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
