@@ -88,12 +88,12 @@
           </item>
           <item>
            <property name="text">
-            <string>Numpy Array Sequence</string>
+            <string>Digital Micrograph (.dm4)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Digital Micrograph (.dm4)</string>
+            <string>Other HDF5 Dataset (.h5)</string>
            </property>
           </item>
          </widget>
@@ -103,7 +103,7 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>6</number>
+         <number>0</number>
         </property>
         <widget class="WidgetImportEMPAD" name="page_empad"/>
         <widget class="WidgetImportEMPAD_NJU" name="page_empad_nju"/>
@@ -112,8 +112,8 @@
         <widget class="QWidget" name="page_mat"/>
         <widget class="QWidget" name="page_mat_folder"/>
         <widget class="WidgetImportNumpy" name="page_npy"/>
-        <widget class="QWidget" name="page_npy_folder"/>
         <widget class="WidgetImportDM4" name="page_dm4"/>
+        <widget class="QWidget" name="page_h5"/>
        </widget>
       </item>
      </layout>

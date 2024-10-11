@@ -552,17 +552,12 @@ class ActionImportFourDSTEM(ActionEditBase):
             )
             importer.loadData()
             
-            
         
         elif mode == 7:
-            # .npy file sequences 
-            pass 
-        
-        elif mode == 8:
             # .dm4 file 
             pass 
         
-        elif mode == 9:
+        elif mode == 8:
             # from other h5 file 
             pass 
             

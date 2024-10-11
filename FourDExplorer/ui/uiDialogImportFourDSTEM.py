@@ -93,12 +93,12 @@ class Ui_Dialog(object):
         self.page_npy = WidgetImportNumpy()
         self.page_npy.setObjectName(u"page_npy")
         self.stackedWidget.addWidget(self.page_npy)
-        self.page_npy_folder = QWidget()
-        self.page_npy_folder.setObjectName(u"page_npy_folder")
-        self.stackedWidget.addWidget(self.page_npy_folder)
         self.page_dm4 = WidgetImportDM4()
         self.page_dm4.setObjectName(u"page_dm4")
         self.stackedWidget.addWidget(self.page_dm4)
+        self.page_h5 = QWidget()
+        self.page_h5.setObjectName(u"page_h5")
+        self.stackedWidget.addWidget(self.page_h5)
 
         self.verticalLayout.addWidget(self.stackedWidget)
 
@@ -178,7 +178,7 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
 
-        self.stackedWidget.setCurrentIndex(6)
+        self.stackedWidget.setCurrentIndex(0)
 
 
         QMetaObject.connectSlotsByName(Dialog)
@@ -196,8 +196,8 @@ class Ui_Dialog(object):
         self.comboBox_mode.setItemText(4, QCoreApplication.translate("Dialog", u"MATLAB 4D Matrix (.mat)", None))
         self.comboBox_mode.setItemText(5, QCoreApplication.translate("Dialog", u"MATLAB Matrix Sequence", None))
         self.comboBox_mode.setItemText(6, QCoreApplication.translate("Dialog", u"Numpy 4D Array (.npy)", None))
-        self.comboBox_mode.setItemText(7, QCoreApplication.translate("Dialog", u"Numpy Array Sequence", None))
-        self.comboBox_mode.setItemText(8, QCoreApplication.translate("Dialog", u"Digital Micrograph (.dm4)", None))
+        self.comboBox_mode.setItemText(7, QCoreApplication.translate("Dialog", u"Digital Micrograph (.dm4)", None))
+        self.comboBox_mode.setItemText(8, QCoreApplication.translate("Dialog", u"Other HDF5 Dataset (.h5)", None))
 
         self.groupBox_2.setTitle(QCoreApplication.translate("Dialog", u"Import To", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"Import Dataset to Location:", None))
