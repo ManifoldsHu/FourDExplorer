@@ -27,6 +27,7 @@ import numpy as np
 from bin.TaskManager import TaskManager 
 from bin.MetaManager import MetaManager 
 from bin.DateTimeManager import DateTimeManager 
+from lib.TaskLoadData import TaskLoadNumpy 
 from Constants import APP_VERSION 
 
 class ImporterNumpy(QObject):
@@ -70,42 +71,6 @@ class ImporterNumpy(QObject):
             '/General/time': self.datetime_manager.current_time,
             '/General/time_zone': self.datetime_manager.current_timezone,
         }
-        
-    @property
-    def scan_i(self) -> int:
-        return self._scan_i
-    
-    @property
-    def scan_j(self) -> int:
-        return self._scan_j
-    
-    @property
-    def dp_i(self) -> int:
-        return self._dp_i
-    
-    @property
-    def dp_j(self) -> int:
-        return self._dp_j
-    
-    @property
-    def file_type(self) -> str:
-        return self._file_type
-    
-    @property
-    def file_path(self) -> str:
-        return self._file_path
-    
-    @property
-    def dtype(self) -> str:
-        return self._dtype
-    
-    @property
-    def is_flipped(self) -> bool:
-        return self._is_flipped
-    
-    @property
-    def rotate90(self) -> int:
-        return self._rotate90
     
     @property
     def logger(self) -> Logger:
@@ -122,11 +87,127 @@ class ImporterNumpy(QObject):
         global qApp
         return qApp.datetime_manager
     
-    def _parseNpzDataNames(self):
+    # def _parseNpzDataNames(self):
+    #     """
+    #     Parse the data names in the .npz file.
+    #     """
+    #     with np.load(self.file_path) as data:
+    #         self._data_names = list(data.keys())
+            
+    def setFilePath(self, path: str):
         """
-        Parse the data names in the .npz file.
+        arguments:
+            path: (str) The absolute path of the outside file.
         """
-        with np.load(self.file_path) as data:
-            self._data_names = list(data.keys())
+        if not isinstance(path, str):
+            raise TypeError('path must be a str, not '
+                '{0}'.format(type(path).__name__))
+        
+        if not os.path.isfile(path):
+            raise OSError('path is not a file: {0}'.format(path))
+        
+        self._file_path = path
+        
+    def setReadParameters(self, file_path: str, npz_data_name: str = None,):
+        """
+        arguments:
+            file_path: (str) The absolute path of the outside file.
+            
+            npz_data_name: (str) The data name in the .npz file. If not 
+                specified, the first data will be loaded.
+        """
+        self.setFilePath(file_path)
+        self._npz_data_name = npz_data_name
         
 
+    def varifyData(self) -> bool:
+        """
+        Return True if the data is a valid 4D-STEM dataset.
+        """
+        # 检查文件路径是否存在
+        if not self._file_path:
+            return False
+
+        # 处理 npy 文件
+        if self._file_path.endswith('.npy'):
+            try:
+                # 使用 with np.load 风格加载文件头部并检查维度
+                with np.load(self._file_path, mmap_mode='r') as data:
+                    if data.ndim == 4:
+                        return True
+            except Exception as e:
+                print(f"Error loading .npy file: {e}")
+            return False
+
+        # 处理 npz 文件
+        elif self._file_path.endswith('.npz'):
+            try:
+                # 获取当前选择的键
+                selected_key = self._npz_data_name
+                # 使用 mmap_mode='r' 延迟加载选定数组
+                with np.load(self._file_path, mmap_mode='r') as npz_data:
+                    selected_data = npz_data[selected_key]
+                    if selected_data.ndim == 4:
+                        return True
+            except Exception as e:
+                print(f"Error loading .npz file: {e}")
+            return False
+        return False
+        
+    def parseShapeAndDtype(self) -> tuple:
+        """
+        Return the shape and dtype of the data.
+        For .npy files, directly read the shape and dtype using memory mapping.
+        For .npz files, read the shape and dtype of the selected array from the combobox.
+        
+        returns:
+            shape: (tuple[int]) The shape of the data.
+            dtype: (str) The dtype of the data.
+        """
+        # 检查文件路径是否存在
+        if not self._file_path:
+            return None, None
+
+        # 处理 npy 文件
+        if self._file_path.endswith('.npy'):
+            try:
+                # 使用 mmap_mode='r' 只获取形状和 dtype 信息
+                data = np.load(self._file_path, mmap_mode='r')
+                return data.shape, data.dtype
+            except Exception as e:
+                print(f"Error loading .npy file: {e}")
+                return None, None
+
+        # 处理 npz 文件
+        elif self._file_path.endswith('.npz'):
+            try:
+                # 获取当前选择的键
+                selected_key = self.ui.comboBox_array_name.currentText()
+                if selected_key in self._npz_keys:
+                    # 使用 mmap_mode='r' 延迟加载选定数组并获取形状和 dtype
+                    with np.load(self._file_path, mmap_mode='r') as npz_data:
+                        selected_data = npz_data[selected_key]
+                        return selected_data.shape, selected_data.dtype
+            except Exception as e:
+                print(f"Error loading .npz file: {e}")
+                return None, None
+
+        return None, None
+
+
+        
+        
+    def loadData(self):
+        """
+        This method will submit a load task to the task manager.
+        """
+        if not self._file_path:
+            raise RuntimeError("No file is assigned.")
+        if not self.varifyData():
+            raise RuntimeError("Invalid 4D-STEM data. The data must be 4-dimensional.")
+        shape, dtype = self.parseShapeAndDtype()
+        if (shape is None) or (dtype is None):
+            raise RuntimeError("Failed to parse the shape of the data.")
+        
+        self.task = TaskLoadNumpy(shape, self._file_path, self.item_parent_path, self.item_name, self.meta) 
+        self.task_manager.addTask(self.task)

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiDialogImportFourDSTEM.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.3.0
+## Created by: Qt User Interface Compiler version 6.2.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -20,8 +20,10 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QGroupBox,
     QSizePolicy, QSpacerItem, QStackedWidget, QVBoxLayout,
     QWidget)
 
+from bin.Widgets.WidgetImportDM4 import WidgetImportDM4
 from bin.Widgets.WidgetImportEMPAD import (WidgetImportEMPAD, WidgetImportEMPAD_NJU)
 from bin.Widgets.WidgetImportMerlin import WidgetImportMerlin
+from bin.Widgets.WidgetImportNumpy import WidgetImportNumpy
 from bin.Widgets.WidgetImportRaw import WidgetImportRaw
 
 class Ui_Dialog(object):
@@ -88,15 +90,15 @@ class Ui_Dialog(object):
         self.page_mat_folder = QWidget()
         self.page_mat_folder.setObjectName(u"page_mat_folder")
         self.stackedWidget.addWidget(self.page_mat_folder)
-        self.page_npy = QWidget()
+        self.page_npy = WidgetImportNumpy()
         self.page_npy.setObjectName(u"page_npy")
         self.stackedWidget.addWidget(self.page_npy)
         self.page_npy_folder = QWidget()
         self.page_npy_folder.setObjectName(u"page_npy_folder")
         self.stackedWidget.addWidget(self.page_npy_folder)
-        self.page_dm = QWidget()
-        self.page_dm.setObjectName(u"page_dm")
-        self.stackedWidget.addWidget(self.page_dm)
+        self.page_dm4 = WidgetImportDM4()
+        self.page_dm4.setObjectName(u"page_dm4")
+        self.stackedWidget.addWidget(self.page_dm4)
 
         self.verticalLayout.addWidget(self.stackedWidget)
 
@@ -176,7 +178,7 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
 
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(6)
 
 
         QMetaObject.connectSlotsByName(Dialog)

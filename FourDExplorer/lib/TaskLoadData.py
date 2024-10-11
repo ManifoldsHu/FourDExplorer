@@ -16,17 +16,24 @@ date:           Apr 29, 2021
 
 from logging import Logger
 import os
-from typing import Iterable, Mapping, Tuple  
+from typing import Iterable
+from typing import Mapping
+from typing import Tuple  
 from PIL import Image
 
-from PySide6.QtCore import QObject, Signal 
+from PySide6.QtCore import QObject
+from PySide6.QtCore import Signal 
 import h5py
 import numpy as np
-# from bin.ItemActions import ActionShowFourDSTEM
 
-from bin.TaskManager import Subtask, SubtaskWithProgress, Task
+from bin.TaskManager import Subtask
+from bin.TaskManager import SubtaskWithProgress
+from bin.TaskManager import Task
 from bin.HDFManager import HDFHandler
-from lib.ReadBinary import getDType, readFourDSTEMFromRaw
+from lib.ReadBinary import getDType
+from lib.ReadBinary import readFourDSTEMFromRaw
+from lib.ReadBinary import readFourDSTEMFromNpy
+from lib.ReadBinary import readFourDSTEMFromNpz
 
 class TaskBaseLoadData(Task):
     """
@@ -349,6 +356,83 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
 #         self, 
 
 #     )
+
+
+class TaskLoadNumpy(TaskBaseLoadData):
+    """
+    把外部 Numpy 文件中加载进 HDF5 文件中的任务。
+    
+    Task to load numpy file into the HDF5 file.
+    """
+    def __init__(self,
+        shape,
+        file_path: str,
+        item_parent_path: str,
+        item_name: str,
+        meta: dict,
+        dtype: str,
+        npz_data_name: str = None,
+        parent: QObject = None,
+    ):
+        """
+        arguments:
+            file_path: (str) The absolute path of the ouside raw file.
+            
+            
+        """
+        self._file_path = file_path
+        self._npz_data_name = npz_data_name
+        super().__init__(
+            shape,
+            file_path, 
+            item_parent_path, 
+            item_name, 
+            parent, 
+            **meta
+        )
+        self._dtype = dtype 
+        self.name = 'Load 4D-STEM data'
+        self.comment = (
+            'Load 4D-STEM data\n'
+            'Data File path: {0}\n'
+            'To Dataset Object: {1}\n'.format(
+                self._file_path, self._item_name 
+            )
+        )
+        
+        self.setPrepare(self._createDataset)
+        self._bindSubtask()
+        
+    def _createDataset(self):
+        self.hdf_handler.addNewData(
+            self._item_parent_path,
+            self._item_name,
+            self._shape,
+            self._dtype,
+        )
+        
+    def _bindSubtask(self):
+        if self._file_path.endswith('.npz'):
+            self.addSubtaskFuncWithProgress(
+                'Load Data from .npz', 
+                readFourDSTEMFromNpz,
+                file_path = self._file_path,
+                item_path = self.item_path,
+                npz_data_name = self._npz_data_name,
+                shape = self._shape,
+                dtype = self._dtype,
+            )
+        elif self._file_path.endswith('.npy'):
+            self.addSubtaskFuncWithProgress(
+                'Load Data from .npy', 
+                readFourDSTEMFromNpy,
+                file_path = self._file_path,
+                item_path = self.item_path,
+                shape = self._shape,
+                dtype = self._dtype,
+            )
+
+
 
     
 class TaskLoadTiff(TaskBaseLoadData):

@@ -33,3 +33,8 @@ docs/_templates
 docs/.nojekyll
 # Sphinx I18N, Auto-generated Templates
 docs/locale/pot/
+
+# Venv 
+venv
+FourDExplorerVenv 
+Venv
