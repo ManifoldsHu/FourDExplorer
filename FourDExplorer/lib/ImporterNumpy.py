@@ -132,11 +132,11 @@ class ImporterNumpy(QObject):
         if self._file_path.endswith('.npy'):
             try:
                 # 使用 with np.load 风格加载文件头部并检查维度
-                with np.load(self._file_path, mmap_mode='r') as data:
-                    if data.ndim == 4:
-                        return True
+                data = np.load(self._file_path, mmap_mode='r')
+                if data.ndim == 4:
+                    return True
             except Exception as e:
-                print(f"Error loading .npy file: {e}")
+                self.logger.error(f"Error loading .npy file: {e}")
             return False
 
         # 处理 npz 文件
@@ -145,12 +145,12 @@ class ImporterNumpy(QObject):
                 # 获取当前选择的键
                 selected_key = self._npz_data_name
                 # 使用 mmap_mode='r' 延迟加载选定数组
-                with np.load(self._file_path, mmap_mode='r') as npz_data:
-                    selected_data = npz_data[selected_key]
-                    if selected_data.ndim == 4:
-                        return True
+                npz_data = np.load(self._file_path, mmap_mode='r')
+                selected_data = npz_data[selected_key]
+                if selected_data.ndim == 4:
+                    return True
             except Exception as e:
-                print(f"Error loading .npz file: {e}")
+                self.logger.error(f"Error loading .npz file: {e}")
             return False
         return False
         
@@ -209,5 +209,12 @@ class ImporterNumpy(QObject):
         if (shape is None) or (dtype is None):
             raise RuntimeError("Failed to parse the shape of the data.")
         
-        self.task = TaskLoadNumpy(shape, self._file_path, self.item_parent_path, self.item_name, self.meta) 
+        self.task = TaskLoadNumpy(
+            shape, 
+            self._file_path, 
+            self.item_parent_path, 
+            self.item_name, 
+            self.meta,
+            dtype
+        ) 
         self.task_manager.addTask(self.task)

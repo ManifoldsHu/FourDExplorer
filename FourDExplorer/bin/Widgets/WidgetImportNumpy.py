@@ -56,6 +56,8 @@ class WidgetImportNumpy(QWidget):
         if file_path == '':
             return 
         
+        file_path = os.path.abspath(file_path)
+        
         if file_path.endswith('.npz'):
             self.ui.stackedWidget.setCurrentIndex(0)
             self.ui.comboBox_array_name.clear()
@@ -68,6 +70,7 @@ class WidgetImportNumpy(QWidget):
                     
         elif file_path.endswith('.npy'):
             self.ui.stackedWidget.setCurrentIndex(1)
+        
         
         self._file_path = file_path
         self.ui.lineEdit_file_path.setText(file_path)

@@ -201,18 +201,22 @@ def readFourDSTEMFromNpz(
     if progress_signal is None:
         progress_signal = Signal(int)
 
-    with np.load(file_path, mmap_mode='r') as npz_data:
-        selected_data = npz_data[npz_data_name]
-        if len(selected_data.shape) != 4:
-            raise IndexError('dataset must be a 4-dimensional matrix')
-        scan_i, scan_j, dp_i, dp_j = selected_data.shape
-        with h5py.File(item_path, 'r+') as hdf_file:
-            dataset = hdf_file[item_path]
-            for ii in range(scan_i):
-                for jj in range(scan_j):
-                    dataset[ii, jj, :, :] = selected_data[ii, jj, :, :]
-                
-                progress_signal.emit(int((ii+1)/scan_i*100))
+    global qApp
+    hdf_handler = qApp.hdf_handler
+
+    # with np.load(file_path, mmap_mode='r') as npz_data:
+    npz_data = np.load(file_path, mmap_mode = 'r')
+    selected_data = npz_data[npz_data_name]
+    if len(selected_data.shape) != 4:
+        raise IndexError('dataset must be a 4-dimensional matrix')
+    scan_i, scan_j, dp_i, dp_j = selected_data.shape
+    
+    dataset = hdf_handler.file[item_path]
+    for ii in range(scan_i):
+        for jj in range(scan_j):
+            dataset[ii, jj, :, :] = selected_data[ii, jj, :, :]
+        
+        progress_signal.emit(int((ii+1)/scan_i*100))
                 
                 
 def readFourDSTEMFromNpy(
@@ -238,14 +242,18 @@ def readFourDSTEMFromNpy(
     if progress_signal is None:
         progress_signal = Signal(int)
     
-    with np.load(file_path, mmap_mode='r') as npy_data:
-        if len(npy_data.shape) != 4:
-            raise IndexError('dataset must be a 4-dimensional matrix')
-        scan_i, scan_j, dp_i, dp_j = npy_data.shape
-        with h5py.File(item_path, 'r+') as hdf_file:
-            dataset = hdf_file[item_path]
-            for ii in range(scan_i):
-                for jj in range(scan_j):
-                    dataset[ii, jj, :, :] = npy_data[ii, jj, :, :]
-                
-                progress_signal.emit(int((ii+1)/scan_i*100))
+    global qApp 
+    hdf_handler = qApp.hdf_handler
+    
+    # with np.load(file_path, mmap_mode='r') as npy_data:
+    npy_data = np.load(file_path, mmap_mode='r')
+    if len(npy_data.shape) != 4:
+        raise IndexError('dataset must be a 4-dimensional matrix')
+    scan_i, scan_j, dp_i, dp_j = npy_data.shape
+
+    dataset = hdf_handler.file[item_path]
+    for ii in range(scan_i):
+        for jj in range(scan_j):
+            dataset[ii, jj, :, :] = npy_data[ii, jj, :, :]
+        
+        progress_signal.emit(int((ii+1)/scan_i*100))

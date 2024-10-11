@@ -419,8 +419,6 @@ class TaskLoadNumpy(TaskBaseLoadData):
                 file_path = self._file_path,
                 item_path = self.item_path,
                 npz_data_name = self._npz_data_name,
-                shape = self._shape,
-                dtype = self._dtype,
             )
         elif self._file_path.endswith('.npy'):
             self.addSubtaskFuncWithProgress(
@@ -428,8 +426,6 @@ class TaskLoadNumpy(TaskBaseLoadData):
                 readFourDSTEMFromNpy,
                 file_path = self._file_path,
                 item_path = self.item_path,
-                shape = self._shape,
-                dtype = self._dtype,
             )
 
 
