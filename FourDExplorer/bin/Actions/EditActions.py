@@ -559,7 +559,9 @@ class ActionImportFourDSTEM(ActionEditBase):
             # .dm4 file 
             importer = ImporterDM4(new_name, parent_path)
             page: WidgetImportDM4
-            pass 
+            file_path = page.getFilePath()
+            importer.parseDM4(file_path)
+            importer.loadData()
         
         elif mode == 8:
             # from other h5 file 

@@ -442,8 +442,9 @@ class ImporterDM4(QObject):
             raise ValueError("scan_j must be larger than 0.")
         self._scan_j = sj 
 
-    def parseDM4(self):
-        dm4obj = ParseDM4(self._dm4_path)
+    def parseDM4(self, dm4_path: str):
+        self._dm4_path = dm4_path
+        dm4obj = ParseDM4(dm4_path)
         root = dm4obj.parse()
         image_list = root.get_tag_by_name('ImageList')
         taglist = []
@@ -458,8 +459,8 @@ class ImporterDM4(QObject):
         if len(taglist) > 1:
             self.logger.warning(f"Multiple 4D-STEM dataset found in the .dm4 file. Using the first one.")
 
-        the_tag = taglist[0]
-        dims = the_tag.get_tag_by_name('Dimensions')
+        tagdir_4dstem = taglist[0]
+        dims = tagdir_4dstem.get_tag_by_name('Dimensions')
         self.scan_i = dims.get_tag(0).get_data()
         self.scan_j = dims.get_tag(1).get_data()
         self._dp_i = dims.get_tag(2).get_data()
@@ -467,9 +468,10 @@ class ImporterDM4(QObject):
 
         self._num_images = self.scan_i * self.scan_j
 
-        self._first_image_offset = the_tag.data.offset
-        self._scalar_type = the_tag.data.type
-        self._scalar_size = the_tag.data.dsize
+        data_tag = tagdir_4dstem.get_tag_by_name('Data')
+        self._first_image_offset = data_tag.data.offset
+        self._scalar_type = data_tag.data.type
+        self._scalar_size = data_tag.data.dsize
     
     def loadData(self):
         """

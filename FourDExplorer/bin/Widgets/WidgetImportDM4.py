@@ -52,4 +52,11 @@ class WidgetImportDM4(QWidget):
         file_path = os.path.abspath(file_path)
         self.ui.lineEdit_file_path.setText(file_path)
         
+    def getFilePath(self):
+        """
+        Get the file path of the selected .dm4 file.
         
+        Returns:
+            str: file path
+        """
+        return self.ui.lineEdit_file_path.text()
