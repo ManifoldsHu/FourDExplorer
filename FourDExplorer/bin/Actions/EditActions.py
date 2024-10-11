@@ -40,10 +40,12 @@ from bin.Widgets.WidgetImportEMPAD import WidgetImportEMPAD
 from bin.Widgets.WidgetImportMerlin import WidgetImportMerlin 
 from bin.Widgets.WidgetImportRaw import WidgetImportRaw 
 from bin.Widgets.WidgetImportNumpy import WidgetImportNumpy 
+from bin.Widgets.WidgetImportDM4 import WidgetImportDM4
 from lib.ImporterEMPAD import ImporterEMPAD, ImporterEMPAD_NJU
 from lib.ImporterRaw import ImporterRawFourDSTEM
 from lib.ImporterMIB import ImporterMIB
 from lib.ImporterNumpy import ImporterNumpy
+from lib.ImporterDM4 import ImporterDM4
 from lib.TaskLoadData import TaskLoadTiff
 
 class ActionEditBase(QAction):
@@ -555,6 +557,8 @@ class ActionImportFourDSTEM(ActionEditBase):
         
         elif mode == 7:
             # .dm4 file 
+            importer = ImporterDM4(new_name, parent_path)
+            page: WidgetImportDM4
             pass 
         
         elif mode == 8:
