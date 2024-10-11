@@ -44,6 +44,7 @@ extensions = [
     'sphinx.ext.intersphinx', # link to other Sphinx documentation
     'sphinx.ext.napoleon', # support for NumPy and Google style docstrings
     'sphinx.ext.githubpages', # publish documentation to GitHub Pages
+    'sphinx.ext.mathjax',   # mathjax
 ]
 
 templates_path = ['_templates']
@@ -51,7 +52,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # Options for HTML output
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
+html_static_path = ['_static', 'fig']
+html_favicon = 'fig/4D.png'
+# html_logo = 'fig/4D.png'  # The color of icon is near to the background, looks odd
 
 # Locale settings for internationalization
 locale_dirs = ['locale/']  # Directory where translation files are stored

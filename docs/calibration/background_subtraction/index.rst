@@ -1,5 +1,10 @@
 Background Subtraction
-==================
+==========================
+
+4D-Explorer offers two methods for background noise removal: subtracting a reference background image and histogram filtering. The former involves selecting a background image from HDF5, ensuring it matches the dataset's dimensions, and applying the subtraction. The latter uses histogram limits to filter out noise, setting values outside the limits to either the maximum limit or zero.
+
+
+
 
 .. toctree::
    :maxdepth: 2
@@ -7,15 +12,3 @@ Background Subtraction
 
    histogram_filter
    reference
-
-Background Subtraction Overview
-=============================
-
-This section details the background subtraction process. You can describe the methods used and the importance of histogram filtering here.
-
-- Steps for subtracting background
-- When to apply histogram filters
-
-.. note::
-
-   Be mindful of noise when subtracting the background in low-signal images.
