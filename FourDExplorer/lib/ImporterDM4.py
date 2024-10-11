@@ -92,7 +92,7 @@ class TagDirectory(TagObject):
             raise ValueError("show_max_level must be a non-negative integer")
         for i in range(self.num_tags):
             current_tag = self.tags[i]
-            print(f"{"    "*level}{self.name} ({i+1}/{self.num_tags}), {current_tag.get_name()}, type: {current_tag.get_type()}")
+            print(f"{'    '*level}{self.name} ({i+1}/{self.num_tags}), {current_tag.get_name()}, type: {current_tag.get_type()}")
             if current_tag.get_type() == 'directory' and level < show_max_level:
                 current_tag.show_tags(level= level+1, show_max_level=show_max_level)
 
@@ -139,7 +139,7 @@ class Tag(TagObject):
         self.data = data
 
     def __str__(self):
-        return f"Tag: {self.name}, Length: {self.length}, Type: {self.get_tag_type()["description"]}, Data: {self.data}"
+        return f"Tag: {self.name}, Length: {self.length}, Type: {self.get_tag_type()['description']}, Data: {self.data}"
 
     def get_parent_directory(self):
         return self.parent_directory
