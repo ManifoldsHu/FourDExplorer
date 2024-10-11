@@ -9,8 +9,8 @@ This section guides users through editing experimental parameters for 4D-STEM da
    :maxdepth: 2
    :caption: Edit Parameters
 
-   aberration
-   camera
    general
    microscope
+   camera
    space
+   aberration

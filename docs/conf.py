@@ -50,6 +50,24 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+mathjax_config = {
+    "tex": {
+        "inlineMath": [["$", "$"], ["\\(", "\\)"]],
+        "displayMath": [["$$", "$$"], ["\\[", "\\]"]],
+    }
+}
+
+mathjax3_config = {
+    "tex": {
+        "inlineMath": [["$", "$"], ["\\(", "\\)"]],
+    },
+    "options": {
+        "skipHtmlTags": ["script", "noscript", "style", "textarea", "pre"],
+        "processHtmlClass": "mathjax-process"
+    }
+}
+
+
 # Options for HTML output
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static', 'fig']

@@ -17,7 +17,7 @@ gold_nanoparticle_06
 - **Camera model**: Thermofisher EMPAD
 - **Accelerating voltage (U)**: 60 kV
 - **Camera length (CL)**: 576.6 mm
-- **Convergence angle ($\alpha$)**: 22.5 mrad
+- **Convergence angle (α)**: 22.5 mrad
 - **Scan step size**: 1.80 nm
 - **Defocus**: In-focus
 - **Notes**: This dataset was captured at focus with gold nanoparticles embedded in DNA. It was pre-configured with a 30° scan rotation angle and exhibits some diffraction drift. This dataset is suitable for demonstrating the process of **Rotational Offset Correction** by calculating the curl of the CoM and the process of **Diffraction Shift Alignment** using FDDNet to measure the shift in each diffraction spot.
@@ -34,7 +34,7 @@ gold_nanoparticle_07
 - **Camera model**: Thermofisher EMPAD
 - **Accelerating voltage (U)**: 60 kV
 - **Camera length (CL)**: 576.6 mm
-- **Convergence angle ($\alpha$)**: 22.5 mrad
+- **Convergence angle (α)**: 22.5 mrad
 - **Scan step size**: 1.31 nm
 - **Defocus**: -2.11 μm (under-focused)
 - **Notes**: This dataset was captured under under-focus conditions, with gold nanoparticles embedded in DNA. In each diffraction image, the shape of the gold particles (real-space information) is visible. The sample stage height was adjusted to achieve the under-focus while maintaining the same scan rotation angle as the ``gold_nanoparticle_06`` dataset. This dataset is suitable for demonstrating the process of **Rotational Offset Correction** using Axial BF images.
@@ -48,7 +48,7 @@ MoS2_14
 - **Camera model**: Thermofisher EMPAD
 - **Accelerating voltage (U)**: 60 kV
 - **Camera length (CL)**: 286.3 mm
-- **Convergence angle ($\alpha$)**: 22.5 mrad
+- **Convergence angle (α)**: 22.5 mrad
 - **Scan step size**: 0.029 nm
 - **Defocus**: In-focus
 - **Notes**: This dataset represents atomic-level imaging of molybdenum disulfide (MoS₂), a 2D material. It is suitable for demonstrating the effects of different reconstruction methods.

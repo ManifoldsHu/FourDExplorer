@@ -3,7 +3,7 @@ Microscope Parameters
 
 We can modify the metadata sequentially. After completing the first page (General) — and it's okay to leave some metadata fields blank — click the ``Next→`` button to move to the second page, which is the **Microscope** page. Here, you can enter information about the microscope, such as renaming it to ``Thermofisher FEI Titan G2 60-300``.
 
-Next, several key parameters are available for editing, including **Beam Current**, **Accelerate Voltage**, **Camera Length**, **Convergence Angle** ($\alpha$), **Dwell Time**, and **Step Size**. These parameters are crucial for determining the quantitative analysis results of the dataset, so they must be modified with caution. Some parameters, like **Camera Length** and **Convergence Angle**, often require calibration using standard samples.
+Next, several key parameters are available for editing, including **Beam Current**, **Accelerate Voltage**, **Camera Length**, **Convergence Angle** (α), **Dwell Time**, and **Step Size**. These parameters are crucial for determining the quantitative analysis results of the dataset, so they must be modified with caution. Some parameters, like **Camera Length** and **Convergence Angle**, often require calibration using standard samples.
 
 .. image:: /fig/EditConvergenceAngle.png
    :alt: Edit Convergence Angle
