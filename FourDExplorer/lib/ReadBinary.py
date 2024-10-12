@@ -337,7 +337,11 @@ def readFourDSTEMFromDM4(
         
     with open(file_path, 'rb') as fid:
         fid.seek(offset_to_first_image)
-        dp_i_chunk_size = 10    # Set up chunk size for dp_i dimension
+        
+        # Set up chunk size for dp_i dimension
+        # ensure the chunk size is smaller than 1 percent of the whole dataset 
+        # if the whole dataset is large
+        dp_i_chunk_size = max(dp_i // 100, 1)
         
         for i_start in range(0, dp_i, dp_i_chunk_size):
             i_end = min(i_start + dp_i_chunk_size, dp_i)
