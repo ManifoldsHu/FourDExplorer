@@ -334,19 +334,19 @@ def readFourDSTEMFromDM4(
     hdf_handler = qApp.hdf_handler
     dataset = hdf_handler.file[item_path]
     dt = getDType(scalar_type, scalar_size, little_endian)
-
+        
     with open(file_path, 'rb') as fid:
         fid.seek(offset_to_first_image)
-        for ii in range(dp_i):
-            for jj in range(dp_j):
-                data = np.nan_to_num(np.fromfile(
-                    fid,
-                    dtype = dt,
-                    count = scan_i * scan_j,
-                    sep = '',
-                    offset = 0,
-                )).reshape((scan_i, scan_j))
-                dataset[:, :, ii, jj] = data
-                    
-            progress_signal.emit(int((ii+1)/dp_i*100))
-    
+        dp_i_chunk_size = 10    # Set up chunk size for dp_i dimension
+        
+        for i_start in range(0, dp_i, dp_i_chunk_size):
+            i_end = min(i_start + dp_i_chunk_size, dp_i)
+            chunk_elements = (i_end - i_start) * dp_j * scan_i * scan_j
+            
+            data = np.nan_to_num(np.fromfile(fid, dtype=dt, count=chunk_elements))
+            data = data.reshape((i_end - i_start, dp_j, scan_i, scan_j))
+            data = data.transpose(2, 3, 0, 1)   # shape to (scan_i, scan_j, dp_i, dp_j)
+            dataset[:, :, i_start:i_end, :] = data  # the dataset slice must be 4D
+            
+            progress = int((i_end) / dp_i * 100)
+            progress_signal.emit(progress)

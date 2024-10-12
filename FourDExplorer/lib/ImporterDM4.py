@@ -442,8 +442,8 @@ class ImporterDM4(QObject):
     def parseDM4(self, dm4_path: str):
         self._dm4_path = dm4_path
         dm4obj = ParseDM4(dm4_path)
-        self._little_endian = True if dm4obj.byte_order == '<' else False
         root = dm4obj.parse()
+        self._little_endian = True if dm4obj.byte_order == '<' else False
         image_list = root.get_tag_by_name('ImageList')
         taglist = []
         for tag in image_list.tags:
