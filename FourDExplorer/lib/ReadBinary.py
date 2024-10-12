@@ -183,6 +183,9 @@ def readFourDSTEMFromNpz(
 ) -> None:
     """
     Reads a 4D-STEM dataset from a .npz file and writes it into an HDF5 dataset.
+    
+    This function reduces memory usage by reading and writing one scan row at a 
+    time for large datasets, and one scan column at a time for smaller datasets.
 
     arguments:
         file_path (str): The absolute path of the .npz file.
@@ -204,19 +207,31 @@ def readFourDSTEMFromNpz(
     global qApp
     hdf_handler = qApp.hdf_handler
 
-    # with np.load(file_path, mmap_mode='r') as npz_data:
-    npz_data = np.load(file_path, mmap_mode = 'r')
+    # Load the .npz file and get the shape of the selected data
+    npz_data = np.load(file_path, mmap_mode='r')
     selected_data = npz_data[npz_data_name]
     if len(selected_data.shape) != 4:
         raise IndexError('dataset must be a 4-dimensional matrix')
     scan_i, scan_j, dp_i, dp_j = selected_data.shape
-    
+    del npz_data, selected_data  # Release memory
+
     dataset = hdf_handler.file[item_path]
-    for ii in range(scan_i):
-        for jj in range(scan_j):
-            dataset[ii, jj, :, :] = selected_data[ii, jj, :, :]
-        
-        progress_signal.emit(int((ii+1)/scan_i*100))
+    
+    if scan_i > 5:  # If chunk is small, read all columns at once
+        for ii in range(scan_i):
+            npz_data = np.load(file_path, mmap_mode='r')
+            selected_data = npz_data[npz_data_name]
+            dataset[ii, :, :, :] = selected_data[ii, :, :, :]
+            del npz_data, selected_data  # Release memory
+            progress_signal.emit(int((ii+1)/scan_i*100))
+    else:  # If chunk is large, read one column, one row at a time
+        for ii in range(scan_i):
+            for jj in range(scan_j):
+                npz_data = np.load(file_path, mmap_mode='r')
+                selected_data = npz_data[npz_data_name]
+                dataset[ii, jj, :, :] = selected_data[ii, jj, :, :]
+                del npz_data, selected_data  # Release memory
+            progress_signal.emit(int((ii+1)/scan_i*100))
                 
                 
 def readFourDSTEMFromNpy(
@@ -226,6 +241,9 @@ def readFourDSTEMFromNpy(
 ) -> None:
     """
     Reads a 4D-STEM dataset from a .npy file and writes it into an HDF5 dataset.
+    
+    This function reduces memory usage by reading and writing one scan row at a 
+    time for large datasets, and one scan column at a time for smaller datasets.
 
     arguments:
         file_path (str): The absolute path of the .npy file.
@@ -245,15 +263,24 @@ def readFourDSTEMFromNpy(
     global qApp 
     hdf_handler = qApp.hdf_handler
     
-    # with np.load(file_path, mmap_mode='r') as npy_data:
     npy_data = np.load(file_path, mmap_mode='r')
     if len(npy_data.shape) != 4:
         raise IndexError('dataset must be a 4-dimensional matrix')
-    scan_i, scan_j, dp_i, dp_j = npy_data.shape
-
+    scan_i, scan_j, dp_i, dp_j = npy_data.shape 
+    del npy_data
     dataset = hdf_handler.file[item_path]
-    for ii in range(scan_i):
-        for jj in range(scan_j):
-            dataset[ii, jj, :, :] = npy_data[ii, jj, :, :]
-        
-        progress_signal.emit(int((ii+1)/scan_i*100))
+    
+    if scan_i > 5:      # if chunk is small, read all columns at once
+        for ii in range(scan_i):
+            npy_data = np.load(file_path, mmap_mode='r')
+            dataset[ii, :, :, :] = npy_data[ii, :, :, :]
+            del npy_data        # release memory
+            progress_signal.emit(int((ii+1)/scan_i*100))
+            
+    else:       # if chunk is large, read one column, one row at a time
+        for ii in range(scan_i):   
+            for jj in range(scan_j):
+                npy_data = np.load(file_path, mmap_mode='r')
+                dataset[ii, jj, :, :] = npy_data[ii, jj, :, :]
+                del npy_data    # release memory
+            progress_signal.emit(int((ii+1)/scan_i*100))
