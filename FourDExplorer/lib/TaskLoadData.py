@@ -522,3 +522,121 @@ class TaskLoadTiff(TaskBaseLoadData):
         just after the task is completed.
         """
         self.logger.debug('Task {0} completed.'.format(self.name))
+
+
+class TaskLoadDM4(TaskBaseLoadData):
+    """
+    从 DM4 文件中加载 4D-STEM 数据的 Task
+    
+    将自动在 HDF5 文件中创建一个 Object 并导入数据。
+    
+    Load 4D-STEM data from DM4 file.
+    
+    Will create a Dataset in HDF5 file according to the item_path.
+    """
+    def __init__(
+        self, 
+        shape: tuple[int],
+        file_path: str,
+        item_parent_path: str,
+        item_name: str,
+        offset_to_first_image: int,
+        gap_between_images: int,
+        dtype: str,
+        meta: dict,
+        little_endian: bool,
+        is_flipped = False,
+        rotate90: int = 0,
+        parent: QObject = None,
+    ):
+        """
+        arguments:
+            shape: (tuple[int]) The shape of the dataset: 
+                (scan_i, scan_j, dp_i, dp_j)
+            
+            file_path: (str) The absolute path of the ouside raw file.
+            
+            item_parent_path: (str) The path of the parent group of the Dataset 
+                item in the HDF file.
+            
+            item_name: (str) The name of the new Dataset item in the HDF file.
+            
+            offset_to_first_image: (int) The offset bytes of the first image
+            
+            gap_between_images: (int) The gap between every two images
+            
+            dtype: (str) the scalar type
+            
+            meta: (dict) other meta data that should be stored in the attrs of 
+                HDF5 object.
+            
+            little_endian: (bool) Is data in the file little-endian?
+            
+            is_flipped: (bool) Is chirality of 2D x 2D the same?
+            
+            rotate90: (int) Times every image should be rotated.
+            
+            parent: (QObject)
+        """
+        super().__init__(
+            shape,
+            file_path, 
+            item_parent_path, 
+            item_name, 
+            parent, 
+            **meta
+        )
+        
+        self._offset_to_first_image = offset_to_first_image
+        self._gap_between_images = gap_between_images
+        self._dtype = dtype
+        self._little_endian = little_endian
+        self._is_flipped = is_flipped
+        self._rotate90 = rotate90
+        self.name = 'Load DM4 4D-STEM data'
+        self.comment = (
+            'Load DM4 4D-STEM data\n'
+            f'Data File path: {file_path}\n'
+            f'To Dataset Object: {item_name}\n'
+        )
+        
+        self.setPrepare(self._createDataset)
+        self._bindSubtask()
+        
+    def _createDataset(self):
+        """
+        Will create a dataset in HDF5 file according to the item_path.
+
+        
+        This function works as the preparing function that will be called
+        just before the task is submitted.
+        """
+        self.hdf_handler.addNewData(
+            self._item_parent_path,
+            self._item_name,
+            self._shape,
+            self._dtype
+        )
+        
+        for key, value in self._meta.items():
+            self.hdf_handler.file[self.item_path].attrs[key] = value 
+            
+    def _bindSubtask(self):
+        """
+        Add subtask, which is the practical worker
+        """
+        scan_i, scan_j, dp_i, dp_j = self._shape 
+        self.addSubtaskFuncWithProgress(
+            'Copy Data',
+            readFourDSTEMFromDM4,
+            file_path = self._file_path,
+            item_path = self.item_path,
+            dp_i = dp_i,
+            dp_j = dp_j,
+            scan_i = scan_i,
+            scan_j = scan_j,
+            scalar_type = self._dtype,
+            scalar_size = getSizeOfDType(self._dtype),
+            offset_to_first_image = self._offset_to_first_image,
+        )
+    
