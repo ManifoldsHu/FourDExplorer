@@ -215,24 +215,30 @@ tagDataType = {
 """
 Implementation of a parser for the Digital Micrograph DM4 file format. The parser reads the header, tag directory, and tags in the file.
 """
-class ParseDM4:
-    def __init__(self, file_path):
+class ParseDM4(QObject):
+    def __init__(self, file_path, parent=None):
+        super().__init__()
         self.file_path = file_path
         self.io = None  # io object
         self.byte_order = '>'  # Default to big-endian ('>' for big-endian, '<' for little-endian)
         self.byte_size = None # Size of the root tag directory 
 
+    @property
+    def logger(self) -> Logger:
+        global qApp 
+        return qApp.logger
+
     def open_file(self):
-        print("Opening file...")
+        self.logger.debug("Opening file...")
         try:
             self.io = open(self.file_path, 'rb')
-            print("File opened successfully.")
+            self.logger.debug("File opened successfully.")
         except FileNotFoundError:
             raise FileNotFoundError(f"File not found: {self.file_path}")
         
 
     def read_header(self):
-        print("Reading header...")
+        self.logger.debug("Reading header...")
         f = self.io
         # The header consists of 16 bytes (DM version, root tag length, byte order)
         dm_version = struct.unpack('>I', f.read(4))[0]
@@ -245,7 +251,7 @@ class ParseDM4:
         if byte_order == 1:
             self.byte_order = '<'  # Little-endian
 
-        print(f"Header read successfully, DM version: {dm_version}, Root length: {root_len}, Byte order: {self.byte_order}.")
+        self.logger.debug(f"Header read successfully, DM version: {dm_version}, Root length: {root_len}, Byte order: {self.byte_order}.")
 
     def read_tag_directory(self, parent_dir_name = None, tag_dir_name=None, tag_dir_len=None):
         f = self.io
@@ -281,7 +287,7 @@ class ParseDM4:
                 tag_name = f.read(tag_name_len).decode('utf-8')
             except UnicodeDecodeError:
                 # Handle decoding error - you can log or skip this tag, or try another encoding
-                print(f"Failed to decode tag name at position {f.tell()}")
+                self.logger.warning(f"Failed to decode tag name at position {f.tell()}")
                 tag_name = None
         else:
             tag_name = None
@@ -292,7 +298,7 @@ class ParseDM4:
         elif tag_type == 21:  # Tag
             tag_object = self.read_tag(parent_dir_name=parent_dir_name, tag_name = tag_name)
         elif tag_type == 00:  # End of file (8 nulls)
-            print("End of file reached")
+            self.logger.debug("End of file reached")
             return
         else:
             raise TypeError(f"Unknown tag type: {tag_type}")
@@ -365,12 +371,12 @@ class ParseDM4:
         return Tag(parent_dir_name, tag_name, tag_data_len, tag_info[0], tag_data)
 
     def parse(self):
-        print("Starting parsing...")
+        self.logger.debug("Starting parsing DM4 file...")
         self.open_file()
         self.read_header()
-        print("Reading root directory...")
+        self.logger.debug("Reading root directory of DM4 file...")
         dm4obj = self.read_tag_directory(parent_dir_name= "", tag_dir_name='/', tag_dir_len=self.byte_size)
-        print("Parsing completed.")
+        self.logger.debug("Parsing DM4 file completed.")
 
         return dm4obj
 

@@ -30,7 +30,7 @@ ROOT_PATH = os.path.dirname(__file__)
 
 # The absolute path of the configuration file
 global CONFIG_PATH
-CONFIG_PATH = os.path.join(ROOT_PATH, '.config')
+CONFIG_PATH = os.path.join(ROOT_PATH, 'config.ini')
 
 class HDFType(IntEnum):
     """
@@ -160,7 +160,7 @@ class UIThemeColor(IntEnum):
     Yellow = 1180
     PurpleNJU = 2000
 
-    default = 1020
+    default = 1060
 
 class UIThemeMode(IntEnum):
     """

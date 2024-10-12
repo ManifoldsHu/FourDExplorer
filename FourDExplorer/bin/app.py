@@ -86,14 +86,16 @@ class App(QApplication):
         """
         This function must be called after QApplication is initialized.
         """
+        from bin.ConfigManager import ConfigManager
         from bin.HDFManager import HDFHandler
         from bin.UIManager import ThemeHandler
         from bin.TaskManager import TaskManager
         from bin.Log import LogUtil
         from bin.UnitManager import UnitManager
         from bin.DateTimeManager import DateTimeManager
-        # from bin.MetaManager import MetaManager
 
+        # from bin.MetaManager import MetaManager
+        self._config_manager = ConfigManager(self)
         self._hdf_handler = HDFHandler(self)
         self._theme_handler = ThemeHandler(self)
         self._task_manager = TaskManager(self)
@@ -101,6 +103,7 @@ class App(QApplication):
         self._unit_manager = UnitManager(self)
         self._datetime_manager = DateTimeManager(self)
         self._meta_managers = {}
+        
 
  
     @property

@@ -22,7 +22,7 @@ logs
 *.oaqs
 *.h5
 .vscode
-.config 
+config.ini
 .DS_Store
 test_AlignmentReference.py
 
