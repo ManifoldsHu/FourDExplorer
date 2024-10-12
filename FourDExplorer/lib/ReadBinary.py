@@ -284,3 +284,69 @@ def readFourDSTEMFromNpy(
                 dataset[ii, jj, :, :] = npy_data[ii, jj, :, :]
                 del npy_data    # release memory
             progress_signal.emit(int((ii+1)/scan_i*100))
+
+
+def readFourDSTEMFromDM4(
+        file_path: str,
+        item_path: str,
+        dp_i: int,
+        dp_j: int,
+        scan_i: int,
+        scan_j: int,
+        scalar_type: str = 'float',
+        scalar_size: int = 4,
+        offset_to_first_image: int = 0,
+        little_endian: bool = True,
+        progress_signal: Signal = None, # The progress signal of the task
+) -> None:
+    """
+    Reads a 4D-STEM dataset from a .dm4 file and writes it into an HDF5 dataset.
+
+    arguments:
+        file_path: (str) The absolute path of the .dm4 file.
+
+        item_path: (str) The dataset to be written. (The original data
+            will be covered)
+
+        dp_i: (int) number of rows of one image (height).
+
+        dp_j: (int) number of columns of one image (width).
+
+        scan_i: (int) number of rows of the scanning arrays of 4D-STEM.
+
+        scan_j: (int) number of columns of the scanning arrays of 4D-STEM.
+
+        scalar_type: (str) must be one of these: (float,int,uint,)
+
+        scalar_size: (int) how many bytes of one scalar number. Must be one of 
+            these: (1, 2, 4,)
+            
+        offset_to_first_image: (int) The offset bytes before the first image
+
+        little_endian: (bool) default to be True. If false, will read with
+            big_endian.
+
+    """
+    if progress_signal is None:
+        progress_signal = Signal(int)
+    
+    global qApp 
+    hdf_handler = qApp.hdf_handler
+    dataset = hdf_handler.file[item_path]
+    dt = getDType(scalar_type, scalar_size, little_endian)
+
+    with open(file_path, 'rb') as fid:
+        fid.seek(offset_to_first_image)
+        for ii in range(dp_i):
+            for jj in range(dp_j):
+                data = np.nan_to_num(np.fromfile(
+                    fid,
+                    dtype = dt,
+                    count = scan_i * scan_j,
+                    sep = '',
+                    offset = 0,
+                )).reshape((dp_i, dp_j))
+                dataset[:, :, ii, jj] = data
+                    
+            progress_signal.emit(int((ii+1)/scan_i*100))
+    
