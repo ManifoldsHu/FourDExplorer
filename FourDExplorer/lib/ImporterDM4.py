@@ -25,7 +25,7 @@ from dateutil import parser as dt_parser
 from bin.TaskManager import TaskManager 
 from bin.MetaManager import MetaManager
 from bin.DateTimeManager import DateTimeManager
-from lib.TaskLoadData import TaskLoadFourDSTEMFromRaw
+from lib.TaskLoadData import TaskLoadFourDSTEMFromDM4
 from lib.CalibrationMisc import Voltage2WaveLength
 from Constants import APP_VERSION
 
@@ -395,9 +395,6 @@ class ImporterDM4(QObject):
         self._little_endian = True
 
         self._first_image_offset = 0
-        self._gap_between_images = 0
-        self._is_flipped = False
-        self._rotate90 = False
 
         self.meta = {
             # TO DO...
@@ -484,18 +481,15 @@ class ImporterDM4(QObject):
             raise RuntimeError("No .mib file is assigned.")
         shape = (self._scan_i, self._scan_j, self._dp_i, self._dp_j)
 
-        self.task = TaskLoadFourDSTEMFromRaw(
+        self.task = TaskLoadFourDSTEMFromDM4(
             shape = shape,
             file_path = self._dm4_path,
             item_parent_path = self.item_parent_path,
             item_name = self.item_name,
             offset_to_first_image = self._first_image_offset,
-            gap_between_images = self._gap_between_images,
             scalar_type = self._scalar_type,
             scalar_size = self._scalar_size,
             little_endian = True,
-            is_flipped = self._is_flipped,
-            rotate90 = self._rotate90,
             parent = self,
             **self.meta,
         )
