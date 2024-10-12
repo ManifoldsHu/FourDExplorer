@@ -8,6 +8,9 @@
 
 Welcome to the 4D-Explorer documentation. This documentation provides comprehensive guidance on using and contributing to the 4D-Explorer project.
 
+.. image:: /fig/InitWindow.png 
+    :alt: 4D-Explorer Main Window
+
 4D-Explorer is a software designed for analyzing four-dimensional scanning transmission electron microscopy (4D-STEM) data. It allows for the import, storage, correction, and reconstruction of 4D-STEM datasets and their metadata in real space. For an overview of 4D-STEM technology, see the review article by `Colin Ophus, 2019`__. 
 
 __ https://www.cambridge.org/core/journals/microscopy-and-microanalysis/article/fourdimensional-scanning-transmission-electron-microscopy-4dstem-from-scanning-nanodiffraction-to-ptychography-and-beyond/A7E922A2C5BFD7FD3F208C537B872B7A
