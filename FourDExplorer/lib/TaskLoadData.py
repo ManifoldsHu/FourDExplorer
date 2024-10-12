@@ -625,7 +625,7 @@ class TaskLoadFourDSTEMFromDM4(TaskBaseLoadData):
             self._item_parent_path,
             self._item_name,
             self._shape,
-            self._dtype
+            self.dtype
         )
         
         for key, value in self._meta.items():
