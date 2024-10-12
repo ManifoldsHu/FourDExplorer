@@ -34,6 +34,7 @@ from lib.ReadBinary import getDType
 from lib.ReadBinary import readFourDSTEMFromRaw
 from lib.ReadBinary import readFourDSTEMFromNpy
 from lib.ReadBinary import readFourDSTEMFromNpz
+from lib.ReadBinary import readFourDSTEMFromDM4
 
 class TaskBaseLoadData(Task):
     """
@@ -524,7 +525,7 @@ class TaskLoadTiff(TaskBaseLoadData):
         self.logger.debug('Task {0} completed.'.format(self.name))
 
 
-class TaskLoadDM4(TaskBaseLoadData):
+class TaskLoadFourDSTEMFromDM4(TaskBaseLoadData):
     """
     从 DM4 文件中加载 4D-STEM 数据的 Task
     
@@ -541,13 +542,13 @@ class TaskLoadDM4(TaskBaseLoadData):
         item_parent_path: str,
         item_name: str,
         offset_to_first_image: int,
-        gap_between_images: int,
-        dtype: str,
-        meta: dict,
+        scalar_type: str,
+        scalar_size: int,
         little_endian: bool,
         is_flipped = False,
         rotate90: int = 0,
         parent: QObject = None,
+        **meta,
     ):
         """
         arguments:
@@ -572,9 +573,9 @@ class TaskLoadDM4(TaskBaseLoadData):
             
             little_endian: (bool) Is data in the file little-endian?
             
-            is_flipped: (bool) Is chirality of 2D x 2D the same?
+            is_flipped: (bool) Is chirality of 2D x 2D the same?    # TODO
             
-            rotate90: (int) Times every image should be rotated.
+            rotate90: (int) Times every image should be rotated.    # TODO
             
             parent: (QObject)
         """
@@ -588,8 +589,9 @@ class TaskLoadDM4(TaskBaseLoadData):
         )
         
         self._offset_to_first_image = offset_to_first_image
-        self._gap_between_images = gap_between_images
-        self._dtype = dtype
+        self._gap_between_images = 0
+        self._scalar_type = scalar_type
+        self._scalar_size = scalar_size 
         self._little_endian = little_endian
         self._is_flipped = is_flipped
         self._rotate90 = rotate90
@@ -602,6 +604,14 @@ class TaskLoadDM4(TaskBaseLoadData):
         
         self.setPrepare(self._createDataset)
         self._bindSubtask()
+        
+    @property
+    def dtype(self) -> str:
+        return getDType(
+            self._scalar_type,
+            self._scalar_size,
+            self._little_endian,
+        )
         
     def _createDataset(self):
         """
@@ -635,8 +645,20 @@ class TaskLoadDM4(TaskBaseLoadData):
             dp_j = dp_j,
             scan_i = scan_i,
             scan_j = scan_j,
-            scalar_type = self._dtype,
-            scalar_size = getSizeOfDType(self._dtype),
+            scalar_type = self._scalar_type,
+            scalar_size = self._scalar_size,
             offset_to_first_image = self._offset_to_first_image,
+            little_endian = self._little_endian,
         )
+        
+    def _showFourDSTEM(self):
+        """
+        TODO 
+        Will open the 4D-STEM dataset in the HDF5 object.
+        
+        This function works as the following function that will be called
+        just after the task is completed.
+        """
+        self.logger.debug(f'Task {self.name} completed.')
+        
     
