@@ -35,14 +35,15 @@ add_files = [
     (os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '*.ico'), os.path.join('ui', 'resources', 'icons')),
     (os.path.join('FourDExplorer', 'ui', 'resources', 'images', '*.png'), os.path.join('ui', 'resources', 'images')),
     (os.path.join('FourDExplorer', 'ui', 'resources', 'themes', 'dark', '*.xml'), os.path.join('ui', 'resources', 'themes', 'dark')),
-    (os.path.join('FourDExplorer', 'ui', 'resources', 'themes', 'light', '*.xml'), os.path.join('ui', 'resources', 'themes', 'light'))
+    (os.path.join('FourDExplorer', 'ui', 'resources', 'themes', 'light', '*.xml'), os.path.join('ui', 'resources', 'themes', 'light')),
+    (os.path.join('FourDExplorer', 'schema', 'MetaStructures', '*.json'), os.path.join('schema', 'MetaStructures')),
+    (os.path.join('FourDExplorer', 'models', '*.onnx'), os.path.join('models')),
 ]
 
 # 分析配置
 a = Analysis(
     py_files,
-    pathex=[os.path.join('.', 'FourDExplorer')],
-    pathex=[os.path.join('.', 'FourDExplorer')],
+    pathex=[os.path.join(os.path.abspath('.'), 'FourDExplorer')],
     binaries=[],
     datas=add_files,
     hiddenimports=[],
@@ -79,7 +80,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '4D.ico'),
     icon=os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '4D.ico'),
 )
 
