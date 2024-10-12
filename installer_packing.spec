@@ -6,10 +6,13 @@ import platform
 
 # 获取系统架构和平台信息
 bits, _ = platform.architecture()   # '64-bit', 'WindowsPE'
-platform_os = sys.platform          # 'win32'
+platform_os = sys.platform          # win32, darwin, linux
 
 # 定义加密块为 None
 block_cipher = None
+py_files = [
+    os.path.join('FourDExplorer', 'FourDExplorer.py'),
+]
 
 # 项目路径
 project_path = os.getcwd()
@@ -28,18 +31,17 @@ package_name = 'FourDExplorer-v{0}-{1}-{2}'.format(version, platform_os, bits)
 
 # 需要额外包含的文件
 add_files = [
-    (os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '*.png'), 'ui/resources/icons'),
-    (os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '*.ico'), 'ui/resources/icons'),
-    (os.path.join('FourDExplorer', 'ui', 'resources', 'images', '*.png'), 'ui/resources/images'),
-    (os.path.join('FourDExplorer', 'ui', 'resources', 'themes', 'dark', '*.xml'), 'ui/resources/themes/dark'),
-    (os.path.join('FourDExplorer', 'ui', 'resources', 'themes', 'light', '*.xml'), 'ui/resources/themes/light'),
-    (os.path.join('FourDExplorer', 'schema', 'MetaStructures', '*.json'), 'schema/MetaStructures'),
-    (os.path.join('FourDExplorer', 'models', '*.onnx'), 'models')
+    (os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '*.png'), os.path.join('ui', 'resources', 'icons')),
+    (os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '*.ico'), os.path.join('ui', 'resources', 'icons')),
+    (os.path.join('FourDExplorer', 'ui', 'resources', 'images', '*.png'), os.path.join('ui', 'resources', 'images')),
+    (os.path.join('FourDExplorer', 'ui', 'resources', 'themes', 'dark', '*.xml'), os.path.join('ui', 'resources', 'themes', 'dark')),
+    (os.path.join('FourDExplorer', 'ui', 'resources', 'themes', 'light', '*.xml'), os.path.join('ui', 'resources', 'themes', 'light'))
 ]
 
 # 分析配置
 a = Analysis(
     py_files,
+    pathex=[os.path.join('.', 'FourDExplorer')],
     pathex=[os.path.join('.', 'FourDExplorer')],
     binaries=[],
     datas=add_files,
@@ -77,6 +79,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '4D.ico'),
     icon=os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '4D.ico'),
 )
 
