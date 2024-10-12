@@ -345,8 +345,8 @@ def readFourDSTEMFromDM4(
                     count = scan_i * scan_j,
                     sep = '',
                     offset = 0,
-                )).reshape((dp_i, dp_j))
+                )).reshape((scan_i, scan_j))
                 dataset[:, :, ii, jj] = data
                     
-            progress_signal.emit(int((ii+1)/scan_i*100))
+            progress_signal.emit(int((ii+1)/dp_i*100))
     
