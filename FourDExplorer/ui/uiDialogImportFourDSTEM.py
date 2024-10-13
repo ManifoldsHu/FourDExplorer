@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QDialog, QGroupBox,
 
 from bin.Widgets.WidgetImportDM4 import WidgetImportDM4
 from bin.Widgets.WidgetImportEMPAD import (WidgetImportEMPAD, WidgetImportEMPAD_NJU)
+from bin.Widgets.WidgetImportHDF5 import WidgetImport4DSTEMFromHDF5
 from bin.Widgets.WidgetImportMerlin import WidgetImportMerlin
 from bin.Widgets.WidgetImportNumpy import WidgetImportNumpy
 from bin.Widgets.WidgetImportRaw import WidgetImportRaw
@@ -96,7 +97,7 @@ class Ui_Dialog(object):
         self.page_dm4 = WidgetImportDM4()
         self.page_dm4.setObjectName(u"page_dm4")
         self.stackedWidget.addWidget(self.page_dm4)
-        self.page_h5 = QWidget()
+        self.page_h5 = WidgetImport4DSTEMFromHDF5()
         self.page_h5.setObjectName(u"page_h5")
         self.stackedWidget.addWidget(self.page_h5)
 
@@ -178,7 +179,7 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(8)
 
 
         QMetaObject.connectSlotsByName(Dialog)

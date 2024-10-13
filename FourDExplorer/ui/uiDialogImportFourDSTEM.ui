@@ -103,7 +103,7 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>8</number>
         </property>
         <widget class="WidgetImportEMPAD" name="page_empad"/>
         <widget class="WidgetImportEMPAD_NJU" name="page_empad_nju"/>
@@ -113,7 +113,7 @@
         <widget class="QWidget" name="page_mat_folder"/>
         <widget class="WidgetImportNumpy" name="page_npy"/>
         <widget class="WidgetImportDM4" name="page_dm4"/>
-        <widget class="QWidget" name="page_h5"/>
+        <widget class="WidgetImport4DSTEMFromHDF5" name="page_h5"/>
        </widget>
       </item>
      </layout>
@@ -248,6 +248,12 @@
    <class>WidgetImportNumpy</class>
    <extends>QWidget</extends>
    <header>bin.Widgets.WidgetImportNumpy.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WidgetImport4DSTEMFromHDF5</class>
+   <extends>QWidget</extends>
+   <header>bin.Widgets.WidgetImportHDF5.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

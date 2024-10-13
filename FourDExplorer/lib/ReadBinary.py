@@ -354,3 +354,42 @@ def readFourDSTEMFromDM4(
             
             progress = int((i_end) / dp_i * 100)
             progress_signal.emit(progress)
+            
+            
+def readDataFromHDF5(
+    file_path: str, 
+    dataset_path: str, 
+    item_path: str, 
+    progress_signal: Signal = None
+):
+    """
+    Read data from an HDF5 file and write it to a dataset in the current HDF5 file.
+
+    arguments:
+        file_path: (str) The absolute path of the source HDF5 file.
+
+        dataset_path: (str) The path of the dataset in the source HDF5 file.
+
+        item_path: (str) The path of the dataset in the current HDF5 file.
+
+        progress_signal: (Signal) A signal to emit progress updates.
+    """
+    if progress_signal is None:
+        progress_signal = Signal(int)
+    
+    global qApp 
+    hdf_handler = qApp.hdf_handler
+    dataset = hdf_handler.file[item_path]
+    
+    with h5py.File(file_path, 'r') as src_hdf_file:
+        src_dataset = src_hdf_file[dataset_path]
+        total_elements = src_dataset.size
+        chunk_size = max(total_elements // 100, 1)
+        
+        for i in range(0, total_elements, chunk_size):
+            end = min(i + chunk_size, total_elements)
+            chunk = src_dataset[i:end]
+            dataset[i:end] = chunk
+            
+            progress = int(end / total_elements * 100)
+            progress_signal.emit(progress)

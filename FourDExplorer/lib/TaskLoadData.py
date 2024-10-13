@@ -35,6 +35,7 @@ from lib.ReadBinary import readFourDSTEMFromRaw
 from lib.ReadBinary import readFourDSTEMFromNpy
 from lib.ReadBinary import readFourDSTEMFromNpz
 from lib.ReadBinary import readFourDSTEMFromDM4
+from lib.ReadBinary import readDataFromHDF5
 
 class TaskBaseLoadData(Task):
     """
@@ -661,4 +662,73 @@ class TaskLoadFourDSTEMFromDM4(TaskBaseLoadData):
         """
         self.logger.debug(f'Task {self.name} completed.')
         
+
+class TaskLoadDataFromHDF5(TaskBaseLoadData):
+    """
+    从 HDF5 文件中加载数据. 支持加载任意形状的数据集
     
+    Load data from HDF5 file.
+    """
+    
+    def __init__(self, file_path: str, dataset_path: str, item_parent_path: str, item_name: str, parent: QObject = None, **meta):
+        with h5py.File(file_path, 'r') as hdf_file:
+            dataset = hdf_file[dataset_path]
+            self._shape = dataset.shape
+            self._dtype = dataset.dtype
+
+        super().__init__(self._shape, file_path, item_parent_path, item_name, parent, **meta)
+        self._file_path = file_path
+        self._dataset_path = dataset_path
+        
+        print(f"item_parent_path: {item_parent_path}, item_name: {item_name}")
+        self.name = 'Load Data from HDF5'
+        self.comment = (
+            'Load data from HDF5 file\n'
+            'Source File path: {0}\n'
+            'Dataset Path: {1}\n'
+            'To Dataset Object: {2}\n'.format(
+                self._file_path, self._dataset_path, self._item_name
+            )
+        )
+        
+        self.setPrepare(self._createDataset)
+        self._bindSubtask()
+
+        
+    def _createDataset(self):
+        """
+        Will create a dataset in HDF5 file according to the item_path.
+
+        This function works as the preparing function that will be called
+        just before the task is submitted.
+        """
+        self.hdf_handler.addNewData(
+            self._item_parent_path,
+            self._item_name,
+            self._shape,
+            self._dtype
+        )
+        
+        for key, value in self._meta.items():
+            self.hdf_handler.file[self.item_path].attrs[key] = value 
+            
+    def _bindSubtask(self):
+        """
+        Add subtask, which is the practical worker
+        """
+        self.addSubtaskFuncWithProgress(
+            'Copy Data',
+            readDataFromHDF5,
+            file_path = self._file_path,
+            dataset_path = self._dataset_path,
+            item_path = self.item_path
+        )
+        
+    def _showFourDSTEM(self):
+        """
+        Will open the 4D-STEM dataset in the HDF5 object.
+        
+        This function works as the following function that will be called
+        just after the task is completed.
+        """
+        self.logger.debug(f'Task {self.name} completed.')
