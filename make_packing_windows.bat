@@ -14,8 +14,8 @@ if exist dist (
 
 REM If either build or dist exists, prompt the user once
 if defined DIR_FOUND (
-    echo Warning build or dist directory found
-    set /p CONTINUE=Do you want to proceed and delete them? (Y/N)     
+    echo Warning: build or dist directory found
+    set /p CONTINUE=Do you want to proceed and delete them? (Y/N)
 
     REM If user inputs N, exit the script
     if /I "%CONTINUE%"=="N" (
@@ -35,7 +35,7 @@ if defined DIR_FOUND (
     )
 )
 
-REM Run PyInstaller to build the project
+REM Run PyInstaller to build the project regardless of whether directories existed
 echo Running PyInstaller...
 pyinstaller installer_packing.spec
 
