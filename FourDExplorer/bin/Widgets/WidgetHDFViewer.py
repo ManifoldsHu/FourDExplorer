@@ -262,7 +262,8 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         
         for action in self._action_group_analysis.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
-
+            
+            
     def _initFileActions(self):
         """
         Initialize File actions.
@@ -537,10 +538,10 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
             self.hdf_viewer.action_group_reconstruction, 
             name = 'Reconstruction',
         )
-        self.addActionGroupAsSubMenu(
-            self.hdf_viewer.action_group_analysis, 
-            name = 'Analysis',
-        )
+        # self.addActionGroupAsSubMenu(
+        #     self.hdf_viewer.action_group_analysis, 
+        #     name = 'Analysis',
+        # )         # TODO 
         self.addActionGroup(self.hdf_viewer.action_group_edit)
         self.addActionGroup(self.hdf_viewer.action_group_attr)
         
