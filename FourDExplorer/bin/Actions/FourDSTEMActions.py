@@ -159,6 +159,7 @@ class ActionPlotCTF(ActionOpenData):
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.setText('Plot CTF')
+        self.setVisible(False)      # TODO This is not completed yet, so hidden
         
     def openAs(self, hdf_type: HDFType = None) -> 'PagePlotCTF':
         """
