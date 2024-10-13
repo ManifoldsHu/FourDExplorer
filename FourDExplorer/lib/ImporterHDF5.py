@@ -30,9 +30,22 @@ from Constants import APP_VERSION
 
 class ImporterHDF5(QObject):
     """
+    支持从任意的 HDF5 文件中加载任意形状的数据集。
     
+    Importer to copy dataset from other hdf5 file with arbitrary shape into this 
+    dataset.
     """
     def __init__(self, item_name: str, item_parent_path: str, parent: QObject = None):
+        """
+        Initializes the ImporterHDF5 object.
+
+        arguments:
+            item_name (str): The name of the item to be imported.
+            
+            item_parent_path (str): The parent path of the item in the HDF5 file.
+            
+            parent (QObject, optional): The parent QObject. Defaults to None.
+        """
         super().__init__(parent)
         self.item_name = item_name 
         self.item_parent_path = item_parent_path 

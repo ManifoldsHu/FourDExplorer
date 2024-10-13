@@ -63,6 +63,7 @@ import threading
 from collections.abc import Mapping
 from typing import Iterator
 from logging import Logger
+import itertools
 
 import h5py
 import numpy as np
@@ -1958,30 +1959,36 @@ class HDFTreeModel(QAbstractItemModel):
 
 class TaskCopy(Task):
     """
-    复制任务，将 HDF5 对象及其所有子对象都复制过去。
+    Copy an item with all its children to the destination.
 
-    这个任务会提交到线程池运行。更多有关信息请查看 TaskManager 模块。       
-
-    Copy an item with all its children to destination.
-
-    For more information of Task object, see TaskManager module.
+    This task will be submitted to the thread pool for execution. For more information, see the TaskManager module.
     """
-    def __init__(self,
-        parent: QObject, 
-        item_path: str, 
-        dest_parent_path: str, 
+    def __init__(
+        self,
+        parent: QObject,
+        item_path: str,
+        dest_parent_path: str,
         new_name: str
     ):
+        """
+        arguments:
+            parent: (QObject) The parent object.
+            
+            item_path: (str) The path of the item to be copied.
+            
+            dest_parent_path: (str) The path of the destination parent.
+            
+            new_name: (str) The new name for the copied item.
+        """
         super().__init__(parent)
         self._item_path = item_path
         self._dest_parent_path = dest_parent_path
         self._new_name = new_name
 
-
         self.name = 'copy'
         self.comment = (
             'Copy item from: {0}\n'
-            'Destination:{1}\n'
+            'Destination: {1}\n'
             'New name: {2}'.format(
                 item_path, dest_parent_path, new_name
             )
@@ -1991,10 +1998,10 @@ class TaskCopy(Task):
             new_path = '/' + new_name
         else:
             new_path = dest_parent_path + '/' + new_name
-        
-        self.addSubtaskFunc(
+
+        self.addSubtaskFuncWithProgress(
             'Copy Items',
-            self.hdf_handler.file.copy,
+            self.copyItem,
             item_path,
             new_path,
         )
@@ -2002,23 +2009,48 @@ class TaskCopy(Task):
         self.setPrepare(self._copyPrepare)
         self.setFollow(self._copyFollow)
 
-    @property 
+    @property
     def task_manager(self) -> TaskManager:
-        global qApp 
+        """
+        Get the task manager.
+
+        returns:
+            (TaskManager) The task manager instance.
+        """
+        global qApp
         return qApp.task_manager
 
     @property
     def model(self) -> HDFTreeModel:
+        """
+        Get the HDFTreeModel.
+
+        returns:
+            (HDFTreeModel) The HDFTreeModel instance.
+        """
         return self.hdf_handler.model
 
     @property
     def hdf_handler(self) -> HDFHandler:
-        global qApp 
+        """
+        Get the HDFHandler.
+
+        returns:
+            (HDFHandler) The HDFHandler instance.
+        """
+        global qApp
         return qApp.hdf_handler
+
+    @property
+    def logger(self) -> Logger:
+        global qApp
+        return qApp.logger
 
     def _copyPrepare(self):
         """
         Preparation work of copy. Create one node in the destination.
+
+        This method prepares the destination by creating a new node based on the type of the source node.
         """
         item_path = self._item_path
         dest_parent_path = self._dest_parent_path
@@ -2033,7 +2065,6 @@ class TaskCopy(Task):
 
         dest_parent_index = self.model.indexFromPath(dest_parent_path)
         row = self.model.rowCount(dest_parent_index)
-        # print('Prepare called')
         self.model.beginInsertRows(dest_parent_index, row, row)
         dest_parent_node.addChild(new_node)
         self.model.endInsertRows()
@@ -2041,6 +2072,8 @@ class TaskCopy(Task):
     def _copyFollow(self):
         """
         Following work of copy. Create child nodes recursively.
+
+        This method recursively creates child nodes in the destination.
         """
         dest_parent_path = self._dest_parent_path
         new_name = self._new_name
@@ -2050,10 +2083,174 @@ class TaskCopy(Task):
             new_node = self.hdf_handler.addChildDeepFirst(new_node)
         new_index = self.model.indexFromPath(new_node.path)
         self.model.dataChanged.emit(new_index, new_index)
-        # print('Follow called')
 
     def addToTaskManager(self):
+        """
+        Add this task to the task manager.
+        """
         self.task_manager.addTask(self)
+        
+        
+    def copyItem(
+        self, 
+        src_path: str, 
+        dest_path: str, 
+        progress_signal: Signal = None, # The progress signal of the task
+    ):
+        """
+        Recursively copy an HDF5 item from src_path to dest_path, copying datasets in slices.
+
+        arguments:
+            src_path: (str) The source path of the item to be copied.
+            
+            dest_path: (str) The destination path where the item will be copied.
+            
+            progress_signal: (Signal) The progress signal of the task.
+        """
+        src_item = self.hdf_handler.file[src_path]
+
+        if isinstance(src_item, h5py.Group):
+            # Create a new group at the destination
+            dest_group = self.hdf_handler.file.create_group(dest_path)
+            # Copy attributes
+            for key, value in src_item.attrs.items():
+                dest_group.attrs[key] = value
+            # Recursively copy group members
+            for name in src_item:
+                src_child_path = src_path + '/' + name
+                dest_child_path = dest_path + '/' + name
+                self.logger.info('Copying {0}'.format(src_child_path))
+                self.copyItem(src_child_path, dest_child_path, progress_signal)
+        elif isinstance(src_item, h5py.Dataset):
+            src_dset = src_item
+            # Create a new dataset at the destination with the same properties
+            dest_dset = self.hdf_handler.file.create_dataset(
+                dest_path,
+                shape=src_dset.shape,
+                dtype=src_dset.dtype,
+                maxshape=src_dset.maxshape,
+                chunks=src_dset.chunks,
+                compression=src_dset.compression,
+                compression_opts=src_dset.compression_opts,
+                shuffle=src_dset.shuffle,
+                fletcher32=src_dset.fletcher32,
+                scaleoffset=src_dset.scaleoffset
+            )
+            # Copy attributes
+            for key, value in src_dset.attrs.items():
+                dest_dset.attrs[key] = value
+            # Copy data in slices
+            self.copyDatasetInSlices(src_dset, dest_dset, progress_signal = progress_signal)
+        else:
+            print(f"Unknown item type at {src_path}")
+
+    def copyDatasetInSlices(
+        self, 
+        src_dset: h5py.Dataset, 
+        dest_dset: h5py.Dataset, 
+        max_chunk_bytes: int = 4*1024*1024,
+        progress_signal: Signal = None,
+    ):
+        """
+        Copy data from src_dset to dest_dset in slices to avoid loading the entire dataset into memory.
+
+        This method ensures efficient memory usage by copying data in chunks that do not exceed the specified maximum chunk size.
+        
+        The chunk sizes are computed proportionally across all dimensions to balance the number of elements in each chunk.
+
+        arguments:
+            src_dset: (h5py.Dataset) The source dataset to be copied.
+            
+            dest_dset: (h5py.Dataset) The destination dataset where the data will be copied.
+            
+            max_chunk_bytes: (int) The maximum size of each chunk in bytes. 
+                Default is 4 MB.
+        """
+
+        shape = src_dset.shape
+        dtype = src_dset.dtype
+        itemsize = dtype.itemsize
+        total_size = np.prod(shape, dtype = np.int64) * itemsize
+        max_chunk_elems = max_chunk_bytes // itemsize
+        
+        if progress_signal is None:
+            progress_signal = Signal(int)
+
+        if total_size <= max_chunk_bytes:
+            # Small dataset; copy all at once
+            dest_dset[...] = src_dset[...]
+        else:
+            # Compute chunk sizes along each axis
+            chunk_sizes = self.computeChunkSizes(shape, max_chunk_elems)
+            # Calculate total number of chunks
+            progress = 0
+            total_chunks = np.prod([(dim + size - 1) // size for dim, size in zip(shape, chunk_sizes)], dtype = np.int64)
+            # Generate slices
+            for slices in self.getSlices(shape, chunk_sizes):
+                data = src_dset[slices]
+                dest_dset[slices] = data
+                progress += 1
+                progress_signal.emit(min(100, int(progress * 100 / total_chunks)))
+
+    def computeChunkSizes(self, shape: tuple, max_chunk_elems: int) -> list:
+        """
+        Compute chunk sizes along each axis to ensure that each chunk contains
+        at most max_chunk_elems elements, reducing dimensions proportionally.
+
+        arguments:
+            shape: (tuple) The shape of the dataset.
+            
+            max_chunk_elems: (int) The maximum number of elements in each chunk.
+
+        returns:
+            (list) The computed chunk sizes for each dimension.
+        """
+        N = len(shape)
+        total_elems = np.prod(shape, dtype=np.int64)
+        if total_elems <= max_chunk_elems:
+            return list(shape)
+
+        # Compute scaling factor
+        scaling_factor = (total_elems / max_chunk_elems) ** (1 / N)
+        # Compute chunk sizes proportionally
+        chunk_sizes = [max(1, int(dim / scaling_factor)) for dim in shape]
+
+        # Ensure chunk sizes are within valid bounds
+        chunk_sizes = [min(dim, size) for dim, size in zip(shape, chunk_sizes)]
+
+        # Recalculate total_elems to check if within limit
+        chunk_elems = np.prod(chunk_sizes, dtype=np.int64)
+        while chunk_elems > max_chunk_elems:
+            # Increase scaling factor slightly
+            scaling_factor *= 1.05
+            chunk_sizes = [max(1, int(dim / scaling_factor)) for dim in shape]
+            chunk_sizes = [min(dim, size) for dim, size in zip(shape, chunk_sizes)]
+            chunk_elems = np.prod(chunk_sizes, dtype=np.int64)
+
+        return chunk_sizes
+
+    def getSlices(self, shape: tuple, chunk_sizes: list) -> Iterator[tuple]:
+        """
+        Generate slices to cover the dataset shape, with up to max_chunk_elems elements per chunk.
+
+        arguments:
+            shape: (tuple) The shape of the dataset.
+            
+            chunk_sizes: (list) The chunk sizes for each dimension.
+
+        yields:
+            (tuple) A tuple of slices for each chunk.
+        """
+
+        ranges = []
+        for dim_size, chunk_size in zip(shape, chunk_sizes):
+            ranges.append(range(0, dim_size, chunk_size))
+        for start_indices in itertools.product(*ranges):
+            slices = []
+            for start, chunk_size, dim_size in zip(start_indices, chunk_sizes, shape):
+                stop = min(start + chunk_size, dim_size)
+                slices.append(slice(start, stop))
+            yield tuple(slices)
 
 
 class HDFAttrModel(QAbstractTableModel):
