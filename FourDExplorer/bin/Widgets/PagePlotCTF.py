@@ -720,9 +720,9 @@ class PagePlotCTF(QWidget):
         elif ctf_image_modes == 5:
             # ICoM
             ctf_image = ctf_calculator.calcCTFofDCoM()
-            
-        print(np.max(ctf_image))
-        print(np.min(ctf_image))
+        ctf_image = ctf_image / np.max(ctf_image)
+        print("max ", np.max(ctf_image))
+        print("min ", np.min(ctf_image))
             
         self.ctf_image_object.set_data(ctf_image)
         
