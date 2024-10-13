@@ -50,6 +50,7 @@ class DialogImportFourDSTEM(QDialog):
 
         self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.comboBox_mode.currentIndexChanged.connect(self._changeMode)
+        
         self.ui.stackedWidget.setCurrentIndex(0)
 
         self.ui.pushButton_browse_parent.clicked.connect(self.browseParent)
@@ -60,6 +61,8 @@ class DialogImportFourDSTEM(QDialog):
 
         self.ui.lineEdit_name.setText('Untitled')
         self._validateNewName()
+        
+        self._hideOptions()     # some importer is not completed yet
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -69,6 +72,8 @@ class DialogImportFourDSTEM(QDialog):
     def _changeMode(self, index: int):
         """
         Slots when import mode is changed.
+        
+        NOTE: 4 and 5 is not completed yet, and hence they are removed
 
         arguments:
             index: (int)    0   'EMPAD v1.0'
@@ -80,8 +85,24 @@ class DialogImportFourDSTEM(QDialog):
                             6   'Numpy 4D Array (.npy)'
                             7   'Numpy Array Sequence'
                             8   'Digital Micrograph (.dm4)'
+                            9   'Other HDF5 Dataset (.h5)'
         """
         self.ui.stackedWidget.setCurrentIndex(index)
+    
+    def _hideOptions(self):
+        """
+        Hide options for incomplete importers.
+
+        This method removes the options for MATLAB 4D Matrix (.mat) and MATLAB 
+        Matrix Sequence from the combo box and the corresponding widgets from 
+        the stacked widget.
+        
+        TODO
+        """
+        self.ui.comboBox_mode.removeItem(5)
+        self.ui.comboBox_mode.removeItem(4)
+        self.ui.stackedWidget.removeWidget(self.ui.stackedWidget.widget(5))
+        self.ui.stackedWidget.removeWidget(self.ui.stackedWidget.widget(4))
     
     def browseParent(self) -> bool:
         """
