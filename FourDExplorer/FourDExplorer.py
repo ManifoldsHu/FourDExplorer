@@ -34,19 +34,20 @@ All rights reserved.
 """
 
 import sys
-import traceback
+import os 
+ROOT_PATH = os.path.dirname(__file__)
+if not ROOT_PATH in sys.path:
+    sys.path.append(ROOT_PATH)
 
 import matplotlib.style as mplstyle
 mplstyle.use('fast')
 
-from Constants import ROOT_PATH
 from bin.Widgets.SplashScreenStart import SplashScreenStart
 
 from bin.app import App 
 
 def run():
-    if not ROOT_PATH in sys.path:
-        sys.path.append(ROOT_PATH)
+
 
     ''' start app '''
     app = App(sys.argv)

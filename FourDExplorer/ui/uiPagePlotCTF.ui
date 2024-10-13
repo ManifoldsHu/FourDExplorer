@@ -27,7 +27,7 @@
       <widget class="QLineEdit" name="lineEdit_config_path"/>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_browse_probe">
+      <widget class="QPushButton" name="pushButton_browse_config">
        <property name="text">
         <string>Browse</string>
        </property>
@@ -50,7 +50,7 @@
        </property>
        <widget class="QWidget" name="tab_3">
         <attribute name="title">
-         <string>Ronchigram</string>
+         <string>Ronchigram (Random Sample)</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_11">
          <item>
@@ -107,7 +107,7 @@
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -144,7 +144,7 @@
               <item>
                <widget class="QLabel" name="label_21">
                 <property name="text">
-                 <string>Full Detector Size (in mrad)</string>
+                 <string>Bright Field Disk Radius (in pix)</string>
                 </property>
                </widget>
               </item>
@@ -228,7 +228,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="doubleSpinBox_full_detector_size">
+               <widget class="QDoubleSpinBox" name="doubleSpinBox_bright_field_disk_radius">
                 <property name="maximum">
                  <double>9999.989999999999782</double>
                 </property>
@@ -377,7 +377,7 @@
               <item>
                <widget class="QLabel" name="label_28">
                 <property name="text">
-                 <string>Spherical Aberration Cs (in mm)</string>
+                 <string>Spherical Aberration Cs (in μm)</string>
                 </property>
                </widget>
               </item>
@@ -674,6 +674,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_start_calculation">
+       <property name="text">
+        <string>Start Calculation</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_save_config_path">

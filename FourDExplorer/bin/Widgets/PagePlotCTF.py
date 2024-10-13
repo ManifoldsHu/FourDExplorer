@@ -43,6 +43,7 @@ from matplotlib.axes import Axes
 from matplotlib.image import AxesImage 
 from matplotlib.patches import Circle 
 from matplotlib.patches import Annulus
+from matplotlib.lines import Line2D
 from matplotlib.colorbar import Colorbar, make_axes 
 
 import h5py 
@@ -56,6 +57,7 @@ from Constants import HDFType
 from ui import uiPagePlotCTF
 
 from lib.Probe import OpticalSTEM
+from lib.Probe import CTFCalculator
 
 class PagePlotCTF(QWidget):
     """
@@ -92,8 +94,12 @@ class PagePlotCTF(QWidget):
 
         self._ctf_line_ax = None 
         self._ctf_line_object = None 
+        
+        self._random_sample = None 
 
         self.ui.lineEdit_config_path.setReadOnly(True)
+        
+        
 
         self._initUi()
 
@@ -244,6 +250,10 @@ class PagePlotCTF(QWidget):
         return self.ui.widget_plot_ctf_curve.blit_manager
     
     @property
+    def ctf_line_object(self) -> Line2D:
+        return self._ctf_line_object
+    
+    @property
     def task_manager(self) -> TaskManager:
         global qApp 
         return qApp.task_manager
@@ -256,6 +266,7 @@ class PagePlotCTF(QWidget):
             for j in range(256):
                 if (i-128)**2 + (j-128)**2 < radius**2:
                     dummy[i,j] = 1         
+        dummy = dummy / np.sum(dummy)
         return dummy#self.hdf_handler.file[self._ronchigram_data_path]
     
     @property
@@ -279,25 +290,22 @@ class PagePlotCTF(QWidget):
         config_object.attrs["scan_step_size"] = self.ui.doubleSpinBox_scanning_step_size.value() * 1e-9
         config_object.attrs["detector_shape"] = [int(self.ui.comboBox_pixel_number.currentText()), int(self.ui.comboBox_pixel_number.currentText())]
         # estimate the real space pixel size from small angle approximation: dx = CL * full_detector_size / N
-        config_object.attrs["detector_pixel_size"] = self.config_object.attrs["camera_length"] * self.ui.doubleSpinBox_full_detector_size.value() * 1e-3 / int(self.ui.comboBox_pixel_number.currentText())
+        # config_object.attrs["detector_pixel_size"] = self.config_object.attrs["camera_length"] * self.ui.doubleSpinBox_full_detector_size.value() * 1e-3 / int(self.ui.comboBox_pixel_number.currentText())   # TODO
 
         config_object.attrs["defocus"] = self.ui.doubleSpinBox_defocus.value() * 1e-9
         config_object.attrs["Cs"] = self.ui.doubleSpinBox_Cs.value() * 1e-3
 
     def _setOpticalSTEM(self):
         optics = OpticalSTEM(
-            accelerate_voltage=self.config_object.attrs.get("/Acquisition/Microscope/accelerate_voltage", 200e3),
-            alpha=self.config_object.attrs.get("/Acquisition/Microscope/convergence_angle", 12e-3),
-            camera_length=self.config_object.attrs.get("/Acquisition/Microscope/camera_length", 8e-3),
+            accelerate_voltage=self.config_object.attrs.get("/Acquisition/Microscope/accelerate_voltage", 60e3),
+            alpha=self.config_object.attrs.get("/Acquisition/Microscope/convergence_angle", 22.5e-3),
+            camera_length=self.config_object.attrs.get("/Acquisition/Microscope/camera_length", 576e-3),
             scan_step_size=self.config_object.attrs.get("/Calibration/Space/scan_dr_i", 5e-9),
-            detector_shape=self.config_object.attrs.get("detector_shape", (256, 256)),
-            detector_pixel_size=self.config_object.attrs.get("/Acquisition/Camera/pixel_size_i", 1e-10),
-            defocus=self.config_object.attrs.get("/Aberration/C1", 100e-9),
-            Cs=self.config_object.attrs.get("/Aberration/C3", 1e-3),
+            detector_shape=self.config_object.shape[2:4],
+            detector_pixel_size=self.config_object.attrs.get("/Acquisition/Camera/pixel_size_i", 150e-6),
+            defocus=self.config_object.attrs.get("/Aberration/C1", 10e-9),
+            Cs=self.config_object.attrs.get("/Aberration/C3", 1e-6),
         )
-        wavelength = optics.wave_length
-        bright_field_disk_radius = optics.alpha * optics.dp_N * optics.dx / wavelength
-        optics.setBrightFieldDiskRadius(bright_field_disk_radius)
 
         return optics
     
@@ -305,12 +313,13 @@ class PagePlotCTF(QWidget):
         """
         Initialise UI.
         """
-        self.ui.pushButton_browse_probe.clicked.connect(self._browseProbe)
+        self.ui.pushButton_browse_config.clicked.connect(self._browseProbe)
 
         self.ui.comboBox_pixel_number.setCurrentIndex(0)
         self.ui.doubleSpinBox_alpha.setValue(12.0)
         self.ui.doubleSpinBox_voltage.setValue(200.0)
-        self.ui.doubleSpinBox_full_detector_size.setValue(25.0)
+        # self.ui.doubleSpinBox_full_detector_size.setValue(25.0)
+        self.ui.doubleSpinBox_bright_field_disk_radius.setValue(25.0)
         self.ui.doubleSpinBox_scanning_step_size.setValue(5.0)
         self.ui.doubleSpinBox_camera_length.setValue(8.0)
         self.ui.label_dk.setText("1")
@@ -329,6 +338,8 @@ class PagePlotCTF(QWidget):
         self.ui.doubleSpinBox_abf_inner_radius.setValue(10.0)
 
         self.ui.pushButton_save_config_path.clicked.connect(self._saveConfigPath)
+        
+        self.ui.pushButton_start_calculation.clicked.connect(self._updateProbe)
 
         # self._updateConfigObject()
     
@@ -358,6 +369,30 @@ class PagePlotCTF(QWidget):
         self._config_path = data_path
         self.ui.lineEdit_config_path.setText(self._config_path)
 
+        optics = self._setOpticalSTEM()
+        
+        scan_i, scan_j, dp_i, dp_j = self.hdf_handler.file[data_path].shape 
+        if dp_i in [128, 256, 512, 1024, 2048, 4096]:
+            self.ui.comboBox_pixel_number.setCurrentIndex(int(np.log2(dp_i) - 7))
+        else:
+            self.ui.comboBox_pixel_number.setCurrentIndex(0)
+
+        self.ui.comboBox_image_modes.setCurrentIndex(0)
+        self.ui.doubleSpinBox_alpha.setValue(optics.alpha * 1e3)
+        self.ui.doubleSpinBox_camera_length.setValue(optics.camera_length * 1e3)
+        
+        self.ui.doubleSpinBox_voltage.setValue(optics.accelerate_voltage * 1e-3)
+        self.ui.doubleSpinBox_scanning_step_size.setValue(optics.scan_step_size * 1e9)
+        # self.ui.doubleSpinBox_full_detector_size.setValue(optics.alpha / optics.bright_field_disk_radius * optics.dp_N)
+        self.ui.doubleSpinBox_bright_field_disk_radius.setValue(optics.bright_field_disk_radius)
+        
+        self.ui.doubleSpinBox_defocus.setValue(optics.defocus * 1e9)
+        self.ui.doubleSpinBox_Cs.setValue(optics.Cs * 1e6)
+        
+        self.ui.doubleSpinBox_abf_inner_radius.setValue(25)
+        self.ui.doubleSpinBox_abf_outer_radius.setValue(50)
+        
+        
         self._createAxes()
         self._createImages()
         self._createColorbar()
@@ -478,6 +513,16 @@ class PagePlotCTF(QWidget):
             vmax=ctf_image_max,
         )
         self.ctf_image_blit_manager['image'] = self._ctf_image_object
+        
+        if self._ctf_line_object in self.ctf_line_ax.lines:
+            self._ctf_line_object.remove()
+        
+        self._ctf_line_object, = self.ctf_line_ax.plot(
+            np.arange(0, 256, 1),
+            np.ones((256,)),
+            color='black',
+            linewidth=2,
+        )
 
     def _createColorbar(self):
         """
@@ -612,6 +657,95 @@ class PagePlotCTF(QWidget):
     #   - 调整、完善关于 4D-STEM 的实验参数的记录
     #   - 添加对于 .ctf 类型数据的支持 (于 HDFManager 中)
     #   - 构建 Calculator 类以及 OpticalConfig 类，用于得到 CTF 数据
+    
+    def _updateProbe(self):
+        accelerate_voltage = self.ui.doubleSpinBox_voltage.value() * 1e3
+        dp_N = int(self.ui.comboBox_pixel_number.currentText())
+        scan_N = 128 
+        alpha = self.ui.doubleSpinBox_alpha.value() * 1e-3
+        scan_step_size = self.ui.doubleSpinBox_scanning_step_size.value() * 1e-9
+        # bright_field_disk_radius = alpha * dp_N / self.ui.doubleSpinBox_full_detector_size.value()
+        bright_field_disk_radius = self.ui.doubleSpinBox_bright_field_disk_radius.value()
+        camera_length = self.ui.doubleSpinBox_camera_length.value() * 1e-3 
+        defocus = self.ui.doubleSpinBox_defocus.value() * 1e-9 
+        Cs = self.ui.doubleSpinBox_Cs.value() * 1e-6 
+
+        optics = OpticalSTEM(
+            accelerate_voltage=accelerate_voltage,
+            detector_shape = (dp_N, dp_N),
+            scan_shape = (scan_N, scan_N),
+            alpha = alpha,
+            scan_step_size=scan_step_size,
+            bright_field_disk_radius=bright_field_disk_radius,
+            camera_length = camera_length,
+            defocus = defocus,
+            Cs = Cs,
+        )
+        
+        probe = optics.generateProbe()
+        self.probe_abs_object.set_data(np.abs(probe))
+        self.probe_angle_object.set_data(np.angle(probe))
+        object_phase = np.random.random_sample((optics.dp_N, optics.dp_N)) * 0.2
+        exit_wave = probe * np.exp(1j * object_phase)
+        diffraction_wave = optics.fft2(exit_wave, optics.dx)
+        diffraction_intensity = np.abs(diffraction_wave)**2 
+        diffraction_intensity = diffraction_intensity / np.sum(diffraction_intensity)
+        self.ronchigram_object.set_data(diffraction_intensity)
+        
+        ctf_image_modes = self.ui.comboBox_image_modes.currentIndex()
+        beta_in = self.ui.doubleSpinBox_abf_inner_radius.value()
+        beta_out = self.ui.doubleSpinBox_abf_outer_radius.value()
+        ctf_calculator = CTFCalculator(optics)
+        
+        radial_locate, radial_distance = ctf_calculator.generateRadialPreimage(
+            matrix_shape = optics.detector_shape, 
+            target = None, 
+            pixel_size = optics.du,
+        )
+        if ctf_image_modes == 0:
+            # BF, ABF 
+            ctf_image = ctf_calculator.calcCTFofVirtualImageFirstOrder(beta_in, beta_out)
+        elif ctf_image_modes == 1:
+            # ADF 
+            ctf_image = ctf_calculator.calcCTFofVirtualImageSecondOrder(beta_in, beta_out)
+        elif ctf_image_modes == 2:
+            # Full BF 
+            ctf_image = ctf_calculator.calcCTFofVirtualImageSecondOrder(0, bright_field_disk_radius)
+        elif ctf_image_modes == 3:
+            # Axial BF 
+            ctf_image = ctf_calculator.calcCTFofAxialBF()
+        elif ctf_image_modes == 4:
+            # DCoM
+            ctf_image = ctf_calculator.calcCTFofDCoM()
+        elif ctf_image_modes == 5:
+            # ICoM
+            ctf_image = ctf_calculator.calcCTFofDCoM()
+            
+        print(np.max(ctf_image))
+        print(np.min(ctf_image))
+            
+        self.ctf_image_object.set_data(ctf_image)
+        
+        # locate, distance = ctf_calculator.generateRadialPreimage(dp_N, None, optics.du)
+        
+        _, ctf_curve_y = ctf_calculator.generateRotationalAverage(ctf_image, target=None, pixel_size = optics.du, preimage_locate=radial_locate, preimage_distance=radial_distance)
+        
+        self.ctf_line_object.set_xdata(radial_distance*1e-9)
+        self.ctf_line_object.set_ydata(ctf_curve_y)
+        
+        
+        self.probe_abs_blit_manager.update()
+        self.ronchigram_blit_manager.update()
+        self.probe_angle_blit_manager.update()
+        self.ctf_image_blit_manager.update()
+        self.ctf_line_blit_manager.update()
+        
+    # def _updateCTF(self):
+    #     optics = self._setOpticalSTEM()
+    #     ctf_calculator = CTFCalculator(optics)
+        
+    
+    
 
 # import sys
 # from bin.app import App

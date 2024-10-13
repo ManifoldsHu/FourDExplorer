@@ -1,7 +1,22 @@
-include README.md 
-include FourDExplorer/ui/resources/icons/*.ico  
-include FourDExplorer/ui/resources/icons/*.png
-include FourDExplorer/ui/resources/images/*.png
-include FourDExplorer/ui/resources/themes/dark/*.xml
-include FourDExplorer/ui/resources/themes/light/*.xml
-prune dist *.egg-info build
+include README.md
+
+# 包含 PNG 和 ICO 图标
+recursive-include FourDExplorer/ui/resources/icons *.png *.ico
+
+# 包含 images 目录下的 PNG 文件
+recursive-include FourDExplorer/ui/resources/images *.png
+
+# 包含 dark 和 light 主题下的 XML 文件
+recursive-include FourDExplorer/ui/resources/themes/dark *.xml
+recursive-include FourDExplorer/ui/resources/themes/light *.xml
+
+# 包含 schema/MetaStructures 下的 JSON 文件
+recursive-include FourDExplorer/schema/MetaStructures *.json
+
+# 包含 models 目录下的 ONNX 文件
+recursive-include FourDExplorer/models *.onnx
+
+# 排除 dist、build 和 egg-info 文件夹（以避免打包这些内容）
+prune dist
+prune build
+prune *.egg-info

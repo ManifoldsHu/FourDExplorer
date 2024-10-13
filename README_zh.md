@@ -7,7 +7,7 @@
 
 ## 可执行文件安装
 
-从发布中，根据操作系统下载压缩包。目前支持 Windows 10、Windows 11 及 Mac OS。对于 Linux 而言，请使用从 PyPI 安装。下载好之后解压，然后找到 4D-Explorer.exe 即可运行。
+从仓库的发布页面中，根据操作系统下载压缩包。目前支持 Windows 10、Windows 11 及 Mac OS。对于 Linux 而言，请使用从 PyPI 安装。下载好之后解压，然后找到 4D-Explorer.exe 即可运行。
 
 ## 从 PyPI 安装
 

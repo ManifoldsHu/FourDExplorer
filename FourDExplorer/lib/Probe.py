@@ -1268,105 +1268,202 @@ class OpticalSTEM(object):
         
         self._update_optical_config()
 
-    def _update_diffraction_params(
-            self, 
-            detector_pixel_size = None, 
-            alpha = None, 
-            camera_length = None, 
-            bright_field_disk_radius = None
-        ):
-        """
-        由于这四个参数满足一个约束
-        alpha * camera_length * bright_field_disk_radius**(-1) * detector_pixel_size**(-1) == 1
+    # def _update_diffraction_params(
+    #         self, 
+    #         detector_pixel_size = None, 
+    #         alpha = None, 
+    #         camera_length = None, 
+    #         bright_field_disk_radius = None
+    #     ):
+    #     """
+    #     由于这四个参数满足一个约束
+    #     alpha * camera_length * bright_field_disk_radius**(-1) * detector_pixel_size**(-1) == 1
 
-        我们设置优先级为
-        detector_pixel_size > alpha > camera_length > bright_field_disk_radius
+    #     我们设置优先级为
+    #     detector_pixel_size > alpha > camera_length > bright_field_disk_radius
 
-        如果什么参数都不传递，就什么都不做。
+    #     如果什么参数都不传递，就什么都不做。
 
-        如果传递的参数大于零个、小于四个，那么除了会修改传递的参数之外，还会修改除传递的参数以外最低优先级的那个参数，以满足约束条件。
+    #     如果传递的参数大于零个、小于四个，那么除了会修改传递的参数之外，还会修改除传递的参数以外最低优先级的那个参数，以满足约束条件。
 
-        如果传递的参数等于四个，那么无视传递的最低优先级的参数 (bright_field_disk_radius)，而将其交由前三个参数以及约束来决定。
-        """
-        _param_dict = {     # 传入的参数字典
-            'detector_pixel_size': detector_pixel_size,
-            'alpha': alpha,
-            'camera_length': camera_length,
-            'bright_field_disk_radius': bright_field_disk_radius,
-        }
+    #     如果传递的参数等于四个，那么无视传递的最低优先级的参数 (bright_field_disk_radius)，而将其交由前三个参数以及约束来决定。
+    #     """
+    #     _param_dict = {     # 传入的参数字典
+    #         'detector_pixel_size': detector_pixel_size,
+    #         'alpha': alpha,
+    #         'camera_length': camera_length,
+    #         'bright_field_disk_radius': bright_field_disk_radius,
+    #     }
 
-        _ordered_keys = [   # 参数优先级的顺序
-            'detector_pixel_size', 
-            'alpha', 
-            'camera_length', 
-            'bright_field_disk_radius'
-        ]
+    #     _ordered_keys = [   # 参数优先级的顺序
+    #         'detector_pixel_size', 
+    #         'alpha', 
+    #         'camera_length', 
+    #         'bright_field_disk_radius'
+    #     ]
 
-        _current_dict = {   # 现有的参数字典
-            'detector_pixel_size': self.detector_pixel_size,
-            'alpha': self.alpha,
-            'camera_length': self.camera_length,
-            'bright_field_disk_radius': self.bright_field_disk_radius
-        }
+    #     _current_dict = {   # 现有的参数字典
+    #         'detector_pixel_size': self.detector_pixel_size,
+    #         'alpha': self.alpha,
+    #         'camera_length': self.camera_length,
+    #         'bright_field_disk_radius': self.bright_field_disk_radius
+    #     }
 
-        _updated_dict = {   # 更新后的参数字典
-            'detector_pixel_size': None,
-            'alpha': None,
-            'camera_length': None,
-            'bright_field_disk_radius': None,
-        }
+    #     _updated_dict = {   # 更新后的参数字典
+    #         'detector_pixel_size': None,
+    #         'alpha': None,
+    #         'camera_length': None,
+    #         'bright_field_disk_radius': None,
+    #     }
 
-        _prod_power = {     # 这四个参数所满足的约束为，其各幂次的乘积等于 1
-            'detector_pixel_size': -1,
-            'bright_field_disk_radius': -1,
-            'camera_length': 1,
-            'alpha': 1,
-        }
+    #     _prod_power = {     # 这四个参数所满足的约束为，其各幂次的乘积等于 1
+    #         'detector_pixel_size': -1,
+    #         'bright_field_disk_radius': -1,
+    #         'camera_length': 1,
+    #         'alpha': 1,
+    #     }
 
-        for key in _param_dict:     # 检查传入的参数
-            if _param_dict[key] is not None:
-                if not isinstance(_param_dict[key], (float, int)):
-                    raise TypeError(f"{key} must be a float")
-                if _param_dict[key] <= 0:
-                    raise ValueError(f"{key} must be positive")
+    #     for key in _param_dict:     # 检查传入的参数
+    #         if _param_dict[key] is not None:
+    #             if not isinstance(_param_dict[key], (float, int)):
+    #                 raise TypeError(f"{key} must be a float")
+    #             if _param_dict[key] <= 0:
+    #                 raise ValueError(f"{key} must be positive")
             
 
-        _count_none = sum(1 for k in _ordered_keys if _param_dict[k] is None)
+    #     _count_none = sum(1 for k in _ordered_keys if _param_dict[k] is None)
 
-        if _count_none == 4:    # 如果什么参数都不传递，就什么都不做。
-            return
-        if _count_none == 0:    # 如果传递了四个参数，那么无视最低优先级的参数，即 
-                                # bright_field_disk_radius
-            _param_dict['bright_field_disk_radius'] = None 
-            _count_none += 1
+    #     if _count_none == 4:    # 如果什么参数都不传递，就什么都不做。
+    #         return
+    #     if _count_none == 0:    # 如果传递了四个参数，那么无视最低优先级的参数，即 
+    #                             # bright_field_disk_radius
+    #         _param_dict['bright_field_disk_radius'] = None 
+    #         _count_none += 1
         
-        # 找出优先级最低的 None 参数，它将由传入的参数与现有的参数来决定。
-        param_to_be_determined = None 
-        for key in _ordered_keys[::-1]:
-            if _param_dict[key] is None:
-                param_to_be_determined = key 
-                break 
+    #     # 找出优先级最低的 None 参数，它将由传入的参数与现有的参数来决定。
+    #     param_to_be_determined = None 
+    #     for key in _ordered_keys[::-1]:
+    #         if _param_dict[key] is None:
+    #             param_to_be_determined = key 
+    #             break 
 
-        for key in _updated_dict:   # 除最后要决定的参数外，其他参数已定下
-            if key == param_to_be_determined:
-                _updated_dict[key] = None
-            elif _param_dict[key] is None:
-                _updated_dict[key] = _current_dict[key]
+    #     for key in _updated_dict:   # 除最后要决定的参数外，其他参数已定下
+    #         if key == param_to_be_determined:
+    #             _updated_dict[key] = None
+    #         elif _param_dict[key] is None:
+    #             _updated_dict[key] = _current_dict[key]
+    #         else:
+    #             _updated_dict[key] = _param_dict[key]
+
+    #     _prod_num = 1               # 计算最后要决定的参数的值
+    #     for key in _updated_dict:
+    #         if key == param_to_be_determined:
+    #             _prod_num *= 1
+    #         else:
+    #             _prod_num = _prod_num * (_updated_dict[key] ** _prod_power[key])
+    #     _updated_dict[param_to_be_determined] = 1 / _prod_num
+
+    #     self._alpha = _updated_dict['alpha']    # 将这些参数都保存下来
+    #     self._detector_pixel_size = detector_pixel_size
+    #     self._camera_length = _updated_dict['camera_length']
+    #     self._bright_field_disk_radius = _updated_dict['bright_field_disk_radius']
+    
+    
+    def _update_diffraction_params(
+        self,
+        detector_pixel_size=None,
+        alpha=None,
+        camera_length=None,
+        bright_field_disk_radius=None
+    ):
+        """
+        The four parameters satisfy the constraint:
+        alpha * camera_length * bright_field_disk_radius**(-1) * detector_pixel_size**(-1) == 1
+
+        The priority is set as:
+        detector_pixel_size > alpha > camera_length > bright_field_disk_radius
+
+        If no parameters are passed, do nothing.
+
+        If between 1 and 3 parameters are passed, besides updating the passed parameters,
+        update the lowest priority parameter among the ones not passed to satisfy the constraint.
+
+        If all four parameters are passed, ignore the lowest priority parameter (bright_field_disk_radius),
+        and set it according to the other three parameters and the constraint.
+        """
+
+        # If no parameters are passed, do nothing
+        if all(param is None for param in [detector_pixel_size, alpha, camera_length, bright_field_disk_radius]):
+            return
+
+        # Get current values
+        parameters = {
+            'detector_pixel_size': self._detector_pixel_size,
+            'alpha': self._alpha,
+            'camera_length': self._camera_length,
+            'bright_field_disk_radius': self._bright_field_disk_radius
+        }
+
+        # Update passed parameters
+        if detector_pixel_size is not None:
+            parameters['detector_pixel_size'] = detector_pixel_size
+        if alpha is not None:
+            parameters['alpha'] = alpha
+        if camera_length is not None:
+            parameters['camera_length'] = camera_length
+        if bright_field_disk_radius is not None:
+            parameters['bright_field_disk_radius'] = bright_field_disk_radius
+
+        # Determine which parameters have been passed
+        passed = {
+            'detector_pixel_size': detector_pixel_size is not None,
+            'alpha': alpha is not None,
+            'camera_length': camera_length is not None,
+            'bright_field_disk_radius': bright_field_disk_radius is not None
+        }
+
+        num_params_passed = sum(passed.values())
+
+        priorities = ['detector_pixel_size', 'alpha', 'camera_length', 'bright_field_disk_radius']
+
+        if num_params_passed == 4:
+            # Ignore the lowest priority parameter (bright_field_disk_radius)
+            param_to_compute = 'bright_field_disk_radius'
+        else:
+            # Find the lowest priority parameter among the ones not passed
+            for param_name in reversed(priorities):
+                if not passed[param_name]:
+                    param_to_compute = param_name
+                    break
+
+        # Compute the missing parameter
+        def compute_missing_param(parameters, param_to_compute):
+            if param_to_compute == 'bright_field_disk_radius':
+                parameters['bright_field_disk_radius'] = (
+                    parameters['alpha'] * parameters['camera_length'] / parameters['detector_pixel_size']
+                )
+            elif param_to_compute == 'detector_pixel_size':
+                parameters['detector_pixel_size'] = (
+                    parameters['alpha'] * parameters['camera_length'] / parameters['bright_field_disk_radius']
+                )
+            elif param_to_compute == 'camera_length':
+                parameters['camera_length'] = (
+                    parameters['bright_field_disk_radius'] * parameters['detector_pixel_size'] / parameters['alpha']
+                )
+            elif param_to_compute == 'alpha':
+                parameters['alpha'] = (
+                    parameters['bright_field_disk_radius'] * parameters['detector_pixel_size'] / parameters['camera_length']
+                )
             else:
-                _updated_dict[key] = _param_dict[key]
+                raise ValueError(f"Unknown parameter {param_to_compute}")
 
-        _prod_num = 1               # 计算最后要决定的参数的值
-        for key in _updated_dict:
-            if key == param_to_be_determined:
-                _prod_num *= 1
-            else:
-                _prod_num = _prod_num * (_updated_dict[key] ** _prod_power[key])
-        _updated_dict[param_to_be_determined] = 1 / _prod_num
+        compute_missing_param(parameters, param_to_compute)
 
-        self._alpha = _updated_dict['alpha']    # 将这些参数都保存下来
-        self._detector_pixel_size = detector_pixel_size
-        self._camera_length = _updated_dict['camera_length']
-        self._bright_field_disk_radius = _updated_dict['bright_field_disk_radius']
+        # Save parameters back to self
+        self._detector_pixel_size = parameters['detector_pixel_size']
+        self._alpha = parameters['alpha']
+        self._camera_length = parameters['camera_length']
+        self._bright_field_disk_radius = parameters['bright_field_disk_radius']
 
     def generateConvergentAperture(self) -> np.ndarray:
         """

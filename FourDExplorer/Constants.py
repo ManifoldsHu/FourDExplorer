@@ -16,7 +16,7 @@ date:           Feb 19, 2022
 
 # The version of the application
 global APP_VERSION 
-APP_VERSION = (0, 6, 0)
+APP_VERSION = (0, 6, 4)
 
 import logging
 import os

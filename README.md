@@ -7,7 +7,7 @@
 
 ## Installation FourDExplorer from Executable 
 
-From releases, we download packages according to the operating system. Currently, Windows 10, Windows 11 and MacOS are supported. For Linux, see Installation FourDExplorer from Source instead.
+From releases page of GitHub, we download packages according to the operating system. Currently, Windows 10, Windows 11 and MacOS are supported. For Linux, see Installation FourDExplorer from Source instead.
 
 Next, unzip the downloaded packages, and execute 4D-Explorer.exe to open the software.
 

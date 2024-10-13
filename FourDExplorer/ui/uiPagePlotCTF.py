@@ -26,7 +26,7 @@ class Ui_Form(object):
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName(u"Form")
-        Form.resize(1216, 1044)
+        Form.resize(1216, 1043)
         self.verticalLayout_6 = QVBoxLayout(Form)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
         self.horizontalLayout_6 = QHBoxLayout()
@@ -41,10 +41,10 @@ class Ui_Form(object):
 
         self.horizontalLayout_6.addWidget(self.lineEdit_config_path)
 
-        self.pushButton_browse_probe = QPushButton(Form)
-        self.pushButton_browse_probe.setObjectName(u"pushButton_browse_probe")
+        self.pushButton_browse_config = QPushButton(Form)
+        self.pushButton_browse_config.setObjectName(u"pushButton_browse_config")
 
-        self.horizontalLayout_6.addWidget(self.pushButton_browse_probe)
+        self.horizontalLayout_6.addWidget(self.pushButton_browse_config)
 
 
         self.verticalLayout_6.addLayout(self.horizontalLayout_6)
@@ -186,11 +186,11 @@ class Ui_Form(object):
 
         self.verticalLayout_20.addWidget(self.doubleSpinBox_voltage)
 
-        self.doubleSpinBox_full_detector_size = QDoubleSpinBox(self.tab)
-        self.doubleSpinBox_full_detector_size.setObjectName(u"doubleSpinBox_full_detector_size")
-        self.doubleSpinBox_full_detector_size.setMaximum(9999.989999999999782)
+        self.doubleSpinBox_bright_field_disk_radius = QDoubleSpinBox(self.tab)
+        self.doubleSpinBox_bright_field_disk_radius.setObjectName(u"doubleSpinBox_bright_field_disk_radius")
+        self.doubleSpinBox_bright_field_disk_radius.setMaximum(9999.989999999999782)
 
-        self.verticalLayout_20.addWidget(self.doubleSpinBox_full_detector_size)
+        self.verticalLayout_20.addWidget(self.doubleSpinBox_bright_field_disk_radius)
 
         self.doubleSpinBox_scanning_step_size = QDoubleSpinBox(self.tab)
         self.doubleSpinBox_scanning_step_size.setObjectName(u"doubleSpinBox_scanning_step_size")
@@ -485,6 +485,11 @@ class Ui_Form(object):
 
         self.horizontalLayout_5.addItem(self.horizontalSpacer_4)
 
+        self.pushButton_start_calculation = QPushButton(Form)
+        self.pushButton_start_calculation.setObjectName(u"pushButton_start_calculation")
+
+        self.horizontalLayout_5.addWidget(self.pushButton_start_calculation)
+
         self.pushButton_save_config_path = QPushButton(Form)
         self.pushButton_save_config_path.setObjectName(u"pushButton_save_config_path")
 
@@ -496,9 +501,9 @@ class Ui_Form(object):
 
         self.retranslateUi(Form)
 
-        self.tabWidget_2.setCurrentIndex(2)
+        self.tabWidget_2.setCurrentIndex(0)
         self.tabWidget_3.setCurrentIndex(0)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
         self.stackedWidget.setCurrentIndex(0)
 
 
@@ -507,9 +512,9 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
-        self.label.setText(QCoreApplication.translate("Form", u"Optical Configuration (CTF Curve) Path", None))
-        self.pushButton_browse_probe.setText(QCoreApplication.translate("Form", u"Browse", None))
-        self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_3), QCoreApplication.translate("Form", u"Ronchigram", None))
+        self.label.setText(QCoreApplication.translate("Form", u"Optical Configuration (CTF) Path", None))
+        self.pushButton_browse_config.setText(QCoreApplication.translate("Form", u"Browse", None))
+        self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_3), QCoreApplication.translate("Form", u"Ronchigram (Random Sample)", None))
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_4), QCoreApplication.translate("Form", u"Probe (Amplitude)", None))
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_5), QCoreApplication.translate("Form", u"Probe (Phase)", None))
         self.tabWidget_3.setTabText(self.tabWidget_3.indexOf(self.tab_9), QCoreApplication.translate("Form", u"CTF Image", None))
@@ -517,7 +522,7 @@ class Ui_Form(object):
         self.label_18.setText(QCoreApplication.translate("Form", u"Detector Pixel Number (N)", None))
         self.label_19.setText(QCoreApplication.translate("Form", u"Convergent Semi-angle \u03b1 (in mrad)", None))
         self.label_20.setText(QCoreApplication.translate("Form", u"Accelerate Voltage (in kV)", None))
-        self.label_21.setText(QCoreApplication.translate("Form", u"Full Detector Size (in mrad)", None))
+        self.label_21.setText(QCoreApplication.translate("Form", u"Bright Field Disk Radius (in pix)", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"Scanning Step Size (in nm)", None))
         self.label_8.setText(QCoreApplication.translate("Form", u"Camera Length (in mm)", None))
         self.comboBox_pixel_number.setItemText(0, QCoreApplication.translate("Form", u"128", None))
@@ -537,7 +542,7 @@ class Ui_Form(object):
         self.label_reciprocal_space_size.setText(QCoreApplication.translate("Form", u"TextLabel", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("Form", u"Optical Parameters", None))
         self.label_27.setText(QCoreApplication.translate("Form", u"<html><head/><body><p>Defocus (in nm)</p></body></html>", None))
-        self.label_28.setText(QCoreApplication.translate("Form", u"Spherical Aberration Cs (in mm)", None))
+        self.label_28.setText(QCoreApplication.translate("Form", u"Spherical Aberration Cs (in \u03bcm)", None))
         self.pushButton_set_aberrations.setText(QCoreApplication.translate("Form", u"Set High Order Aberrations...", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_8), QCoreApplication.translate("Form", u"Aberration Coefficients", None))
         self.label_6.setText(QCoreApplication.translate("Form", u"Descriptions", None))
@@ -553,6 +558,7 @@ class Ui_Form(object):
         self.label_3.setText(QCoreApplication.translate("Form", u"Outer Radius (in mrad)", None))
         self.label_4.setText(QCoreApplication.translate("Form", u"Inner Radius (in mrad)", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Form", u"CTF Image Modes", None))
+        self.pushButton_start_calculation.setText(QCoreApplication.translate("Form", u"Start Calculation", None))
         self.pushButton_save_config_path.setText(QCoreApplication.translate("Form", u"Save Optical Configuration (CTF Curve)", None))
     # retranslateUi
 

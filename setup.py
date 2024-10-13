@@ -18,28 +18,22 @@ DESCRIPTION = 'Use 4D-Explorer to process and analyze 4D-STEM data.'
 URL = 'https://github.com/ManifoldsHu/FourDExplorer'
 EMAIL = 'FourDExplorer@gmail.com'
 AUTHOR = 'Hu Yiming'
-REQUIRES_PYTHON = '>=3.9.0'
+REQUIRES_PYTHON = '>=3.10.1,<3.11'
 VERSION = '.'.join([str(v) for v in APP_VERSION])
 
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+
 # What packages are required for this module to be executed?
-REQUIRED = [
-    'numpy >= 1.20, <= 1.23',
-    'h5py >= 3.7, <= 3.8',
-    'matplotlib >= 3.5, <= 3.6',
-    'pyinstaller >= 5.4, <= 5.5',
-    'psutil == 5.9',
-    'pyside6 == 6.2.2.1',
-    'qt-material == 2.12',
-    'scikit-image >= 0.18, <= 0.19',
-    'scipy >= 1.8, <= 1.9',
-]
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 
 # What packages are optional?
 EXTRAS = {
-    # 'GPU enabling': ['cupy'],
+    # 'GPU enabling': ['cupy'],     # No need for now
 }
-
-here = os.path.abspath(os.path.dirname(__file__))
 
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
@@ -114,7 +108,7 @@ setup(
         "logs", 
         "*.log",
     ]),
-    install_requires=REQUIRED,
+    install_requires=required,
     extras_require=EXTRAS,
     include_package_data=True,
     license='GPLv3',
