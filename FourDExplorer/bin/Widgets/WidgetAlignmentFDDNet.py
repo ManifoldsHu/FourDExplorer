@@ -358,7 +358,7 @@ class WidgetAlignmentFDDNet(QWidget):
             name: (str|None) the name of the generated map dataset 
             
             fit_model_name: (str|None) the name of the fitting method. Now 
-                supports 'linear', 'quadratic' and None
+                supports 'Linear', 'Quadratic' and None
                 
         returns:
             (dict) the metadata of generated shift mapping.
@@ -401,7 +401,7 @@ class WidgetAlignmentFDDNet(QWidget):
         meta['/Calibration/Quantify/value_unit'] = 'pix'
         meta['/Calibration/Quantify/value_unit_display'] = 'pix'
         meta['/Calibration/Quantify/display_unit_magnify'] = 1
-        meta['/Calibration/Quantify/display_norm_mode'] = 'linear'
+        meta['/Calibration/Quantify/display_norm_mode'] = 'Linear'
 
         return meta
     
@@ -457,7 +457,7 @@ class DialogGenerateShiftVector(QDialog):
         if self.radio_button_apply_current_shift_vec.isChecked():
             return None
         elif self.radio_button_linear_regression.isChecked():
-            return 'linear'
+            return 'Linear'
         elif self.radio_button_quadratic_polynomial.isChecked():
-            return 'quadratic'
+            return 'Quadratic'
         return None

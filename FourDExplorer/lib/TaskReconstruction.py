@@ -147,7 +147,10 @@ class TaskVirtualImage(TaskBaseReconstruct):
         )
 
         for key, value in self._meta.items():
-            self.hdf_handler.file[self.image_path].attrs[key] = value 
+            try:
+                self.hdf_handler.file[self.image_path].attrs[key] = value 
+            except Exception as e:
+                self.logger.error(f'Failed to set attribute {key}: {e}')
 
     def _bindSubtask(self):
         """
@@ -282,7 +285,10 @@ class TaskCenterOfMass(Task):
 
                 for key, value in self._metas_dict[com_mode].items():
                     data_path = self._getDataPath(com_mode)
-                    self.hdf_handler.file[data_path].attrs[key] = value
+                    try:
+                        self.hdf_handler.file[data_path].attrs[key] = value
+                    except Exception as e:
+                        self.logger.error(f"Failed to set attribute {key} for dataset {data_path}: {e}")
 
     def _getDataPath(self, com_mode: str) -> str:
         """

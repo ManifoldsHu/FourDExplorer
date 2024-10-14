@@ -108,7 +108,10 @@ class TaskBaseFourDSTEMModify(Task):
         Update metadata. The new attributes will be added.
         """
         for key in meta:
-            self._meta[key] = meta[key]
+            try:
+                self._meta[key] = meta[key]
+            except Exception as e:
+                self.logger.error(f'Failed to update metadata for key {key}: {e}')
 
     def _createFourDSTEM(self):
         """
@@ -134,7 +137,10 @@ class TaskBaseFourDSTEMModify(Task):
             )
 
         for key, value in self._meta.items():
-            self.hdf_handler.file[self.output_path].attrs[key] = value 
+            try:
+                self.hdf_handler.file[self.output_path].attrs[key] = value
+            except Exception as e:
+                self.logger.error(f'Failed to set attribute {key} for dataset {self.output_path}: {e}')
 
     def _showFourDSTEM(self):
         """

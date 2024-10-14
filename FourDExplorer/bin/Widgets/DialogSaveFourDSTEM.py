@@ -41,6 +41,7 @@ class DialogSaveFourDSTEM(QDialog):
 
         self.ui.pushButton_ok.clicked.connect(self.ok)
         self.ui.pushButton_cancel.clicked.connect(self.reject)
+        self.ui.pushButton_browse.clicked.connect(self.browseParent)
 
     @property
     def hdf_handler(self) -> HDFHandler:

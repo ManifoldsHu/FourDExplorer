@@ -630,7 +630,10 @@ class TaskLoadFourDSTEMFromDM4(TaskBaseLoadData):
         )
         
         for key, value in self._meta.items():
-            self.hdf_handler.file[self.item_path].attrs[key] = value 
+            try:
+                self.hdf_handler.file[self.item_path].attrs[key] = value
+            except Exception as e:
+                self.logger.error(f'Failed to set attribute {key}: {e}')
             
     def _bindSubtask(self):
         """
@@ -710,7 +713,10 @@ class TaskLoadDataFromHDF5(TaskBaseLoadData):
         )
         
         for key, value in self._meta.items():
-            self.hdf_handler.file[self.item_path].attrs[key] = value 
+            try:
+                self.hdf_handler.file[self.item_path].attrs[key] = value
+            except Exception as e:
+                self.logger.error(f'Failed to set attribute {key}: {e}')
             
     def _bindSubtask(self):
         """

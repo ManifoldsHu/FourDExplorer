@@ -252,6 +252,8 @@ class TaskFDDNetInference(Task):
                             elif fit_model_name == 'Quadratic':
                                 result = quadraticModel(locations.T, *params).reshape(scan_i, scan_j)
                     elif mode == 'center':
+                        
+                        
                         ci_values = result_dict['ci'].ravel()
                         cj_values = result_dict['cj'].ravel()
                         
