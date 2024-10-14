@@ -412,12 +412,16 @@ class ImporterDM4(QObject):
             '/Acquisition/Camera/pixel_number_j': 1024,
             '/Acquisition/Camera/pixel_size_i': 15e-6,
             '/Acquisition/Camera/pixel_size_j': 15e-6,
+            '/Acquisition/Camera/accelerating_voltage': 300000,
+            '/Acquisition/Camera/camera_length': 0.0,
+            '/Acquisition/Camera/step_size_i': 1.0,
+            '/Acquisition/Camera/step_size_j': 1.0,
             '/Calibration/Space/dp_i': 1024,
             '/Calibration/Space/dp_j': 1024,
             '/Calibration/Space/du_i': 1.0,
             '/Calibration/Space/du_j': 1.0,
-            '/Calibration/Space/du_dr_i': 1.0,
-            '/Calibration/Space/du_dr_j': 1.0,
+            '/Calibration/Space/scan_dr_i': 1.0,
+            '/Calibration/Space/scan_dr_j': 1.0,
         }
 
     @property
@@ -513,12 +517,16 @@ class ImporterDM4(QObject):
         self.meta['/Acquisition/Camera/pixel_number_j'] = active_size[1]
         self.meta['/Acquisition/Camera/pixel_size_i'] = camera_pixel_size[0] * 1e-6
         self.meta['/Acquisition/Camera/pixel_size_j'] = camera_pixel_size[1] * 1e-6
+        self.meta['/Acquisition/Camera/accelerating_voltage'] = voltage
+        self.meta['/Acquisition/Camera/camera_length'] = camera_length
+        self.meta['/Acquisition/Camera/step_size_i'] = horizontal_spacing * 1e-9
+        self.meta['/Acquisition/Camera/step_size_j'] = vertical_spacing * 1e-9
         self.meta['/Calibration/Space/dp_i'] = self._dp_i
         self.meta['/Calibration/Space/dp_j'] = self._dp_j
         self.meta['/Calibration/Space/du_i'] = camera_pixel_size[0] * 1e-6 / (camera_length * 1e-3 * wavelength)
         self.meta['/Calibration/Space/du_j'] = camera_pixel_size[1] * 1e-6 / (camera_length * 1e-3 * wavelength)
-        self.meta['/Calibration/Space/du_dr_i'] = horizontal_spacing * 1e-9
-        self.meta['/Calibration/Space/du_dr_j'] = vertical_spacing * 1e-9
+        self.meta['/Calibration/Space/scan_dr_i'] = horizontal_spacing * 1e-9
+        self.meta['/Calibration/Space/scan_dr_j'] = vertical_spacing * 1e-9
     
     def loadData(self):
         """
