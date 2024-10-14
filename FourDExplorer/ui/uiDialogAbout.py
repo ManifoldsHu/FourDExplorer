@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'uiDialogAbout.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.3.0
+## Created by: Qt User Interface Compiler version 6.2.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -135,6 +135,11 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.label_6)
 
+        self.label_26 = QLabel(Dialog)
+        self.label_26.setObjectName(u"label_26")
+
+        self.verticalLayout.addWidget(self.label_26)
+
 
         self.horizontalLayout.addLayout(self.verticalLayout)
 
@@ -168,6 +173,11 @@ class Ui_Dialog(object):
         self.label_11.setObjectName(u"label_11")
 
         self.verticalLayout_2.addWidget(self.label_11)
+
+        self.label_27 = QLabel(Dialog)
+        self.label_27.setObjectName(u"label_27")
+
+        self.verticalLayout_2.addWidget(self.label_27)
 
 
         self.horizontalLayout.addLayout(self.verticalLayout_2)
@@ -209,6 +219,11 @@ class Ui_Dialog(object):
 
         self.verticalLayout_4.addWidget(self.label_21)
 
+        self.label_28 = QLabel(Dialog)
+        self.label_28.setObjectName(u"label_28")
+
+        self.verticalLayout_4.addWidget(self.label_28)
+
 
         self.horizontalLayout_2.addLayout(self.verticalLayout_4)
 
@@ -243,6 +258,11 @@ class Ui_Dialog(object):
 
         self.verticalLayout_3.addWidget(self.label_22)
 
+        self.label_29 = QLabel(Dialog)
+        self.label_29.setObjectName(u"label_29")
+
+        self.verticalLayout_3.addWidget(self.label_29)
+
 
         self.horizontalLayout_2.addLayout(self.verticalLayout_3)
 
@@ -276,11 +296,13 @@ class Ui_Dialog(object):
         self.label_4.setText(QCoreApplication.translate("Dialog", u"\u5355\u4f4d", None))
         self.label_5.setText(QCoreApplication.translate("Dialog", u"\u9879\u76ee\u5730\u5740", None))
         self.label_6.setText(QCoreApplication.translate("Dialog", u"\u4ed3\u5e93\u5730\u5740", None))
-        self.label_7.setText(QCoreApplication.translate("Dialog", u"\u80e1\u4e00\u9e23", None))
+        self.label_26.setText(QCoreApplication.translate("Dialog", u"\u6587\u6863\u5730\u5740", None))
+        self.label_7.setText(QCoreApplication.translate("Dialog", u"4D-Explorer Developing Groups", None))
         self.label_8.setText(QCoreApplication.translate("Dialog", u"FourDExplorer@gmail.com", None))
         self.label_9.setText(QCoreApplication.translate("Dialog", u"\u5357\u4eac\u5927\u5b66", None))
         self.label_10.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><a href=\"https://pengwang.org/4d-explorer\"><span style=\" text-decoration: underline; color:#0000ff;\">4D-Explorer \u9879\u76ee</span></a></p></body></html>", None))
         self.label_11.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><a href=\"https://github.com/ManifoldsHu/FourDExplorer\"><span style=\" text-decoration: underline; color:#0000ff;\">Github \u4ed3\u5e93\u5730\u5740</span></a></p></body></html>", None))
+        self.label_27.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><a href=\"https://fourdexplorer.readthedocs.io/en/latest/\"><span style=\" text-decoration: underline; color:#0000ff;\">4D-Explorer \u6587\u6863</span></a></p></body></html>", None))
         self.label_12.setText(QCoreApplication.translate("Dialog", u"4D-Explorer is a software for four-dimensional scan-\n"
 "ning transmission electron microscopy (4D-STEM) \n"
 "data processing and analysis. 4D-Explorer is licensed\n"
@@ -290,10 +312,12 @@ class Ui_Dialog(object):
         self.label_17.setText(QCoreApplication.translate("Dialog", u"Insitute", None))
         self.label_19.setText(QCoreApplication.translate("Dialog", u"Website", None))
         self.label_21.setText(QCoreApplication.translate("Dialog", u"Repository", None))
-        self.label_14.setText(QCoreApplication.translate("Dialog", u"Hu Yiming", None))
+        self.label_28.setText(QCoreApplication.translate("Dialog", u"Document", None))
+        self.label_14.setText(QCoreApplication.translate("Dialog", u"4D-Explorer Developing Groups", None))
         self.label_16.setText(QCoreApplication.translate("Dialog", u"FourDExplorer@gmail.com", None))
         self.label_18.setText(QCoreApplication.translate("Dialog", u"Nanjiing University", None))
         self.label_20.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><a href=\"https://pengwang.org/4d-explorer/\"><span style=\" text-decoration: underline; color:#0000ff;\">4D-Explorer </span></a></p></body></html>", None))
         self.label_22.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><a href=\"https://github.com/ManifoldsHu/FourDExplorer\"><span style=\" text-decoration: underline; color:#0000ff;\">Github Repository</span></a></p></body></html>", None))
+        self.label_29.setText(QCoreApplication.translate("Dialog", u"<html><head/><body><p><a href=\"https://fourdexplorer.readthedocs.io/en/latest/\"><span style=\" text-decoration: underline; color:#0000ff;\">4D-Explorer Document</span></a></p></body></html>", None))
     # retranslateUi
 

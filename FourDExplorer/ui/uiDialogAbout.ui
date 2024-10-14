@@ -189,6 +189,13 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QLabel" name="label_26">
+             <property name="text">
+              <string>文档地址</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
          <item>
@@ -209,7 +216,7 @@
            <item>
             <widget class="QLabel" name="label_7">
              <property name="text">
-              <string>胡一鸣</string>
+              <string>4D-Explorer Developing Groups</string>
              </property>
             </widget>
            </item>
@@ -238,6 +245,13 @@
             <widget class="QLabel" name="label_11">
              <property name="text">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/ManifoldsHu/FourDExplorer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Github 仓库地址&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_27">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://fourdexplorer.readthedocs.io/en/latest/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;4D-Explorer 文档&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -294,6 +308,13 @@ data processing and analysis. 4D-Explorer is licensed
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QLabel" name="label_28">
+             <property name="text">
+              <string>Document</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
          <item>
@@ -314,7 +335,7 @@ data processing and analysis. 4D-Explorer is licensed
            <item>
             <widget class="QLabel" name="label_14">
              <property name="text">
-              <string>Hu Yiming</string>
+              <string>4D-Explorer Developing Groups</string>
              </property>
             </widget>
            </item>
@@ -343,6 +364,13 @@ data processing and analysis. 4D-Explorer is licensed
             <widget class="QLabel" name="label_22">
              <property name="text">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/ManifoldsHu/FourDExplorer&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Github Repository&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_29">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://fourdexplorer.readthedocs.io/en/latest/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;4D-Explorer Document&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
