@@ -408,10 +408,12 @@ class ImporterDM4(QObject):
             '/General/time': self.datetime_manager.current_time,
             '/General/time_zone': self.datetime_manager.current_timezone, 
             '/Acquisition/Camera/name': '',
-            '/Acquisition/Camera/pixel_number_i': 128,
-            '/Acquisition/Camera/pixel_number_j': 128,
-            '/Acquisition/Camera/pixel_size_i': 150e-6,
-            '/Acquisition/Camera/pixel_size_j': 150e-6,
+            '/Acquisition/Camera/pixel_number_i': 1024,
+            '/Acquisition/Camera/pixel_number_j': 1024,
+            '/Acquisition/Camera/pixel_size_i': 15e-6,
+            '/Acquisition/Camera/pixel_size_j': 15e-6,
+            '/Calibration/Space/dp_i': 1024,
+            '/Calibration/Space/dp_j': 1024,
             '/Calibration/Space/du_i': 1.0,
             '/Calibration/Space/du_j': 1.0,
             '/Calibration/Space/du_dr_i': 1.0,
@@ -491,6 +493,7 @@ class ImporterDM4(QObject):
 
         # Retrieve useful metadata
         device = tagdir_4dstem.get_tag_by_name('Device')
+        active_size = device.get_tag_by_name('Active Size (pixels)').get_data()
         camera_pixel_size = device.get_tag_by_name('Pixel Size (um)').get_data() # um
         camera_name = ''.join(chr(i) for i in device.get_tag_by_name('Name').get_data())
 
@@ -506,10 +509,12 @@ class ImporterDM4(QObject):
 
         # Update metadata
         self.meta['/Acquisition/Camera/name'] = camera_name
-        self.meta['/Acquisition/Camera/pixel_number_i'] = self._dp_i
-        self.meta['/Acquisition/Camera/pixel_number_j'] = self._dp_j
+        self.meta['/Acquisition/Camera/pixel_number_i'] = active_size[0]
+        self.meta['/Acquisition/Camera/pixel_number_j'] = active_size[1]
         self.meta['/Acquisition/Camera/pixel_size_i'] = camera_pixel_size[0] * 1e-6
         self.meta['/Acquisition/Camera/pixel_size_j'] = camera_pixel_size[1] * 1e-6
+        self.meta['/Calibration/Space/dp_i'] = self._dp_i
+        self.meta['/Calibration/Space/dp_j'] = self._dp_j
         self.meta['/Calibration/Space/du_i'] = camera_pixel_size[0] * 1e-6 / (camera_length * 1e-3 * wavelength)
         self.meta['/Calibration/Space/du_j'] = camera_pixel_size[1] * 1e-6 / (camera_length * 1e-3 * wavelength)
         self.meta['/Calibration/Space/du_dr_i'] = horizontal_spacing * 1e-9
