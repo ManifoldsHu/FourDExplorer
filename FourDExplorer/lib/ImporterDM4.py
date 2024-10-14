@@ -403,7 +403,19 @@ class ImporterDM4(QObject):
         self._first_image_offset = 0
 
         self.meta = {
-            # TO DO...
+            '/General/fourd_explorer_version': '.'.join([str(i) for i in APP_VERSION]),
+            '/General/date': self.datetime_manager.current_date,
+            '/General/time': self.datetime_manager.current_time,
+            '/General/time_zone': self.datetime_manager.current_timezone, 
+            '/Acquisition/Camera/name': '',
+            '/Acquisition/Camera/pixel_number_i': 128,
+            '/Acquisition/Camera/pixel_number_j': 128,
+            '/Acquisition/Camera/pixel_size_i': 150e-6,
+            '/Acquisition/Camera/pixel_size_j': 150e-6,
+            '/Calibration/Space/du_i': 1.0,
+            '/Calibration/Space/du_j': 1.0,
+            '/Calibration/Space/du_dr_i': 1.0,
+            '/Calibration/Space/du_dr_j': 1.0,
         }
 
     @property
@@ -476,6 +488,32 @@ class ImporterDM4(QObject):
         self._first_image_offset = data_tag.data.offset
         self._scalar_type = data_tag.data.type
         self._scalar_size = data_tag.data.dsize
+
+        # Retrieve useful metadata
+        device = tagdir_4dstem.get_tag_by_name('Device')
+        camera_pixel_size = device.get_tag_by_name('Pixel Size (um)').get_data() # um
+        camera_name = ''.join(chr(i) for i in device.get_tag_by_name('Name').get_data())
+
+        microscope_info = tagdir_4dstem.get_tag_by_name('Microscope Info')
+        voltage = microscope_info.get_tag_by_name('Voltage').get_data() # V
+        camera_length = microscope_info.get_tag_by_name('STEM Camera Length').get_data() # mm
+
+        digiscan = tagdir_4dstem.get_tag_by_name('DigiScan')
+        horizontal_spacing = digiscan.get_tag_by_name('Horizontal Spacing').get_data() # nm ?
+        vertical_spacing = digiscan.get_tag_by_name('Vertical Spacing').get_data() # nm ?
+
+        wavelength = Voltage2WaveLength(voltage)
+
+        # Update metadata
+        self.meta['/Acquisition/Camera/name'] = camera_name
+        self.meta['/Acquisition/Camera/pixel_number_i'] = self._dp_i
+        self.meta['/Acquisition/Camera/pixel_number_j'] = self._dp_j
+        self.meta['/Acquisition/Camera/pixel_size_i'] = camera_pixel_size[0] * 1e-6
+        self.meta['/Acquisition/Camera/pixel_size_j'] = camera_pixel_size[1] * 1e-6
+        self.meta['/Calibration/Space/du_i'] = camera_pixel_size[0] * 1e-6 / (camera_length * 1e-3 * wavelength)
+        self.meta['/Calibration/Space/du_j'] = camera_pixel_size[1] * 1e-6 / (camera_length * 1e-3 * wavelength)
+        self.meta['/Calibration/Space/du_dr_i'] = horizontal_spacing * 1e-9
+        self.meta['/Calibration/Space/du_dr_j'] = vertical_spacing * 1e-9
     
     def loadData(self):
         """
