@@ -22,6 +22,10 @@ If you are not satisfied with the appearance of the ellipse (e.g., if it is too 
 
 Next, click the ``Generate Shift Mapping`` button to generate the shift distribution. For a typical 4D-STEM dataset, this process might take a bit longer because the FDDNet model is applied to each diffraction image. You can switch to the ``Task Panel`` on the left to view the progress bar.
 
+.. tip::
+   Before using FDDNet for generating diffraction shift, consider applying a histogram filter to reduce background noise for better results. See :doc:`../background_subtraction/histogram_filter`
+
+
 Once the shift distribution is generated, you can switch to the ``Displaying Effects`` tab at the top right. In the ``Shift Mapping Path`` section, select the newly generated shift distribution. Now, in the **Auxiliary Circle** section, the ``Set circle to where the shift vector points to`` option becomes available. Check this option to set the circle's center to the position indicated by the measured shift distribution. As you adjust the scan position, the auxiliary circle will move with the diffraction disc, allowing you to verify whether the shift distribution is accurate. This effect becomes more noticeable when using the mouse wheel to adjust the scan position.
 
 .. image:: /fig/DiffractionAlignmentFDDNet2.png

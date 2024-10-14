@@ -3,6 +3,11 @@ Importing 4D-STEM Dataset in DM4 Format
 
 The .dm4 file format is a proprietary file format used by Gatan's Digital Micrograph software, which is commonly employed for storing and analyzing microscopy data, including 4D-STEM datasets. Unlike the EMPAD format, which requires both an XML and a RAW file, the .dm4 format encapsulates all necessary data within a single file with the extension `.dm4`.
 
+.. warning::
+
+   Due to the proprietary nature of the .dm4 file format, support for .dm4 files is incomplete. Users should be cautious with automatically read metadata.
+
+
 To import a 4D-STEM dataset stored in the .dm4 format, follow these steps:
 
 1. **Open an HDF5 File**: Ensure that you have an HDF5 file open in the main interface.

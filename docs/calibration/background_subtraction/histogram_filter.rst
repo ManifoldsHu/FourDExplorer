@@ -8,4 +8,13 @@ If, on the opened page, you click the **Select Window Filter** tab on the top ri
 
 By checking the **Apply Minimum Limit Window** or **Apply Maximum Limit Window** checkboxes, you can display the filtered result in the center of the page. In most cases, to remove background noise (especially noise caused by X-rays), it is enough to set only the minimum limit.
 
+.. image:: /fig/BackgroundSubtractionFilter.png
+   :alt: Background Subtraction Filter
+
+
 Once the filtering is complete, click the red ``Start Background Subtraction`` button at the bottom of the page to open a dialog where you can set the output path for the resulting dataset.
+
+.. note::
+   Many direct electron detectors are noise-free, and this correction may not be necessary before reconstruction, as it might filter out signals outside the bright-field diffraction disk (especially those that contribute to the annular dark-field image).
+
+
