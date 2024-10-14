@@ -68,7 +68,22 @@
           </item>
           <item>
            <property name="text">
+            <string>Digital Micrograph (.dm4)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>General Raw Data (Binary)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Numpy 4D Array (.npy)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Other HDF5 Dataset (.h5)</string>
            </property>
           </item>
           <item>
@@ -81,21 +96,6 @@
             <string>MATLAB Matrix Sequence</string>
            </property>
           </item>
-          <item>
-           <property name="text">
-            <string>Numpy 4D Array (.npy)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Digital Micrograph (.dm4)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Other HDF5 Dataset (.h5)</string>
-           </property>
-          </item>
          </widget>
         </item>
        </layout>
@@ -103,17 +103,17 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>8</number>
+         <number>3</number>
         </property>
         <widget class="WidgetImportEMPAD" name="page_empad"/>
         <widget class="WidgetImportEMPAD_NJU" name="page_empad_nju"/>
         <widget class="WidgetImportMerlin" name="page_medipix"/>
+        <widget class="WidgetImportDM4" name="page_dm4"/>
         <widget class="WidgetImportRaw" name="page_raw"/>
+        <widget class="WidgetImportNumpy" name="page_npy"/>
+        <widget class="WidgetImport4DSTEMFromHDF5" name="page_h5"/>
         <widget class="QWidget" name="page_mat"/>
         <widget class="QWidget" name="page_mat_folder"/>
-        <widget class="WidgetImportNumpy" name="page_npy"/>
-        <widget class="WidgetImportDM4" name="page_dm4"/>
-        <widget class="WidgetImport4DSTEMFromHDF5" name="page_h5"/>
        </widget>
       </item>
      </layout>

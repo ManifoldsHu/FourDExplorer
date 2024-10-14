@@ -509,16 +509,20 @@ class ActionImportFourDSTEM(ActionEditBase):
             importer = ImporterMIB(new_name, parent_path)
             page: WidgetImportMerlin
             mib_path = page.getMibPath()
-            # hdr_path = page.getHeaderPath()
             importer.parseMibHead(mib_path)
             importer.scan_i = page.scan_i
             importer.scan_j = page.scan_j 
             importer.loadData()
-
-            # importer.parseHdrFile(hdr_path)
-
-
+        
         elif mode == 3:
+            # .dm4 file 
+            importer = ImporterDM4(new_name, parent_path)
+            page: WidgetImportDM4
+            file_path = page.getFilePath()
+            importer.parseDM4(file_path)
+            importer.loadData()
+
+        elif mode == 4:
             importer = ImporterRawFourDSTEM(new_name, parent_path)
             page: WidgetImportRaw
             importer.setReadParameters(
@@ -535,18 +539,9 @@ class ActionImportFourDSTEM(ActionEditBase):
                 rotate_90 = page.getRotate90(),
                 is_flipped = page.getIsFlip(),
             )
-
             importer.loadData()
-            
-        elif mode == 4:
-            # .mat file 
-            pass # TODO
-            
+
         elif mode == 5:
-            # .mat file sequences 
-            pass 
-        
-        elif mode == 6:
             # .npy/.npz file
             importer = ImporterNumpy(new_name, parent_path)
             page: WidgetImportNumpy 
@@ -556,16 +551,7 @@ class ActionImportFourDSTEM(ActionEditBase):
             )
             importer.loadData()
             
-        
-        elif mode == 7:
-            # .dm4 file 
-            importer = ImporterDM4(new_name, parent_path)
-            page: WidgetImportDM4
-            file_path = page.getFilePath()
-            importer.parseDM4(file_path)
-            importer.loadData()
-        
-        elif mode == 8:
+        elif mode == 6:
             # from other h5 file 
             pass 
             importer = ImporterHDF5(new_name, parent_path)
@@ -574,6 +560,14 @@ class ActionImportFourDSTEM(ActionEditBase):
             dataset_path = page.getSelectedItemPath()
             importer.setFileAndDatasetPath(file_path, dataset_path)
             importer.loadData()
+             
+        elif mode == 7:
+            # .mat file 
+            pass # TODO
+            
+        elif mode == 8:
+            # .mat file sequences 
+            pass 
             
         
         

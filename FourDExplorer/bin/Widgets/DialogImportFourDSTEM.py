@@ -62,7 +62,7 @@ class DialogImportFourDSTEM(QDialog):
         self.ui.lineEdit_name.setText('Untitled')
         self._validateNewName()
         
-        self._hideOptions()     # some importer is not completed yet
+        self._hideOptions()     # some importer is not completed yet TODO
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -78,14 +78,13 @@ class DialogImportFourDSTEM(QDialog):
         arguments:
             index: (int)    0   'EMPAD v1.0'
                             1   'EMPAD v0.51 (for NJU)'
-                            2   'MerlinEM Medipix3 (.mib)'
-                            3   'General Raw Data (Binary)'
-                            4   'MATLAB 4D Matrix (.mat)'
-                            5   'MATLAB Matrix Sequence'
-                            6   'Numpy 4D Array (.npy)'
-                            7   'Numpy Array Sequence'
-                            8   'Digital Micrograph (.dm4)'
-                            9   'Other HDF5 Dataset (.h5)'
+                            2   'Merlin Medipix 3'
+                            3   'Digital Micrograph (.dm4)'
+                            4   'General Raw Data (Binary)'
+                            5   'Numpy 4D Array (.npy)'
+                            6   'HDF5 (.h5)'
+                            7   'MATLAB 4D Matrix (.mat)'
+                            8   'MATLAB Matrix Sequence'
         """
         self.ui.stackedWidget.setCurrentIndex(index)
     
@@ -99,10 +98,10 @@ class DialogImportFourDSTEM(QDialog):
         
         TODO
         """
-        self.ui.comboBox_mode.removeItem(5)
-        self.ui.comboBox_mode.removeItem(4)
-        self.ui.stackedWidget.removeWidget(self.ui.stackedWidget.widget(5))
-        self.ui.stackedWidget.removeWidget(self.ui.stackedWidget.widget(4))
+        self.ui.comboBox_mode.removeItem(8)
+        self.ui.comboBox_mode.removeItem(7)
+        self.ui.stackedWidget.removeWidget(self.ui.stackedWidget.widget(8))
+        self.ui.stackedWidget.removeWidget(self.ui.stackedWidget.widget(7))
     
     def browseParent(self) -> bool:
         """
@@ -153,13 +152,13 @@ class DialogImportFourDSTEM(QDialog):
         returns:
             (int)   0   'EMPAD v1.0'
                     1   'EMPAD v0.51 (for NJU)'
-                    2   'Medipix'
-                    3   'General Raw Data (Binary)'
-                    4   'MATLAB 4D Matrix (.mat)'
-                    5   'MATLAB Matrix Sequence'
-                    6   'Numpy 4D Array (.npy)'
-                    7   'Numpy Array Sequence'
-                    8   'Digital Micrograph (.dm4)'
+                    2   'Merlin Medipix 3'
+                    3   'Digital Micrograph (.dm4)'
+                    4   'General Raw Data (Binary)'
+                    5   'Numpy 4D Array (.npy)'
+                    6   'HDF5 (.h5)'
+                    7   'MATLAB 4D Matrix (.mat)'
+                    8   'MATLAB Matrix Sequence'
         """
         return self.ui.comboBox_mode.currentIndex()
 
