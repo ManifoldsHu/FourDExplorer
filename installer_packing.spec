@@ -64,6 +64,10 @@ pyz = PYZ(
     cipher=block_cipher,
 )
 
+icon_path = os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '4D.ico')
+if platform_os == 'darwin':
+    icon_path = os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '4D.icns')
+
 # 创建可执行文件
 exe = EXE(
     pyz,
@@ -80,7 +84,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=os.path.join('FourDExplorer', 'ui', 'resources', 'icons', '4D.ico'),
+    icon=icon_path,
 )
 
 # 收集所有依赖和文件，生成目录结构
