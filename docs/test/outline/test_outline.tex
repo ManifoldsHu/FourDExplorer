@@ -1,0 +1,623 @@
+\documentclass[a4paper,12pt]{report}	%book/report/article
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{ntheorem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{braket}
+\usepackage{siunitx}
+\usepackage[version = 4]{mhchem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+%geometry宏包设置页边距
+\geometry{
+	textwidth=138mm,
+	textheight=215mm,
+	left=27mm,
+	right=27mm,
+	top=25.4mm, 
+	bottom=25.4mm,
+	headheight=2.17cm,
+	headsep=4mm,
+	footskip=12mm,
+	heightrounded,
+}
+
+%ntheorem宏包设置定理环境
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
+\newtheorem*{proof}{Proof}
+\newtheorem{property}{Property}[chapter]
+\newtheorem{axiom}{Axiom}[chapter]
+\newcommand{\qed}{$\hfill\blacksquare$}
+
+%listings宏包设置代码环境
+\lstset{
+	language=python,
+	backgroundcolor=\color{red!5!green!5!blue!5},
+	breaklines=true,
+	numbers=left,
+	numberstyle= \small,
+	basicstyle=\fontspec{Consolas}\small,
+	commentstyle=\fontspec{Consolas Italic}\small\color{red!80!green!80!blue!80},
+	keywordstyle=\color{blue!50}\fontspec{Consolas Bold}\small,
+	showstringspaces=false,
+	frame = shadowbox,
+	tabsize = 4,
+}
+
+
+\title{4D-Explorer 软件测试大纲}
+\author{4D-Explorer 项目组}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents 
+
+\chapter{引言}
+
+\section{4D-Explorer 软件介绍}
+
+4D-Explorer 是一款用于分析四维扫描透射电子显微镜 (4D-STEM) 数据的软件。它能够导入、存储、校正 4D-STEM 数据集及其元数据，并在实空间中进行数据重构。该软件基于 HDF5 文件格式，提供了以下主要功能：
+
+\begin{itemize}
+    \item 数据导入：支持多种格式的 4D-STEM 数据导入
+    \item 数据存储：采用 HDF5 文件格式进行高效的数据存储和管理
+    \item 数据校正：提供多种数据校正功能，确保数据质量
+    \item 数据重构：支持在实空间中进行多种类型的图像重构
+    \item 数据可视化：提供 2D 图像、矢量场等多种数据可视化方式
+    \item 数据校准：包含详细的校准步骤，确保定量成像的准确性
+\end{itemize}
+
+4D-Explorer 采用模块化设计，具有良好的扩展性和可维护性。软件不会一次性将整个数据集加载到内存中，因此可以在个人电脑上高效运行。
+
+% 关于 4D-STEM 技术的详细背景，请参考 Colin Ophus 2019 年的综述文章：
+% \url{https://www.cambridge.org/core/journals/microscopy-and-microanalysis/article/fourdimensional-scanning-transmission-electron-microscopy-4dstem-from-scanning-nanodiffraction-to-ptychography-and-beyond/A7E922A2C5BFD7FD3F208C537B872B7A}
+
+% 项目源代码和问题跟踪系统可在 GitHub 上获取：
+% \url{https://github.com/ManifoldsHu/FourDExplorer}
+
+
+\section{测试目的}
+
+本测试大纲旨在确保 4D-Explorer 软件的质量和可靠性，具体目标包括：
+
+\begin{itemize}
+    \item 验证软件功能是否符合需求规格说明书的要求
+    \item 确保软件在不同使用场景下的稳定性和可靠性
+    \item 检测并修复软件中的潜在缺陷和错误
+    \item 评估软件的性能指标，包括处理速度、内存占用等
+    \item 验证软件与不同操作系统和硬件平台的兼容性
+    \item 确保用户界面符合设计规范，提供良好的用户体验
+    \item 验证数据处理结果的准确性和可重复性
+    \item 确保软件在长期运行和大量数据处理时的稳定性
+    \item 验证软件的安全性和数据保护机制
+    \item 为软件的持续改进和优化提供依据
+\end{itemize}
+
+通过系统化的测试，我们将确保 4D-Explorer 软件能够满足科研人员对 4D-STEM 数据分析的需求，为材料科学研究提供可靠的工具支持。
+
+
+\section{测试类型}
+
+\paragraph{单元测试}
+对软件的最小可测试单元进行检查和验证，主要针对各个模块的功能进行测试，确保每个模块都能正确实现其设计功能。
+
+\paragraph{界面测试}
+验证用户界面是否符合设计规范，检查界面元素的布局、样式、交互行为等，确保用户界面友好、易用。
+
+\paragraph{性能测试}
+评估软件在不同负载条件下的性能表现，包括响应时间、吞吐量、资源利用率等指标，确保软件能够满足性能要求。
+
+\paragraph{兼容性测试}
+验证软件在不同操作系统、硬件平台、浏览器等环境下的兼容性，确保软件能够在目标环境中正常运行。
+
+\paragraph{回归测试}
+在软件修改或更新后，重新执行之前通过的测试用例，确保新的修改没有引入新的缺陷或影响已有功能。
+
+\chapter{测试环境与工具}
+
+\section{测试环境}
+
+所使用的测试环境如下。
+
+个人电脑1:
+\begin{itemize}
+    \item CPU: Intel Core i9-13900K @5.4GHz 
+    \item 内存: 128GB DDR5 4000 MHz 
+    \item 硬盘: (2+4+4)TB M.2 SSD (单块硬盘 PCIE 4.0 x 4 通道)
+    \item 操作系统: Windows 11 Pro 23H2 (64位)
+\end{itemize}
+
+个人电脑2:
+\begin{itemize}
+    \item CPU: Intel Core i5-8265U @3.9GHz 
+    \item 内存: 8GB DDR4 2800 MHz
+    \item 硬盘: 512GB M.2 SSD (单块硬盘 PCIE 3.0 x 4 通道)
+    \item 操作系统: Windows 10 Pro 22H2 (64位)
+\end{itemize}
+
+个人电脑3: 
+\begin{itemize}
+    \item CPU: 
+    \item 内存: 8GB 
+    \item 硬盘: 
+    \item 操作系统: MacOS 
+\end{itemize}
+
+\section{测试工具}
+
+本测试将使用以下工具来确保测试的全面性和有效性：
+
+\begin{itemize}
+    \item \textbf{unittest}: Python 内置的单元测试框架，用于编写和执行单元测试、集成测试等
+    \item \textbf{pytest}: 功能更强大的测试框架，支持参数化测试和更丰富的断言
+\end{itemize}
+
+这些工具将帮助我们：
+\begin{itemize}
+    \item 确保代码质量符合开发规范
+    \item 验证功能的正确性和稳定性
+    \item 评估测试的覆盖率
+    \item 检测性能瓶颈
+    \item 生成详细的测试报告
+    \item 自动化测试流程，提高测试效率
+\end{itemize}
+
+\chapter{单元测试内容}
+
+\section{测试核心类功能}
+
+\subsection{数据集管理器测试}
+
+主要针对 HDFManager 的功能进行测试。其功能包括：
+\paragraph{HDF5 文件操作测试}
+\begin{itemize}
+    \item 文件打开与关闭：验证能否正确打开和关闭 HDF5 文件，并触发相应的信号（file\_opened, file\_closed）
+    \item 文件路径管理：测试文件路径的获取和设置功能
+    \item 并发访问：验证多线程环境下文件访问的线程安全性
+\end{itemize}
+
+\paragraph{数据节点操作测试}
+\begin{itemize}
+    \item 节点创建：测试能否正确创建 Group 和 Dataset 节点
+    \item 节点删除：验证节点删除功能
+    \item 节点重命名：测试节点重命名功能
+    \item 节点移动：验证节点在不同 Group 之间的移动
+    \item 节点复制：测试节点复制功能
+\end{itemize}
+
+\paragraph{元数据管理测试}
+\begin{itemize}
+    \item 属性创建：验证能否正确创建新的属性
+    \item 属性删除：测试属性删除功能
+    \item 属性修改：验证属性值的修改功能
+    \item 属性类型：测试不同类型属性（字符串、数值、数组等）的存储和读取
+\end{itemize}
+
+\paragraph{数据访问测试}
+\begin{itemize}
+    \item 数据读取：验证不同类型数据集（.4dstem, .img, .vec, .line）的读取功能
+    \item 数据写入：测试数据写入功能
+    \item 内存映射：验证大数据集的内存映射功能
+\end{itemize}
+
+\paragraph{命名规则测试}
+\begin{itemize}
+    \item 合法名称：测试符合命名规则的名称（如 Dataset\_1, 数据集, Valid-Name+123）
+    \item 非法名称：验证不符合命名规则的名称（如 Invalid/Name, Name., Invalid*Name）
+    \item 边界情况：测试空字符串、特殊字符等边界情况
+\end{itemize}
+
+\paragraph{错误处理测试}
+\begin{itemize}
+    \item 文件不存在：测试打开不存在的文件时的错误处理
+    \item 权限不足：验证文件权限不足时的错误处理
+    \item 无效路径：测试无效文件路径的处理
+    \item 节点不存在：验证访问不存在的节点时的错误处理
+\end{itemize}
+
+测试用例应覆盖上述所有功能，并验证在各种异常情况下的健壮性。测试过程中应特别注意多线程环境下的线程安全性，以及大数据集处理时的性能表现。
+
+\subsection{任务管理器测试}
+
+主要针对 TaskManager 的功能进行测试，确保任务调度、状态管理、并发处理等功能正常工作。
+
+\paragraph{任务调度测试}
+\begin{itemize}
+    \item 任务队列管理：验证任务能否正确加入队列并按顺序执行
+    \item 任务取消：测试在队列中等待的任务能否被正确取消
+    \item 任务优先级：验证高优先级任务能否优先执行
+    \item 任务依赖：测试任务之间的依赖关系能否正确处理
+\end{itemize}
+
+\paragraph{任务状态测试}
+\begin{itemize}
+    \item 状态转换：验证任务在不同阶段的状态转换是否正确（初始化、等待、执行、完成等）
+    \item 异常处理：测试任务执行过程中出现异常时的状态处理
+    \item 任务中断：验证任务被强制中断时的状态处理
+\end{itemize}
+
+\paragraph{并发处理测试}
+\begin{itemize}
+    \item 线程池管理：验证线程池能否正确管理并发任务
+    \item 资源竞争：测试多个任务同时访问共享资源时的处理
+    \item 任务隔离：验证不同任务之间的执行是否相互独立
+    \item 性能测试：评估任务管理器在高并发情况下的性能表现
+\end{itemize}
+
+\paragraph{子任务管理测试}
+\begin{itemize}
+    \item 子任务创建：测试子任务能否正确创建和执行
+    \item 子任务依赖：验证子任务之间的依赖关系处理
+    \item 子任务状态：测试子任务的状态管理是否正确
+    \item 子任务结果：验证子任务的执行结果能否正确获取
+\end{itemize}
+
+\paragraph{信号与事件测试}
+\begin{itemize}
+    \item 任务完成信号：验证任务完成时能否正确发出信号
+    \item 进度更新信号：测试任务进度更新时能否正确发出信号
+    \item 异常信号：验证任务出现异常时能否正确发出信号
+    \item 状态改变信号：测试任务状态改变时能否正确发出信号
+\end{itemize}
+
+\paragraph{错误处理测试}
+\begin{itemize}
+    \item 无效任务：测试添加无效任务时的错误处理
+    \item 资源不足：验证系统资源不足时的错误处理
+    \item 任务超时：测试任务执行超时时的处理
+    \item 线程异常：验证线程池出现异常时的处理
+\end{itemize}
+
+
+\subsection{日志管理器测试}
+
+\paragraph{日志记录测试}
+\begin{itemize}
+    \item 基本日志记录：验证不同级别日志（DEBUG, INFO, WARNING, ERROR, CRITICAL）能否正确记录
+    \item 异常日志记录：测试异常情况下的日志记录，包括异常信息和 traceback
+    \item 日志格式：验证日志输出格式是否符合预期
+\end{itemize}
+
+\paragraph{日志输出测试}
+\begin{itemize}
+    \item 文件输出：验证日志能否正确输出到指定文件
+    \item 控制台输出：测试日志在控制台的输出功能
+    \item 界面输出：验证日志在界面组件中的显示功能
+    \item 输出隔离：测试不同输出渠道（文件、控制台、界面）的独立性
+    \item 任务错误捕捉: 测试日志能否正确捕捉运行于线程池中的任务中产生的错误，并给出正确的错误代码行
+\end{itemize}
+
+\paragraph{日志级别管理测试}
+\begin{itemize}
+    \item 级别设置：验证文件、控制台、界面三个渠道的日志级别设置功能
+    \item 级别过滤：测试不同日志级别下的信息过滤功能
+    \item 默认级别：验证未设置日志级别时的默认行为
+\end{itemize}
+
+\paragraph{日志文件管理测试}
+\begin{itemize}
+    \item 文件路径：测试日志文件路径的设置和获取功能
+    \item 默认路径：验证未设置路径时的默认路径行为
+    \item 文件创建：测试日志文件的自动创建功能
+    \item 文件轮转：验证日志文件按日期轮转的功能
+\end{itemize}
+
+\paragraph{错误处理测试}
+\begin{itemize}
+    \item 无效路径：测试设置无效日志路径时的错误处理
+    \item 权限不足：验证日志文件写入权限不足时的错误处理
+    \item 配置错误：测试日志配置文件错误时的处理
+\end{itemize}
+
+测试用例应覆盖上述所有功能，并验证在各种异常情况下的健壮性。测试过程中应特别注意多线程环境下的线程安全性，以及大数据量日志处理时的性能表现。
+
+
+\subsection{元数据管理器测试}
+
+\paragraph{基本功能测试}
+\begin{itemize}
+    \item 元数据树结构验证：测试 SchemaTree、ValueTree 和 DisplayTree 的正确构建
+    \item 元数据节点操作：测试节点的添加、删除、修改和查询功能
+    \item 元数据验证：测试元数据名称和值的有效性检查
+    \item 元数据持久化：测试元数据的保存和加载功能
+\end{itemize}
+
+\paragraph{单位管理测试}
+\begin{itemize}
+    \item 单位注册：测试新单位的注册功能，包括合法和非法单位
+    \item 单位转换：测试不同单位之间的转换功能
+    \item 单位格式化：测试单位在不同上下文（General, TeX, Unicode）下的格式化
+    \item 单位维度检查：测试长度单位和空间频率单位的识别
+\end{itemize}
+
+\paragraph{元数据字段测试}
+\begin{itemize}
+    \item 浮点数字段：测试带单位的浮点数字段的操作和单位转换
+    \item 整数字段：测试整数字段的基本操作
+    \item 字符串字段：测试字符串字段的验证和操作
+\end{itemize}
+
+\paragraph{异常处理测试}
+\begin{itemize}
+    \item 无效元数据：测试处理无效元数据名称和值的情况
+    \item 单位错误：测试处理未注册单位和单位转换错误的情况
+    \item 文件操作：测试处理文件读写错误的情况
+    \item 空值处理：测试元数据字段为空值时的处理
+    \item 极值测试：测试元数据字段在最大值和最小值时的表现
+    \item 特殊字符：测试元数据名称包含特殊字符时的处理
+\end{itemize}
+
+\paragraph{日期时间管理测试}
+\begin{itemize}
+    \item 日期格式：测试日期格式是否符合标准（YYYY-MM-DD）
+    \item 时间格式：测试时间格式是否符合标准（HH:MM:SS）
+    \item 时区显示：测试时区显示是否正确（UTC±HH:MM）
+    \item 时间获取：测试获取当前日期、时间和时区的功能
+\end{itemize}
+
+\subsection{配置管理器测试}
+
+主要针对 ConfigManager 的功能进行测试，确保配置文件的管理和初始化功能正常工作。
+
+\paragraph{配置文件初始化测试}
+\begin{itemize}
+    \item 文件创建：验证配置文件不存在时能否正确创建
+    \item 默认值设置：测试默认配置值是否正确设置
+    \item 文件修复：验证配置文件不完整时能否正确修复
+\end{itemize}
+
+\paragraph{配置读取测试}
+\begin{itemize}
+    \item UI 配置读取：验证 UI 主题相关配置的读取功能
+    \item 日志配置读取：测试日志路径和日志级别的读取功能
+    \item 配置缓存：验证配置读取的缓存机制
+\end{itemize}
+
+\paragraph{配置写入测试}
+\begin{itemize}
+    \item UI 配置更新：测试 UI 主题相关配置的更新功能
+    \item 日志配置更新：验证日志路径和日志级别的更新功能
+    \item 配置持久化：测试配置更改能否正确保存到文件
+\end{itemize}
+
+\paragraph{错误处理测试}
+\begin{itemize}
+    \item 无效路径：测试配置文件路径无效时的错误处理
+    \item 权限不足：验证配置文件读写权限不足时的错误处理
+    \item 配置格式错误：测试配置文件格式错误时的处理
+    \item 非法值处理：验证配置项包含非法值时的处理
+\end{itemize}
+
+\subsection{UI界面管理器测试}
+
+\paragraph{标签页管理测试}
+\begin{itemize}
+    \item 标签页创建：验证能否正确创建新的标签页
+    \item 标签页切换：测试标签页之间的切换功能
+    \item 标签页关闭：验证标签页关闭功能，包括单个关闭和全部关闭
+    \item 标签页历史记录：测试标签页历史记录功能
+    \item 标签页滚动：验证内容过多时标签页的滚动功能
+    \item 标签页标题：测试标签页标题的显示和更新
+    \item 标签页图标：验证标签页图标的显示
+    \item 标签页数量限制：测试最大标签页数量的限制
+\end{itemize}
+
+\paragraph{主题管理测试}
+\begin{itemize}
+    \item 主题切换：测试不同主题（浅色、深色、经典）的切换功能
+    \item 主题颜色：验证不同主题颜色的应用
+    \item 主题密度：测试不同主题密度的设置
+    \item 主题图标：验证主题切换时图标的颜色变化
+    \item 主题持久化：测试主题设置的保存和加载
+    \item 工具栏样式：验证不同主题下工具栏的样式
+    \item 主题异常处理：测试无效主题设置时的错误处理
+\end{itemize}
+
+\paragraph{界面布局测试}
+\begin{itemize}
+    \item 窗口大小调整：测试窗口大小变化时界面布局的适应性
+    \item 分割器调整：验证分割器位置调整对界面布局的影响
+    \item 控件位置：测试各控件在不同分辨率下的显示位置
+    \item 最小化/最大化：验证窗口最小化和最大化时的界面表现
+\end{itemize}
+
+\paragraph{错误处理测试}
+\begin{itemize}
+    \item 无效标签页：测试添加无效标签页时的错误处理
+    \item 主题文件缺失：验证主题文件缺失时的错误处理
+    \item 界面元素丢失：测试界面元素丢失时的错误处理
+    \item 布局异常：验证布局文件损坏时的错误处理
+\end{itemize}
+
+\subsection{图像渲染器测试}
+
+\paragraph{基本功能测试}
+\begin{itemize}
+    \item 初始化测试：验证 BlitManager 能否正确初始化并与画布关联
+    \item 背景缓存：测试背景缓存功能是否正常工作
+    \item 最小更新间隔：验证最小更新间隔设置是否生效
+    \item 画布关联：测试 BlitManager 与画布的关联是否正确
+\end{itemize}
+
+\paragraph{图形元素管理测试}
+\begin{itemize}
+    \item 图形元素添加：测试能否正确添加和管理图形元素
+    \item 图形元素更新：验证图形元素的更新功能
+    \item 图形元素删除：测试图形元素的删除功能
+    \item 图形元素查询：验证图形元素的查询功能
+    \item 图形元素动画状态：测试图形元素的动画状态设置
+\end{itemize}
+
+\paragraph{渲染性能测试}
+\begin{itemize}
+    \item 单次渲染时间：测试单次渲染所需时间
+    \item 高频率更新：验证在高频率更新情况下的性能表现
+    \item 多图形元素渲染：测试同时渲染多个图形元素时的性能
+    \item 大尺寸图像渲染：验证大尺寸图像渲染的性能
+\end{itemize}
+
+\paragraph{事件处理测试}
+\begin{itemize}
+    \item 绘制事件：测试绘制事件的响应和处理
+    \item 背景更新：验证背景更新是否正确触发
+    \item 事件过滤：测试无关事件的过滤功能
+\end{itemize}
+
+\paragraph{错误处理测试}
+\begin{itemize}
+    \item 无效图形元素：测试添加无效图形元素时的错误处理
+    \item 画布不匹配：验证图形元素与画布不匹配时的错误处理
+    \item 背景丢失：测试背景缓存丢失时的处理
+    \item 高负载处理：验证在高负载情况下的稳定性
+\end{itemize}
+
+\section{算法测试}
+
+\subsection{4D-STEM 实验参数算法测试}
+
+\subsection{虚拟成像算法测试}
+
+\subsection{质心成像算法测试}
+
+\subsection{背底去除算法测试}
+
+\subsection{FDDNet 推理测试}
+
+\subsection{矢量场算法测试}
+
+\subsection{衍射合轴算法测试}
+
+\subsection{旋转校正算法测试}
+
+\section{IO测试}
+
+\subsection{DM4 文件解析器测试}
+
+\subsection{EMPAD 文件解析器测试}
+
+\subsection{MIB 文件解析器测试}
+
+\subsection{Numpy 文件解析器测试}
+
+\subsection{HDF5 文件解析器测试}
+
+\subsection{Raw 文件解析器测试}
+
+
+
+
+\chapter{界面测试内容}
+
+\section{主界面测试}
+
+TODO
+
+\chapter{功能测试内容}
+
+
+\section{导入数据功能测试}
+
+\subsection{DM4 文件测试}
+
+\subsection{EMPAD 文件测试}
+
+\subsection{MIB 文件测试}
+
+\subsection{Raw 文件测试}
+
+\subsection{HDF5 文件测试}
+
+\subsection{Numpy 文件测试}
+
+
+\section{基础 HDF5 文件管理功能测试}
+
+
+\section{重构功能测试}
+
+\section{校正功能测试}
+
+\section{实验参数管理功能测试}
+
+\section{图像渲染功能测试}
+
+\section{日志功能测试}
+
+\section{系统信息展示功能测试}
+
+
+
+\chapter{性能测试内容}
+
+\section{导入数据集速度测试}
+
+\section{重构数据集速度测试}
+
+\section{校正数据集速度测试}
+
+\section{渲染速度测试}
+
+
+
+\chapter{兼容测试内容}
+
+\section{操作系统兼容性测试}
+\begin{itemize}
+    \item Windows 10/11 测试
+    \item Linux 发行版测试（Ubuntu, CentOS等）
+    \item macOS 测试
+\end{itemize}
+
+\section{Python版本兼容性测试}
+\begin{itemize}
+    \item Python 3.8 测试
+    \item Python 3.9 测试
+    \item Python 3.10 测试
+    \item Python 3.11 测试
+\end{itemize}
+
+\section{硬件兼容性测试}
+\begin{itemize}
+    \item CPU架构测试（x86, ARM）
+    \item 内存需求测试
+    \item 存储空间测试
+\end{itemize}
+
+\section{依赖库版本兼容性测试}
+\begin{itemize}
+    \item NumPy 版本兼容性测试
+    \item SciPy 版本兼容性测试
+    \item Matplotlib 版本兼容性测试
+    \item PyQt/PySide 版本兼容性测试
+\end{itemize}
+
+\section{文件系统兼容性测试}
+\begin{itemize}
+    \item NTFS 文件系统测试
+    \item ext4 文件系统测试
+    \item APFS 文件系统测试
+    \item 网络文件系统测试 (NFS, SMB)
+\end{itemize}
+
+
+
+
+% \nocite{*}	%参考文献
+% \bibliographystyle{plain}
+% \bibliography{Ref.bib}
+
+
+
+\end{document}

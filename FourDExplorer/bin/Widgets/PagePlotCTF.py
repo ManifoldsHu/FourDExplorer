@@ -4,6 +4,11 @@
 *----------------------------- PagePlotCTF.py --------------------------------*
 通过解析式计算 CTF 的页面。
 
+根据实际的使用场景，这个页面应当可以读取任意的 Dataset，不论其维度以及其类型。它通过
+在 Metadata 中找到相应的 metadata 来读取。具体来说，对于 .4dstem 数据集，它会尝试
+读取 .4dstem 数据集中相应的实验参数；而对于 .img 数据集，它会进行如下尝试：
+    - 查找 attrs 中的 /FourDSTEM
+
 部件内容：
     - WidgetPlotImage 用于使用 matplotlib 显示图像
     - WidgetPlotLine 用于使用 matplotlib 画线
