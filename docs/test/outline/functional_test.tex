@@ -1,0 +1,442 @@
+\documentclass[a4paper,12pt]{report}	%book/report/article
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{ntheorem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{braket}
+\usepackage{siunitx}
+\usepackage[version = 4]{mhchem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+%geometry宏包设置页边距
+\geometry{
+	textwidth=138mm,
+	textheight=215mm,
+	left=27mm,
+	right=27mm,
+	top=25.4mm, 
+	bottom=25.4mm,
+	headheight=2.17cm,
+	headsep=4mm,
+	footskip=12mm,
+	heightrounded,
+}
+
+%ntheorem宏包设置定理环境
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
+\newtheorem{corollary}{Corollary}[chapter]
+\newtheorem*{proof}{Proof}
+\newtheorem{property}{Property}[chapter]
+\newtheorem{axiom}{Axiom}[chapter]
+\newcommand{\qed}{$\hfill\blacksquare$}
+
+%listings宏包设置代码环境
+\lstset{
+	language=python,
+	backgroundcolor=\color{red!5!green!5!blue!5},
+	breaklines=true,
+	numbers=left,
+	numberstyle= \small,
+	basicstyle=\fontspec{Consolas}\small,
+	commentstyle=\fontspec{Consolas Italic}\small\color{red!80!green!80!blue!80},
+	keywordstyle=\color{blue!50}\fontspec{Consolas Bold}\small,
+	showstringspaces=false,
+	frame = shadowbox,
+	tabsize = 4,
+}
+
+
+\title{4D-Explorer 功能测试大纲}
+\author{4D-Explorer 项目组}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents 
+
+\begin{table}[htbp]
+\centering
+\caption{文档编辑历史}
+\begin{tabular}{lll}
+\toprule
+时间 & 作者 & 事件 \\
+\midrule
+2025-1-6 & Hu Yiming & 创建初始版本 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\chapter{引言}
+
+\section{背景介绍}
+
+4D-Explorer 是一款专为处理和分析四维扫描透射电子显微镜 (4D-STEM) 数据而设计的开源软件, 旨在为材料科学和生命科学领域的研究人员提供直观且高效的数据处理工具. 随着高速电子探测器的发展, 4D-STEM 技术已成为表征微观结构的重要方法, 但其数据处理的复杂性对研究人员提出了更高的要求. 4D-Explorer 通过提供可视化和交互式的工作流程, 简化了数据准备、校准、图像重建和定量结果生成的过程.
+
+该软件支持多种图像重建方法, 例如虚拟成像 (Virtual Imaging) 和质心成像 (Center of Mass Imaging, CoM). 虚拟成像通过选择衍射空间中的特定区域 (如环形区域) 来重建样品图像, 模拟传统 STEM 成像; 而质心成像则通过量化电子束偏转来重建样品图像, 能够计算样品的电势和电荷密度. 此外, 4D-Explorer 还引入了一种新颖的旋转偏移校正算法, 利用散焦 4D-STEM 数据集及其轴向明场图像, 降低了实验要求, 提高了校准的准确性.
+
+4D-Explorer 支持多种操作系统 (如 Windows 和 macOS), 并推荐使用 Anaconda 配置 Python 环境以运行软件. 用户可以通过导入模块并运行 GUI 界面来操作软件, 同时提供了多组测试数据集 (如金纳米颗粒和 MoS2) 供用户练习和演示. 该软件采用 HDF5 文件格式管理数据, 能够高效处理大规模数据集, 且不会一次性将整个数据集加载到内存中, 从而降低了对计算资源的需求.
+
+4D-Explorer 的开源特性使其具有高度的可扩展性, 研究人员可以根据需求对其进行定制和优化. 其源代码和文档可在 GitHub 和 Gitee 上获取, 同时提供了详细的安装指南和使用教程. 通过 4D-Explorer, 研究人员能够更高效地利用 4D-STEM 技术, 推动材料科学和生命科学领域的微观结构研究.
+
+\section{测试目的}
+本功能测试大纲旨在全面验证4D-Explorer软件的各项功能是否符合设计要求，确保软件能够满足科研人员对4D-STEM数据分析的需求。通过系统化的功能测试，我们将验证软件核心功能的正确性和稳定性，确保用户界面交互符合设计规范，同时测试数据导入功能的完整性和准确性。
+
+我们将重点验证HDF5文件管理功能的可靠性，测试图像重建算法的正确性和精度，并评估数据校正功能的有效性。此外，我们还将确保实验参数管理功能的完整性，测试图像渲染功能的性能和效果，验证软件在不同使用场景下的稳定性。
+
+通过全面的功能测试，我们将确保功能模块之间的兼容性和协调性，测试异常情况下的错误处理机制，验证用户操作的响应速度和流畅度。我们还将评估功能扩展接口的可用性和稳定性，测试大规模数据处理时的功能表现，并验证功能文档与实际操作的匹配度，最终确保4D-Explorer软件能够为科研人员提供可靠、高效的4D-STEM数据分析工具。
+
+\section{测试人员}
+\begin{enumerate}
+    \item Hu Yiming. 功能测试负责人，撰写功能测试大纲，进行 Windows 平台测试
+    \item Sean. 进行 macOS 平台测试
+\end{enumerate}
+
+\section{测试环境}
+
+\subsection{Windows 平台}
+
+系统配置:
+\begin{itemize}
+    \item CPU: Intel Core i9-13900K @5.4GHz 
+    \item 内存: 128GB DDR5 4000 MHz 
+    \item 硬盘: 4TB M.2 SSD (PCIE 4.0 x 4 通道)
+    \item 操作系统: Windows 11 Pro 23H2 (64位)
+\end{itemize}
+
+测试流程:
+\begin{enumerate}
+    \item 从 4D-Explorer 仓库中下载当前版本 4D-Explorer 安装包;
+    \item 解压安装包;
+    \item 打开 4D-Explorer.exe;
+    \item 准备测试数据集;
+    \item 使用测试数据集，根据功能测试大纲完成各功能点测试。
+\end{enumerate}
+
+\subsection{macOS 平台}
+
+TODO
+
+\chapter{软件主界面}
+
+启动软件后，应当能进入软件主界面。在不同的分辨率屏幕下，软件主界面的界面布局可能有所差异。默认情况下，应当最大化显示软件主界面，以获得足够的显示空间。
+
+点击右上角的最大化窗口按钮，即可最大化显示软件主界面。
+
+在软件主界面中，默认包含：上部菜单栏，中间左侧控制面板，中间右侧主页，中间下侧日志显示面板，以及底部状态栏。
+
+菜单栏中，包含 File, Edit, View, Dataset, Settings, Help 等菜单。
+
+\section{打开教程}
+
+在主界面的主页 (Home) 中点击 WATCH TUTORIALS ABOUT 4D-EXPLORER 按钮，此时应当打开浏览器，跳转至 4D-Explorer 的文档界面。
+
+点击菜单栏中的 Help 菜单中，点击 About 按钮，应当能打开 About 窗口。
+
+在窗口中，依次点击项目地址、仓库地址、文档地址、Website, Repository, Document 所对应的六个超链接，查看它们是否能够正确地打开浏览器并跳转到对应的界面。
+
+检查 About 窗口中是否正确显示 4D-Explorer 的版本号以及 4D 标识。
+
+\section{主界面布局拖拽}
+
+在主界面中，将鼠标移动到左侧控制面板和右侧主页之间的分界线 (由三个竖直排列的点标识位置), 即应当可以拖拽以调整左侧控制面板的宽度。将宽度调整至最左边，可将左侧控制面板调整至最小宽度，但无法隐藏。
+
+通过点击控制面板左侧的按钮，应当显示或隐藏左侧控制面板，或者切换到对应的控制面板页面。目前存在四个页面，将鼠标移动到按钮上，应当显示提示文本，即为对应控制面板页面的名称，从上到下为 File, Pages, Task 和 System Info. 
+
+在左侧排列按钮的列的最下方，有一个齿轮按钮，点击后应当能在右侧打开设置页面。
+
+在右侧，主页和日志面板之间也有分界线，由三个横向排列的点标识位置。若在主页没有看到日志面板，那么应当能在主页的最下面看到横向排列的三个点。将鼠标移动到分界线处，即应当可以拖拽以调整日志面板的高度，或向上拖拽以显示日志面板。
+
+\section{设置界面主题}
+
+在主界面中，点开 Settings 菜单，点击 Settings 按钮，应当可以打开设置页面。
+
+在设置页面中，应当存在 THEME 和 LOGGING 选项卡。
+
+在 THEME 选项卡中，可以调整 THEME MODE、THEME COLOR 和 THEME DENSITY，分别为主题模式 (夜间模式)、主题颜色、主题密度 (决定了部件和字体大小)。请根据几种组合进行调整，查看实际显示效果是否和预期效果一致。
+
+\begin{table}[H]
+\centering
+\caption{主题设置测试组合}
+\begin{tabular}{cccc}
+\toprule
+主题模式 & 主题颜色 & THEME DENSITY & 预期结果 \\
+\midrule
+default & default & default & 浅色主题，深紫色配色，正常密度 \\
+dark & blue & normal & 深色主题，蓝色配色，正常密度 \\
+light & amber & small & 浅色主题，琥珀色配色，小密度 \\
+classical & purpleNJU & large & 经典主题，无配色，正常密度 \\
+dark & gray & very tiny & 深色主题，灰色配色，极小密度 \\
+light & deep purple & very huge & 浅色主题，深紫色配色，超大密度 \\
+default & blue & tiny & 浅色主题，蓝色配色，微小密度 \\
+classical & amber & normal & 经典主题，无配色，正常密度 \\
+dark & purpleNJU & small & 深色主题，南大紫色配色，小密度 \\
+light & gray & large & 浅色主题，灰色配色，大密度 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+注意，在经典主题中不支持调节配色和密度。
+
+\section{日志显示与设置}
+
+在主页下方，应当显示日志窗口。(如果未显示，尝试拖拽主页下方横向排列的三个点)
+
+窗口的右上角，按下 CLEAR 按钮，应当可以打开设置页面。
+
+在设置页面中，应当可以打开 LOGGING 标签页，里面存在调整主页窗口日志等级的选项、调整文件记录日志等级的选项。
+
+将日志等级从INFO调整至WARNING或ERROR后，切换到设置主题 (THEME) 标签页，换个颜色。此时，应当不显示切换颜色的日志记录 (为 INFO 级别)。将等级从 ERROR 等级调整回 INFO 或者 DEBUG 后，切换到设置主题页切换颜色，此时应当显示切换颜色的日志记录。
+
+在设置主题标签页中，还应当存在显示当前日志文件保存目录的文本框，以及BROWSE、USE DEFAULT PATH、OPEN LOG FOLDER 以及 CLEAR LOG FILES 四个按钮，分别是浏览保存日志目录、使用默认地址、打开当前日志目录、清除日志文件的按钮。
+
+在设置页面中，依次测试以下按钮功能：
+
+首先测试"BROWSE"按钮。点击该按钮后，应当弹出文件选择对话框，允许用户选择新的日志文件保存目录。选择新目录后，需要检查文本框中的路径是否更新为新选择的路径。然后进行以下操作以确认日志文件确实会保存到新目录中：
+
+1. 在软件中切换主题颜色以生成新的日志记录
+2. 手动检查新目录中是否创建了新的日志文件
+3. 打开新创建的日志文件，验证其中是否包含刚生成的日志记录
+4. 检查日志文件的时间戳是否为当前时间
+5. 确认日志文件大小是否随着新日志记录的添加而增加
+
+接着测试"USE DEFAULT PATH"按钮。点击该按钮后，应当将日志文件保存目录重置为软件默认路径。需要验证文本框中的路径是否更新为默认路径，并确认日志文件会保存到默认目录中。重新切换主题颜色，以生成新的日志记录，并检查日志文件是否保存到默认目录中。
+
+然后测试"OPEN LOG FOLDER"按钮。点击该按钮后，应当可以由系统默认的文件管理器打开当前日志文件保存目录。需要检查文件管理器是否确实打开了正确的目录，并确认目录中显示了相应的日志文件。日志文件应当以今天的日期命名。
+
+最后测试"CLEAR LOG FILES"按钮。点击该按钮后，应当弹出确认对话框。确认清除操作后，需要验证当前日志目录中的所有日志文件是否被删除，并检查日志窗口中是否显示了清除成功的提示信息。新建一个任意名称的 .txt 文本文件，以及一个任意名称的 .log 文件。再次点击 CLEAR LOG FILES，检查两个文件的情况。扩展名为 .txt 文件应当被保留，而 .log 文件应当被删除。
+
+\section{系统信息显示}
+
+在主页右侧，应当显示系统信息窗口。该窗口包含 CPU、内存和磁盘使用情况的实时监控。
+
+检查窗口是否显示 CPU 核心数量、当前 CPU 总使用率、4D-Explorer 的 CPU 使用率，并验证 CPU 使用率进度条是否实时更新且数值在 0\%-100\% 之间。
+
+检查窗口是否显示系统总内存大小、可用内存大小、4D-Explorer 的内存使用量，并验证内存使用率进度条是否实时更新且数值在 0\%-100\% 之间。
+
+检查窗口是否显示磁盘总容量、磁盘可用空间、4D-Explorer 的磁盘读取速度和写入速度，并验证磁盘使用率进度条是否实时更新且数值在 0\%-100\% 之间。
+
+打开任务管理器或系统监控工具，对比系统信息窗口显示的数据与系统监控工具的数据，验证所有数值是否在合理范围内，所有进度条是否随系统负载变化而实时更新，磁盘读写速度是否随文件操作而变化。
+
+
+\chapter{基础 HDF5 文件管理功能测试}
+
+4D-Explorer 软件基于 HDF5 文件格式进行数据存储和操作，因此，本章将介绍 HDF5 文件的基础功能测试。
+
+在主界面的菜单栏中，可以看到 File 菜单，里面应当能看见新建 HDF5 文件、打开 HDF5 文件以及关闭 HDF5 文件的选项。
+
+在左侧控制面板中，应当存在管理 HDF5 文件的面板 (对应最左侧按钮列中的第一个按钮)。在面板中，从上到下应当依次为 HIERARCHY DATA FORMAT 按钮、搜索框和刷新按钮，以及数据集列表。
+
+在数据集列表的下方存在一排四个按钮，分别是移动、复制、删除、重命名按钮。
+
+再下方应当存在 WORKING DIRECTORY 按钮。点击该按钮后，应当能切换到能展示当前工作目录中文件的列表。在没有打开任何 HDF5 文件时，当前工作目录为 4D-Explorer 软件的根目录。点击上方的 HIERARCHY DATA FORMAT 按钮，应当可以切换回展示 HDF5 文件的层级结构的界面。
+
+\section{新建、打开与关闭 HDF5 文件}
+
+\subsection{基本功能测试}
+在不打开 HDF5 文件的前提下，此时左侧控制面板中，展示 HDF5 文件层级结构的界面为空的状态，里面有提示说 CREATE/OPEN A FILE。
+
+在菜单栏的 File 菜单中，点击 New HDF5 File 按钮，应当能打开选择目录和文件名的对话框。确认后，应当能创建相应的 .h5 文件。并且，应当能自动打开刚刚创建的文件。此时，HDF5 结构列表中的提示应当消失，并且变成刚刚创建文件的名字。对应地，左侧还有一个数据库形状的图标。
+
+在 File 菜单栏中点击关闭文件按钮，应当可以关闭当前打开的文件。此时 HDF5 结构列表应当重回空状态，只剩下一句提示。
+
+对着提示点击右键，应当会在鼠标点击位置出现上下文菜单，里面包含和 File 菜单中相同的三个选项，即新建、打开、关闭文件。此时由于没有打开任何文件，因此关闭文件按钮应当是灰色的。
+
+在鼠标右键打开的上下文菜单中，选择新建文件，按照主界面菜单栏中相应按钮的同等操作，应当同样能创建一个新的 .h5 文件。并且，应当能自动打开刚刚创建的文件。
+
+\subsection{文件创建、打开与关闭的流程测试}
+按照如下顺序创建、开启、关闭文件，并在每一步中检查 HDF5 结构列表和当前工作目录列表的状态。
+
+\begin{enumerate}
+    \item 新建文件 test1.h5，检查 HDF5 结构列表是否正确显示文件名称和图标
+    \item 关闭 test1.h5，检查 HDF5 结构列表是否恢复空状态
+    \item 再次新建文件 test1.h5（同名文件），检查是否提示覆盖确认
+    \item 确认覆盖后，检查 HDF5 结构列表是否正确显示
+    \item 关闭 test1.h5
+    \item 新建文件 test2.h5，检查 HDF5 结构列表是否正确显示
+    \item 不关闭 test2.h5，直接新建文件 test3.h5，检查是否提示关闭当前文件
+    \item 确认关闭当前文件后，检查 test3.h5 是否正确创建并显示
+    \item 关闭 test3.h5
+    \item 打开 test1.h5，检查 HDF5 结构列表是否正确显示
+    \item 不关闭 test1.h5，直接打开 test2.h5，检查是否提示关闭当前文件
+    \item 确认关闭当前文件后，检查 test2.h5 是否正确打开并显示
+    \item 关闭 test2.h5
+    \item 打开 test1.h5
+    \item 在文件打开状态下，尝试关闭软件，检查是否提示保存
+    \item 重新打开软件，检查 HDF5 结构列表是否为空
+    \item 打开 test1.h5，检查文件内容是否与上次保存一致
+    \item 关闭 test1.h5
+    \item 删除 test1.h5、test2.h5、test3.h5 文件
+    \item 尝试打开已删除的 test1.h5，检查是否提示文件不存在
+\end{enumerate}
+
+\subsection{文件占用与释放测试}
+测试在不同情况下文件的占用与释放状态：
+
+\begin{enumerate}
+    \item 打开 test1.h5 文件
+    \item 尝试在另一个 4D-Explorer 进程中打开 test1.h5，检查是否提示文件已被占用
+    \item 尝试在系统文件管理器中删除 test1.h5，检查是否提示文件被占用无法删除
+    \item 在第一个 4D-Explorer 进程中关闭 test1.h5
+    \item 再次尝试在另一个 4D-Explorer 进程中打开 test1.h5，检查是否能够正常打开
+    \item 尝试在系统文件管理器中删除 test1.h5，检查是否能够正常删除
+    \item 打开 test1.h5 文件
+    \item 直接关闭 4D-Explorer 软件
+    \item 检查 test1.h5 文件是否被正确释放 (可以再打开一个 4D-Explorer 进程尝试打开 test1.h5)
+    \item 重新打开 4D-Explorer 软件，检查 HDF5 结构列表是否为空
+    \item 尝试打开 test1.h5，检查文件是否能够正常打开
+\end{enumerate}
+
+\subsection{文件权限异常测试}
+
+按照流程依次执行以下步骤，测试在文件或目录的权限并不为可写入时的情形。包括：
+\begin{enumerate}
+    \item 尝试在只读目录中创建新文件，检查是否提示权限不足并记录相应日志。
+    \item 尝试打开一个只读权限的 .h5 文件，检查是否能够正常打开。应当提示权限不足并记录相应日志。
+\end{enumerate}
+
+在 Windows 系统中，创建只读目录的步骤如下：
+\begin{enumerate}
+    \item 在目标位置右键点击并选择"新建文件夹"，命名为 readonly\_dir
+    \item 右键点击该文件夹，选择"属性"
+    \item 在"常规"选项卡中勾选"只读"属性
+    \item 切换到"安全"选项卡，编辑权限设置
+    \item 选择"Users"组并在"拒绝"列中勾选"写入"权限
+    \item 若需要管理员权限，系统会提示"你需要提供管理员权限来更改这些设置"，此时提供权限即可完成设置
+    \item 设置完成后，尝试在该目录中创建文件时，系统会提示"你需要权限来执行此操作"或"目标文件夹访问被拒绝"
+\end{enumerate}
+
+在 Linux 和 macOS 系统中，创建只读目录的流程如下：
+\begin{enumerate}
+    \item 打开终端
+    \item 使用 mkdir readonly\_dir 命令创建目录
+    \item 通过 chmod a-w readonly\_dir 或 chmod 555 readonly\_dir 命令设置只读权限
+    \item 若需要 root 权限而未使用 sudo 命令，系统会提示"Permission denied"
+    \item 使用 sudo 命令后即可成功设置权限
+    \item 设置完成后，尝试在该目录中创建文件时，系统会提示"Permission denied"
+\end{enumerate}
+
+在 Windows 系统中，设置 .h5 文件为只读的步骤如下：
+\begin{enumerate}
+    \item 通过 4D-Explorer 创建并保存一个 .h5 文件（例如 readonly.h5），然后关闭文件
+    \item 右键点击该文件，选择"属性"菜单
+    \item 在"常规"选项卡中勾选"只读"属性
+    \item 切换到"安全"选项卡，选择"Users"用户组
+    \item 在"拒绝"列中勾选"写入"权限
+    \item 若当前用户权限不足，系统会提示"你需要提供管理员权限来更改这些设置"，此时提供管理员权限即可完成设置
+    \item 完成设置后，当尝试修改该文件时，系统会显示"你需要权限来执行此操作"或"目标文件访问被拒绝"的提示
+\end{enumerate}
+
+对于 Linux 和 macOS 系统，设置 .h5 文件为只读的流程如下：
+\begin{enumerate}
+    \item 使用 4D-Explorer 创建并保存 .h5 文件（如 readonly.h5），然后关闭文件
+    \item 打开终端并导航到文件所在目录
+    \item 执行 chmod a-w readonly.h5 或 chmod 444 readonly.h5 命令
+    \item 在 Linux 系统中，若未使用 sudo 命令且权限不足，系统会提示"Permission denied"；在 macOS 系统中则会提示"Operation not permitted"
+    \item 使用 sudo 命令后即可成功设置只读权限
+    \item 设置完成后，尝试修改文件时，系统均会显示"Permission denied"的提示信息
+\end{enumerate}
+
+
+\subsection{异常关机测试}
+2. 异常关机测试：
+   - 打开 test1.h5 文件并修改内容
+   - 不保存直接强制关机
+   - 重新启动系统并打开 4D-Explorer
+   - 检查 HDF5 结构列表是否为空
+   - 尝试打开 test1.h5，检查文件内容是否与强制关机前一致
+   - 检查日志中是否有异常关机记录
+
+\subsection{磁盘空间不足测试}
+3. 磁盘空间不足测试：
+   - 创建一个接近磁盘容量上限的大文件
+   - 尝试创建新 .h5 文件，检查是否提示磁盘空间不足
+   - 尝试保存对现有 .h5 文件的修改，检查是否提示磁盘空间不足
+   - 尝试导入新数据到现有 .h5 文件中，检查是否提示磁盘空间不足
+   - 删除部分文件释放磁盘空间后，重复上述操作，检查是否能够正常执行
+
+
+\section{创建新 Group}
+
+\section{创建新 Dataset}
+
+\section{移动项}
+
+\section{复制项}
+
+\section{删除项}
+
+\section{重命名项}
+
+\section{更改项的扩展名}
+
+
+
+
+\chapter{导入数据功能测试}
+
+\section{导入 DM4 文件}
+
+\section{导入 EMPAD 文件}
+
+\section{导入 MIB 文件}
+
+\section{导入任意 Raw 文件}
+
+\section{从其他 HDF5 文件中导入数据}
+
+\section{导入 Numpy 文件}
+
+
+\chapter{重构功能测试}
+
+\section{虚拟成像}
+
+\section{质心成像}
+
+\chapter{校正功能测试}
+
+\section{背底去除}
+
+\section{扫描旋转校正}
+
+\section{衍射合轴}
+
+\chapter{实验参数管理功能测试}
+
+\section{添加参数}
+
+\section{修改参数}
+
+\section{删除参数}
+
+\section{系统初始化 4D-STEM 参数}
+
+\chapter{图像渲染功能测试}
+
+\section{拖动图像}
+
+\section{缩放图像}
+
+\section{调整亮度}
+
+\section{调整对比度}
+
+\section{使用对数尺度}
+
+\section{显示矢量场}
+
+\section{调整比例尺}
+
+
+\end{document}

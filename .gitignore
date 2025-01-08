@@ -64,3 +64,5 @@ Venv
 *.snm
 *.vrb
 *.thm
+*.synctex(?:\.gz)?
+*.xdv
