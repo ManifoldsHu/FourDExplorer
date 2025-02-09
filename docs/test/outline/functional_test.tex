@@ -349,68 +349,2042 @@ light & gray & large & 浅色主题，灰色配色，大密度 \\
 
 
 \subsection{异常关机测试}
-2. 异常关机测试：
-   - 打开 test1.h5 文件并修改内容
-   - 不保存直接强制关机
-   - 重新启动系统并打开 4D-Explorer
-   - 检查 HDF5 结构列表是否为空
-   - 尝试打开 test1.h5，检查文件内容是否与强制关机前一致
-   - 检查日志中是否有异常关机记录
+如果遭遇了异常关机 (甚至断电)，HDF5 文件可能不能及时释放 (未释放的状态写入在 HDF5 文件中)，从而再也打不开了，丢失数据。或许需要添加一些文件修复机制，以及关机处理机制，以缓解这个问题。
+\begin{enumerate}
+    \item 打开 test1.h5 文件
+    \item 导入 4D-STEM 数据 (另建一个 HDF5 文件，编写脚本写入大量数据，然后从该 HDF5 文件中导入)
+    \item 在导入进行到一半时，不保存直接强制关机
+    \item 重新启动系统并打开 4D-Explorer
+    \item 尝试打开 test1.h5，检查文件是否可以正常打开
+    \item 检查 test1.h5 文件内容是否与强制关机前一致
+\end{enumerate}
 
 \subsection{磁盘空间不足测试}
-3. 磁盘空间不足测试：
-   - 创建一个接近磁盘容量上限的大文件
-   - 尝试创建新 .h5 文件，检查是否提示磁盘空间不足
-   - 尝试保存对现有 .h5 文件的修改，检查是否提示磁盘空间不足
-   - 尝试导入新数据到现有 .h5 文件中，检查是否提示磁盘空间不足
-   - 删除部分文件释放磁盘空间后，重复上述操作，检查是否能够正常执行
+如果磁盘空间不足，则文件创建或写入可能会失败。需要测试此时 4D-Explorer 能否给出正确的提示。
+\begin{enumerate}
+    \item 编写脚本，创建一个接近磁盘容量上限的大文件
+    \item 尝试创建新 .h5 文件，检查是否提示磁盘空间不足
+    \item 尝试导入新数据到现有 .h5 文件中，检查是否提示磁盘空间不足
+    \item 删除部分文件释放磁盘空间后，重复上述操作，检查是否能够正常执行
+\end{enumerate}
 
 
 \section{创建新 Group}
 
+在打开 HDF5 文件后，可以创建新的 Group。有两种方法需要测试有效性：
+\begin{enumerate}
+\item 在 HDF5 结构列表中的某一个 Group 或者最顶级的根目录，右键点击并选择 New 按钮，应当可以打开 Create Item 的对话框。此时在 Location 对应的文本框中应当显示所点击的目录的路径。
+\item 顶部菜单栏中的 Edit 菜单中，点击 New 按钮，同样可以打开 Create Item 对话框。此时在 Location 对应的文本框中应当为空。
+\end{enumerate}
+
+在对话框中，应当能够输入 Group 名称，名称应当符合 HDF5 命名规范且不能为空。应当能够通过浏览按钮选择父目录路径，路径应当显示在父路径显示框中。如果未指定父路径，默认应当在根目录下创建 Group。 
+
+\subsection{Group 创建异常情况测试}
+测试在创建 Group 时可能出现的各种异常情况。
+
+创建名称过长的 Group
+\begin{enumerate}
+    \item 尝试创建名称超过 255 个字符的 Group
+        使用这个名称：\lstinline{This is an extremely long group name that exceeds the 255 character limit. It contains spaces and special characters to test the robustness of the system. The quick brown fox jumps over the lazy dog. abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789}
+    \item 检查是否提示名称过长错误
+    \item 检查是否允许创建接近长度限制的 Group 名称
+\end{enumerate}
+    
+创建包含特殊字符的 Group
+\begin{enumerate}
+    \item 尝试创建包含以下字符的 Group 名称：\textbackslash / : * ? " < > |
+    \item 检查是否提示非法字符错误
+    \item 检查是否允许创建包含下划线(\_)和连字符(-)的 Group 名称
+\end{enumerate}
+    
+创建空名称的 Group
+\begin{enumerate}
+    \item 尝试不输入任何名称直接创建 Group
+    \item 检查是否提示名称不能为空
+\end{enumerate}
+    
+创建重复名称的 Group
+\begin{enumerate}
+    \item 在同一个父目录下创建两个名称相同的 Group
+    \item 检查是否提示名称冲突
+    \item 检查是否允许在不同父目录下创建同名 Group
+\end{enumerate}
+
+创建包含空格的 Group
+\begin{enumerate}
+    \item 尝试创建名称包含前导或尾随空格的 Group
+    \item 检查是否自动去除多余空格
+    \item 检查是否允许创建包含中间空格的 Group 名称
+\end{enumerate}
+    
+创建包含非 ASCII 字符的 Group
+\begin{enumerate}
+    \item 尝试创建包含中文、emoji 等 Unicode 字符的 Group 名称
+    \item 检查是否能够正确保存和显示
+    \item 检查在不同操作系统下的兼容性
+\end{enumerate}
+
+对于所有测试用例，4D-Explorer 应当能够对非法输入给出明确的错误提示，同时记录相应的错误日志，并在处理过程中保持文件结构的完整性。系统应当具备足够的健壮性，不会因异常输入导致程序崩溃，且在错误发生后能够保持可继续操作的状态。
+
+
+
 \section{创建新 Dataset}
+在打开 HDF5 文件后，可以创建新的空 Dataset。和创建新的 Group 类似，也有两个入口：
+\begin{enumerate}
+    \item 在 HDF5 结构列表中的某一个 Group 或者最顶级的根目录，右键点击并选择 New 按钮，应当可以打开 Create Item 的对话框。此时在 Location 对应的文本框中应当显示所点击的目录的路径。将 Type 对应的选择框设置为 General Data，即为创建 Dataset。
+    \item 顶部菜单栏中的 Edit 菜单中，点击 New 按钮，同样可以打开 Create Item 对话框。此时在 Location 对应的文本框中应当为空。将 Type 对应的选择框设为 General Data，即为创建 Dataset。
+\end{enumerate}
+
+\subsection{创建 Dataset 基本功能测试}
+创建新 Dataset 的基本功能
+\begin{enumerate}
+    \item 选择父目录路径
+    \item 输入 Dataset 名称
+    \item 选择数据类型（目前仅支持 float32）
+    \item 选择维度（1D 到 4D）
+    \item 设置每个维度的大小
+    \item 检查是否成功创建指定形状的空 Dataset
+\end{enumerate}
+
+\subsection{创建 Dataset 异常情况测试}
+创建名称过长的 Dataset
+\begin{enumerate}
+    \item 尝试创建名称超过 255 个字符的 Dataset
+    \item 检查是否提示名称过长错误
+    \item 检查是否允许创建接近长度限制的 Dataset 名称
+\end{enumerate}
+
+创建包含特殊字符的 Dataset
+\begin{enumerate}
+    \item 尝试创建包含以下字符的 Dataset 名称：\textbackslash / : * ? " < > |
+    \item 检查是否提示非法字符错误
+    \item 检查是否允许创建包含下划线(\_)和连字符(-)的 Dataset 名称
+\end{enumerate}
+
+创建空名称的 Dataset
+\begin{enumerate}
+    \item 尝试不输入任何名称直接创建 Dataset
+    \item 检查是否提示名称不能为空
+\end{enumerate}
+
+创建重复名称的 Dataset
+\begin{enumerate}
+    \item 在同一个父目录下创建两个名称相同的 Dataset
+    \item 检查是否提示名称冲突
+    \item 检查是否允许在不同父目录下创建同名 Dataset
+\end{enumerate}
+
+创建包含空格的 Dataset
+\begin{enumerate}
+    \item 尝试创建名称包含前导或尾随空格的 Dataset
+    \item 检查是否自动去除多余空格
+    \item 检查是否允许创建包含中间空格的 Dataset 名称
+\end{enumerate}
+
+创建包含非 ASCII 字符的 Dataset
+\begin{enumerate}
+    \item 尝试创建包含中文、emoji 等 Unicode 字符的 Dataset 名称
+    \item 检查是否能够正确保存和显示
+    \item 检查在不同操作系统下的兼容性
+\end{enumerate}
+
+创建大尺寸 Dataset
+\begin{enumerate}
+    \item 尝试创建接近系统内存限制的 Dataset
+    \item 检查是否提示内存不足错误.
+    \item 检查是否允许创建合理大小的 Dataset
+\end{enumerate}
+
+创建超大尺寸 Dataset 
+\begin{enumerate}
+    \item 尝试创建接近硬盘空间大小限制的 Dataset 
+    \item 检查是否提示硬盘空间不足的错误.
+    \item 检查是否允许创建合理大小的 Dataset 
+\end{enumerate}
+
+测试不同维度 Dataset 的创建功能
+\begin{enumerate}
+    \item 分别创建一维、二维、三维和四维 Dataset，设置其形状分别为：(16,)、(16, 32)、(16, 32, 64)、(16, 32, 64, 128)
+    \item 验证 Dataset 的维度设置是否准确。通过将鼠标移动到左侧控制面板中，对应的 Dataset 项上，稍等片刻即会出现提示信息，为其形状。
+    \item 验证 Dataset 各维度的大小是否符合预期
+\end{enumerate}
+
+创建具有不恰当扩展名的 Dataset 
+\begin{enumerate}
+    \item 创建形状为 (32, 64, 128) 的 Dataset，并给出与数据集形状不符合的扩展名 (.4dstem)。
+    \item 验证 Dataset 是否创建成功。
+\end{enumerate}
+
+对于所有测试用例，4D-Explorer 应当能够对非法输入给出明确的错误提示，同时记录相应的错误日志，并在处理过程中保持文件结构的完整性。系统应当具备足够的健壮性，不会因异常输入导致程序崩溃，且在错误发生后能够保持可继续操作的状态。
 
 \section{移动项}
 
+将一个项移动到另一个 Group 当中，应当存在三种方式：
+\begin{enumerate}
+    \item 对着左侧控制面板中，相应的项，右键打开上下文菜单，点击 Move 选项，应当可以打开相应的 Move Item 对话框。
+    \item 在控制面板的下面，有 Move 按钮，点击后可打开相应的对话框。
+    \item 在菜单栏的 Edit 菜单中，有 Move 按钮，点击后可打开相应的对话框。 
+\end{enumerate}
+
+在对话框中，应当可以通过 Browse 按钮，选择需要移动的项，以及目标 Group。 
+
+\subsection{基本的移动功能测试}
+从某个目录中，移动 Dataset 到根目录中 
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (16, 16)
+    └── group2
+        └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将group1/dataset1移动到根目录
+    \item 预期结果：系统应成功移动dataset1到根目录，并保持其数据完整
+\end{itemize}
+
+从根目录中，移动 Dataset 到子目录中
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── dataset1 (16, 16)
+    └── group1
+        └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将根目录下的dataset1移动到group1
+    \item 预期结果：系统应成功移动dataset1到group1目录下，并保持其数据完整
+\end{itemize}
+
+从某个目录中，移动某个 Group 整体到根目录中 
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   ├── dataset1 (16, 16)
+    │   └── group2
+    │       ├── dataset2 (32, 32)
+    │       └── group3
+    │           └── dataset3 (64, 64)
+    └── group4
+        └── dataset4 (128, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将group2（包含子group和dataset）移动到根目录
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功移动group2到根目录
+        \item 保持group2内部结构完整
+        \item group3及其dataset3应保持原样
+        \item dataset2应保持原样
+        \item 移动后group2应成为根目录的直接子项
+        \item group1下应仅保留dataset1
+    \end{enumerate}
+\end{itemize}
+
+从根目录中，整体移动某个 Group 到子目录中 
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   ├── dataset1 (16, 16)
+    │   └── group2
+    │       ├── dataset2 (32, 32)
+    │       └── group3
+    │           └── dataset3 (64, 64)
+    └── group4
+        └── dataset4 (128, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将group1移动到group4
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功移动group1到group4目录下
+        \item 保持group1内部结构完整
+        \item group2及其dataset2应保持原样
+        \item group3及其dataset3应保持原样
+        \item dataset1应保持原样
+        \item 移动后group1应成为group4的子项
+        \item 根目录下应仅保留group4
+    \end{enumerate}
+\end{itemize}
+
+\subsection{移动的异常情况测试}
+测试空目录
+\begin{itemize}
+    \item 测试目录结构：/
+    \item 测试流程：尝试在根目录下移动不存在的项
+    \item 预期结果：系统应提示"未找到要移动的项"的错误
+\end{itemize}
+
+测试单Dataset目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将dataset1移动到自身
+    \item 预期结果：系统应提示"无法将Dataset移动到自身"的错误
+\end{itemize}
+
+测试嵌套目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   ├── dataset1 (16, 16)
+    │   └── group2
+    │       └── dataset2 (64, 64)
+    └── group3
+        └── dataset3 (128, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将group1移动到group2
+    \item 预期结果：系统应提示"无法将Group移动到其子Group中"的错误
+\end{itemize}
+
+测试具有特殊字符目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── 中文目录
+    │   └── dataset1 (32, 32)
+    ├── emoji😊
+    │   └── dataset2 (64, 64)
+    └── space dir
+        └── dataset3 (128, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将"emoji😊"移动到"space dir"
+    \item 预期结果：系统应正确处理特殊字符，成功完成移动
+\end{itemize}
+
+测试混合维度目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── 1D
+    │   └── dataset1 (16)
+    ├── 2D
+    │   └── dataset2 (16, 32)
+    ├── 3D
+    │   └── dataset3 (16, 32, 64)
+    └── 4D
+        └── dataset4 (16, 32, 64, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将4D/dataset4移动到1D
+    \item 预期结果：系统应成功移动，保持Dataset维度信息不变
+\end{itemize}
+
+测试没有发生变化的移动
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (16, 16)
+    └── group2
+        └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将group1移动到根目录下
+    \item 预期结果：系统应保持group1位置不变，不产生任何变化
+\end{itemize}
+
+测试目标目录中具有和项相同名字的 Dataset 
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (16, 16)
+    └── group2
+        └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将group1/dataset1移动到group2
+    \item 预期结果：系统应提示目标目录已存在同名Dataset，移动操作失败
+\end{itemize}
+
+测试目标目录中具有和项相同名字的 Group 
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (16, 16)
+    └── group2
+        └── group1
+            └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将根目录下的group1移动到group2
+    \item 预期结果：系统应提示目标目录已存在同名Group，移动操作失败
+\end{itemize}
+
+测试目标目录中具有和等待移动的 Dataset 相同名字的 Group 
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (16, 16)
+    └── group2
+        └── dataset1
+            └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将group1/dataset1移动到group2/dataset1
+    \item 预期结果：系统应提示目标目录已存在同名Group，移动操作失败
+\end{itemize}
+
+测试目标目录中具有和等待移动的 Group 相同名字的 Dataset 
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (16, 16)
+    └── group2
+        └── group1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将group1移动到group2/group1
+    \item 预期结果：系统应提示目标目录已存在同名Dataset，移动操作失败
+\end{itemize}
+
+
 \section{复制项}
+
+和移动项类似，复制项也有三种入口：
+\begin{enumerate}
+    \item 对着左侧控制面板中，相应的项，右键打开上下文菜单，点击 Copy 选项，应当可以打开相应的 Copy Item 对话框。
+    \item 在控制面板的下面，有 Copy 按钮，点击后可打开相应的对话框。
+    \item 在菜单栏的 Edit 菜单中，有 Copy 按钮，点击后可打开相应的对话框。
+\end{enumerate}
+
+\subsection{复制项基础功能测试}
+复制 Dataset 到根目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (16, 16)
+    └── group2
+        └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将group1/dataset1复制到根目录
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功复制dataset1到根目录
+        \item 原dataset1保持不变
+        \item 复制后的dataset1应与原dataset1具有相同的数据和属性
+    \end{enumerate}
+\end{itemize}
+
+复制 Dataset 到子目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── dataset1 (16, 16)
+    └── group1
+        └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将根目录下的dataset1复制到group1
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功复制dataset1到group1目录下
+        \item 原dataset1保持不变
+        \item 复制后的dataset1应与原dataset1具有相同的数据和属性
+    \end{enumerate}
+\end{itemize}
+
+复制 Group 到根目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   ├── dataset1 (16, 16)
+    │   └── group2
+    │       ├── dataset2 (32, 32)
+    │       └── group3
+    │           └── dataset3 (64, 64)
+    └── group4
+        └── dataset4 (128, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将group1复制到根目录
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功复制group1到根目录
+        \item 保持group1内部结构完整
+        \item 所有子Group和Dataset都应被正确复制
+        \item 复制后的Group和Dataset应与原Group和Dataset具有相同的数据和属性
+    \end{enumerate}
+\end{itemize}
+
+复制 Group 到子目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   ├── dataset1 (16, 16)
+    │   └── group2
+    │       ├── dataset2 (32, 32)
+    │       └── group3
+    │           └── dataset3 (64, 64)
+    └── group4
+        └── dataset4 (128, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将group1复制到group4
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功复制group1到group4目录下
+        \item 保持group1内部结构完整
+        \item 所有子Group和Dataset都应被正确复制
+        \item 复制后的Group和Dataset应与原Group和Dataset具有相同的数据和属性
+    \end{enumerate}
+\end{itemize}
+
+\subsection{复制项异常情况测试}
+
+测试复制到自身
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将group1复制到自身
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应允许复制操作
+        \item 在group1下创建group1\textunderscore copy
+        \item 保持原group1结构完整
+        \item 复制后的group1\textunderscore copy应与原group1具有相同的数据和属性
+    \end{enumerate}
+\end{itemize}
+
+测试复制到子目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   ├── dataset1 (16, 16)
+    │   └── group2
+    │       └── dataset2 (64, 64)
+    └── group3
+        └── dataset3 (128, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将group1复制到group2
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应允许复制操作
+        \item 在group2下创建group1\textunderscore copy
+        \item 保持原group1结构完整
+        \item 复制后的group1\textunderscore copy应与原group1具有相同的数据和属性
+    \end{enumerate}
+\end{itemize}
+
+测试复制特殊字符目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── 中文目录
+    │   └── dataset1 (32, 32)
+    ├── emoji😊
+    │   └── dataset2 (64, 64)
+    └── space dir
+        └── dataset3 (128, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将"emoji😊"复制到"space dir"
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应正确处理特殊字符
+        \item 在"space dir"下创建"emoji😊\textunderscore copy"
+        \item 保持原"emoji😊"结构完整
+        \item 复制后的目录应与原目录具有相同的数据和属性
+    \end{enumerate}
+\end{itemize}
+
+测试复制混合维度目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── 1D
+    │   └── dataset1 (16)
+    ├── 2D
+    │   └── dataset2 (16, 32)
+    ├── 3D
+    │   └── dataset3 (16, 32, 64)
+    └── 4D
+        └── dataset4 (16, 32, 64, 128)
+    \end{verbatim}
+    \item 测试流程：尝试将4D/dataset4复制到1D
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应允许复制操作
+        \item 在1D下创建dataset4\textunderscore copy
+        \item 保持原dataset4的维度信息不变
+        \item 复制后的dataset4\textunderscore copy应与原dataset4具有相同的数据和属性
+    \end{enumerate}
+\end{itemize}
+
+测试复制到不存在的目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将dataset1复制到不存在的目录
+    \item 预期结果：系统应提示"目标目录不存在"的错误
+\end{itemize}
+
+测试复制同名项
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (32, 32)
+    └── group2
+        └── dataset1 (64, 64)
+    \end{verbatim}
+    \item 测试流程：尝试将group1/dataset1复制到group2
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应提示"目标目录已存在同名项"
+        \item 提供重命名选项
+        \item 如果选择重命名，应成功创建复制项
+        \item 如果选择覆盖，应提示确认并完成覆盖
+    \end{enumerate}
+\end{itemize}
+
+测试复制大数据集时的异常情况
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        └── large_dataset (1024, 1024, 1024)
+    \end{verbatim}
+    \item 测试流程：
+    \begin{enumerate}
+        \item 开始复制large\textunderscore dataset到新位置
+        \item 在复制过程中直接关闭软件
+    \end{enumerate}
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应正确处理中断
+        \item 重启软件后不应出现数据损坏
+        \item 目标位置不应存在不完整的复制项
+    \end{enumerate}
+\end{itemize}
+
+测试复制包含多个Dataset的Group
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        ├── dataset1 (256, 256)
+        ├── dataset2 (512, 512)
+        └── dataset3 (1024, 1024)
+    \end{verbatim}
+    \item 测试流程：复制整个group1到新位置
+    \item 预期结果：
+    \begin{enumerate}
+        \item 进度条应正确显示总进度
+        \item 每个dataset的复制进度应单独显示
+        \item 复制完成后所有dataset应保持完整
+    \end{enumerate}
+\end{itemize}
+
+测试复制高维大数据Group
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        ├── dataset1 (1024, 1024, 1024)
+        └── dataset2 (128, 128, 128, 128)
+    \end{verbatim}
+    \item 测试流程：复制整个group1到新位置
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统不应出现明显卡顿
+        \item 内存占用应在合理范围内
+        \item 复制过程应保持响应
+        \item 复制完成后数据应保持完整
+    \end{enumerate}
+\end{itemize}
 
 \section{删除项}
 
+删除项应当存在三种方式：
+\begin{enumerate}
+    \item 对着左侧控制面板中，相应的项，右键打开上下文菜单，点击 Delete 选项
+    \item 在控制面板的下面，有 Delete 按钮
+    \item 在菜单栏的 Edit 菜单中，有 Delete 按钮
+\end{enumerate}
+
+\subsection{删除项基础功能测试}
+删除单个 Dataset
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── dataset1 (16, 16)
+    └── group1
+        └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：删除根目录下的dataset1
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功删除dataset1
+        \item 根目录下应仅保留group1
+        \item group1及其dataset2应保持不变
+    \end{enumerate}
+\end{itemize}
+
+删除单个 Group
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── group1
+    │   └── dataset1 (16, 16)
+    └── group2
+        └── dataset2 (32, 32)
+    \end{verbatim}
+    \item 测试流程：删除group1
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功删除group1及其dataset1
+        \item 根目录下应仅保留group2
+        \item group2及其dataset2应保持不变
+    \end{enumerate}
+\end{itemize}
+
+删除嵌套 Group
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        ├── dataset1 (16, 16)
+        └── group2
+            ├── dataset2 (32, 32)
+            └── group3
+                └── dataset3 (64, 64)
+    \end{verbatim}
+    \item 测试流程：删除group1
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功删除group1及其所有子项
+        \item 根目录下应为空
+    \end{enumerate}
+\end{itemize}
+
+\subsection{删除项异常情况测试}
+测试删除根目录
+\begin{itemize}
+    \item 测试流程：尝试删除根目录
+    \item 预期结果：系统应提示"无法删除根目录"的错误
+\end{itemize}
+
+测试删除不存在的项
+\begin{itemize}
+    \item 测试流程：尝试删除不存在的项
+    \item 预期结果：系统应提示"未找到要删除的项"的错误
+\end{itemize}
+
+测试删除包含特殊字符的项
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── 中文目录
+    │   └── dataset1 (32, 32)
+    ├── emoji😊
+    │   └── dataset2 (64, 64)
+    └── space dir
+        └── dataset3 (128, 128)
+    \end{verbatim}
+    \item 测试流程：删除"emoji😊"
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功删除"emoji😊"及其dataset2
+        \item 其他目录应保持不变
+    \end{enumerate}
+\end{itemize}
+
+测试删除高维大数据
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        ├── dataset1 (1024, 1024, 1024)
+        └── dataset2 (128, 128, 128, 128)
+    \end{verbatim}
+    \item 测试流程：删除group1
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统不应出现明显卡顿
+        \item 内存占用应在合理范围内
+        \item 删除过程应保持响应
+        \item 删除完成后根目录应为空
+    \end{enumerate}
+\end{itemize}
+
 \section{重命名项}
+
+重命名一个项应当存在三种方式：
+\begin{enumerate}
+    \item 对着左侧控制面板中，相应的项，右键打开上下文菜单，点击 Rename 选项，应当可以打开相应的 Rename Item 对话框。
+    \item 在控制面板的下面，有 Rename 按钮，点击后可打开相应的对话框。
+    \item 在菜单栏的 Edit 菜单中，有 Rename 按钮，点击后可打开相应的对话框。
+\end{enumerate}
+
+在对话框中，应当可以输入新的名称并确认重命名操作。系统应验证新名称的有效性，包括长度限制、特殊字符检查等。
+
+\subsection{基本重命名功能测试}
+重命名 Dataset
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：将dataset1重命名为dataset1\textunderscore new
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功重命名
+        \item 数据应保持完整
+        \item 维度信息应保持不变
+    \end{enumerate}
+\end{itemize}
+
+重命名 Group
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：将group1重命名为group1\textunderscore new
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功重命名
+        \item 内部结构应保持完整
+        \item dataset1应保持原样
+    \end{enumerate}
+\end{itemize}
+
+\subsection{重命名异常情况测试}
+测试重命名为空名称
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将dataset1重命名为空
+    \item 预期结果：系统应提示"名称不能为空"的错误
+\end{itemize}
+
+测试重命名为已存在名称
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    ├── dataset1 (32, 32)
+    └── dataset2 (64, 64)
+    \end{verbatim}
+    \item 测试流程：尝试将dataset1重命名为dataset2
+    \item 预期结果：系统应提示"名称已存在"的错误
+\end{itemize}
+
+测试重命名为包含非法字符
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将dataset1重命名为dataset1/*
+    \item 预期结果：系统应提示"名称包含非法字符"的错误
+\end{itemize}
+
+测试重命名为超长名称
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：尝试将dataset1重命名为超过255字符的名称
+    \item 预期结果：系统应提示"名称过长"的错误
+\end{itemize}
+
+测试重命名特殊字符目录
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── 中文目录
+        └── dataset1 (32, 32)
+    \end{verbatim}
+    \item 测试流程：将"中文目录"重命名为"new中文目录"
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功重命名
+        \item 内部结构应保持完整
+        \item dataset1应保持原样
+    \end{enumerate}
+\end{itemize}
+
+测试重命名嵌套结构
+\begin{itemize}
+    \item 测试目录结构：
+    \begin{verbatim}
+    /
+    └── group1
+        ├── dataset1 (16, 16)
+        └── group2
+            └── dataset2 (64, 64)
+    \end{verbatim}
+    \item 测试流程：将group1重命名为group1\textunderscore new
+    \item 预期结果：
+    \begin{enumerate}
+        \item 系统应成功重命名
+        \item 内部结构应保持完整
+        \item 所有子项路径应正确更新
+    \end{enumerate}
+\end{itemize}
+
 
 \section{更改项的扩展名}
 
+通过在控制面板对应的数据集中点击右键，可以打开上下文菜单，里面应当有 Change Data Type 选项，点击后应当能打开修改数据集扩展名的对话框。
 
+在对话框中，应当可以通过点击 browse 按钮选择需要改扩展名的数据集。
+
+在 Current Type 文本框中，应当显示当前的数据集类型。准备两个数据集，分别为无扩展名，以及有 .4dstem 扩展名的数据集。无扩展名的数据集类型应当为 Data, 而 .4dstem 扩展名的数据集类型为 FourDSTEM. 
+
+在切换到对应的扩展名时，应当能显示扩展名所对应数据类型的说明。
+
+在确认修改后，系统应提示修改成功，并在左侧显示修改了扩展名的数据集，其应当具有和扩展名相对应的图标。
 
 
 \chapter{导入数据功能测试}
 
-\section{导入 DM4 文件}
+导入数据支持 DM4、EMPAD、MIB、Raw、Numpy 等格式的数据。它有三个入口：
+\begin{enumerate}
+    \item 在左侧的控制面板，右键点击 Group，在弹出的菜单中应当能看到 Import 4D-STEM dataset 按钮，点击后应当可打开导入 4D-STEM 数据集的窗口。
+    \item 在主界面菜单栏中的 Edit 菜单，点击 Import 4D-STEM dataset 按钮，点击后应当可打开导入 4D-STEM 数据集的窗口。
+\end{enumerate}
 
-\section{导入 EMPAD 文件}
+\section{导入 4D-STEM 文件}
 
-\section{导入 MIB 文件}
+\subsection{导入 DM4 文件}
 
-\section{导入任意 Raw 文件}
+在打开 4D-STEM 数据集的窗口之后，选择 Digital Micrograph (.dm4) 对应的选项。选择测试 .dm4 数据后，在 name 处填写 DM.4dstem。然后，点击 OK 即可开始导入数据。此时，左下角应当出现导入进度条；在左侧控制面板中的任务面板，亦可看到导入进度条。
 
-\section{从其他 HDF5 文件中导入数据}
+导入完成后，应当在控制面板的文件面板中，看到刚刚导入的 4D-STEM 数据集。将鼠标移动到数据集上，等待一会儿，会显示数据集的形状。检查数据集形状/维度是否符合预期。
 
-\section{导入 Numpy 文件}
+右键点击数据集，在弹出的上下文菜单中点击 Open，应当可在右侧看到查看 4D-STEM 衍射图像的界面。
+
+观察衍射图像，看看其是否正确导入，检查衍射图像的
+\begin{enumerate}
+    \item 形状 
+    \item 数值范围
+    \item 数据类型 
+    \item 画幅
+\end{enumerate} 
+是否符合预期。检查需要覆盖到扫描范围的四个角落，并且再随机抽取 4 个扫描位置。
+
+\subsection{导入 EMPAD 文件}
+
+在打开 4D-STEM 数据集的窗口之后，选择 EMPAD v0.51 对应的选项。选择测试 .xml 数据后，在 name 处填写 EMPAD.4dstem。此时，在 EMPAD RAW FILE 的文本框中应当展示 xml 文件对应的 .raw 文件。然后，点击 OK 即可开始导入数据。此时，左下角应当出现导入进度条；在左侧控制面板中的任务面板，亦可看到导入进度条。
+
+导入完成后，应当在控制面板的文件面板中，看到刚刚导入的 4D-STEM 数据集。将鼠标移动到数据集上，等待一会儿，会显示数据集的形状。检查数据集形状/维度是否符合预期。
+
+右键点击数据集，在弹出的上下文菜单中点击 Open，应当可在右侧看到查看 4D-STEM 衍射图像的界面。
+
+观察衍射图像，看看其是否正确导入，检查衍射图像的
+\begin{enumerate}
+    \item 形状 
+    \item 数值范围
+    \item 数据类型 
+    \item 画幅
+\end{enumerate} 
+是否符合预期。检查需要覆盖到扫描范围的四个角落，并且再随机抽取 4 个扫描位置。
+
+检查导入的数据集的元数据，看看是否正确导入。
+
+将测试文件中的 .raw 文件移出，重新选择 EMPAD 对应的选项进行导入，检查是否提示未找到 .raw 文件。
+
+准备适用于 v1.0 的 EMPAD 数据集，进行导入，检查是否提示 EMPAD 版本不正确
+
+准备适用于 v0.51 的 EMPAD 数据集，选择 EMPAD v1.0 对应的选项进行导入，检查是否提示 EMPAD 版本不正确。
+
+\subsection{导入 MIB 文件}
+
+在打开 4D-STEM 数据集，选择 MIB 对应的选项。选择测试 .mib 数据后，还应当选择对应的 .hdr 文件。之后，在 name 处填写 MIB.4dstem。然后，点击 OK 即可开始导入数据。此时，左下角应当出现导入进度条；在左侧控制面板中的任务面板，亦可看到导入进度条。
+
+导入完成后，应当在控制面板的文件面板中，看到刚刚导入的 4D-STEM 数据集。将鼠标移动到数据集上，等待一会儿，会显示数据集的形状。检查数据集形状/维度是否符合预期。
+
+观察衍射图像，看看其是否正确导入，检查衍射图像的
+\begin{enumerate}
+    \item 形状 
+    \item 数值范围
+    \item 数据类型 
+    \item 画幅
+\end{enumerate} 
+是否符合预期。检查需要覆盖到扫描范围的四个角落，并且再随机抽取 4 个扫描位置。
+
+在选择导入文件时，只提供 .mib 文件，而不提供 .hdr 文件。取消勾选 set scanning coordinate according to the .hdr file，手动指定扫描形状。然后进行导入，看看能否正确导入。
+
+在选择导入文件时，只提供 .mib 文件，而不提供 .hdr 文件。取消勾选 set scanning coordinate according to the .hdr file，手动指定错误的扫描形状 (设置过大的扫描形状，超过文件长度)。然后进行导入，查看是否会报错。
+
+\subsection{导入任意 Raw 文件}
+
+分别准备 EMPAD、MIB 的二进制文件，测试导入任意二进制文件功能。
+
+在打开 4D-STEM 数据集的窗口之后，选择 Raw 对应的选项。选择测试二进制数据后，在 name 处填写 Raw.4dstem。然后，点击 OK 即可开始导入数据。此时，左下角应当出现导入进度条；在左侧控制面板中的任务面板，亦可看到导入进度条。
+
+导入完成后，应当在控制面板的文件面板中，看到刚刚导入的 4D-STEM 数据集。将鼠标移动到数据集上，等待一会儿，会显示数据集的形状。检查数据集形状/维度是否符合预期。
+
+观察衍射图像，看看其是否正确导入，检查衍射图像的
+\begin{enumerate}
+    \item 形状 
+    \item 数值范围
+    \item 数据类型 
+    \item 画幅
+\end{enumerate} 
+是否符合预期。检查需要覆盖到扫描范围的四个角落，并且再随机抽取 4 个扫描位置。
+
+\subsection{从其他 HDF5 文件中导入数据}
+
+使用脚本准备一个 .h5 文件，内有多种形状的数据集，包括二维图像、四维数据集等，分散在不同的 Group 中。
+
+\begin{verbatim}
+/
+├── group1
+│   ├── dataset1 (16, 16, 256, 256)  # 4D-STEM 数据集
+│   └── dataset2 (32, 32)            # 2D 图像
+├── group2
+│   ├── dataset3 (64, 64, 128, 128)  # 4D-STEM 数据集
+│   └── group3
+│       └── dataset4 (128, 128)      # 2D 图像
+└── dataset5 (512, 512)              # 根目录下的 2D 图像
+\end{verbatim}
 
 
-\chapter{重构功能测试}
+在打开 4D-STEM 数据集的窗口之后，选择 HDF5 对应的选项。选择测试 .h5 数据后，查看对话框中是否列出了正确的 4D-STEM 数据集。在 name 处填写 HDF5.4dstem。然后，点击 OK 即可开始导入数据。此时，左下角应当出现导入进度条；在左侧控制面板中的任务面板，亦可看到导入进度条。
+
+导入完成后，应当在控制面板的文件面板中，看到刚刚导入的 4D-STEM 数据集。将鼠标移动到数据集上，等待一会儿，会显示数据集的形状。检查数据集形状/维度是否符合预期。
+
+观察衍射图像，看看其是否正确导入，检查衍射图像的
+\begin{enumerate}
+    \item 形状 
+    \item 数值范围
+    \item 数据类型 
+    \item 画幅
+\end{enumerate} 
+是否符合预期。检查需要覆盖到扫描范围的四个角落，并且再随机抽取 4 个扫描位置。
+
+\subsection{导入 Numpy 文件}
+
+准备 .npy 和 .npz 测试文件，其中 .npz 文件包含多个数组，至少包含一个 4D-STEM 数据集。
+
+在打开 4D-STEM 数据集的窗口之后，选择 Numpy 对应的选项。选择测试 .npy 数据后，在 name 处填写 Numpy.4dstem。然后，点击 OK 即可开始导入数据。此时，左下角应当出现导入进度条；在左侧控制面板中的任务面板，亦可看到导入进度条。
+
+导入完成后，应当在控制面板的文件面板中，看到刚刚导入的 4D-STEM 数据集。将鼠标移动到数据集上，等待一会儿，会显示数据集的形状。检查数据集形状/维度是否符合预期。
+
+观察衍射图像，看看其是否正确导入，检查衍射图像的
+\begin{enumerate}
+    \item 形状 
+    \item 数值范围
+    \item 数据类型 
+    \item 画幅
+\end{enumerate} 
+是否符合预期。检查需要覆盖到扫描范围的四个角落，并且再随机抽取 4 个扫描位置。
+
+对于大型数据集（如 256x256x256x256），观察导入过程中内存使用情况，确保：
+\begin{itemize}
+    \item 内存使用不会持续增长
+    \item 导入完成后内存能够及时释放
+    \item 导入过程中不会出现内存不足的情况
+\end{itemize}
+
+测试以下异常情况：
+\begin{itemize}
+    \item 选择非 4D 的 .npy 文件
+    \item 选择不包含 4D 数据的 .npz 文件
+    \item 选择损坏的 .npy/.npz 文件
+    \item 选择超大文件（超过可用内存）
+\end{itemize}
+检查程序是否能够正确识别并提示错误信息。
+
+
+\chapter{查看与重构功能测试}
+
+查看与重构功能是 4D-Explorer 的核心功能之一，用于对 4D-STEM 数据进行重构，以获取二维图像。
+
+\section{查看 4D-STEM 数据集}
+
+查看 4D-STEM 数据集页面是 4D-Explorer 的核心功能之一，用于查看和浏览 4D-STEM 数据。测试步骤如下：
+
+\subsection{基本功能测试}
+\begin{enumerate}
+    \item 打开 4D-STEM 数据集，进入查看页面
+    \item 检查页面布局是否正确显示：
+    \begin{itemize}
+        \item 左侧显示衍射图样和扫描位置控制
+        \item 右侧显示预览图像和图像参数控制
+        \item 底部显示亮度、对比度、归一化和颜色映射控制
+    \end{itemize}
+    \item 测试扫描位置控制：
+    \begin{itemize}
+        \item 通过 spinBox 调整扫描位置 (i,j)
+        \item 测试用例：四个角落位置 (0,0)、(0,max)、(max,0)、(max,max) 以及随机位置
+        \item 期望结果：衍射图样正确更新，显示对应位置的衍射图
+    \end{itemize}
+    \item 测试图像显示参数控制：
+    \begin{itemize}
+        \item 亮度控制：
+        \begin{itemize}
+            \item 测试流程：调整亮度滑块
+            \item 期望结果：图像亮度实时变化，数值范围正确
+        \end{itemize}
+        \item 对比度控制：
+        \begin{itemize}
+            \item 测试流程：调整对比度滑块
+            \item 期望结果：图像对比度实时变化，数值范围正确
+        \end{itemize}
+        \item 归一化模式：
+        \begin{itemize}
+            \item 测试流程：切换线性/对数归一化
+            \item 期望结果：图像显示模式正确切换，数值范围正确
+        \end{itemize}
+        \item 颜色映射：
+        \begin{itemize}
+            \item 测试流程：切换不同颜色映射
+            \item 期望结果：图像颜色正确变化，支持所有预设颜色映射
+        \end{itemize}
+    \end{itemize}
+    \item 测试数据路径显示：
+    \begin{itemize}
+        \item 检查数据路径是否正确显示在路径框中
+        \item 测试浏览按钮功能
+    \end{itemize}
+\end{enumerate}
+
+\subsection{异常情况测试}
+\begin{enumerate}
+    \item 测试无效扫描位置：
+    \begin{itemize}
+        \item 输入超出范围的扫描位置
+        \item 期望结果：显示错误提示，自动修正为有效值
+    \end{itemize}
+
+    \item 测试数据格式错误：
+    \begin{itemize}
+        \item 打开非 4D-STEM 数据 (尝试打开维度为 2 的数据集)
+        \item 期望结果：显示错误提示，无法加载数据
+    \end{itemize}
+\end{enumerate}
 
 \section{虚拟成像}
 
+虚拟成像功能用于从 4D-STEM 数据中重构虚拟图像，其成像原理与传统 STEM 一致。测试步骤如下：
+
+\subsection{基本功能测试}
+\begin{enumerate}
+    \item 打开 4D-STEM 数据集，进入虚拟成像页面
+    \item 检查页面布局是否正确显示：
+    \begin{itemize}
+        \item 左侧显示衍射图样
+        \item 右侧显示参数控制面板
+        \item 底部显示开始计算按钮
+    \end{itemize}
+    \item 测试不同掩模模式：
+    \begin{itemize}
+        \item 圆形（明场）：
+        \begin{itemize}
+            \item 测试流程：选择圆形模式，调整中心位置、半径
+            \item 测试用例：中心位置(0,0)，半径50；中心位置(128,128)，半径100
+            \item 期望结果：圆形掩模正确显示，参数面板显示中心坐标和半径输入框
+        \end{itemize}
+        \item 环形（环形暗场）：
+        \begin{itemize}
+            \item 测试流程：选择环形模式，调整中心位置、内径、外径
+            \item 测试用例：中心位置(64,64)，内径30，外径60；中心位置(192,192)，内径50，外径100
+            \item 期望结果：环形掩模正确显示，参数面板显示中心坐标、内径和外径输入框
+        \end{itemize}
+        \item 扇形：
+        \begin{itemize}
+            \item 测试流程：选择扇形模式，调整中心位置、半径、起始角度、终止角度
+            \item 测试用例：中心位置(96,96)，半径80，角度0-90；中心位置(160,160)，半径120，角度45-135
+            \item 期望结果：扇形掩模正确显示，参数面板显示中心坐标、半径和角度输入框
+        \end{itemize}
+        \item 矩形：
+        \begin{itemize}
+            \item 测试流程：选择矩形模式，调整中心位置、宽度、高度、旋转角度
+            \item 测试用例：中心位置(128,128)，宽100，高50，旋转0；中心位置(64,192)，宽80，高120，旋转45
+            \item 期望结果：矩形掩模正确显示，参数面板显示中心坐标、宽度、高度和旋转角度输入框
+        \end{itemize}
+        \item 椭圆：
+        \begin{itemize}
+            \item 测试流程：选择椭圆模式，调整中心位置、长轴、短轴、旋转角度
+            \item 测试用例：中心位置(96,96)，长轴100，短轴50，旋转0；中心位置(160,160)，长轴120，短轴80，旋转30
+            \item 期望结果：椭圆掩模正确显示，参数面板显示中心坐标、长轴、短轴和旋转角度输入框
+        \end{itemize}
+        \item 多边形：
+        \begin{itemize}
+            \item 测试流程：选择多边形模式，调整顶点位置
+            \item 测试用例：三角形(0,0)-(128,0)-(64,128)；五边形(64,64)-(128,64)-(160,128)-(128,192)-(64,192)
+            \item 期望结果：多边形掩模正确显示，参数面板显示顶点坐标输入框
+        \end{itemize}
+        \item 分段环形：
+        \begin{itemize}
+            \item 测试流程：选择分段环形模式，调整中心位置、内径、外径、分段数、开口角度、旋转角度
+            \item 测试用例：中心位置(128,128)，内径50，外径100，4段，开口角度30，旋转0；中心位置(64,192)，内径30，外径80，6段，开口角度45，旋转15
+            \item 期望结果：分段环形掩模正确显示，参数面板显示中心坐标、内径、外径、分段数、开口角度和旋转角度输入框
+        \end{itemize}
+    \end{itemize}
+    \item 选择不同扫描位置，检查衍射图样显示是否正确更新
+    \item 调整亮度、对比度、归一化方式和颜色映射，检查显示效果
+\end{enumerate}
+
+\subsection{调整掩膜形状测试}
+
+\begin{enumerate}
+    \item 圆形模式：
+    \begin{itemize}
+        \item 测试用例：
+        \begin{itemize}
+            \item 透明度：0.5
+            \item 边缘颜色：蓝色
+            \item 填充颜色：红色
+            \item 线宽：2
+            \item 填充：是
+        \end{itemize}
+        \item 预期结果：圆形半透明显示，红色填充，蓝色边框，线宽2
+    \end{itemize}
+    
+    \item 环形模式：
+    \begin{itemize}
+        \item 测试用例：
+        \begin{itemize}
+            \item 透明度：0.8
+            \item 边缘颜色：绿色
+            \item 填充颜色：无
+            \item 线样式：虚线
+            \item 线宽：3
+        \end{itemize}
+        \item 预期结果：环形显示，绿色虚线边框，线宽3，无填充
+    \end{itemize}
+    
+    \item 扇形模式：
+    \begin{itemize}
+        \item 测试用例：
+        \begin{itemize}
+            \item 透明度：1.0
+            \item 边缘颜色：橙色
+            \item 填充颜色：紫色
+            \item 点形：斜线
+            \item 线宽：1
+        \end{itemize}
+        \item 预期结果：扇形显示，紫色斜线填充，橙色边框，线宽1
+    \end{itemize}
+    
+    \item 矩形模式：
+    \begin{itemize}
+        \item 测试用例：
+        \begin{itemize}
+            \item 透明度：0.6
+            \item 边缘颜色：红色
+            \item 填充颜色：蓝色
+            \item 线样式：点线
+            \item 线宽：4
+        \end{itemize}
+        \item 预期结果：矩形显示，蓝色填充，红色点线边框，线宽4
+    \end{itemize}
+    
+    \item 椭圆模式：
+    \begin{itemize}
+        \item 测试用例：
+        \begin{itemize}
+            \item 透明度：0.9
+            \item 边缘颜色：紫色
+            \item 填充颜色：绿色
+            \item 点形：交叉
+            \item 线宽：2
+        \end{itemize}
+        \item 预期结果：椭圆显示，绿色交叉填充，紫色边框，线宽2
+    \end{itemize}
+    
+    \item 多边形模式：
+    \begin{itemize}
+        \item 测试用例：
+        \begin{itemize}
+            \item 透明度：0.7
+            \item 边缘颜色：灰色
+            \item 填充颜色：粉色
+            \item 点形：圆圈
+            \item 线宽：3
+        \end{itemize}
+        \item 预期结果：多边形显示，粉色圆圈填充，灰色边框，线宽3
+    \end{itemize}
+    
+    \item 分段环形模式：
+    \begin{itemize}
+        \item 测试用例：
+        \begin{itemize}
+            \item 透明度：0.5
+            \item 边缘颜色：青色
+            \item 填充颜色：黄色
+            \item 点形：星形
+            \item 线宽：2
+        \end{itemize}
+        \item 预期结果：分段环形显示，黄色星形填充，青色边框，线宽2
+    \end{itemize}
+\end{enumerate}
+
+\subsection{计算功能测试}
+\begin{enumerate}
+    \item 选择不同掩模模式，设置合理参数
+    \item 点击开始计算按钮，检查：
+    \begin{itemize}
+        \item 是否弹出保存对话框
+        \item 保存路径和文件名是否正确
+        \item 计算进度是否显示
+        \item 计算结果是否正确保存
+    \end{itemize}
+    \item 检查计算结果：
+    \begin{itemize}
+        \item 图像尺寸是否与扫描尺寸一致
+        \item 数值范围是否合理
+        \item 元数据是否正确保存
+    \end{itemize}
+\end{enumerate}
+
+\subsection{异常情况测试}
+\begin{enumerate}
+    \item 测试无效参数：
+    \begin{itemize}
+        \item 掩模尺寸为0或负数
+        \item 掩模位置超出衍射图样范围
+        \item 旋转角度超出合理范围
+    \end{itemize}
+\end{enumerate}
+
+
 \section{质心成像}
+
+\subsection{质心成像功能测试}
+\begin{enumerate}
+    \item 打开质心成像页面，检查：
+    \begin{itemize}
+        \item 窗口标题是否为"Center Of Mass"
+        \item 工具提示是否正确显示
+        \item 开始计算按钮文本是否为"Start to Calculate Center of Mass (CoM)"
+    \end{itemize}
+
+    \item 测试不同掩模模式：
+    \begin{itemize}
+        \item 圆形掩模：
+        \begin{itemize}
+            \item 设置半径，检查圆形大小是否正确变化
+            \item 移动中心位置，检查圆形位置是否正确变化
+            \item 检查圆形区域计算是否正确
+        \end{itemize}
+        \item 环形掩模：
+        \begin{itemize}
+            \item 设置内外半径，检查环形宽度是否正确变化
+            \item 移动中心位置，检查环形位置是否正确变化
+            \item 检查环形区域计算是否正确
+        \end{itemize}
+        \item 扇形掩模：
+        \begin{itemize}
+            \item 设置起始和终止角度，检查扇形角度范围是否正确
+            \item 设置半径，检查扇形大小是否正确变化
+            \item 检查扇形区域计算是否正确
+        \end{itemize}
+        \item 矩形掩模：
+        \begin{itemize}
+            \item 设置长宽，检查矩形尺寸是否正确变化
+            \item 设置旋转角度，检查矩形方向是否正确变化
+            \item 检查矩形区域计算是否正确
+        \end{itemize}
+        \item 多边形掩模：
+        \begin{itemize}
+            \item 设置边数（3-10），检查多边形形状是否正确变化
+            \item 设置半径，检查多边形大小是否正确变化
+            \item 检查多边形区域计算是否正确
+        \end{itemize}
+        \item 分段环形掩模：
+        \begin{itemize}
+            \item 设置分段数（2-8），检查分段数量是否正确
+            \item 设置每段角度范围，检查分段角度是否正确
+            \item 检查分段环形区域计算是否正确
+        \end{itemize}
+    \end{itemize}
+
+    \item 点击开始计算按钮，检查：
+    \begin{itemize}
+        \item 是否弹出创建质心成像对话框
+        \begin{itemize}
+            \item 保存路径选择
+            \item 计算项目选择（CoM、CoMi、CoMj、dCoM、iCoM）
+            \item 数据集命名
+            \item 映射模式选择（质心映射或电场映射）
+            \item 归一化选项
+        \end{itemize}
+    \end{itemize}
+
+    \item 在对话框中设置参数并确认，检查：
+    \begin{itemize}
+        \item 任务是否成功添加到任务管理器
+        \item 计算进度是否正常显示
+        \item 计算结果是否保存到指定路径
+        \item 生成的文件名是否正确
+        \item 元数据是否正确保存
+    \end{itemize}
+
+    \item 检查计算结果：
+    \begin{itemize}
+        \item CoM矢量场：
+        \begin{itemize}
+            \item 文件扩展名是否为.vec
+            \item 数据维度是否正确
+            \item 矢量方向是否符合选择模式
+        \end{itemize}
+        \item CoMi/CoMj分量：
+        \begin{itemize}
+            \item 文件扩展名是否为.img
+            \item 数值范围是否合理
+            \item 与CoM矢量场是否对应
+        \end{itemize}
+        \item dCoM/iCoM：
+        \begin{itemize}
+            \item 文件扩展名是否为.img
+            \item 数值范围是否合理
+            \item 空间分布是否符合预期
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\subsection{异常情况测试}
+\begin{enumerate}
+    \item 测试无效参数：
+    \begin{itemize}
+        \item 保存路径为空或无效
+        \item 数据集名称为空或包含非法字符
+        \item 未选择任何计算项目
+    \end{itemize}
+\end{enumerate}
+
+\section{查看二维图像}
+
+\subsection{正常功能测试}
+\begin{enumerate}
+    \item 打开图像文件：
+    \begin{itemize}
+        \item 通过右键菜单选择"Open Image"或"Open As..."选择Image类型
+        \item 检查图像是否正确显示
+        \item 检查图像路径是否正确显示在路径栏
+        \item 检查直方图是否正确显示
+    \end{itemize}
+
+    \item 调整图像显示参数：
+    \begin{itemize}
+        \item 亮度调整：
+        \begin{itemize}
+            \item 拖动亮度滑块，检查图像亮度变化
+            \item 测试边界值（0和99）是否正常工作
+        \end{itemize}
+        \item 对比度调整：
+        \begin{itemize}
+            \item 拖动对比度滑块，检查图像对比度变化
+            \item 测试边界值（0和99）是否正常工作
+        \end{itemize}
+        \item 归一化方式选择：
+        \begin{itemize}
+            \item 在线性和对数归一化之间切换
+            \item 检查图像显示是否正确更新
+        \end{itemize}
+        \item 颜色映射选择：
+        \begin{itemize}
+            \item 选择不同的颜色映射（viridis, plasma, gray等）
+            \item 检查图像颜色是否正确更新
+        \end{itemize}
+    \end{itemize}
+
+    \item 浏览其他图像：
+    \begin{itemize}
+        \item 点击Browse按钮选择新图像
+        \item 检查新图像是否正确加载
+        \item 检查路径栏是否更新
+        \item 检查直方图是否更新
+    \end{itemize}
+\end{enumerate}
+
+\subsection{异常情况测试}
+\begin{enumerate}
+    \item 测试无效图像文件：
+    \begin{itemize}
+        \item 尝试打开非2D矩阵数据
+        \item 检查是否显示错误提示
+        \item 检查当前图像是否保持不变
+    \end{itemize}
+
+    \item 测试空路径：
+    \begin{itemize}
+        \item 尝试打开空路径
+        \item 检查是否显示错误提示
+        \item 检查当前图像是否保持不变
+    \end{itemize}
+
+    \item 测试不支持的图像格式：
+    \begin{itemize}
+        \item 尝试打开RGB图像（3通道）
+        \item 检查是否显示错误提示
+        \item 检查当前图像是否保持不变
+    \end{itemize}
+
+    \item 测试边界条件：
+    \begin{itemize}
+        \item 将亮度和对比度滑块设置为超出范围的值
+        \item 检查是否自动限制在0-99范围内
+    \end{itemize}
+\end{enumerate}
+
+\subsection{性能测试}
+\begin{enumerate}
+    \item 测试大图像加载：
+    \begin{itemize}
+        \item 加载大尺寸图像（如4096x4096）
+        \item 检查加载时间是否在可接受范围内
+        \item 检查图像显示是否流畅
+    \end{itemize}
+
+    \item 测试实时更新性能：
+    \begin{itemize}
+        \item 快速拖动亮度和对比度滑块
+        \item 检查图像更新是否流畅
+        \item 检查是否有明显的延迟或卡顿
+    \end{itemize}
+\end{enumerate}
+
+\section{查看矢量场}
 
 \chapter{校正功能测试}
 
+校正是另一类重要的功能。使用带有 DNA 的纳米金颗粒数据集进行测试。
+
 \section{背底去除}
+
+\subsection{参考图像法}
+
+\begin{enumerate}
+    \item 测试参考图像法背景去除功能：
+    \begin{itemize}
+        \item 打开4D-STEM数据集
+        \item 点击"Browse"按钮选择背景参考图像
+        \item 检查lineEdit\_background\_path是否正确显示背景图像路径
+        \item 勾选checkBox\_apply\_subtraction复选框
+        \item 点击"Start Calculation"按钮开始计算
+        \item 检查是否生成新的背景去除后的数据集
+        \item 检查新数据集的属性中是否包含背景去除相关信息
+    \end{itemize}
+
+    \item 测试无效背景图像路径：
+    \begin{itemize}
+        \item 在lineEdit\_background\_path中输入无效路径
+        \item 点击"Start Calculation"按钮
+        \item 检查是否显示错误提示
+        \item 检查是否未生成新数据集
+    \end{itemize}
+
+    \item 测试背景图像与4D-STEM数据尺寸不匹配：
+    \begin{itemize}
+        \item 选择与4D-STEM数据尺寸不同的背景图像
+        \item 点击"Start Calculation"按钮
+        \item 检查是否显示尺寸不匹配错误提示
+        \item 检查是否未生成新数据集
+    \end{itemize}
+
+    \item 测试未选择背景图像：
+    \begin{itemize}
+        \item 保持lineEdit\_background\_path为空
+        \item 勾选checkBox\_apply\_subtraction复选框
+        \item 点击"Start Calculation"按钮
+        \item 检查是否显示未选择背景图像的错误提示
+        \item 检查是否未生成新数据集
+    \end{itemize}
+
+    \item 测试未勾选应用背景去除：
+    \begin{itemize}
+        \item 选择有效的背景图像
+        \item 不勾选checkBox\_apply\_subtraction复选框
+        \item 点击"Start Calculation"按钮
+        \item 检查是否未执行背景去除操作
+        \item 检查是否生成与原始数据相同的新数据集
+    \end{itemize}
+
+    \item 测试边界条件：
+    \begin{itemize}
+        \item 选择包含极端值（如0或极大值）的背景图像
+        \item 执行背景去除操作
+        \item 检查结果数据是否在合理范围内
+        \item 检查是否出现数值溢出或异常
+    \end{itemize}
+\end{enumerate}
+
+
+\subsection{基于直方图的背景去除}
+
+\begin{enumerate}
+    \item 测试窗口最小值过滤：
+    \begin{itemize}
+        \item 在spinBox\_window\_min中输入最小值
+        \item 勾选checkBox\_apply\_window\_min复选框
+        \item 点击"Start Calculation"按钮
+        \item 检查结果数据是否过滤掉小于最小值的像素
+        \item 检查新数据集的属性中是否包含窗口过滤信息
+    \end{itemize}
+
+    \item 测试窗口最大值过滤：
+    \begin{itemize}
+        \item 在spinBox\_window\_max中输入最大值
+        \item 勾选checkBox\_apply\_window\_max复选框
+        \item 点击"Start Calculation"按钮
+        \item 检查结果数据是否过滤掉大于最大值的像素
+        \item 检查新数据集的属性中是否包含窗口过滤信息
+    \end{itemize}
+
+    \item 测试同时应用最小值和最大值过滤：
+    \begin{itemize}
+        \item 在spinBox\_window\_min和spinBox\_window\_max中分别输入最小值和最大值
+        \item 同时勾选checkBox\_apply\_window\_min和checkBox\_apply\_window\_max复选框
+        \item 点击"Start Calculation"按钮
+        \item 检查结果数据是否同时满足最小值和最大值的约束
+        \item 检查新数据集的属性中是否包含完整的窗口过滤信息
+    \end{itemize}
+
+    \item 测试无效窗口值：
+    \begin{itemize}
+        \item 设置最小值大于最大值
+        \item 点击"Start Calculation"按钮
+        \item 检查是否显示无效窗口值的错误提示
+        \item 检查是否未生成新数据集
+    \end{itemize}
+
+    \item 测试未选择任何窗口过滤：
+    \begin{itemize}
+        \item 保持checkBox\_apply\_window\_min和checkBox\_apply\_window\_max未勾选
+        \item 点击"Start Calculation"按钮
+        \item 检查是否未执行任何窗口过滤操作
+        \item 检查生成的新数据集是否与原始数据相同
+    \end{itemize}
+
+    \item 测试边界条件：
+    \begin{itemize}
+        \item 设置极端的窗口值（如0或极大值）
+        \item 执行窗口过滤操作
+        \item 检查结果数据是否在合理范围内
+        \item 检查是否出现数值溢出或异常
+    \end{itemize}
+
+    \item 测试与背景去除的组合使用：
+    \begin{itemize}
+        \item 同时选择有效的背景图像和窗口过滤参数
+        \item 点击"Start Calculation"按钮
+        \item 检查是否先执行背景去除再执行窗口过滤
+        \item 检查新数据集的属性中是否包含完整的处理信息
+    \end{itemize}
+\end{enumerate}
+
 
 \section{扫描旋转校正}
 
+\subsection{旋度法}
+\begin{enumerate}
+    \item 测试矢量场选择功能：
+    \begin{itemize}
+        \item 点击"Browse"按钮选择矢量场
+        \item 检查lineEdit\_vector\_field\_path是否正确显示路径
+        \item 检查是否成功绘制旋度和散度曲线
+        \item 检查doubleSpinBox\_rotation\_angle是否自动设置为最小旋度角度
+    \end{itemize}
+
+    \item 测试无效矢量场选择：
+    \begin{itemize}
+        \item 尝试选择非矢量场数据集
+        \item 检查是否显示错误提示
+        \item 检查界面是否保持原状
+    \end{itemize}
+
+    \item 测试旋度曲线计算：
+    \begin{itemize}
+        \item 选择有效矢量场
+        \item 检查曲线是否平滑连续
+        \item 检查曲线是否在0-360度范围内
+        \item 检查旋度和散度曲线是否归一化显示
+    \end{itemize}
+
+    \item 测试角度微调功能：
+    \begin{itemize}
+        \item 手动调整doubleSpinBox\_rotation\_angle的值
+        \item 检查曲线上的标记点是否同步移动
+        \item 检查角度值是否在0-360度范围内
+    \end{itemize}
+
+    \item 测试旋转校正执行：
+    \begin{itemize}
+        \item 设置有效旋转角度
+        \item 点击"OK"按钮
+        \item 检查是否生成新的旋转后数据集
+        \item 检查新数据集的属性中是否包含旋转角度信息
+    \end{itemize}
+
+    \item 测试取消操作：
+    \begin{itemize}
+        \item 设置旋转角度后点击"Cancel"按钮
+        \item 检查是否未生成新数据集
+        \item 检查界面是否正常关闭
+    \end{itemize}
+
+    \item 测试边界条件：
+    \begin{itemize}
+        \item 设置旋转角度为0度和360度
+        \item 检查结果数据集是否与原始数据一致
+        \item 检查属性中是否记录正确的旋转角度
+    \end{itemize}
+
+    \item 测试与矢量场显示效果的组合：
+    \begin{itemize}
+        \item 调整quiver\_scale, quiver\_width, quiver\_color参数
+        \item 执行旋转校正
+        \item 检查新数据集的显示效果是否保持设置
+        \item 检查属性中是否保存显示参数
+    \end{itemize}
+\end{enumerate}
+
+
+\subsection{近轴明场像法}
+
+\begin{enumerate}
+    \item 测试界面初始化：
+    \begin{itemize}
+        \item 检查界面控件是否正常加载
+        \item 检查doubleSpinBox\_rotation\_angle的初始值是否为0
+        \item 检查"Find Rotation Angle"按钮是否可用
+        \item 检查"OK"和"Cancel"按钮是否可用
+    \end{itemize}
+
+    \item 测试选择4D-STEM数据集：
+    \begin{itemize}
+        \item 点击"Choose 4D-STEM Dataset"按钮
+        \item 选择有效的4D-STEM数据集
+        \item 检查数据集路径是否正确显示
+        \item 检查数据集维度是否符合要求
+    \end{itemize}
+
+    \item 测试自动角度查找功能：
+    \begin{itemize}
+        \item 点击"Find Rotation Angle"按钮
+        \item 检查是否弹出角度查找对话框
+        \item 检查是否显示角度查找进度
+        \item 检查是否返回合理的旋转角度
+        \item 检查doubleSpinBox\_rotation\_angle是否更新为找到的角度
+    \end{itemize}
+
+    \item 测试手动角度设置：
+    \begin{itemize}
+        \item 在doubleSpinBox\_rotation\_angle中输入角度值
+        \item 检查输入值是否在0-360度范围内
+        \item 检查角度值是否被正确记录
+    \end{itemize}
+
+    \item 测试旋转校正执行：
+    \begin{itemize}
+        \item 设置有效旋转角度
+        \item 点击"OK"按钮
+        \item 检查是否弹出保存对话框
+        \item 检查是否生成新的旋转后数据集
+        \item 检查新数据集的属性中是否包含旋转角度信息
+    \end{itemize}
+
+    \item 测试取消操作：
+    \begin{itemize}
+        \item 设置旋转角度后点击"Cancel"按钮
+        \item 检查是否未生成新数据集
+        \item 检查界面是否正常关闭
+    \end{itemize}
+
+    \item 测试边界条件：
+    \begin{itemize}
+        \item 设置旋转角度为0度和360度
+        \item 检查结果数据集是否与原始数据一致
+        \item 检查属性中是否记录正确的旋转角度
+    \end{itemize}
+
+    \item 测试错误处理：
+    \begin{itemize}
+        \item 选择无效数据集
+        \item 检查是否显示错误提示
+        \item 检查界面控件是否禁用
+    \end{itemize}
+
+\end{enumerate}
+
+
 \section{衍射合轴}
+
+\subsection{手动测量}
+
+\begin{enumerate}
+    \item 测试界面初始化：
+    \begin{itemize}
+        \item 检查是否显示手动对齐模式界面
+        \item 检查表格控件是否初始化
+        \item 检查添加/删除锚点按钮是否可用
+        \item 检查应用/取消按钮状态
+        \item 检查衍射图样显示区域是否初始化
+    \end{itemize}
+
+    \item 测试添加锚点：
+    \begin{itemize}
+        \item 点击添加锚点按钮
+        \item 检查表格是否新增一行
+        \item 检查新增行是否包含位置和位移输入框
+        \item 检查衍射图样是否显示新锚点标记
+        \item 检查锚点数量限制（最大10个）
+    \end{itemize}
+
+    \item 测试删除锚点：
+    \begin{itemize}
+        \item 选择表格中的某一行
+        \item 点击删除锚点按钮
+        \item 检查表格行数是否减少
+        \item 检查衍射图样中对应锚点标记是否消失
+        \item 检查删除最后一个锚点时按钮是否禁用
+    \end{itemize}
+
+    \item 测试锚点位置输入：
+    \begin{itemize}
+        \item 在位置输入框中输入坐标
+        \item 检查输入格式是否正确（x,y）
+        \item 检查非法输入是否被拒绝
+        \item 检查衍射图样中锚点位置是否更新
+    \end{itemize}
+
+    \item 测试位移输入：
+    \begin{itemize}
+        \item 在位移输入框中输入矢量
+        \item 检查输入格式是否正确（dx,dy）
+        \item 检查非法输入是否被拒绝
+        \item 检查衍射图样中位移箭头是否更新
+    \end{itemize}
+
+    \item 测试应用对齐：
+    \begin{itemize}
+        \item 输入至少3个有效锚点
+        \item 点击应用按钮
+        \item 检查是否弹出保存对话框
+        \item 检查是否生成新的对齐后数据集
+        \item 检查新数据集的属性中是否包含对齐信息
+    \end{itemize}
+
+    \item 测试取消操作：
+    \begin{itemize}
+        \item 输入锚点信息后点击取消按钮
+        \item 检查是否未生成新数据集
+        \item 检查界面是否正常关闭
+    \end{itemize}
+
+    \item 测试错误处理：
+    \begin{itemize}
+        \item 输入少于3个锚点时点击应用
+        \item 检查是否显示错误提示
+        \item 检查输入无效坐标或位移
+        \item 检查是否显示格式错误提示
+    \end{itemize}
+
+    \item 测试辅助显示功能：
+    \begin{itemize}
+        \item 勾选显示辅助箭头复选框
+        \item 检查衍射图样中是否显示位移箭头
+        \item 取消勾选复选框
+        \item 检查箭头是否隐藏
+    \end{itemize}
+
+    \item 测试亮度/对比度调节：
+    \begin{itemize}
+        \item 拖动亮度滑块
+        \item 检查衍射图样亮度是否变化
+        \item 拖动对比度滑块
+        \item 检查衍射图样对比度是否变化
+    \end{itemize}
+\end{enumerate}
+
+\subsection{使用参考数据集}
+
+\begin{enumerate}
+    \item 测试参考数据集选择功能：
+    \begin{itemize}
+        \item 点击"Browse"按钮选择参考数据集
+        \item 检查路径是否正确显示在文本框中
+        \item 检查是否拒绝非4D-STEM数据集
+        \item 检查是否拒绝维度不匹配的4D-STEM数据集
+    \end{itemize}
+
+    \item 测试显示位移衍射图功能：
+    \begin{itemize}
+        \item 勾选"Display shifted diffraction image"复选框
+        \item 检查衍射图是否根据参考数据集质心位移
+        \item 取消勾选复选框
+        \item 检查衍射图是否恢复原始位置
+    \end{itemize}
+
+    \item 测试扫描位置变化响应：
+    \begin{itemize}
+        \item 调整扫描位置i,j索引
+        \item 检查位移矢量显示是否正确更新
+        \item 检查衍射图位移是否正确更新
+    \end{itemize}
+
+    \item 测试生成位移映射功能：
+    \begin{itemize}
+        \item 点击"Generate Shift Mapping"按钮
+        \item 检查是否弹出保存对话框
+        \item 检查是否生成新的位移场数据集
+        \item 检查新数据集的元数据是否正确
+    \end{itemize}
+
+    \item 测试辅助圆功能：
+    \begin{itemize}
+        \item 在"Displaying Effects"选项卡中选择生成的位移场
+        \item 勾选"Set circle to where the shift vector points to"
+        \item 检查辅助圆中心是否随位移矢量移动
+        \item 调整扫描位置
+        \item 检查辅助圆是否跟随衍射盘移动
+    \end{itemize}
+
+    \item 测试应用对齐功能：
+    \begin{itemize}
+        \item 点击"Start to apply alignment"按钮
+        \item 检查是否弹出保存对话框
+        \item 检查是否生成新的对齐后数据集
+        \item 检查新数据集的属性中是否包含对齐信息
+    \end{itemize}
+
+    \item 测试错误处理：
+    \begin{itemize}
+        \item 未选择参考数据集时点击生成位移映射
+        \item 检查是否显示错误提示
+        \item 未生成位移场时勾选辅助圆选项
+        \item 检查是否显示错误提示
+    \end{itemize}
+\end{enumerate}
+
+
+
+\subsection{FDDNet 测量}
+\begin{enumerate}
+    \item 测试FDDNet方法选择：
+    \begin{itemize}
+        \item 在"Alignment Method"下拉菜单中选择"Use FDDNet"
+        \item 检查是否显示FDDNet相关控件
+        \item 检查FDDNet预测结果显示区域是否可见
+    \end{itemize}
+
+    \item 测试FDDNet预测结果显示：
+    \begin{itemize}
+        \item 调整扫描位置
+        \item 检查"Disk Center Shift (i/j)"值是否正确更新
+        \item 检查"Elliptical Semi-major/minor Axis"值是否正确更新
+        \item 检查"Elliptical Rotation Angle"值是否正确更新
+    \end{itemize}
+
+    \item 测试显示位移衍射图功能：
+    \begin{itemize}
+        \item 勾选"Display shifted diffraction image"复选框
+        \item 检查衍射图是否根据FDDNet预测结果自动居中
+        \item 调整扫描位置
+        \item 检查衍射图是否保持居中
+        \item 取消勾选复选框
+        \item 检查衍射图是否恢复原始位置
+    \end{itemize}
+
+    \item 测试显示测量椭圆功能：
+    \begin{itemize}
+        \item 勾选"Show the measured ellipse"复选框
+        \item 检查是否显示FDDNet预测的椭圆
+        \item 调整扫描位置
+        \item 检查椭圆是否随衍射盘边界变化
+        \item 取消勾选复选框
+        \item 检查椭圆是否消失
+    \end{itemize}
+
+    \item 测试椭圆效果调整功能：
+    \begin{itemize}
+        \item 点击"Adjust Ellipse Effects"按钮
+        \item 检查是否弹出椭圆效果调整对话框
+        \item 修改椭圆颜色、线宽等参数
+        \item 检查椭圆显示效果是否正确更新
+    \end{itemize}
+
+    \item 测试生成位移映射功能：
+    \begin{itemize}
+        \item 点击"Generate Shift Mapping"按钮
+        \item 检查是否弹出保存对话框
+        \item 检查是否生成新的位移场数据集
+        \item 检查新数据集的元数据是否正确
+        \item 检查任务进度条是否正常显示
+    \end{itemize}
+
+    \item 测试辅助圆功能：
+    \begin{itemize}
+        \item 在"Displaying Effects"选项卡中选择生成的位移场
+        \item 勾选"Set circle to where the shift vector points to"
+        \item 检查辅助圆中心是否随FDDNet预测的位移矢量移动
+        \item 调整扫描位置
+        \item 检查辅助圆是否跟随衍射盘移动
+    \end{itemize}
+
+    \item 测试应用对齐功能：
+    \begin{itemize}
+        \item 点击"Start to apply alignment"按钮
+        \item 检查是否弹出保存对话框
+        \item 检查是否生成新的对齐后数据集
+        \item 检查新数据集的属性中是否包含FDDNet对齐信息
+    \end{itemize}
+
+    \item 测试错误处理：
+    \begin{itemize}
+        \item 未加载4D-STEM数据时点击生成位移映射
+        \item 检查是否显示错误提示
+        \item 未生成位移场时勾选辅助圆选项
+        \item 检查是否显示错误提示
+        \item 在低质量衍射图上使用FDDNet
+        \item 检查是否显示警告提示
+    \end{itemize}
+\end{enumerate}
+
 
 \chapter{实验参数管理功能测试}
 
