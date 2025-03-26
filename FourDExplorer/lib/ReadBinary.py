@@ -338,24 +338,25 @@ def readFourDSTEMFromDM4(
     with open(file_path, 'rb') as fid:
         fid.seek(offset_to_first_image)
         
-        # Set up chunk size for dp_i dimension
-        # ensure the chunk size is smaller than 1 percent of the whole dataset 
-        # if the whole dataset is large
-        dp_i_chunk_size = max(dp_i // 100, 1)
+        # # Set up chunk size for dp_i dimension
+        # # ensure the chunk size is smaller than 1 percent of the whole dataset 
+        # # if the whole dataset is large
+        # dp_i_chunk_size = max(dp_i // 100, 1)
         
-        for i_start in range(0, dp_i, dp_i_chunk_size):
-            i_end = min(i_start + dp_i_chunk_size, dp_i)
-            chunk_elements = (i_end - i_start) * dp_j * scan_i * scan_j
+        # for i_start in range(0, dp_i, dp_i_chunk_size):
+        #     i_end = min(i_start + dp_i_chunk_size, dp_i)
+        #     chunk_elements = (i_end - i_start) * dp_j * scan_i * scan_j
             
-            data = np.nan_to_num(np.fromfile(fid, dtype=dt, count=chunk_elements))
-            data = data.reshape((i_end - i_start, dp_j, scan_i, scan_j))
-            data = data.transpose(2, 3, 0, 1)   # shape to (scan_i, scan_j, dp_i, dp_j)
-            dataset[:, :, i_start:i_end, :] = data  # the dataset slice must be 4D
+        #     data = np.nan_to_num(np.fromfile(fid, dtype=dt, count=chunk_elements))
+        #     data = data.reshape((i_end - i_start, dp_j, scan_i, scan_j))
+        #     data = data.transpose(2, 3, 0, 1)   # shape to (scan_i, scan_j, dp_i, dp_j)
+        #     dataset[:, :, i_start:i_end, :] = data  # the dataset slice must be 4D
             
-            progress = int((i_end) / dp_i * 100)
-            progress_signal.emit(progress)
-            
-            
+        #     progress = int((i_end) / dp_i * 100)
+        #     progress_signal.emit(progress)
+        data = np.nan_to_num(np.fromfile(fid, dtype=dt, count=dp_i * dp_j * scan_i * scan_j)) # convert to chunk loading
+        dataset[:,:,:,:] = data.reshape((scan_i, scan_j, dp_i, dp_j))
+                
 def readDataFromHDF5(
     file_path: str, 
     dataset_path: str, 

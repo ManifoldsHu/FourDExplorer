@@ -15,15 +15,11 @@ date:           Oct 12, 2024
 """
 
 from logging import Logger 
-import os 
 import struct
-import datetime
 
-from PySide6.QtCore import QObject 
-from dateutil import parser as dt_parser
+from PySide6.QtCore import QObject
 
 from bin.TaskManager import TaskManager 
-from bin.MetaManager import MetaManager
 from bin.DateTimeManager import DateTimeManager
 from lib.TaskLoadData import TaskLoadFourDSTEMFromDM4
 from lib.CalibrationMisc import Voltage2WaveLength
@@ -44,9 +40,6 @@ class TagDirectory(TagObject):
         self.sorted = sorted
         self.num_tags = num_tags
         self.tags = []
-
-    def __str__(self):
-        return f"Tag Directory: {self.name}, Number of tags: {self.num_tags}, Closed: {self.closed}, Sorted: {self.sorted}"
 
     def append_tag(self, tag):
         if isinstance(tag, TagObject):
@@ -138,9 +131,6 @@ class Tag(TagObject):
         self.tagtype = tag_type
         self.data = data
 
-    def __str__(self):
-        return f"Tag: {self.name}, Length: {self.length}, Type: {self.get_tag_type()['description']}, Data: {self.data}"
-
     def get_parent_directory(self):
         return self.parent_directory
     
@@ -191,10 +181,11 @@ class TagArrayData():
             return 'uint'
         elif self.dtype == 'f' or self.dtype == 'd':
             return 'float'
+        elif self.dtype == '?': # 8-bit unsigned integer?
+            return 'uint'
         else:
             raise TypeError(f"Unknown data type: {self.dtype}.")
         
-
 tagDataType = {
     0x02: {'format': 'h', 'description': 'short (i2*)', 'size': 2},
     0x03: {'format': 'i', 'description': 'signed long (i4*)', 'size': 4},
@@ -204,7 +195,7 @@ tagDataType = {
     0x07: {'format': 'd', 'description': 'double (f8*)', 'size': 8},
     0x08: {'format': 'b', 'description': 'boolean (i1)', 'size': 1},
     0x09: {'format': 'c', 'description': 'char (a1)', 'size': 1},
-    0x0A: {'format': 'b', 'description': 'i1', 'size': 1},
+    0x0A: {'format': '?', 'description': 'i1', 'size': 1}, # Octet, 8-bit data item
     0x0B: {'format': 'q', 'description': 'long long (i8*)', 'size': 8}, # ?
     0x0C: {'format': 'Q', 'description': 'unsigned long long (i8*)', 'size': 8}, # ?
     0x0F: {'format': 'struct', 'description': 'group of data', 'size': None},  # Size varies
@@ -476,17 +467,33 @@ class ImporterDM4(QObject):
                 taglist.append(tag)
             else:
                 continue
+
         if len(taglist) == 0:
             raise ValueError("No 4D-STEM data found in the .dm4 file.")
-        if len(taglist) > 1:
-            self.logger.warning(f"Multiple 4D-STEM dataset found in the .dm4 file. Using the first one.")
+        
+        ind = 0
 
-        tagdir_4dstem = taglist[0]
+        self.logger.info(f"Found {len(taglist)} 4D-STEM dataset(s) in the .dm4 file.")
+
+        if len(taglist) > 1:
+            self.logger.warning("Multiple 4D-STEM dataset found in the .dm4 file.")
+            for i in range(0, len(taglist)):
+                scalar_type = taglist[i].get_tag_by_name('Data').data.type
+                self.logger.debug(f"Checking the {i+1}th 4D-STEM dataset, scalar type: {scalar_type}.")
+                if scalar_type == 'uint' or scalar_type == 'int' or scalar_type == 'float':
+                    ind = i
+                    self.logger.warning(f"Using the {i+1}th 4D-STEM dataset.")
+                    break
+                    
+        tagdir_4dstem = taglist[ind]
+
+        self.logger.debug(f'4D-STEM scalar type: {tagdir_4dstem.get_tag_by_name("Data").data.type}, scalar size: {tagdir_4dstem.get_tag_by_name("Data").data.dsize}.')
+
         dims = tagdir_4dstem.get_tag_by_name('Dimensions')
-        self.scan_i = dims.get_tag(0).get_data()
-        self.scan_j = dims.get_tag(1).get_data()
-        self._dp_i = dims.get_tag(2).get_data()
-        self._dp_j = dims.get_tag(3).get_data()
+        self.scan_i = dims.get_tag(2).get_data()
+        self.scan_j = dims.get_tag(3).get_data()
+        self._dp_i = dims.get_tag(0).get_data()
+        self._dp_j = dims.get_tag(1).get_data()
 
         self._num_images = self.scan_i * self.scan_j
 
@@ -552,4 +559,3 @@ class ImporterDM4(QObject):
             **self.meta,
         )
         self.task_manager.addTask(self.task)
-
