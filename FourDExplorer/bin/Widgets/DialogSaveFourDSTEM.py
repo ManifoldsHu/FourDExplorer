@@ -21,23 +21,23 @@ from bin.HDFManager import HDFHandler, HDFGroupNode, reValidHDFName
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from ui import uiDialogCreateFourDSTEM
 
+
 class DialogSaveFourDSTEM(QDialog):
     """
     选择在 HDF 文件中保存应用了平移之后的 4D-STEM 数据集的对话框。
 
     Dialog to choose where to save the calibrated 4D-STEM dataset.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogCreateFourDSTEM.Ui_Dialog()
         self.ui.setupUi(self)
 
-        self.ui.lineEdit_name.setText('Untitled')
+        self.ui.lineEdit_name.setText("Untitled")
         self._validateNewName()
 
-        self.ui.checkBox_inplace.stateChanged.connect(
-            self._changePathInputState
-        )
+        self.ui.checkBox_inplace.stateChanged.connect(self._changePathInputState)
 
         self.ui.pushButton_ok.clicked.connect(self.ok)
         self.ui.pushButton_cancel.clicked.connect(self.reject)
@@ -45,8 +45,8 @@ class DialogSaveFourDSTEM(QDialog):
 
     @property
     def hdf_handler(self) -> HDFHandler:
-        global qApp 
-        return qApp.hdf_handler 
+        global qApp
+        return qApp.hdf_handler
 
     def browseParent(self) -> bool:
         """
@@ -55,27 +55,28 @@ class DialogSaveFourDSTEM(QDialog):
         returns:
             (bool) whether a new path is set.
         """
-        dialog_browse = DialogHDFChoose(self, only_group = True)
+        dialog_browse = DialogHDFChoose(self, only_group=True)
         dialog_code = dialog_browse.exec()
         if dialog_code == dialog_browse.Accepted:
             current_path = dialog_browse.getCurrentPath()
             if current_path:
                 self.ui.lineEdit_parent_path.setText(current_path)
-            return True 
+            return True
         else:
-            return False 
+            return False
 
     def setParentPath(self, item_path: str):
         """
         Set the parent group's path where created images will locate.
 
         arguments:
-            item_path: (str) 
+            item_path: (str)
         """
         if not isinstance(item_path, str):
-            raise TypeError('item_path must be a str, not '
-                '{0}'.format(type(item_path).__name__))
-        
+            raise TypeError(
+                "item_path must be a str, not {0}".format(type(item_path).__name__)
+            )
+
         node = self.hdf_handler.getNode(item_path)
         if not isinstance(node, HDFGroupNode):
             self.ui.lineEdit_parent_path.setText(node.parent.path)
@@ -98,10 +99,10 @@ class DialogSaveFourDSTEM(QDialog):
         Will add '.4dstem' automatically as the extension.
         """
         name = self.ui.lineEdit_name.text()
-        if '.' in name:
-            if name.split('.')[-1] == '4dstem':
-                return name 
-        return name + '.4dstem'
+        if "." in name:
+            if name.split(".")[-1] == "4dstem":
+                return name
+        return name + ".4dstem"
 
     def _validateNewName(self):
         """
@@ -131,16 +132,15 @@ class DialogSaveFourDSTEM(QDialog):
         """
         if self.getIsInplace():
             dialog_code = QMessageBox.warning(
-                self, 
-                'In-place Warning',
-                'In-place modification will change your 4D-STEM\n'
-                'dataset forever. MAKE SURE you have a replica\n'
-                'of current 4D-STEM dataset.\n'
-                'Continue?',
+                self,
+                "In-place Warning",
+                "In-place modification will change your 4D-STEM\n"
+                "dataset forever. MAKE SURE you have a replica\n"
+                "of current 4D-STEM dataset.\n"
+                "Continue?",
                 QMessageBox.Ok,
                 QMessageBox.Cancel,
             )
             if dialog_code != QMessageBox.Ok:
-                return 
+                return
         self.accept()
-

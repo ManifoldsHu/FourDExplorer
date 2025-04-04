@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 """
 *-------------------------- WidgetImportHDF5.py ------------------------------*
@@ -14,8 +14,8 @@ date:           Oct 13, 2024
 *-------------------------- WidgetImportHDF5.py ------------------------------*
 """
 
-from logging import Logger 
-import os 
+from logging import Logger
+import os
 
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QFileDialog
@@ -26,45 +26,49 @@ from PySide6.QtGui import QIcon
 import h5py
 
 from bin.UIManager import ThemeHandler
-from ui import uiWidgetImportHDF5 
+from ui import uiWidgetImportHDF5
+
 
 class WidgetImportHDF5(QWidget):
     """
     用于从其他 HDF5 文件中复制某个 Dataset 到当前 HDF5 文件的部件。
-    
+
     包含选择 .h5 文件的对话框以及一个 tree widget 来选择群组或者数据集。
-    
+
     Widget to copy dataset from other HDF5 file to current opened HDF5 file.
-    
-    This includes a dialog to choose the .h5 file and a tree widget to choose 
+
+    This includes a dialog to choose the .h5 file and a tree widget to choose
     dataset or group.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiWidgetImportHDF5.Ui_Form()
         self.ui.setupUi(self)
-        
+
         self.ui.lineEdit_file_path.setReadOnly(True)
-        
+
         self.ui.pushButton_browse.clicked.connect(self._chooseHDF5)
         self.ui.treeWidget_other_hdf5.itemClicked.connect(self._selectDataset)
         self.ui.treeWidget_other_hdf5.setHeaderLabels(["Dataset"])
 
     @property
     def logger(self) -> Logger:
-        global qApp 
+        global qApp
         return qApp.logger
-    
+
     @property
     def theme_handler(self) -> ThemeHandler:
-        global qApp 
+        global qApp
         return qApp.theme_handler
 
     def _chooseHDF5(self):
         """
         Opens a file dialog to choose an HDF5 file.
         """
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select HDF5 File", "", "HDF5 Files (*.h5 *.hdf5)")
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Select HDF5 File", "", "HDF5 Files (*.h5 *.hdf5)"
+        )
         if file_path:
             self.ui.lineEdit_file_path.setText(file_path)
             self._populateTreeWidget(file_path)
@@ -78,19 +82,21 @@ class WidgetImportHDF5(QWidget):
         """
         self.ui.treeWidget_other_hdf5.clear()
         try:
-            with h5py.File(file_path, 'r') as h5file:
-                self._addItemsToTree(h5file, self.ui.treeWidget_other_hdf5.invisibleRootItem())
+            with h5py.File(file_path, "r") as h5file:
+                self._addItemsToTree(
+                    h5file, self.ui.treeWidget_other_hdf5.invisibleRootItem()
+                )
         except Exception as e:
             self.logger.error(f"Failed to open HDF5 file: {str(e)}")
             QMessageBox.warning(self, "Error", f"Failed to open HDF5 file: {str(e)}")
 
-    def _addItemsToTree(self, h5group: 'h5py.Group', parent_item: QTreeWidgetItem):
+    def _addItemsToTree(self, h5group: "h5py.Group", parent_item: QTreeWidgetItem):
         """
         Recursively adds items to the tree widget from the HDF5 group.
 
         arguments:
             h5group: (h5py.Group) The HDF5 group to add.
-            
+
             parent_item: (QTreeWidgetItem) The parent tree widget item.
         """
         for name, item in h5group.items():
@@ -107,18 +113,17 @@ class WidgetImportHDF5(QWidget):
 
     def _selectDataset(self, item: QTreeWidgetItem, column: int):
         """
-        Handles the selection of a dataset in the tree widget. 
-        
+        Handles the selection of a dataset in the tree widget.
+
         Currently do nothing.
 
         arguments:
             item: (QTreeWidgetItem) The selected tree widget item.
-            
+
             column: (int) The column of the selected item.
         """
-        pass 
+        pass
 
-    
     def getHDF5FilePath(self) -> str:
         """
         Provides an external interface to get the path of the selected HDF5 file.
@@ -127,7 +132,7 @@ class WidgetImportHDF5(QWidget):
             (str) The path to the selected HDF5 file.
         """
         return self.ui.lineEdit_file_path.text()
-    
+
     def getSelectedItemPath(self) -> str:
         """
         Provides an external interface to get the path of the selected dataset or group in the HDF5 file.
@@ -142,26 +147,26 @@ class WidgetImportHDF5(QWidget):
             while item:
                 path_parts.insert(0, item.text(0))
                 item = item.parent()
-            path = '/' + '/'.join(path_parts)
+            path = "/" + "/".join(path_parts)
             return path
-        return '/'
-    
-    
+        return "/"
+
 
 class WidgetImport4DSTEMFromHDF5(WidgetImportHDF5):
     """
     在 HDF5 文件中，只显示 4D-STEM 数据集的部件。
-    
-    Widget that only show 4D-STEM datasets from the HDF5 files in the tree 
-    widget. 
+
+    Widget that only show 4D-STEM datasets from the HDF5 files in the tree
+    widget.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
     @property
     def icon_group(self):
         return self.theme_handler.iconProvider("folder")
-        
+
     @property
     def icon_dataset(self):
         return self.theme_handler.iconProvider("file")
@@ -178,7 +183,7 @@ class WidgetImport4DSTEMFromHDF5(WidgetImportHDF5):
             item = QTreeWidgetItem(parent_item)
             item.setText(0, key)
             if isinstance(value, h5py.Dataset):
-                if self._is4DSTEMDataset(hdf5_group.name + '/' + key):
+                if self._is4DSTEMDataset(hdf5_group.name + "/" + key):
                     item.setIcon(0, self.icon_dataset)
                 else:
                     parent_item.removeChild(item)
@@ -196,7 +201,7 @@ class WidgetImport4DSTEMFromHDF5(WidgetImportHDF5):
         returns:
             (bool) True if the dataset is a 4D-STEM dataset, False otherwise.
         """
-        with h5py.File(self.getHDF5FilePath(), 'r') as hdf5_file:
+        with h5py.File(self.getHDF5FilePath(), "r") as hdf5_file:
             dataset = hdf5_file.get(dataset_path)
             if dataset is not None and len(dataset.shape) == 4:
                 return True

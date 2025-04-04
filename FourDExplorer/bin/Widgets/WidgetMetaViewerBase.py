@@ -18,7 +18,7 @@ WidgetMetaViewerBase 用于展示 HDF5 文件中数据集的元数据。该 Widg
     /General/title
     /General/original_name
     /AcquisitionInstrument/manufacturer
-    /AcquisitionInstrument/accelerate_voltage   
+    /AcquisitionInstrument/accelerate_voltage
     /AcquisitionInstrument/Camera/manufacturer
     /AcquisitionInstrument/Camera/pixel_size_i
     /Calibration/Space/du_i
@@ -31,21 +31,21 @@ WidgetMetaViewerBase 用于展示 HDF5 文件中数据集的元数据。该 Widg
     Tab0: General, 在 TreeView 中，分别给出 title 和 original_name 叶子节点，并添加
           dataset_size 和 dataset_dtype 的展示
 
-    Tab1: AcquisitionInstrument, 在 TreeView 中，添加 manufacturer 和 
-          accelerate_voltage 的叶子节点；添加 Camera 树枝节点，并在其下添加 
+    Tab1: AcquisitionInstrument, 在 TreeView 中，添加 manufacturer 和
+          accelerate_voltage 的叶子节点；添加 Camera 树枝节点，并在其下添加
           manufacturer 以及 pixel_size_i 的叶子节点。
 
     Tab2: Calibration, 在 TreeView 中，添加 Space 树枝节点，并在其下添加 du_i 叶子节
           点
 
-    Tab3: Undefined, 添加 sample_name 叶子节点；添加 Sample 树枝节点，并在其下添加 
+    Tab3: Undefined, 添加 sample_name 叶子节点；添加 Sample 树枝节点，并在其下添加
           classification 叶子节点。由于软件不知道它表示的是什么，所以只展示值。
 
 具体预定义的视图由 MetaManagers 中读取，其中不同的扩展名/数据集类型对应不同的预定义视
 图。MetaManagers 可以列出所有预定义的属性项，从而方便我们构造预定义的属性树。如上所述，
 不在预定义的属性树内的属性，会被归类到 Undefined 中。
 
-对于各个属性，我们根据其类型，在 QTreeView 列的右边加入按钮以提供修改方式。此外，和 
+对于各个属性，我们根据其类型，在 QTreeView 列的右边加入按钮以提供修改方式。此外，和
 HDFViewer 类似，我们提供刷新按钮以及搜索功能。
 
 作者：          胡一鸣
@@ -60,16 +60,16 @@ Hierarchical Structure Display: Metadata are organized into a tree-like struct-
 ure based on path-like keys. Root-level nodes correspond to different tabs (Ta-
 bs), with each tab displaying information about the children of that branch.
 
-Display of Secondary and Lower-Level Nodes: Starting from the second level, all 
+Display of Secondary and Lower-Level Nodes: Starting from the second level, all
 child nodes are displayed in a QTreeView within the corresponding tab. Each me-
-tadata node is predefined with type, name, description, and unit, stored in the 
+tadata node is predefined with type, name, description, and unit, stored in the
 schema directory.
 
-Handling of Undefined Attributes: Items not in the predefined properties, even 
+Handling of Undefined Attributes: Items not in the predefined properties, even
 if they are first-level nodes, are displayed in a separate “Undefined” tab usi-
 ng QTreeView. These attributes might be added by users or arise due to version incompatibilities.
 
-Basic Information Display: The predefined view doesn't include basic data type 
+Basic Information Display: The predefined view doesn't include basic data type
 and size information. Thus, the first tab (usually "General") displays these a-
 ttributes along with the dataset's data type, size, and an explanation corresp-
 onding to the extension name.
@@ -90,23 +90,23 @@ The display would be organized as follows:
 
 - Tab0: General, displaying `title` and `original_name` in TreeView, along with `dataset_size` and `dataset_dtype`.
 
-- Tab1: AcquisitionInstrument, displaying `manufacturer` and `accelerate_voltage` 
+- Tab1: AcquisitionInstrument, displaying `manufacturer` and `accelerate_voltage`
   in TreeView; adding a Camera branch node with `manufacturer` and `pixel_size_i`.
 
 - Tab2: Calibration, displaying a Space branch node with `du_i` in TreeView.
 
-- Tab3: Undefined, displaying `sample_name`; adding a Sample branch node with 
-`classification`. As the software cannot identify their meaning, only values are 
+- Tab3: Undefined, displaying `sample_name`; adding a Sample branch node with
+`classification`. As the software cannot identify their meaning, only values are
 displayed.
 
-The specific predefined views are loaded from MetaManagers, with different file 
+The specific predefined views are loaded from MetaManagers, with different file
 extensions/dataset types corresponding to different predefined views. MetaMana-
-gers can list all predefined attributes, facilitating the construction of the 
-predefined attribute tree. Attributes not in the predefined tree are categorized 
+gers can list all predefined attributes, facilitating the construction of the
+predefined attribute tree. Attributes not in the predefined tree are categorized
 into Undefined.
 
-For each attribute, based on its type, buttons are added next to the QTreeView 
-column to provide a method of modification. Additionally, similar to HDFViewer, 
+For each attribute, based on its type, buttons are added next to the QTreeView
+column to provide a method of modification. Additionally, similar to HDFViewer,
 refresh buttons and search functionality are provided.
 
 author:         Hu Yiming
@@ -114,28 +114,29 @@ date:           Nov 17, 2023
 *------------------------ WidgetMetaViewerBase.py ----------------------------*
 """
 
-from logging import Logger 
+from logging import Logger
 
-from PySide6.QtWidgets import QWidget 
+from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QToolBar
-from PySide6.QtWidgets import QTreeView 
+from PySide6.QtWidgets import QTreeView
 from PySide6.QtWidgets import QMessageBox
 from PySide6.QtWidgets import QLineEdit
 from PySide6.QtWidgets import QHeaderView
-from PySide6.QtGui import QAction 
+from PySide6.QtGui import QAction
 from PySide6.QtCore import Qt
 from PySide6.QtCore import QObject
 from PySide6.QtCore import QModelIndex
 from PySide6.QtCore import Signal
 
-from bin.MetaManager import MetaManager 
-from bin.MetaManager import MetaTree 
+from bin.MetaManager import MetaManager
+from bin.MetaManager import MetaTree
 from bin.MetaManager import MetaTreeModel
 from bin.HDFManager import HDFHandler
 from bin.UIManager import ThemeHandler
 from Constants import MetaDataRoles
 
 from ui import uiWidgetMetaViewerBase
+
 
 class WidgetMetaViewerBase(QWidget):
     """
@@ -150,48 +151,46 @@ class WidgetMetaViewerBase(QWidget):
         super().__init__(parent)
         self.ui = uiWidgetMetaViewerBase.Ui_Form()
         self.ui.setupUi(self)
-        self._item_path = ''
-        self._last_kw = ''
-        self._result_generator = None 
+        self._item_path = ""
+        self._last_kw = ""
+        self._result_generator = None
 
     @property
     def meta_manager(self) -> MetaManager:
-        global qApp 
+        global qApp
         return qApp.requireMetaManager(self.item_path)
-    
+
     @property
     def meta_tree(self) -> MetaTree:
-        return self.meta_manager.meta_tree 
-    
+        return self.meta_manager.meta_tree
+
     @property
     def meta_tree_model(self) -> MetaTreeModel:
         return self.meta_manager.meta_tree_model
-    
+
     @property
     def hdf_handler(self) -> HDFHandler:
-        global qApp 
-        return qApp.hdf_handler 
-    
+        global qApp
+        return qApp.hdf_handler
+
     @property
     def item_path(self) -> str:
-        return self._item_path 
-    
+        return self._item_path
+
     def setItemPath(self, item_path: str):
         """
-        Set the item path whose metadata is displayed by this viewer. And 
-        initialize the tree model. 
+        Set the item path whose metadata is displayed by this viewer. And
+        initialize the tree model.
 
         arguments:
             item_path: (str) The path of the dataset or group.
         """
         if not isinstance(item_path, str):
-            raise TypeError(
-                f"item_path must be a str, not {type(item_path).__name__}"
-            )
-        self._item_path = item_path 
+            raise TypeError(f"item_path must be a str, not {type(item_path).__name__}")
+        self._item_path = item_path
         self.meta_manager.model_refreshed.connect(self.resetModel)
         self.ui.treeView_meta.setModel(self.meta_tree_model)
-        self.ui.treeView_meta.expandAll()   # Without which search won't work properly
+        self.ui.treeView_meta.expandAll()  # Without which search won't work properly
 
         # Only after model is set, header can be set.
         header = self.ui.treeView_meta.header()
@@ -207,17 +206,15 @@ class WidgetMetaViewerBase(QWidget):
         """
         On meta manager refresh the model, this function should be called.
         """
-        self.ui.treeView_meta.setModel(
-            self.meta_tree_model
-        )
+        self.ui.treeView_meta.setModel(self.meta_tree_model)
         self.ui.treeView_meta.expandAll()
 
     def searchItem(self, kw: str) -> int:
         """
         Search metadata using given keyword in tree indexes.
 
-        Metadata that has keyword included in key or title (defined in schema) 
-        will be given. The current index will be moved to the searched one. 
+        Metadata that has keyword included in key or title (defined in schema)
+        will be given. The current index will be moved to the searched one.
 
         arguments:
             kw: (str) The keyword to be searched.
@@ -229,27 +226,26 @@ class WidgetMetaViewerBase(QWidget):
                 -2      no valid result generator
                 -3      no more results
         """
-        if kw == '':
-            return -1 
+        if kw == "":
+            return -1
         if kw != self._last_kw:
-            # When the user changes the key word, we need to rebuild 
+            # When the user changes the key word, we need to rebuild
             # the generator and search from the beggining of the tree.
-            self._last_kw = kw 
+            self._last_kw = kw
             self._result_generator = self.meta_tree_model.matchIndexGenerator(kw)
         if self._result_generator is None:
-            return -2 
+            return -2
         try:
             index = next(self._result_generator)
             self.search_result_found.emit()
 
             self.ui.treeView_meta.setCurrentIndex(index)
 
-            return 0 
+            return 0
         except StopIteration:
-            self._last_kw = ''
-            return -3 
-        
-    
+            self._last_kw = ""
+            return -3
+
 
 # class WidgetMetaViewerBase(QWidget):
 #     """
@@ -267,10 +263,10 @@ class WidgetMetaViewerBase(QWidget):
 #         # self._initMetaManager()
 #         self._initSearch()
 #         self._initRefresh()
-        
-        
-#         # self._meta_manager = None 
-        
+
+
+#         # self._meta_manager = None
+
 #     @property
 #     def meta_manager(self) -> MetaManager:
 #         global qApp
@@ -279,20 +275,20 @@ class WidgetMetaViewerBase(QWidget):
 #     @property
 #     def meta_tree(self) -> MetaTree:
 #         return self.meta_manager.meta_tree
-    
+
 #     @property
 #     def meta_tree_model(self) -> MetaTreeModel:
 #         return self.meta_manager.meta_tree_model
-    
+
 #     @property
 #     def hdf_handler(self) -> HDFHandler:
-#         global qApp 
+#         global qApp
 #         return qApp.hdf_handler
-    
+
 #     @property
 #     def item_path(self) -> str:
 #         return self._item_path
-        
+
 #     def _initMetaTreeView(self):
 #         """
 #         Initialize meta tree model.
@@ -342,20 +338,19 @@ class WidgetMetaViewerBase(QWidget):
 #         self._action_search.setLinkedLineEdit(self._lineEdit_search)
 #         self._action_search.setLinkedTreeView(self.ui.treeView_meta)
 #         self._lineEdit_search.addAction(
-#             self._action_search, 
+#             self._action_search,
 #             QLineEdit.LeadingPosition,
 #         )
 #         self.search_toolbar.addWidget(self._lineEdit_search)
- 
+
 #     def _updateModel(self):
 #         """
 #         Update to the newest model when it is changed.
 #         """
 #         self._initMetaTreeView()
 #         self.ui.treeView_meta.expandToDepth(0)
-        
 
-    
+
 # class MetaToolBar(QToolBar):
 #     """
 #     The toolbar to search items in Meta tree.
@@ -369,9 +364,9 @@ class WidgetMetaViewerBase(QWidget):
 
 #     @property
 #     def theme_handler(self) -> ThemeHandler:
-#         global qApp 
-#         return qApp.theme_handler 
-    
+#         global qApp
+#         return qApp.theme_handler
+
 #     def _update_style_sheet(self):
 #         """
 #         When theme is changed, the style sheet must be updated.
@@ -400,46 +395,46 @@ class WidgetMetaViewerBase(QWidget):
 #         self.hdf_handler.file_closed.connect(
 #             lambda: self.setEnabled(False)
 #         )
-#         # self._meta_manager = None 
-#         self._treeview = None 
+#         # self._meta_manager = None
+#         self._treeview = None
 
 #     @property
 #     def hdf_handler(self) -> HDFHandler:
-#         global qApp 
-#         return qApp.hdf_handler 
+#         global qApp
+#         return qApp.hdf_handler
 
 #     @property
 #     def theme_handler(self) -> ThemeHandler:
 #         global qApp
-#         return qApp.theme_handler 
+#         return qApp.theme_handler
 
 #     @property
 #     def logger(self) -> Logger:
-#         global qApp 
+#         global qApp
 #         return qApp.logger
 
 #     @property
 #     def item_path(self) -> str:
-#         return self._item_path 
-    
+#         return self._item_path
+
 #     @property
 #     def meta_key(self) -> str:
-#         return self._meta_key 
-    
+#         return self._meta_key
+
 #     @property
 #     def meta_manager(self) -> MetaManager:
-#         # return self._meta_manager 
-#         global qApp 
+#         # return self._meta_manager
+#         global qApp
 #         return qApp.requireMetaManager(self.item_path)
-    
+
 #     @property
 #     def meta_tree_model(self) -> MetaTreeModel:
 #         return self.meta_manager.meta_tree_model
-    
+
 #     @property
 #     def meta_index(self) -> QModelIndex:
 #         return self.meta_tree_model.indexFromKey()
-    
+
 #     def initIconResources(self, icon_name: str):
 #         """
 #         Initialize the resouce of icons.
@@ -447,14 +442,14 @@ class WidgetMetaViewerBase(QWidget):
 #         argumemnts:
 #             icon_name: (str) the name of icon.
 #         """
-#         _path = ':/HDFEdit/resources/icons/' + icon_name 
+#         _path = ':/HDFEdit/resources/icons/' + icon_name
 #         icon = self.theme_handler.iconProvider(_path)
-#         self._icon_name = icon_name 
+#         self._icon_name = icon_name
 #         self.setIcon(icon)
-    
+
 #     def setItemPath(self, item_path: str):
 #         """
-#         Set the item path that this meta viewer action will manage. 
+#         Set the item path that this meta viewer action will manage.
 
 #         arguments:
 #             item_path: (str) The path of the dataset or group in the HDF5 file.
@@ -472,7 +467,7 @@ class WidgetMetaViewerBase(QWidget):
 #         """
 #         if not isinstance(key, str):
 #             raise TypeError(f'path must be a str, not {type(key).__name__}')
-#         self._meta_key = key 
+#         self._meta_key = key
 
 #     def setMetaKeyFromIndex(self, index: QModelIndex):
 #         """
@@ -485,7 +480,7 @@ class WidgetMetaViewerBase(QWidget):
 #             raise TypeError(f'index must be a QModelIndex, not {type(index).__name__}')
 #         _key = index.data(MetaDataRoles.KeyRole)
 #         if _key is not None:
-#             self._meta_key = _key 
+#             self._meta_key = _key
 #         else:
 #             self._meta_key = ''
 
@@ -505,7 +500,7 @@ class WidgetMetaViewerBase(QWidget):
 #         if not isinstance(treeview, QTreeView):
 #             raise TypeError('treeview must be a QTreeView, not '
 #                 '{0}'.format(type(treeview).__name__))
-#         self._treeview = treeview 
+#         self._treeview = treeview
 #         # model: MetaTreeModel = treeview.model()
 #         # if 'meta_manager' in model.__dir__():
 #         #     self._meta_manager = model.meta_manager
@@ -528,7 +523,7 @@ class WidgetMetaViewerBase(QWidget):
 #                 '{0}: {1}'.format(self.text(), e))
 #             msg.setStandardButtons(QMessageBox.Ok)
 #             msg.exec()
-#     return wrapper 
+#     return wrapper
 
 
 # class ActionRefreshMetaModel(ActionViewMetaBase):
@@ -548,8 +543,8 @@ class WidgetMetaViewerBase(QWidget):
 #         """
 #         Will rebuild the Meta tree and then create a new model.
 
-#         We first get the current chosen key. Then we rebuild the meta manager 
-#         and the meta tree model. Finally, we set the chosen index of the tree 
+#         We first get the current chosen key. Then we rebuild the meta manager
+#         and the meta tree model. Finally, we set the chosen index of the tree
 #         view to the chosen key before.
 #         """
 #         if self._treeview is not None:
@@ -571,22 +566,22 @@ class WidgetMetaViewerBase(QWidget):
 #         self.initIconResources('search.png')
 #         self.triggered.connect(self.searchItem)
 #         self._last_kw = ''
-#         self._result_generator = None 
+#         self._result_generator = None
 
 #     def setLinkedTreeView(self, treeview: QTreeView):
 #         """
 #         Set the linked treeview, such that it can show the result.
 
 #         arguments:
-#             treeview: (QTreeView) 
-#         """        
-#         self._treeview = treeview 
+#             treeview: (QTreeView)
+#         """
+#         self._treeview = treeview
 
 #     def setLinkedLineEdit(self, line_edit: QLineEdit):
 #         """
 #         Set the linked line edit, such that it can get the word to search.
 #         """
-#         self._line_edit = line_edit 
+#         self._line_edit = line_edit
 
 #     def searchItem(self):
 #         """
@@ -594,20 +589,20 @@ class WidgetMetaViewerBase(QWidget):
 #         """
 #         kw = self._line_edit.text()
 #         if kw == '':
-#             return False 
+#             return False
 #         if kw != self._last_kw:
-#             # When the user changes the key word, we need to rebuild 
+#             # When the user changes the key word, we need to rebuild
 #             # the generator and search from the beggining of the tree.
-#             self._last_kw = kw 
+#             self._last_kw = kw
 #             model: MetaTreeModel = self._treeview.model()
 #             self._result_generator = model.matchIndexGenerator(kw)
 #             # TODO
 #         if self._result_generator is None:
-#             return False 
+#             return False
 #         try:
 #             index = next(self._result_generator)
 #             self._treeview.setCurrentIndex(index)
-#             return True 
+#             return True
 #         except StopIteration:
 #             msg = QMessageBox()
 #             msg.setWindowTitle('Search')
@@ -616,5 +611,4 @@ class WidgetMetaViewerBase(QWidget):
 #             msg.setStandardButtons(QMessageBox.Ok)
 #             msg.exec()
 #             self._last_kw = ''
-#             return False 
-
+#             return False

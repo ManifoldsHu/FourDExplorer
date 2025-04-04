@@ -18,7 +18,8 @@ import os
 from PySide6.QtWidgets import QDialog, QWidget
 from PySide6.QtGui import QPixmap
 from Constants import ROOT_PATH, APP_VERSION
-from ui import uiDialogAbout, icon_rc 
+from ui import uiDialogAbout, icon_rc
+
 
 class DialogAbout(QDialog):
     """
@@ -26,22 +27,22 @@ class DialogAbout(QDialog):
 
     Dialog to view the information of the software.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogAbout.Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('About')
+        self.setWindowTitle("About")
 
-        
-        icon_path = os.path.join(ROOT_PATH, 'ui', 'resources', 'icons', '4D.png')
+        icon_path = os.path.join(ROOT_PATH, "ui", "resources", "icons", "4D.png")
         _pic = QPixmap(icon_path)
         _pic.setDevicePixelRatio(4)
         self.ui.label_icon.setPixmap(_pic)
-        # self.ui.graphicsView.setPixmap(_pic) 
+        # self.ui.graphicsView.setPixmap(_pic)
         # self.ui.graphicsView.setStyleSheet(
         #     "border-image: url(:/WindowIcon/resources/icons/4D.png;"
         # )
 
-        version = '.'.join([str(v) for v in APP_VERSION])
+        version = ".".join([str(v) for v in APP_VERSION])
         self.ui.label_version.setText(version)
         self.ui.label_version_en.setText(version)

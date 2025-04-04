@@ -13,13 +13,14 @@ date:           Oct 6, 2022
 *---------------------------- HelpActions.py ---------------------------------*
 """
 
-import os 
-from PySide6.QtCore import QObject 
-from PySide6.QtWidgets import QMessageBox 
-from PySide6.QtGui import QAction, QIcon 
+import os
+from PySide6.QtCore import QObject
+from PySide6.QtWidgets import QMessageBox
+from PySide6.QtGui import QAction, QIcon
 
 from Constants import ROOT_PATH
-from bin.Widgets.DialogAbout import DialogAbout 
+from bin.Widgets.DialogAbout import DialogAbout
+
 
 class ActionAbout(QAction):
     """
@@ -27,11 +28,12 @@ class ActionAbout(QAction):
 
     Open the "about" window.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self.triggered.connect(self.openDialogAbout)
-        self.setText('About')
-        icon_path = os.path.join(ROOT_PATH, 'ui', 'resources', 'icons', '4D.ico')
+        self.setText("About")
+        icon_path = os.path.join(ROOT_PATH, "ui", "resources", "icons", "4D.ico")
         _pic = QIcon()
         _pic.addFile(icon_path)
         self.setIcon(_pic)
@@ -39,5 +41,3 @@ class ActionAbout(QAction):
     def openDialogAbout(self):
         dialog = DialogAbout()
         dialog.exec()
-        
-

@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 """
 *-------------------------- WidgetAlignmentRef.py ----------------------------*
@@ -6,7 +6,7 @@
 通过使用 Reference 对 4D-STEM 数据集进行平移、合轴的部件。
 
 提升部件:
-    - 提升类名 WidgetAlignmentRef 
+    - 提升类名 WidgetAlignmentRef
     - 头文件 bin.Widgets.WidgetAlignmentRef
 
 作者:           胡一鸣
@@ -37,7 +37,7 @@ from Constants import APP_VERSION
 from bin.BlitManager import BlitManager
 from bin.TaskManager import TaskManager
 from bin.HDFManager import HDFHandler
-from bin.HDFManager import HDFDataNode 
+from bin.HDFManager import HDFDataNode
 from bin.DateTimeManager import DateTimeManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.DialogSaveItem import DialogSaveVectorField
@@ -50,26 +50,26 @@ from ui import uiWidgetAlignmentRef
 class WidgetAlignmentRef(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._reference_path = ''
+        self._reference_path = ""
         self.ui = uiWidgetAlignmentRef.Ui_Form()
         self.ui.setupUi(self)
         self._initUi()
-        
+
     @property
     def current_dp_location(self):
         return (self.scan_ii, self.scan_jj)
-    
+
     @property
     def hdf_handler(self) -> HDFHandler:
-        global qApp 
+        global qApp
         return qApp.hdf_handler
-    
+
     @property
     def current_ref_com(self) -> tuple[float, float]:
-        if not self.reference_path: 
+        if not self.reference_path:
             return (0, 0)
         return CenterOfMass(self.reference_dataset[self.scan_ii, self.scan_jj, :, :])
-    
+
     @property
     def reference_path(self) -> str:
         return self._reference_path
@@ -77,70 +77,74 @@ class WidgetAlignmentRef(QWidget):
     @property
     def reference_dataset(self) -> Dataset:
         return self.hdf_handler.file[self._reference_path]
-        
+
     @property
     def dp_object(self) -> AxesImage:
         return self._align_page.dp_object
-    
+
     @property
     def data_path(self) -> str:
         return self._align_page.data_path
 
     @property
     def scan_ii(self) -> int:
-        return self._align_page.scan_ii 
-    
-    @property
-    def scan_jj(self) -> int:
-        return self._align_page.scan_jj 
-    
-    @property
-    def ax(self) -> Axes:
-        return self._align_page.dp_ax
-    
-    @property
-    def blit_manager(self) -> BlitManager:
-        return self._align_page.dp_blit_manager
-    
-    @property
-    def data_object(self) -> Dataset:
-        return self._align_page.data_object
-    
-    @property
-    def scan_ii(self) -> int:
         return self._align_page.scan_ii
-    
+
     @property
     def scan_jj(self) -> int:
         return self._align_page.scan_jj
-    
+
+    @property
+    def ax(self) -> Axes:
+        return self._align_page.dp_ax
+
+    @property
+    def blit_manager(self) -> BlitManager:
+        return self._align_page.dp_blit_manager
+
+    @property
+    def data_object(self) -> Dataset:
+        return self._align_page.data_object
+
+    @property
+    def scan_ii(self) -> int:
+        return self._align_page.scan_ii
+
+    @property
+    def scan_jj(self) -> int:
+        return self._align_page.scan_jj
+
     @property
     def logger(self) -> Logger:
         global qApp
         return qApp.logger
-    
+
     @property
     def datetime_manager(self) -> DateTimeManager:
-        global qApp 
+        global qApp
         return qApp.datetime_manager
 
     @property
     def task_manager(self) -> TaskManager:
-        global qApp 
+        global qApp
         return qApp.task_manager
-    
+
     def _initUi(self):
         """
         Initialize Ui and their signal slot connections.
         """
         self.ui.lineEdit_reference_4dstem.setReadOnly(True)
-        self.ui.pushButton_browse_reference_4dstem.clicked.connect(self._onBrowseReference4DSTEMPath)
-        self.ui.checkBox_show_shifted_dp.stateChanged.connect(self._onShowShiftedDPChanged)
-        self.ui.pushButton_generate_shift_vec.clicked.connect(self._onGenerateShiftVecClicked)
+        self.ui.pushButton_browse_reference_4dstem.clicked.connect(
+            self._onBrowseReference4DSTEMPath
+        )
+        self.ui.checkBox_show_shifted_dp.stateChanged.connect(
+            self._onShowShiftedDPChanged
+        )
+        self.ui.pushButton_generate_shift_vec.clicked.connect(
+            self._onGenerateShiftVecClicked
+        )
         self.ui.label_measured_dp_shift.setText("(0, 0)")
 
-        
-        
     def _onBrowseReference4DSTEMPath(self):
         """
         Open a dialog to browse which 4D-STEM dataset to be opened as the reference.
@@ -150,19 +154,22 @@ class WidgetAlignmentRef(QWidget):
         if dialog_code == dialog.Accepted:
             current_path = dialog.getCurrentPath()
         else:
-            return 
+            return
 
         try:
             self.setReference4DSTEM(current_path)
-        except (KeyError, ValueError, TypeError,) as e:
-            self.logger.error('{0}'.format(e), exc_info = True)
-            msg = QMessageBox(parent = self)
-            msg.setWindowTitle('Warning')
+        except (
+            KeyError,
+            ValueError,
+            TypeError,
+        ) as e:
+            self.logger.error("{0}".format(e), exc_info=True)
+            msg = QMessageBox(parent=self)
+            msg.setWindowTitle("Warning")
             msg.setIcon(QMessageBox.Warning)
             msg.setStandardButtons(QMessageBox.Ok)
-            msg.setText('Cannot open this data: {0}'.format(e))
+            msg.setText("Cannot open this data: {0}".format(e))
             msg.exec()
-
 
     def setParentAlignPage(self, align_page: QWidget):
         """
@@ -175,7 +182,6 @@ class WidgetAlignmentRef(QWidget):
         self._align_page.ui.spinBox_scan_ii.valueChanged.connect(self._onScanChanged)
         self._align_page.ui.spinBox_scan_jj.valueChanged.connect(self._onScanChanged)
 
-
     def setReference4DSTEM(self, reference_path: str):
         """
         Set the reference 4D-STEM dataset path in HDF5 file.
@@ -187,36 +193,39 @@ class WidgetAlignmentRef(QWidget):
             reference_path: (str) the 4D-STEM dataset's path in hdf5 file.
         """
         if not isinstance(reference_path, str):
-            raise TypeError('reference_path must be a str, not '
-                '{0}'.format(type(reference_path).__name__))
+            raise TypeError(
+                "reference_path must be a str, not {0}".format(
+                    type(reference_path).__name__
+                )
+            )
 
         reference_node = self.hdf_handler.getNode(reference_path)
         # May raise KeyError if the path does not exist
         if not isinstance(reference_node, HDFDataNode):
-            raise ValueError('Item {0} must be a '
-                'Dataset'.format(reference_path))
-        
+            raise ValueError("Item {0} must be a Dataset".format(reference_path))
+
         reference_data_obj = self.hdf_handler.file[reference_path]
         if not len(reference_data_obj.shape) == 4:
-            raise ValueError('Data must be a 4D matrix (4D-STEM dataset)')
+            raise ValueError("Data must be a 4D matrix (4D-STEM dataset)")
 
         if reference_data_obj.shape[:2] != self.data_object.shape[:2]:
-            raise ValueError(f'The first two dimensions of the reference dataset ({reference_data_obj.shape[:2]}) must match the first two dimensions of the data object ({self.data_object.shape[:2]}).')
-        
+            raise ValueError(
+                f"The first two dimensions of the reference dataset ({reference_data_obj.shape[:2]}) must match the first two dimensions of the data object ({self.data_object.shape[:2]})."
+            )
+
         if reference_data_obj.shape[2:] != self.data_object.shape[2:]:
-            self.logger.warning(f'The last two dimensions of the reference dataset ({reference_data_obj.shape[2:]}) do not match the last two dimensions of the data object ({self.data_object.shape[2:]}).')
+            self.logger.warning(
+                f"The last two dimensions of the reference dataset ({reference_data_obj.shape[2:]}) do not match the last two dimensions of the data object ({self.data_object.shape[2:]})."
+            )
 
         self._reference_path = reference_path
         self.ui.lineEdit_reference_4dstem.setText(self.reference_path)
-        
-    
-    
+
     def _onShowShiftedDPChanged(self):
         """
         Handle the state change of the 'Show Shifted DP' checkbox.
         """
         self._align_page._updateDP()
-        
 
     def _onGenerateShiftVecClicked(self):
         """
@@ -224,7 +233,11 @@ class WidgetAlignmentRef(QWidget):
         This function will calculate the Center of Mass (CoM) for the reference 4D-STEM dataset.
         """
         if not self._reference_path:
-            QMessageBox.warning(self, 'No Reference Dataset', 'Please set a reference 4D-STEM dataset first.')
+            QMessageBox.warning(
+                self,
+                "No Reference Dataset",
+                "Please set a reference 4D-STEM dataset first.",
+            )
             return
 
         # Open the dialog to get the path and name for saving the Vector Field
@@ -238,12 +251,12 @@ class WidgetAlignmentRef(QWidget):
         com_name = dialog_save.getNewName()
 
         # Initialize the TaskCenterOfMass with only CoM calculation
-        calc_dict = {'CoM': True}
-        names = {'CoM': com_name}
-        metas = {'CoM': self._generateCoMMeta()}
+        calc_dict = {"CoM": True}
+        names = {"CoM": com_name}
+        metas = {"CoM": self._generateCoMMeta()}
 
         is_com_inverted = False
-        is_mean_set_to_zero = False 
+        is_mean_set_to_zero = False
         mask = None
 
         self.task = TaskCenterOfMass(
@@ -264,48 +277,52 @@ class WidgetAlignmentRef(QWidget):
         Generate metadata for center of mass vector field.
         """
         meta = {}
-        meta['Alignment/Method'] = 'Reference Center of Mass'
-        meta['Alignment/ReferenceDatasetPath'] = self._reference_path
-        meta['Alignment/TargetDatasetPath'] = self._align_page.data_path
-        
+        meta["Alignment/Method"] = "Reference Center of Mass"
+        meta["Alignment/ReferenceDatasetPath"] = self._reference_path
+        meta["Alignment/TargetDatasetPath"] = self._align_page.data_path
+
         # Add general and space information
-        meta['/General/title'] = name if name else 'Reference CoM Vector Field'
-        meta['/General/time'] = self.datetime_manager.current_time
-        meta['/General/date'] = self.datetime_manager.current_date
-        meta['/General/time_zone'] = self.datetime_manager.current_timezone
-        meta['/General/foud_explorer_version'] = '.'.join([str(v) for v in APP_VERSION])
-        
+        meta["/General/title"] = name if name else "Reference CoM Vector Field"
+        meta["/General/time"] = self.datetime_manager.current_time
+        meta["/General/date"] = self.datetime_manager.current_date
+        meta["/General/time_zone"] = self.datetime_manager.current_timezone
+        meta["/General/foud_explorer_version"] = ".".join([str(v) for v in APP_VERSION])
+
         # Add space calibration information
-        if '/Calibration/Space/scan_dr_i' in self.data_object.attrs:
-            meta['/Calibration/Space/pixel_size_i'] = self.data_object.attrs['/Calibration/Space/scan_dr_i']
-        if '/Calibration/Space/scan_dr_j' in self.data_object.attrs:
-            meta['/Calibration/Space/pixel_size_j'] = self.data_object.attrs['/Calibration/Space/scan_dr_j']
-        meta['/Calibration/Space/pixel_size_unit'] = 'm'
-        meta['/Calibration/Space/pixel_size_unit_display'] = 'nm'
-        meta['/Calibration/Space/display_unit_magnify'] = 1e9
-        meta['/Calibration/Quantify/value_unit'] = 'pix'
-        meta['/Calibration/Quantify/value_unit_display'] = 'pix'
-        meta['/Calibration/Quantify/display_unit_magnify'] = 1
-        meta['/Calibration/Quantify/display_norm_mode'] = 'linear'
-        
+        if "/Calibration/Space/scan_dr_i" in self.data_object.attrs:
+            meta["/Calibration/Space/pixel_size_i"] = self.data_object.attrs[
+                "/Calibration/Space/scan_dr_i"
+            ]
+        if "/Calibration/Space/scan_dr_j" in self.data_object.attrs:
+            meta["/Calibration/Space/pixel_size_j"] = self.data_object.attrs[
+                "/Calibration/Space/scan_dr_j"
+            ]
+        meta["/Calibration/Space/pixel_size_unit"] = "m"
+        meta["/Calibration/Space/pixel_size_unit_display"] = "nm"
+        meta["/Calibration/Space/display_unit_magnify"] = 1e9
+        meta["/Calibration/Quantify/value_unit"] = "pix"
+        meta["/Calibration/Quantify/value_unit_display"] = "pix"
+        meta["/Calibration/Quantify/display_unit_magnify"] = 1
+        meta["/Calibration/Quantify/display_norm_mode"] = "linear"
+
         return meta
-    
+
     def getCurrentDPShiftVec(self) -> tuple[float, float]:
         """
         Get the current shift vector of the current diffraction pattern.
         """
         if not self._reference_path:
             return (0, 0)
-        # ref_com = self.current_ref_com 
+        # ref_com = self.current_ref_com
         # self.ui.label_measured_dp_shift.setText(f'({ref_com[0]:.2f}, {ref_com[1]:.2f})')
         return self.current_ref_com
-        
+
     def getCurrentShowShiftedDP(self) -> bool:
         """
         Get the current state of the 'Show Shifted DP' checkbox.
         """
         return self.ui.checkBox_show_shifted_dp.isChecked()
-    
+
     def _onScanChanged(self):
         ref_com = self.current_ref_com
-        self.ui.label_measured_dp_shift.setText(f'({ref_com[0]:.2f}, {ref_com[1]:.2f})')
+        self.ui.label_measured_dp_shift.setText(f"({ref_com[0]:.2f}, {ref_com[1]:.2f})")

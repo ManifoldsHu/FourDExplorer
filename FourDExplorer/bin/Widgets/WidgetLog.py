@@ -19,10 +19,11 @@ date:           Mar 24, 2022
 """
 
 import os
-from PySide6.QtWidgets import QWidget 
+from PySide6.QtWidgets import QWidget
 from PySide6.QtGui import QTextCursor
 from bin.Log import LogUtil
 from ui import uiWidgetLog
+
 
 class WidgetLog(QWidget):
     """
@@ -30,6 +31,7 @@ class WidgetLog(QWidget):
 
     Widget to show logs, which includes a QTextBrowser.
     """
+
     def __init__(self, parent: QWidget = None):
         """
         arguments:
@@ -40,12 +42,10 @@ class WidgetLog(QWidget):
         self.ui.setupUi(self)
         self._initLogger()
 
-        self.ui.pushButton_open_log_directory.clicked.connect(
-            self.openLogDir
-        )
+        self.ui.pushButton_open_log_directory.clicked.connect(self.openLogDir)
         self.ui.pushButton_open_log_directory.setVisible(False)
         self.ui.pushButton_clear_log.clicked.connect(self.clearLog)
-    
+
     @property
     def log_util(self) -> LogUtil:
         global qApp
@@ -71,14 +71,14 @@ class WidgetLog(QWidget):
         cursor.insertText(string)
         self.ui.textBrowser_log.setTextCursor(cursor)
         self.ui.textBrowser_log.ensureCursorVisible()
-    
+
     def openLogDir(self):
         """
         Open the logging directory.
         """
         path = self.log_util.log_dir_path
         os.startfile(path)
-    
+
     def clearLog(self):
         """
         Clear the log textBrowser.

@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -43,7 +44,9 @@ class Ui_Form(object):
         self.label_segment4_rotate_angle.setObjectName("label_segment4_rotate_angle")
         self.horizontalLayout_27.addWidget(self.label_segment4_rotate_angle)
         self.doubleSpinBox_segment4_rotate_angle = QtWidgets.QDoubleSpinBox(Form)
-        self.doubleSpinBox_segment4_rotate_angle.setObjectName("doubleSpinBox_segment4_rotate_angle")
+        self.doubleSpinBox_segment4_rotate_angle.setObjectName(
+            "doubleSpinBox_segment4_rotate_angle"
+        )
         self.horizontalLayout_27.addWidget(self.doubleSpinBox_segment4_rotate_angle)
         self.verticalLayout_14.addLayout(self.horizontalLayout_27)
         self.horizontalLayout_28 = QtWidgets.QHBoxLayout()
@@ -52,10 +55,14 @@ class Ui_Form(object):
         self.label_segment4_open_angle.setObjectName("label_segment4_open_angle")
         self.horizontalLayout_28.addWidget(self.label_segment4_open_angle)
         self.doubleSpinBox_segment4_open_angle = QtWidgets.QDoubleSpinBox(Form)
-        self.doubleSpinBox_segment4_open_angle.setObjectName("doubleSpinBox_segment4_open_angle")
+        self.doubleSpinBox_segment4_open_angle.setObjectName(
+            "doubleSpinBox_segment4_open_angle"
+        )
         self.horizontalLayout_28.addWidget(self.doubleSpinBox_segment4_open_angle)
         self.verticalLayout_14.addLayout(self.horizontalLayout_28)
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.verticalLayout_14.addItem(spacerItem)
         self.line_5 = QtWidgets.QFrame(Form)
         self.line_5.setFrameShape(QtWidgets.QFrame.HLine)
@@ -71,7 +78,9 @@ class Ui_Form(object):
         self.label_segment4_center_j.setObjectName("label_segment4_center_j")
         self.horizontalLayout_29.addWidget(self.label_segment4_center_j)
         self.doubleSpinBox_segment4_center_j = QtWidgets.QDoubleSpinBox(Form)
-        self.doubleSpinBox_segment4_center_j.setObjectName("doubleSpinBox_segment4_center_j")
+        self.doubleSpinBox_segment4_center_j.setObjectName(
+            "doubleSpinBox_segment4_center_j"
+        )
         self.horizontalLayout_29.addWidget(self.doubleSpinBox_segment4_center_j)
         self.verticalLayout_14.addLayout(self.horizontalLayout_29)
         self.horizontalLayout_30 = QtWidgets.QHBoxLayout()
@@ -80,13 +89,17 @@ class Ui_Form(object):
         self.label_segment4_center_i.setObjectName("label_segment4_center_i")
         self.horizontalLayout_30.addWidget(self.label_segment4_center_i)
         self.doubleSpinBox_segment4_center_i = QtWidgets.QDoubleSpinBox(Form)
-        self.doubleSpinBox_segment4_center_i.setObjectName("doubleSpinBox_segment4_center_i")
+        self.doubleSpinBox_segment4_center_i.setObjectName(
+            "doubleSpinBox_segment4_center_i"
+        )
         self.horizontalLayout_30.addWidget(self.doubleSpinBox_segment4_center_i)
         self.verticalLayout_14.addLayout(self.horizontalLayout_30)
         self.verticalLayout.addLayout(self.verticalLayout_14)
         self.label_segment4_inner.setBuddy(self.doubleSpinBox_segment4_inner)
         self.label_segment4_outer.setBuddy(self.doubleSpinBox_segment4_outer)
-        self.label_segment4_rotate_angle.setBuddy(self.doubleSpinBox_segment4_rotate_angle)
+        self.label_segment4_rotate_angle.setBuddy(
+            self.doubleSpinBox_segment4_rotate_angle
+        )
         self.label_segment4_open_angle.setBuddy(self.doubleSpinBox_segment4_open_angle)
         self.label_segment4_center_j.setBuddy(self.doubleSpinBox_segment4_center_j)
         self.label_segment4_center_i.setBuddy(self.doubleSpinBox_segment4_center_i)
@@ -97,12 +110,17 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.label_segment4_parameter.setText(_translate("Form", "Four-segmented ring parameters"))
+        self.label_segment4_parameter.setText(
+            _translate("Form", "Four-segmented ring parameters")
+        )
         self.label_segment4_inner.setText(_translate("Form", "inner radius (pix)(&I)"))
         self.label_segment4_outer.setText(_translate("Form", "outer radius (pix)(&O)"))
-        self.label_segment4_rotate_angle.setText(_translate("Form", "rotation angle (deg)(&R)"))
-        self.label_segment4_open_angle.setText(_translate("Form", "open angle (deg)(&A)"))
+        self.label_segment4_rotate_angle.setText(
+            _translate("Form", "rotation angle (deg)(&R)")
+        )
+        self.label_segment4_open_angle.setText(
+            _translate("Form", "open angle (deg)(&A)")
+        )
         self.checkBox_segment4_is_center.setText(_translate("Form", "centered"))
         self.label_segment4_center_j.setText(_translate("Form", "horizontal shift(&J)"))
         self.label_segment4_center_i.setText(_translate("Form", "vertical shift(&I)"))
-

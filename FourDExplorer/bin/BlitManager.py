@@ -24,9 +24,8 @@ All rights reserved
 *------------------------------ BlitManager.py -------------------------------*
 """
 
-
 from typing import Iterator
-import time 
+import time
 from PySide6.QtCore import QObject
 from matplotlib.artist import Artist
 from matplotlib.backend_bases import Event
@@ -35,11 +34,12 @@ from matplotlib.backends.backend_qtagg import (
 )
 from matplotlib.figure import Figure
 
+
 class BlitManager(QObject):
     """
     Matplotlib 位图传送管理器。
 
-    使用位图传送管理器可以高效刷新图像。在 4D-Explorer 中，各个画布都具有自己的 
+    使用位图传送管理器可以高效刷新图像。在 4D-Explorer 中，各个画布都具有自己的
     BlitManager，以此实现动态效果。
 
     Block transfer (Blit) manager of matplotlib.
@@ -53,6 +53,7 @@ class BlitManager(QObject):
         figure: (Figure) the figure associated with the canvas managed by this
             BlitManager object.
     """
+
     def __init__(self, canvas: FigureCanvas, parent: QObject = None):
         """
         arguments:
@@ -64,18 +65,17 @@ class BlitManager(QObject):
         self._background = None
         self._canvas = canvas
         self._artists = {}
-        
+
         # grab the background on every draw
-        self._cid = self._canvas.mpl_connect('draw_event', self._onDraw)
-        
+        self._cid = self._canvas.mpl_connect("draw_event", self._onDraw)
+
         self._last_update_time = time.time()
         self._min_interval = 0.01
-        self._is_updating = False 
-        
+        self._is_updating = False
 
     @property
     def canvas(self) -> FigureCanvas:
-        return self._canvas 
+        return self._canvas
 
     @property
     def figure(self) -> Figure:
@@ -91,7 +91,7 @@ class BlitManager(QObject):
         return len(self._artists)
 
     def __str__(self) -> str:
-        return '<BlitManager> canvas: {0}'.format(self.canvas)
+        return "<BlitManager> canvas: {0}".format(self.canvas)
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -103,14 +103,16 @@ class BlitManager(QObject):
         It is recommended to use artists' labels as keys.
         """
         if not isinstance(key, str):
-            raise TypeError('key must be a str, not '
-                '{0}'.format(type(key).__name__))
+            raise TypeError("key must be a str, not {0}".format(type(key).__name__))
         if not isinstance(artist, Artist):
-            raise TypeError('artist must be an Artist, not '
-                '{0}'.format(type(artist).__name__))
+            raise TypeError(
+                "artist must be an Artist, not {0}".format(type(artist).__name__)
+            )
         if not artist.figure is self.figure:
-            raise RuntimeError('The artist must be in the figure associated '
-                'with the canvas that this BlitManager is managing')
+            raise RuntimeError(
+                "The artist must be in the figure associated "
+                "with the canvas that this BlitManager is managing"
+            )
         artist.set_animated(True)
         self._artists[key] = artist
 
@@ -126,8 +128,11 @@ class BlitManager(QObject):
         elif isinstance(_object, Artist):
             return _object in self._artists.values()
         else:
-            raise TypeError('_object must be a str or Artist, not '
-                '{0}'.format(type(_object).__name__))
+            raise TypeError(
+                "_object must be a str or Artist, not {0}".format(
+                    type(_object).__name__
+                )
+            )
 
     def __delitem__(self, key: str):
         del self._artists[key]
@@ -141,11 +146,10 @@ class BlitManager(QObject):
         """
         if not event is None:
             if not event.canvas is self.canvas:
-                raise RuntimeError('The event must be of the same canvas '
-                    'as the BlitManager.')
-        self._background = self.canvas.copy_from_bbox(
-            self.figure.bbox
-        )
+                raise RuntimeError(
+                    "The event must be of the same canvas as the BlitManager."
+                )
+        self._background = self.canvas.copy_from_bbox(self.figure.bbox)
         self._drawAnimated()
 
     def addArtist(self, key: str, artist: Artist):
@@ -155,15 +159,14 @@ class BlitManager(QObject):
         arguments:
             key: (str) The key of the artist. Recommended to use label.
 
-            artist: (Artist) The artist to be added. It will be set to 
+            artist: (Artist) The artist to be added. It will be set to
                 animated to be safe. The artist must be in the figure
                 associated with the canvas that this class is managing.
         """
         if key in self._artists:
-            raise ValueError('There has been an artist with key '
-                '{0}'.format(key))
+            raise ValueError("There has been an artist with key {0}".format(key))
         self[key] = artist
-    
+
     def resetArtist(self, key: str, artist: Artist):
         """
         Reset an artist with key to be managed.
@@ -172,12 +175,11 @@ class BlitManager(QObject):
             key: (str) The key of the artist. Recommended to use label.
 
             artist: (Artist) The artist to be reset. It will be set to
-                animated to be safe. The artist must be in the figure 
+                animated to be safe. The artist must be in the figure
                 associated with the canvas that this class is managing.
         """
         if not key in self._artists:
-            raise KeyError('There is no artist with key '
-                '{0}'.format(key))
+            raise KeyError("There is no artist with key {0}".format(key))
         self[key] = artist
 
     def _drawAnimated(self):
@@ -191,15 +193,15 @@ class BlitManager(QObject):
         """
         Update the screen with animated artists.
         """
-        
+
         # if self._is_updating:
-        #     return 
-        # self._is_updating = True 
+        #     return
+        # self._is_updating = True
         current_time = time.time()
         if current_time - self._last_update_time < self._min_interval:
-            return 
+            return
         self._last_update_time = current_time
-        
+
         # paranoia in case we missed the draw event
         if self._background is None:
             self._onDraw(None)
@@ -211,7 +213,7 @@ class BlitManager(QObject):
             self.canvas.blit(self.figure.bbox)
         # let the GUI event loop process anything it has to do.
         self.canvas.flush_events()
-        # self._is_updating = False 
+        # self._is_updating = False
 
     def keys(self):
         return self._artists.keys()
@@ -221,5 +223,3 @@ class BlitManager(QObject):
 
     def items(self):
         return self._artists.items()
-
-        

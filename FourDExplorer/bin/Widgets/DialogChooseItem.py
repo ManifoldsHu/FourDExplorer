@@ -14,10 +14,11 @@ date:               Mar 2, 2022
 *--------------------------- DialogChooseItem.py -----------------------------*
 """
 
-from PySide6.QtWidgets import QDialog, QWidget 
+from PySide6.QtWidgets import QDialog, QWidget
 
 from ui import uiDialogHDFChooseItem
 from Constants import HDFType
+
 
 class DialogHDFChoose(QDialog):
     """
@@ -25,6 +26,7 @@ class DialogHDFChoose(QDialog):
 
     Dialog to choose group or data.
     """
+
     def __init__(self, parent: QWidget = None, only_group: bool = False):
         super().__init__(parent)
         self.ui = uiDialogHDFChooseItem.Ui_Dialog()
@@ -34,15 +36,13 @@ class DialogHDFChoose(QDialog):
         self._hdf_handler = qApp.hdf_handler
 
         self._only_group = only_group
-        
-        if self.only_group:
-            self.setWindowTitle('Choose a Group')
-        else:
-            self.setWindowTitle('Choose an Item')
 
-        self.ui.widget_viewer.ui.treeView_HDF.clicked.connect(
-            self.setCurrentPath
-        )
+        if self.only_group:
+            self.setWindowTitle("Choose a Group")
+        else:
+            self.setWindowTitle("Choose an Item")
+
+        self.ui.widget_viewer.ui.treeView_HDF.clicked.connect(self.setCurrentPath)
 
         self.ui.pushButton_ok.clicked.connect(self.accept)
         self.ui.pushButton_cancel.clicked.connect(self.reject)
@@ -59,24 +59,22 @@ class DialogHDFChoose(QDialog):
         """
         Set the path according to the chosen index.
 
-        If the dialog is set to groups-only, the path will be a group 
+        If the dialog is set to groups-only, the path will be a group
         automatically.
         """
         model = self.ui.widget_viewer.ui.treeView_HDF.model()
         index = self.ui.widget_viewer.ui.treeView_HDF.currentIndex()
         if self.only_group:
-            hdf_type = index.data(role = model.DataRoles.HDFTypeRole)
+            hdf_type = index.data(role=model.DataRoles.HDFTypeRole)
             if hdf_type in (HDFType.Group, HDFType.Root):
-                current_path = index.data(
-                    role = model.DataRoles.PathRole)
+                current_path = index.data(role=model.DataRoles.PathRole)
             else:
-                current_path = index.parent().data(
-                    role = model.DataRoles.PathRole)
+                current_path = index.parent().data(role=model.DataRoles.PathRole)
         else:
-            current_path = index.data(role = model.DataRoles.PathRole)
+            current_path = index.data(role=model.DataRoles.PathRole)
 
         self.ui.lineEdit_parent_path.setText(current_path)
-        
+
     def getCurrentPath(self) -> str:
         """
         returns:

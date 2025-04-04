@@ -31,17 +31,19 @@ from bin.Widgets.DialogTaskDetail import DialogTaskDetail
 from bin.Widgets.DialogHistoryTasks import DialogHistoryTasks
 from ui import uiWidgetTaskManager
 
+
 class WidgetTaskManager(QWidget):
     """
     管理并发任务的组件。
-    
+
     包含一个 QListView 用于显示任务队列，以及一些按钮、进度条用来显示当前任务。
 
     Widget to manage concurrent tasks.
 
-    It includes a QListView to show the task queue, and some buttons and a 
+    It includes a QListView to show the task queue, and some buttons and a
     progress bar to show some information of the current task.
     """
+
     def __init__(self, parent: QWidget = None):
         """
         arguments:
@@ -62,7 +64,7 @@ class WidgetTaskManager(QWidget):
         self.ui.pushButton_detail.clicked.connect(self.showCurrentDetail)
         self.ui.pushButton_history.clicked.connect(self.showHistory)
 
-    @property 
+    @property
     def task_manager(self) -> TaskManager:
         return self._task_manager
 
@@ -73,12 +75,8 @@ class WidgetTaskManager(QWidget):
         self.refreshCurrent()
 
     def _initTaskQueue(self):
-        self.ui.listView_waiting_queue.setModel(
-            self.task_manager.model_waiting
-        )
-        self.ui.listView_waiting_queue.setContextMenuPolicy(
-            Qt.CustomContextMenu
-        )
+        self.ui.listView_waiting_queue.setModel(self.task_manager.model_waiting)
+        self.ui.listView_waiting_queue.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.listView_waiting_queue.customContextMenuRequested.connect(
             self.showTaskQueueContextMenu
         )
@@ -88,33 +86,26 @@ class WidgetTaskManager(QWidget):
         refresh current task information according to the task manager.
         """
         if self.task_manager.current_task is None:
-            self.ui.label_current_task_name.setText('None')
+            self.ui.label_current_task_name.setText("None")
             self.ui.progressBar_task.setValue(0)
             self.ui.progressBar_task.setVisible(False)
             self.ui.pushButton_detail.setEnabled(False)
         else:
-            self.ui.label_current_task_name.setText(
-                self.task_manager.current_task.name 
-            )
+            self.ui.label_current_task_name.setText(self.task_manager.current_task.name)
             self.ui.progressBar_task.setVisible(True)
             self.ui.pushButton_detail.setEnabled(True)
-            self.ui.progressBar_task.setValue(
-                self.task_manager.current_task.progress
-            )
+            self.ui.progressBar_task.setValue(self.task_manager.current_task.progress)
 
             if self.task_manager.current_task.hasProgress():
-                self.ui.progressBar_task.setRange(0, 100) # Percentage of step
+                self.ui.progressBar_task.setRange(0, 100)  # Percentage of step
             else:
-                self.ui.progressBar_task.setRange(0, 0) # Busy indicator
+                self.ui.progressBar_task.setRange(0, 0)  # Busy indicator
 
     def refreshProgress(self):
         """
         refresh the progress according to the progress of the task
         """
-        self.ui.progressBar_task.setValue(
-            self.task_manager.current_task.progress
-        )
-
+        self.ui.progressBar_task.setValue(self.task_manager.current_task.progress)
 
     def testFunc(self):
         """
@@ -122,10 +113,9 @@ class WidgetTaskManager(QWidget):
         """
         self._test_count += 1
         if self._test_count % 2 == 1:
-            self.task_manager.addTask(ExampleSleep(parent = self))
+            self.task_manager.addTask(ExampleSleep(parent=self))
         elif self._test_count % 2 == 0:
-            self.task_manager.addTask(ExampleSleepWithoutProgress(parent = self))
-
+            self.task_manager.addTask(ExampleSleepWithoutProgress(parent=self))
 
     def showDetail(self, task):
         """
@@ -137,7 +127,6 @@ class WidgetTaskManager(QWidget):
         dialog = DialogTaskDetail(self)
         dialog.setCurrentTask(task)
         dialog.exec()
-
 
     def showCurrentDetail(self):
         """
@@ -159,15 +148,11 @@ class WidgetTaskManager(QWidget):
             return False
         task = self.task_manager.task_queue[index.row()]
         menu = QMenu(self)
-        menu.action_cancel = menu.addAction('Cancel')
-        menu.action_cancel.triggered.connect(
-            lambda: self.cancelTask(index)
-        )
+        menu.action_cancel = menu.addAction("Cancel")
+        menu.action_cancel.triggered.connect(lambda: self.cancelTask(index))
 
-        menu.action_detail = menu.addAction('Detail')
-        menu.action_detail.triggered.connect(
-            lambda: self.showDetail(task)
-        )
+        menu.action_detail = menu.addAction("Detail")
+        menu.action_detail.triggered.connect(lambda: self.showDetail(task))
         menu.exec(self.mapToGlobal(pos))
 
     def cancelTask(self, index: QModelIndex):
@@ -191,12 +176,10 @@ class WidgetTaskManager(QWidget):
         Shows a dialog to warn the user that there exist an exception.
         """
         dialog = QMessageBox(
-            QMessageBox.Warning, 
-            'Error', 
-            exc, 
-            QMessageBox.Ok, 
+            QMessageBox.Warning,
+            "Error",
+            exc,
+            QMessageBox.Ok,
             self,
         )
         dialog.exec()
-        
-

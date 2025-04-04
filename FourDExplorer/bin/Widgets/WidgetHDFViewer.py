@@ -73,12 +73,14 @@ from bin.Widgets.WidgetBaseHDFViewer import WidgetBaseHDFViewer
 from Constants import HDFType
 from Constants import ItemDataRoles
 
+
 class WidgetHDFViewer(WidgetBaseHDFViewer):
     """
-    用于显示 HDF5 文件结构的基础组件，包含一个 QTreeView。 
+    用于显示 HDF5 文件结构的基础组件，包含一个 QTreeView。
 
     Widget to show HDF file structure, which includes a QTreeView.
     """
+
     def __init__(self, parent: QWidget = None):
         """
         arguments:
@@ -87,11 +89,8 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         super().__init__(parent)
 
         self.ui.treeView_HDF.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.ui.treeView_HDF.customContextMenuRequested.connect(
-            self.showContextMenu
-        )
+        self.ui.treeView_HDF.customContextMenuRequested.connect(self.showContextMenu)
 
-        
         self._initDataActions()
         self._initEditActions()
         self._initFileActions()
@@ -100,10 +99,8 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._initAnalysisActions()
         self._initVectorFieldActions()
 
-        self.hdf_handler.file_closed.connect(
-            self.refreshTreeView
-        )
-        
+        self.hdf_handler.file_closed.connect(self.refreshTreeView)
+
     @property
     def logger(self) -> Logger:
         global qApp
@@ -116,22 +113,22 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
 
     @property
     def theme_handler(self) -> ThemeHandler:
-        global qApp 
+        global qApp
         return qApp.theme_handler
 
     @property
     def action_group_edit(self) -> QActionGroup:
-        return self._action_group_edit 
+        return self._action_group_edit
 
     @property
     def action_group_open(self) -> QActionGroup:
-        return self._action_group_open 
+        return self._action_group_open
 
     @property
     def action_group_attr(self) -> QActionGroup:
-        return self._action_group_attr 
+        return self._action_group_attr
 
-    @property 
+    @property
     def action_group_reconstruction(self) -> QActionGroup:
         return self._action_group_reconstruction
 
@@ -171,7 +168,7 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._action_group_new.addAction(self._action_import_image)
         for action in self._action_group_new.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
-            
+
         self._action_move = ActionMove(self)
         self._action_copy = ActionCopy(self)
         self._action_delete = ActionDelete(self)
@@ -185,12 +182,10 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         for action in self._action_group_edit.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
             self.edit_toolbar.addAction(action)
-        
+
         self._action_group_attr = QActionGroup(self)
         self._action_group_attr.addAction(self._action_attributes)
         self._action_attributes.setLinkedTreeView(self.ui.treeView_HDF)
-        
-        
 
     def _initDataActions(self):
         """
@@ -207,7 +202,7 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
 
         for action in self._action_group_open.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
-        
+
     def _initReconstructionActions(self):
         """
         Initialize 4D-STEM reconstruction actions.
@@ -216,12 +211,8 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._action_center_of_mass = ActionCenterOfMass(self)
 
         self._action_group_reconstruction = QActionGroup(self)
-        self._action_group_reconstruction.addAction(
-            self._action_virtual_image
-        )
-        self._action_group_reconstruction.addAction(
-            self._action_center_of_mass
-        )
+        self._action_group_reconstruction.addAction(self._action_virtual_image)
+        self._action_group_reconstruction.addAction(self._action_center_of_mass)
 
         for action in self._action_group_reconstruction.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
@@ -234,20 +225,12 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._action_background = ActionBackground(self)
         self._action_alignment = ActionAlign(self)
         self._action_rotate = ActionRotate(self)
-        
+
         self._action_group_calibration = QActionGroup(self)
-        self._action_group_calibration.addAction(
-            self._action_edit_param
-        )
-        self._action_group_calibration.addAction(
-            self._action_background
-        )
-        self._action_group_calibration.addAction(
-            self._action_alignment 
-        )
-        self._action_group_calibration.addAction(
-            self._action_rotate
-        )
+        self._action_group_calibration.addAction(self._action_edit_param)
+        self._action_group_calibration.addAction(self._action_background)
+        self._action_group_calibration.addAction(self._action_alignment)
+        self._action_group_calibration.addAction(self._action_rotate)
 
         for action in self._action_group_calibration.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
@@ -259,22 +242,21 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._action_plot_ctf = ActionPlotCTF(self)
         self._action_group_analysis = QActionGroup(self)
         self._action_group_analysis.addAction(self._action_plot_ctf)
-        
+
         for action in self._action_group_analysis.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
-            
-            
+
     def _initFileActions(self):
         """
         Initialize File actions.
         """
         self._action_new_file = ActionNewFile(self)
-        self._action_new_file.setText('New HDF5 File...')
+        self._action_new_file.setText("New HDF5 File...")
         self._action_open_file = ActionOpenFile(self)
-        self._action_open_file.setText('Open HDF5 File...')
+        self._action_open_file.setText("Open HDF5 File...")
         self._action_close_file = ActionCloseFile(self)
-        self._action_close_file.setText('Close HDF5 File')
-        
+        self._action_close_file.setText("Close HDF5 File")
+
         self._action_group_file = QActionGroup(self)
         self._action_group_file.addAction(self._action_new_file)
         self._action_group_file.addAction(self._action_open_file)
@@ -295,33 +277,15 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         self._action_slice_j = ActionSliceJ(self)
 
         self._action_group_vector = QActionGroup(self)
-        self._action_group_vector.addAction(
-            self._action_subtract_mean_vector
-        )
-        self._action_group_vector.addAction(
-            self._action_subtract_reference_vector
-        )
-        self._action_group_vector.addAction(
-            self._action_rotate_vector
-        )
-        self._action_group_vector.addAction(
-            self._action_flip_vector
-        )
-        self._action_group_vector.addAction(
-            self._action_potential
-        )
-        self._action_group_vector.addAction(
-            self._action_divergence
-        )
-        self._action_group_vector.addAction(
-            self._action_curl
-        )
-        self._action_group_vector.addAction(
-            self._action_slice_i
-        )
-        self._action_group_vector.addAction(
-            self._action_slice_j
-        )
+        self._action_group_vector.addAction(self._action_subtract_mean_vector)
+        self._action_group_vector.addAction(self._action_subtract_reference_vector)
+        self._action_group_vector.addAction(self._action_rotate_vector)
+        self._action_group_vector.addAction(self._action_flip_vector)
+        self._action_group_vector.addAction(self._action_potential)
+        self._action_group_vector.addAction(self._action_divergence)
+        self._action_group_vector.addAction(self._action_curl)
+        self._action_group_vector.addAction(self._action_slice_i)
+        self._action_group_vector.addAction(self._action_slice_j)
 
         for action in self._action_group_vector.actions():
             action.setLinkedTreeView(self.ui.treeView_HDF)
@@ -344,11 +308,9 @@ class WidgetHDFViewer(WidgetBaseHDFViewer):
         """
         if self.hdf_handler.isFileOpened():
             index = self.ui.treeView_HDF.currentIndex()
-            chosen_type = index.data(
-                role = ItemDataRoles.HDFTypeRole
-            )
+            chosen_type = index.data(role=ItemDataRoles.HDFTypeRole)
             _type_to_menu = {
-                HDFType.Root: HDFRootMenu, 
+                HDFType.Root: HDFRootMenu,
                 HDFType.Group: HDFGroupMenu,
                 HDFType.FourDSTEM: HDFFourDSTEMMenu,
                 HDFType.Image: HDFImageMenu,
@@ -376,29 +338,30 @@ class HDFViewerMenuBase(QMenu):
     Allowing modification operations of items. Use its subclass according to
     the current QModelIndex.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self._action_groups = []
-        self._hdf_viewer = None 
+        self._hdf_viewer = None
 
     @property
     def hdf_viewer(self) -> WidgetHDFViewer:
         return self._hdf_viewer
-        
+
     def addActionGroup(self, group: QActionGroup, separator: bool = True):
         """
         Add all of the actions in the group to the menu.
 
-        If separator is True, it will also add a separator automatically 
+        If separator is True, it will also add a separator automatically
         between two groups.
 
         arguments:
-            group: (QActionGroup) 
+            group: (QActionGroup)
 
             separator: (bool)
         """
         if len(self._action_groups) > 0 and separator:
-            self.addSeparator() 
+            self.addSeparator()
         self._action_groups.append(group)
         self.addActions(group.actions())
 
@@ -425,19 +388,21 @@ class HDFViewerMenuBase(QMenu):
         arguments:
             viewer: (WidgetHDFViewer)
         """
-        self._hdf_viewer = viewer 
+        self._hdf_viewer = viewer
 
-    
+
 class HDFViewerFileMenu(HDFViewerMenuBase):
     """
     没有打开文件的时候对应的 Menu。
 
     When there is no file opened, the viewer will show this menu.
     """
+
     def __init__(self, parent: WidgetBaseHDFViewer):
         super().__init__(parent)
         self.setLinkedHDFViewer(parent)
         self.addActionGroup(self.hdf_viewer.action_group_file)
+
 
 class HDFItemMenu(HDFViewerMenuBase):
     """
@@ -445,6 +410,7 @@ class HDFItemMenu(HDFViewerMenuBase):
 
     Menu for general items in HDF file.
     """
+
     def __init__(self, parent: WidgetHDFViewer):
         super().__init__(parent)
         self.setLinkedHDFViewer(parent)
@@ -458,20 +424,22 @@ class HDFRootMenu(HDFViewerMenuBase):
 
     Menu for root.
     """
+
     def __init__(self, parent: WidgetHDFViewer):
         super().__init__(parent)
         self.setLinkedHDFViewer(parent)
         self.addActionGroup(self.hdf_viewer.action_group_file)
         self.addActionGroup(self.hdf_viewer.action_group_new)
         self.addActionGroup(self.hdf_viewer.action_group_attr)
-        
-    
+
+
 class HDFGroupMenu(HDFViewerMenuBase):
     """
     一般的 Group 对应的 Menu。
 
     Menu for groups in HDF file.
     """
+
     def __init__(self, parent: WidgetHDFViewer):
         super().__init__(parent)
         self.setLinkedHDFViewer(parent)
@@ -486,6 +454,7 @@ class HDFDataMenu(HDFViewerMenuBase):
 
     Menu for general Dataset in HDF file.
     """
+
     def __init__(self, parent: WidgetHDFViewer):
         super().__init__(parent)
         self.setLinkedHDFViewer(parent)
@@ -512,7 +481,7 @@ class HDFVectorFieldMenu(HDFViewerMenuBase):
         self.addSeparator()
         menu = self.addActionGroupAsSubMenu(
             self.hdf_viewer.action_group_vector,
-            name = 'Vector Field Processing',
+            name="Vector Field Processing",
         )
         menu.insertSeparator(self.hdf_viewer._action_potential)
         self.addActionGroup(self.hdf_viewer.action_group_edit)
@@ -525,28 +494,26 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 
     Menu for 4D-STEM dataset.
     """
+
     def __init__(self, parent: WidgetHDFViewer):
         super().__init__(parent)
         self.setLinkedHDFViewer(parent)
         self.addActionGroup(self.hdf_viewer.action_group_open)
         self.addSeparator()
         self.addActionGroupAsSubMenu(
-            self.hdf_viewer.action_group_calibration, 
-            name = 'Calibration',
+            self.hdf_viewer.action_group_calibration,
+            name="Calibration",
         )
         self.addActionGroupAsSubMenu(
-            self.hdf_viewer.action_group_reconstruction, 
-            name = 'Reconstruction',
+            self.hdf_viewer.action_group_reconstruction,
+            name="Reconstruction",
         )
         # self.addActionGroupAsSubMenu(
-        #     self.hdf_viewer.action_group_analysis, 
+        #     self.hdf_viewer.action_group_analysis,
         #     name = 'Analysis',
-        # )         # TODO 
+        # )         # TODO
         self.addActionGroup(self.hdf_viewer.action_group_edit)
         self.addActionGroup(self.hdf_viewer.action_group_attr)
-        
-
-    
 
 
 # class HDFBaseItemMenu(QMenu):
@@ -561,8 +528,8 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #     the current QModelIndex.
 #     """
 #     def __init__(
-#         self, 
-#         parent: QWidget = None, 
+#         self,
+#         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
 #         if not isinstance(index, QModelIndex):
@@ -588,7 +555,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         # self._action_align = ActionAlign(self, index)
 #         # self._action_bkgrd = ActionBkgrd(self, index)
 #         # self._action_rotate = ActionRotate(self, index)
-    
+
 #     @property
 #     def model_index(self) -> QModelIndex:
 #         return self._model_index
@@ -601,7 +568,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - 删除
 #         - 重命名
 #         - 属性
-        
+
 
 #     All of the items in HDF5 files have these actions:
 #         - move
@@ -611,7 +578,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - attributes
 #     """
 #     def __init__(
-#         self, 
+#         self,
 #         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
@@ -639,7 +606,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - attributes
 #     """
 #     def __init__(
-#         self, 
+#         self,
 #         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
@@ -672,7 +639,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - attributes
 #     """
 #     def __init__(
-#         self, 
+#         self,
 #         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
@@ -714,7 +681,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - attributes
 #     """
 #     def __init__(
-#         self, 
+#         self,
 #         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
@@ -761,7 +728,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - attributes
 #     """
 #     def __init__(
-#         self, 
+#         self,
 #         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
@@ -773,7 +740,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         ])
 
 #         self.addSeparator()
-        
+
 #         self.addActions([
 #             self._action_move,
 #             self._action_copy,
@@ -808,7 +775,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - attributes
 #     """
 #     def __init__(
-#         self, 
+#         self,
 #         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
@@ -820,7 +787,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         ])
 
 #         self.addSeparator()
-        
+
 #         self.addActions([
 #             self._action_move,
 #             self._action_copy,
@@ -833,7 +800,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         self.addActions([
 #             self._action_attributes
 #         ])
-    
+
 # class HDFVectorFieldMenu(HDFBaseItemMenu):
 #     """
 #     矢量场数据所具有的操作。包括：
@@ -855,7 +822,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - attributes
 #     """
 #     def __init__(
-#         self, 
+#         self,
 #         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
@@ -867,7 +834,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         ])
 
 #         self.addSeparator()
-        
+
 #         self.addActions([
 #             self._action_move,
 #             self._action_copy,
@@ -903,7 +870,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         - 属性
 #     """
 #     def __init__(
-#         self, 
+#         self,
 #         parent: QWidget = None,
 #         index: QModelIndex = QModelIndex(),
 #     ):
@@ -915,7 +882,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         ])
 
 #         self.addSeparator()
-    
+
 #         menu_calibrate = self.addMenu('Calibrate')
 #         menu_calibrate.addActions([
 #             self._action_align,
@@ -927,7 +894,7 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #             self._action_virtual_image,
 #             self._action_center_of_mass,
 #         ])
-        
+
 #         self.addSeparator()
 
 #         self.addActions([
@@ -942,5 +909,3 @@ class HDFFourDSTEMMenu(HDFViewerMenuBase):
 #         self.addActions([
 #             self._action_attributes,
 #         ])
-
-        

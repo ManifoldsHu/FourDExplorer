@@ -30,21 +30,21 @@ from logging import Logger
 
 from PySide6.QtWidgets import QWidget, QMessageBox, QToolButton, QMenu
 
-from matplotlib.backends.backend_qtagg import (
-    FigureCanvasQTAgg as FigureCanvas)
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.colorbar import Colorbar, make_axes
 from matplotlib.colors import Normalize, SymLogNorm
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.axis import Axis
-from matplotlib.patches import Rectangle 
-from matplotlib.text import Text 
+from matplotlib.patches import Rectangle
+from matplotlib.text import Text
 
 import numpy as np
 import h5py
 
 from Constants import APP_VERSION
+
 # from bin.Actions.DataActions import ActionOpenFourDSTEM
 # from bin.Actions.FourDSTEMActions import ActionAlign
 # from bin.Actions.FourDSTEMActions import ActionBackground
@@ -58,6 +58,7 @@ from bin.DateTimeManager import DateTimeManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from ui import uiPageBaseFourDSTEM
 
+
 class PageBaseFourDSTEM(QWidget):
     """
     显示 4D-STEM 数据集的部件的基类。包含以下功能：
@@ -67,7 +68,7 @@ class PageBaseFourDSTEM(QWidget):
 
     Ui 文件地址：ROOTPATH/ui/uiPageBaseFourDSTEM
 
-    注意，这个类只是抽象地提供预览 4D-STEM 的功能。要使用此类，应当自己构建独立的 
+    注意，这个类只是抽象地提供预览 4D-STEM 的功能。要使用此类，应当自己构建独立的
     .ui 文件及对应的 .py 文件，并确保子类与父类相同的控件的名字一致。这个类不提供
     实际的渲染，只提供控件之间的逻辑链接。
 
@@ -84,7 +85,7 @@ class PageBaseFourDSTEM(QWidget):
     to show 4D-STEM directly, but only provides logic connects between widgets.
 
     attributes:
-        hdf_handler: (HDFHandler) The handler to manage the hdf file and the 
+        hdf_handler: (HDFHandler) The handler to manage the hdf file and the
             objects inside it.
 
         data_object: (h5py.Dataset) The data object of 4D-STEM data.
@@ -93,7 +94,7 @@ class PageBaseFourDSTEM(QWidget):
 
         logger: (Logger) Use logger to record information.
 
-        dp_canvas: (FigureCanvas) The canvas (widget) object to show 
+        dp_canvas: (FigureCanvas) The canvas (widget) object to show
             Diffraction patterns.
 
         dp_figure: (Figure) The Figure object of the diffraction patterns.
@@ -107,41 +108,39 @@ class PageBaseFourDSTEM(QWidget):
         colorbar_object: (Colorbar) The Colorbar object. This colorbar is atta-
             ched to the diffraction patterns.
 
-        dp_blit_manager: (BlitManager) The blit manager of the diffraction 
-            patterns. When the data, norm, colormap or other attributes of the 
-            diffraction pattern change, use its update() method to plot the 
+        dp_blit_manager: (BlitManager) The blit manager of the diffraction
+            patterns. When the data, norm, colormap or other attributes of the
+            diffraction pattern change, use its update() method to plot the
             updated images.
 
-        scan_ii: (int) The i-coordinate of the current diffraction pattern in 
+        scan_ii: (int) The i-coordinate of the current diffraction pattern in
             the real space. This is also regarded as the row index in a matrix.
 
         scan_jj: (int) The j-coordinate of the current diffraction pattern in
-            the real space. This is also regarded as the column index in a 
+            the real space. This is also regarded as the column index in a
             matrix.
-            
+
         scale_bar: (Rectangle) The rectangle object that shows the scale bar.
-        
-        scale_bar_text: (Text) The text object that shows how long the scale 
+
+        scale_bar_text: (Text) The text object that shows how long the scale
             bar is.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiPageBaseFourDSTEM.Ui_Form()
 
-        self._data_path = ''
+        self._data_path = ""
         self._dp_ax = None
         self._colorbar_ax = None
         self._dp_object = None
         self._colorbar_object = None
-        self._scale_bar = None 
-        self._scale_bar_text = None 
+        self._scale_bar = None
+        self._scale_bar_text = None
         self._scan_ii = 0
         self._scan_jj = 0
-        
-        
 
         # self._initBaseUi()
-        
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -150,7 +149,7 @@ class PageBaseFourDSTEM(QWidget):
 
     @property
     def theme_handler(self) -> ThemeHandler:
-        global qApp 
+        global qApp
         return qApp.theme_handler
 
     @property
@@ -168,9 +167,8 @@ class PageBaseFourDSTEM(QWidget):
 
     @property
     def datetime_manager(self) -> DateTimeManager:
-        global qApp 
+        global qApp
         return qApp.datetime_manager
-
 
     @property
     def dp_canvas(self) -> FigureCanvas:
@@ -211,7 +209,7 @@ class PageBaseFourDSTEM(QWidget):
     @property
     def scale_bar(self) -> Rectangle:
         return self._scale_bar
-    
+
     @property
     def scale_bar_text(self) -> Text:
         return self._scale_bar_text
@@ -226,26 +224,18 @@ class PageBaseFourDSTEM(QWidget):
         self.ui.spinBox_scan_ii.valueChanged.connect(self._updateDPBySpinBoxI)
         self.ui.spinBox_scan_jj.valueChanged.connect(self._updateDPBySpinBoxJ)
 
-        self.ui.horizontalSlider_brightness.setRange(0,99)
-        self.ui.horizontalSlider_contrast.setRange(0,99)
+        self.ui.horizontalSlider_brightness.setRange(0, 99)
+        self.ui.horizontalSlider_contrast.setRange(0, 99)
         self.ui.horizontalSlider_brightness.setValue(50)
         self.ui.horizontalSlider_contrast.setValue(50)
-        self.ui.horizontalSlider_brightness.valueChanged.connect(
-            self._updateBrightness
-        )
-        self.ui.horizontalSlider_contrast.valueChanged.connect(
-            self._updateContrast
-        )
-        
+        self.ui.horizontalSlider_brightness.valueChanged.connect(self._updateBrightness)
+        self.ui.horizontalSlider_contrast.valueChanged.connect(self._updateContrast)
+
         self.ui.comboBox_colormap.setCurrentIndex(0)
-        self.ui.comboBox_colormap.currentIndexChanged.connect(
-            self._changeColormap
-        )
+        self.ui.comboBox_colormap.currentIndexChanged.connect(self._changeColormap)
         self.ui.comboBox_normalize.setCurrentIndex(0)
-        self.ui.comboBox_normalize.currentIndexChanged.connect(
-            self._changeNorm
-        )
-        
+        self.ui.comboBox_normalize.currentIndexChanged.connect(self._changeNorm)
+
         self.ui.pushButton_browse.clicked.connect(self._browse)
         self._initFourDSTEMProcessing()
 
@@ -256,7 +246,6 @@ class PageBaseFourDSTEM(QWidget):
         This toolbutton will be added to the toolbar of the figure canvas.
         """
         self.ui.widget_dp.setProcessingActionItemPath(self.data_path)
-
 
     def setFourDSTEM(self, data_path: str):
         """
@@ -271,21 +260,22 @@ class PageBaseFourDSTEM(QWidget):
             TypeError, KeyError, ValueError
         """
         if not isinstance(data_path, str):
-            raise TypeError('data_path must be a str, not '
-                '{0}'.format(type(data_path).__name__))
+            raise TypeError(
+                "data_path must be a str, not {0}".format(type(data_path).__name__)
+            )
 
         data_node = self.hdf_handler.getNode(data_path)
         # May raise KeyError is the path does not exist
         if not isinstance(data_node, HDFDataNode):
-            raise ValueError('Item {0} must be a Dataset'.format(data_path))
-        
+            raise ValueError("Item {0} must be a Dataset".format(data_path))
+
         data_obj = self.hdf_handler.file[data_path]
         if not len(data_obj.shape) == 4:
-            raise ValueError('Data must be a 4D matrix (4D-STEM dataset)')
+            raise ValueError("Data must be a 4D matrix (4D-STEM dataset)")
 
         self._data_path = data_path
         self.ui.lineEdit_data_path.setText(self.data_path)
-        
+
         # self._createAxes()
         self._createDP()
         self._createColorbar()
@@ -300,11 +290,10 @@ class PageBaseFourDSTEM(QWidget):
         self.dp_canvas.flush_events()
 
         self.ui.widget_dp.setProcessingActionItemPath(self.data_path)
-        
+
         self.ui.widget_dp.action_scale_bar.dialog_scale_bar.initializeBarLength()
         self.ui.widget_dp.action_scale_bar.dialog_scale_bar.readScaleBarMeta()
         self.ui.widget_dp.action_scale_bar.dialog_scale_bar.updateScaleBar()
-
 
     def _createAxes(self):
         """
@@ -312,16 +301,16 @@ class PageBaseFourDSTEM(QWidget):
         """
         if self._dp_ax is None:
             self._dp_ax = self.dp_figure.add_subplot()
-            self.dp_blit_manager.addArtist('dp_axes', self._dp_ax)
+            self.dp_blit_manager.addArtist("dp_axes", self._dp_ax)
         if self._colorbar_ax is None:
             self._colorbar_ax, _kw = make_axes(
                 self.dp_ax,
-                location = 'right',
-                orientation = 'vertical',
+                location="right",
+                orientation="vertical",
             )
             self._colorbar_ax.xaxis.set_visible(False)
             self._colorbar_ax.yaxis.tick_right()
-            self.dp_blit_manager.addArtist('colorbar_axes', self._colorbar_ax)
+            self.dp_blit_manager.addArtist("colorbar_axes", self._colorbar_ax)
 
     def _createDP(self):
         """
@@ -333,11 +322,8 @@ class PageBaseFourDSTEM(QWidget):
             # clear dp objects in the axes.
             self._dp_object.remove()
 
-        self._dp_object = self.dp_ax.imshow(
-            self.data_object[0, 0, :, :]
-        )
-        self.dp_blit_manager['dp_image'] = self._dp_object
-        
+        self._dp_object = self.dp_ax.imshow(self.data_object[0, 0, :, :])
+        self.dp_blit_manager["dp_image"] = self._dp_object
 
     def _createColorbar(self):
         """
@@ -345,12 +331,12 @@ class PageBaseFourDSTEM(QWidget):
         """
         if self._colorbar_object is None:
             self._colorbar_object = Colorbar(
-                ax = self.colorbar_ax,
-                mappable = self.dp_object,
+                ax=self.colorbar_ax,
+                mappable=self.dp_object,
             )
         else:
             self.colorbar_object.update_normal(self.dp_object)
-            
+
     def _createScaleBar(self):
         """
         Create the scale bar and its text artist.
@@ -359,51 +345,44 @@ class PageBaseFourDSTEM(QWidget):
             self._scale_bar = Rectangle((1, 1), 1, 1)
             self.dp_ax.add_patch(self._scale_bar)
         if self._scale_bar_text is None:
-            self._scale_bar_text = self.dp_ax.text(1, 1, '1')
+            self._scale_bar_text = self.dp_ax.text(1, 1, "1")
         self.ui.widget_dp.setScaleBarRelatedArtists(
-            self._scale_bar, 
+            self._scale_bar,
             self._scale_bar_text,
         )
-        self.dp_blit_manager['scale_bar'] = self._scale_bar 
-        self.dp_blit_manager['scale_bar_text'] = self._scale_bar_text
-        
+        self.dp_blit_manager["scale_bar"] = self._scale_bar
+        self.dp_blit_manager["scale_bar_text"] = self._scale_bar_text
+
         self.ui.widget_dp.setScaleBarActionUseMeta(
-            item_path = self.data_path,
-            pixel_length_meta = '/Calibration/Space/du_i',
-            unit_meta = '/Calibration/Space/du_i',
+            item_path=self.data_path,
+            pixel_length_meta="/Calibration/Space/du_i",
+            unit_meta="/Calibration/Space/du_i",
         )
-        
-        
-        
-        
-    
 
     def _updateDP(self):
         """
-        Update the current diffraction pattern according to the location in 
+        Update the current diffraction pattern according to the location in
         the real space (in preview or in spinBoxes).
         """
         if self.data_object is None:
             return None
 
         scan_i, scan_j, dp_i, dp_j = self.data_object.shape
-        scan_ii = max(0, min(scan_i, self.scan_ii)) # Avoid out of boundary
+        scan_ii = max(0, min(scan_i, self.scan_ii))  # Avoid out of boundary
         scan_jj = max(0, min(scan_j, self.scan_jj))
-        self.dp_object.set_data(
-            self.data_object[scan_ii, scan_jj, :, :]
-        )
+        self.dp_object.set_data(self.data_object[scan_ii, scan_jj, :, :])
         self.colorbar_object.update_normal(self.dp_object)
-        self.dp_blit_manager.update()     
+        self.dp_blit_manager.update()
 
     def _updateDPBySpinBoxI(self):
         self._scan_ii = self.ui.spinBox_scan_ii.value()
         # self._scan_jj = self.ui.spinBox_scan_jj.value()
         self._updateDP()
-    
+
     def _updateDPBySpinBoxJ(self):
         self._scan_jj = self.ui.spinBox_scan_jj.value()
         self._updateDP()
-    
+
     def _browse(self):
         """
         Open a dialog to browse which 4D-STEM to be opened.
@@ -414,15 +393,19 @@ class PageBaseFourDSTEM(QWidget):
             current_path = dialog.getCurrentPath()
         try:
             self.setFourDSTEM(current_path)
-        except (KeyError, ValueError, TypeError,) as e:
-            self.logger.error('{0}'.format(e), exc_info = True)
-            msg = QMessageBox(parent = self)
-            msg.setWindowTitle('Warning')
+        except (
+            KeyError,
+            ValueError,
+            TypeError,
+        ) as e:
+            self.logger.error("{0}".format(e), exc_info=True)
+            msg = QMessageBox(parent=self)
+            msg.setWindowTitle("Warning")
             msg.setIcon(QMessageBox.Warning)
             msg.setStandardButtons(QMessageBox.Ok)
-            msg.setText('Cannot open this data: {0}'.format(e))
+            msg.setText("Cannot open this data: {0}".format(e))
             msg.exec()
-        
+
     def _updateBrightness(self, brightness: int):
         """
         Set the brightness of the image.
@@ -432,15 +415,15 @@ class PageBaseFourDSTEM(QWidget):
         """
         contrast = self.ui.horizontalSlider_contrast.value()
         norm_type = self.ui.comboBox_normalize.currentIndex()
-        if norm_type == 0:      # Linear
+        if norm_type == 0:  # Linear
             new_norm = self._calcLinearNorm(brightness, contrast)
-        elif norm_type == 1:    # Logarithm
+        elif norm_type == 1:  # Logarithm
             new_norm = self._calcLogarithmNorm(brightness, contrast)
 
         self.dp_object.set_norm(new_norm)
         self.dp_blit_manager.update()
 
-        self.colorbar_object.update_normal(self.dp_object)  
+        self.colorbar_object.update_normal(self.dp_object)
         self.dp_blit_manager.update()
 
     def _updateContrast(self, contrast: int):
@@ -452,29 +435,29 @@ class PageBaseFourDSTEM(QWidget):
         """
         brightness = self.ui.horizontalSlider_brightness.value()
         norm_type = self.ui.comboBox_normalize.currentIndex()
-        if norm_type == 0:      # Linear
+        if norm_type == 0:  # Linear
             new_norm = self._calcLinearNorm(brightness, contrast)
-        elif norm_type == 1:    # Logarithm
+        elif norm_type == 1:  # Logarithm
             new_norm = self._calcLogarithmNorm(brightness, contrast)
-        
+
         self.dp_object.set_norm(new_norm)
-        self.colorbar_object.update_normal(self.dp_object)   
+        self.colorbar_object.update_normal(self.dp_object)
         self.dp_blit_manager.update()
 
     def _calcLinearNorm(self, brightness: int, contrast: int) -> Normalize:
         """
-        Calculate the linear normalization according to brightness and 
+        Calculate the linear normalization according to brightness and
         contrast value.
 
         This linear normalization has following properties:
-            - if brightness == 0: 
-                vmax is set to the mimimum of the image, so the image looks 
+            - if brightness == 0:
+                vmax is set to the mimimum of the image, so the image looks
                 like a whole black canvas.
             - if brightness == 99:
                 vmin is set to the maximum of the image, so the image looks
                 like a whole white canvas.
             - if contrast == 0:
-                vmin is set to (about) -infinite and vmax is set to (about) 
+                vmin is set to (about) -infinite and vmax is set to (about)
                 +infinite, so the image looks like a whole gray canvas.
             - if contrast == 99:
                 vmax and vmin is set to (minimum + maximum)/2 of the image,
@@ -488,19 +471,19 @@ class PageBaseFourDSTEM(QWidget):
         brightness = max(0, min(99, brightness))
         contrast = max(0, min(99, contrast))
 
-        slope = np.tan((1/2 - (contrast + 1)/100)*(np.pi/2) + np.pi/4)
+        slope = np.tan((1 / 2 - (contrast + 1) / 100) * (np.pi / 2) + np.pi / 4)
 
         # Do not use self.data_object[self.scan_ii, self.scan_jj, :, :], to
-        # avoid calculate maximum and minimum of the data from the disk. 
+        # avoid calculate maximum and minimum of the data from the disk.
         # Rather, the array here is saved in the dp_object in memory.
-        hmin = float(np.min(self.dp_object.get_array()))   
+        hmin = float(np.min(self.dp_object.get_array()))
         hmax = float(np.max(self.dp_object.get_array()))
-        
-        vmin_tmp = brightness/50*(hmin - hmax) + hmax
-        vmax_tmp = brightness/50*(hmin - hmax) - hmin + 2*hmax
-        vmin = (vmin_tmp + vmax_tmp)/2 + slope*(vmin_tmp - vmax_tmp)/2
-        vmax = (vmax_tmp + vmin_tmp)/2 + slope*(vmax_tmp - vmin_tmp)/2
-        return Normalize(vmin = vmin, vmax = vmax)
+
+        vmin_tmp = brightness / 50 * (hmin - hmax) + hmax
+        vmax_tmp = brightness / 50 * (hmin - hmax) - hmin + 2 * hmax
+        vmin = (vmin_tmp + vmax_tmp) / 2 + slope * (vmin_tmp - vmax_tmp) / 2
+        vmax = (vmax_tmp + vmin_tmp) / 2 + slope * (vmax_tmp - vmin_tmp) / 2
+        return Normalize(vmin=vmin, vmax=vmax)
 
     def _calcLogarithmNorm(self, brightness: int, contrast: int):
         """
@@ -509,16 +492,16 @@ class PageBaseFourDSTEM(QWidget):
 
         TODO: For now brightness and contrast do not work.
 
-        arguments:  
+        arguments:
             brightness: (int) must between 0 to 99
 
             contrast: (int) must between 0 to 99
         """
         brightness = max(0, min(99, brightness))
         contrast = max(0, min(99, contrast))
-        hmin = np.min(self.dp_object.get_array())   
+        hmin = np.min(self.dp_object.get_array())
         hmax = np.max(self.dp_object.get_array())
-        return SymLogNorm(1, base = 2, vmin = hmin, vmax = hmax)
+        return SymLogNorm(1, base=2, vmin=hmin, vmax=hmax)
 
     def _changeNorm(self, index: int):
         """
@@ -530,12 +513,12 @@ class PageBaseFourDSTEM(QWidget):
         """
         brightness = self.ui.horizontalSlider_brightness.value()
         contrast = self.ui.horizontalSlider_contrast.value()
-        if index == 0:      # Linear
+        if index == 0:  # Linear
             new_norm = self._calcLinearNorm(brightness, contrast)
-            
-        elif index == 1:    # Logarithm
+
+        elif index == 1:  # Logarithm
             new_norm = self._calcLogarithmNorm(brightness, contrast)
-            
+
         self.dp_object.set_norm(new_norm)
         self.colorbar_object.update_normal(self.dp_object)
         self.dp_blit_manager.update()
@@ -563,5 +546,3 @@ class PageBaseFourDSTEM(QWidget):
             self.dp_object.set_cmap(cmap)
             self.colorbar_object.update_normal(self.dp_object)
             self.dp_blit_manager.update()
-    
-

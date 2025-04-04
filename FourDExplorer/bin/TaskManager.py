@@ -24,25 +24,25 @@
 
 This is a Scheduler for asynchronous concurrent tasks.
 
-We use ThreadExecutor from concurrent.futures as the pool, and use signal to 
-communicate between the main thread and the child threads. This manager is 
+We use ThreadExecutor from concurrent.futures as the pool, and use signal to
+communicate between the main thread and the child threads. This manager is
 only used in multithread, for those long duration IO tasks, and for avoiding
 the main window is blocked. Due to GIL, this manager cannot do parallel calcu-
 ations.
 
 When the main thread wants to submit a concurrent task made up by several func-
-tions, it packs these functions into Subtask objects, and then combine them as 
+tions, it packs these functions into Subtask objects, and then combine them as
 one Task object. Next, the main thread will assign a call-back function to eve-
 ry Subtask, which will send a signal to note the main thread that itself has c-
 ompleted.
 
-We note that in most case, users would like to execute tasks in order. So this 
+We note that in most case, users would like to execute tasks in order. So this
 task manager will run only one Task once. If a user submits several Tasks, they
 will wait in a task queue. Whenever a new Task is submitted, or some Subtask is
 completed, TaskManager will check whether the current Task has completed. If so,
 the next Task will start.
 
-We will be able to cancel a Task in waiting queue, but if it has started, we can 
+We will be able to cancel a Task in waiting queue, but if it has started, we can
 only wait until it is completed.
 
 author:             Hu Yiming
@@ -50,16 +50,15 @@ date:               Jan 9, 2022
 *------------------------------ TaskManager.py -------------------------------*
 """
 
-
 from concurrent import futures
 from typing import Iterator, Callable
 import traceback
 
 from PySide6.QtCore import (
-    Signal, 
-    QObject, 
-    QAbstractListModel, 
-    QModelIndex, 
+    Signal,
+    QObject,
+    QAbstractListModel,
+    QModelIndex,
     Qt,
 )
 
@@ -92,9 +91,11 @@ def _packing(func: Callable, *arg, **kw) -> Callable:
     Arguments: (3, 4)
     Keyword Arguments: {'other': 5}
     """
+
     def _wrapper():
         return func(*arg, **kw)
-    return _wrapper 
+
+    return _wrapper
 
 
 class TaskManager(QObject):
@@ -121,14 +122,14 @@ class TaskManager(QObject):
     here usually exists IO operations and calculations, so we do that concurre-
     ntly.
 
-    Since the operations of the TaskManager rely on the event loop in the main 
+    Since the operations of the TaskManager rely on the event loop in the main
     thread, so we can use signal-slot mechanism in Qt to call its functions. To
     be more specific, we can use signals to call the slot functions like add t-
-    ask into the task queue, cancel tasks, submit a task, and notify users the 
-    current task has been done. 
+    ask into the task queue, cancel tasks, submit a task, and notify users the
+    current task has been done.
 
-    If we want to submit a task to the tread pool, we need to instantiate an 
-    Task object, and then use Task.addSubtask() method to add those functions 
+    If we want to submit a task to the tread pool, we need to instantiate an
+    Task object, and then use Task.addSubtask() method to add those functions
     that need to execute concurrently. After that, we call addTask() method of
     the TaskManager, which will enqueue the task. At last, after a moment the
     task will execute automatically.
@@ -148,7 +149,7 @@ class TaskManager(QObject):
         current_task: (Task or None)
     """
 
-    progress_updated = Signal(int)      
+    progress_updated = Signal(int)
     # emits whenever the current task's progress update
 
     task_info_refresh = Signal()
@@ -167,34 +168,36 @@ class TaskManager(QObject):
         self._model_waiting = TaskQueueModel(self)
 
     @property
-    def task_queue(self) -> 'TaskQueue':
+    def task_queue(self) -> "TaskQueue":
         return self._task_queue
-    
+
     @property
-    def model_waiting(self) -> 'TaskQueueModel':
+    def model_waiting(self) -> "TaskQueueModel":
         return self._model_waiting
 
     @property
-    def current_task(self) -> 'Task':
+    def current_task(self) -> "Task":
         return self._current_task
 
     @current_task.setter
-    def current_task(self, task: 'Task'):
+    def current_task(self, task: "Task"):
         if task == None:
             self._current_task = None
         elif isinstance(task, Task):
             self._current_task = task
         else:
-            raise TypeError('current task must be a Task or None, not '
-                '{0}'.format(type(task).__name__))
+            raise TypeError(
+                "current task must be a Task or None, not {0}".format(
+                    type(task).__name__
+                )
+            )
 
     @property
     def logger(self) -> Logger:
         global qApp
         return qApp.logger
 
-
-    def addTask(self, task: 'Task'):
+    def addTask(self, task: "Task"):
         """
         Add a task to the waiting queue.
 
@@ -202,47 +205,46 @@ class TaskManager(QObject):
             task: (Task)
         """
         if not isinstance(task, Task):
-            raise TypeError('task must be a Task, not '
-                '{0}'.format(type(task).__name__))
+            raise TypeError("task must be a Task, not {0}".format(type(task).__name__))
         task.state = TaskState.Waiting
         task.setParent(self)
         self.model_waiting.addTask(task)
         self._startNextTask()
 
-    def cancelTask(self, index: int|QModelIndex):
+    def cancelTask(self, index: int | QModelIndex):
         """
         Cancel the task in the waiting queue.
 
         arguments:
-            index: (int or QModelIndex) 
+            index: (int or QModelIndex)
         """
         if isinstance(index, int):
             _index = self.model_waiting.createIndex(index, 0)
         elif isinstance(index, QModelIndex):
             _index = index
         else:
-            raise TypeError('index must be int or QModelIndex, not '
-                '{0}'.format(type(index).__name__))
+            raise TypeError(
+                "index must be int or QModelIndex, not {0}".format(type(index).__name__)
+            )
         if not _index.isValid():
             return None
-        
+
         task = self.model_waiting.cancelTask(_index)
         task.state = TaskState.Cancelled
 
     def _startNextTask(self):
         """
-        if a task is completed, it will send task_completed signal. Then this 
-        slot will be called. 
+        if a task is completed, it will send task_completed signal. Then this
+        slot will be called.
         """
         self._clearLastTask()
-        self._refresh()         # Reinitialize the state of task manager
+        self._refresh()  # Reinitialize the state of task manager
 
         _call_submitNextTask = True
         while _call_submitNextTask:
             _call_submitNextTask = self._submitNextTask()
 
-        self._refresh()         # Update the state of task manager
-
+        self._refresh()  # Update the state of task manager
 
     def _clearLastTask(self) -> bool:
         """
@@ -263,14 +265,14 @@ class TaskManager(QObject):
             for subtask in self.current_task:
                 if subtask.exception:
                     self.logger.error(
-                        '{0}'.format(subtask.exception), 
-                        exc_info = True,
+                        "{0}".format(subtask.exception),
+                        exc_info=True,
                     )
                     self.task_exception.emit(
-                        'An exception occured in Subtask {0}'
-                        ' of the Task {1}: {2}'.format(
+                        "An exception occured in Subtask {0}"
+                        " of the Task {1}: {2}".format(
                             subtask.name,
-                            self.current_task.name, 
+                            self.current_task.name,
                             subtask.exception,
                         )
                     )
@@ -281,21 +283,18 @@ class TaskManager(QObject):
         else:
             return False
 
-
     def _currentDoFollowWork(self):
         """
         Do follow work, and handle its exceptions.
         """
         try:
-            self.logger.info('Task {0} completed.'.format(
-                self.current_task.name
-            ))
+            self.logger.info("Task {0} completed.".format(self.current_task.name))
             self.current_task.follow()
         except BaseException as e:
-            self.logger.error('{0}'.format(e), exc_info = True)
+            self.logger.error("{0}".format(e), exc_info=True)
             self.task_exception.emit(
-                'An exception occured when the Task {0} ' 
-                'is doing following work: {0}'.format(
+                "An exception occured when the Task {0} "
+                "is doing following work: {0}".format(
                     self.current_task.name,
                     e,
                 )
@@ -303,11 +302,10 @@ class TaskManager(QObject):
         finally:
             self.current_task = None
 
-
     def _submitNextTask(self) -> bool:
         """
         Get a new task from the waiting queue
-        
+
         Will do prepare work of the task.
 
         If this function returns False, then the task is submitted to the exec-
@@ -321,9 +319,9 @@ class TaskManager(QObject):
 
         returns:
             (bool) indicates whether task manager should recall this function
-                to get another task into the threading pool. 
+                to get another task into the threading pool.
         """
-        
+
         if self.current_task:
             return False
 
@@ -332,7 +330,7 @@ class TaskManager(QObject):
             return False
 
         task.state = TaskState.Submitted
-        self.logger.info('Task {0} submitted.'.format(task.name))
+        self.logger.info("Task {0} submitted.".format(task.name))
         task.task_completed.connect(self._startNextTask)
         task.task_progress.connect(self._sendProgress)
 
@@ -341,67 +339,63 @@ class TaskManager(QObject):
         except BaseException as e:
             # Abandon submitting if errors happen
             task.state = TaskState.Excepted
-            self.logger.error('{0}'.format(e), exc_info = True)
+            self.logger.error("{0}".format(e), exc_info=True)
             self.task_exception.emit(
-                'An exception occured when the Task {0} ' 
-                'is doing preparation work: {0}. '
-                'The task is aborted.'.format(
+                "An exception occured when the Task {0} "
+                "is doing preparation work: {0}. "
+                "The task is aborted.".format(
                     task.name,
                     e,
                 )
             )
-            self.logger.info('Task {0} aborted.'.format(task.name))
-            return True # This function is called again to run the next task.
+            self.logger.info("Task {0} aborted.".format(task.name))
+            return True  # This function is called again to run the next task.
 
         else:
             self.current_task = task
             for subtask in task:
-                subtask.future = self._executor.submit(
-                    subtask.getFunction()
-                )
+                subtask.future = self._executor.submit(subtask.getFunction())
                 subtask.future.add_done_callback(subtask.complete)
                 self.logger.debug(
-                    'subtask {0} submitted to the executor and has added '
-                    'done callback'.format(subtask.name)
+                    "subtask {0} submitted to the executor and has added "
+                    "done callback".format(subtask.name)
                 )
             return False
-
 
     def _refresh(self):
         self.task_info_refresh.emit()
 
-
     def _sendProgress(self):
         self.progress_updated.emit(self.current_task.progress)
 
-
     def _abortForce(self):
         """
-        Force terminating the current task. 
-        
+        Force terminating the current task.
+
         It seems we cannot do this for now.
         """
         pass
 
     def shutDown(self):
         """
-        Shut down the executor. 
-        
+        Shut down the executor.
+
         The python process will end until the last task completes. Use this
-        function before close 4D-Explorer software to clear resources. 
+        function before close 4D-Explorer software to clear resources.
 
         And also the waiting queue will be cleared.
         """
         self.task_queue.clearWaiting()
         self.task_queue.clearHistory()
-        self._executor.shutdown(wait = False, cancel_futures = True)
-        self.logger.debug('Executor in TaskManager shuts down')
-    
+        self._executor.shutdown(wait=False, cancel_futures=True)
+        self.logger.debug("Executor in TaskManager shuts down")
+
     def clearHistory(self):
         """
         Clear the list of history tasks.
         """
         self.task_queue.clearHistory()
+
 
 class TaskQueue(QObject):
     """
@@ -417,7 +411,7 @@ class TaskQueue(QObject):
 
     After a task is initialized, it is enqueued to this task queue. Any time
     a task is completed, one task should be poped, and sumbitted to the pool.
-    
+
     Whenever a task is added to waiting list, it is also added to history list.
     Use clearHistory() to clear the history list.
 
@@ -426,13 +420,14 @@ class TaskQueue(QObject):
 
         maxhistory: (int) the maximum length of history queue
     """
+
     def __init__(self):
         self._maxlen = 10
         self._maxhistory = 100
-        self._tq = []       # waiting list of tasks (task queue)
+        self._tq = []  # waiting list of tasks (task queue)
         self._history = []  # history list of tasks
-        
-    @property 
+
+    @property
     def maxlen(self) -> int:
         """
         returns:
@@ -449,9 +444,8 @@ class TaskQueue(QObject):
             mlen: (int)
         """
         if not isinstance(mlen, int):
-            raise TypeError(('maxlen must be int, not '
-                '{0}'.format(type(mlen).__name__)))
-        self._maxlen = mlen 
+            raise TypeError(("maxlen must be int, not {0}".format(type(mlen).__name__)))
+        self._maxlen = mlen
 
     @property
     def maxhistory(self) -> int:
@@ -470,15 +464,16 @@ class TaskQueue(QObject):
             mlen: (int)
         """
         if not isinstance(mlen, int):
-            raise TypeError(('maxhistory must be int, not '
-                '{0}'.format(type(mlen).__name__)))
-        self._maxhistory = mlen 
+            raise TypeError(
+                ("maxhistory must be int, not {0}".format(type(mlen).__name__))
+            )
+        self._maxhistory = mlen
 
     @property
     def history_list(self) -> list:
         return self._history
 
-    def addTask(self, task: 'Task'):
+    def addTask(self, task: "Task"):
         """
         Add a task into waiting queue.
 
@@ -486,17 +481,16 @@ class TaskQueue(QObject):
             task: (Task)
         """
         if not isinstance(task, Task):
-            raise TypeError('task must be a Task, not '
-                '{0}'.format(type(task).__name__))
+            raise TypeError("task must be a Task, not {0}".format(type(task).__name__))
         if len(self) >= self.maxlen:
-            raise ValueError('Cannot add task: too many task waiting')
+            raise ValueError("Cannot add task: too many task waiting")
         self._tq.append(task)
 
         if len(self._history) >= self.maxhistory:
             self._history.pop(0)
         self._history.append(task)
-    
-    def popTask(self) -> 'Task':
+
+    def popTask(self) -> "Task":
         """
         Get the task from the front of the waiting queue.
 
@@ -508,31 +502,32 @@ class TaskQueue(QObject):
         else:
             return None
 
-    def cancelTask(self, index: int) -> 'Task':
+    def cancelTask(self, index: int) -> "Task":
         """
         Delete a task from the waiting queue.
 
         arguments:
-            index: (int) 
-        
+            index: (int)
+
         returns:
             (Task)
         """
         return self._tq.pop(index)
 
     def __str__(self) -> str:
-        return '<TaskQueue>: {0} members.'.format(len(self._tq))
+        return "<TaskQueue>: {0} members.".format(len(self._tq))
 
     def __repr__(self) -> str:
         return self.__str__()
 
-    def __getitem__(self, index: int) -> 'Task':
+    def __getitem__(self, index: int) -> "Task":
         return self._tq[index]
 
-    def __setitem__(self, index: int, task: 'Task'):
+    def __setitem__(self, index: int, task: "Task"):
         if not isinstance(task, Task):
-            raise TypeError(('task must be Task object, not '
-                '{0}'.format(type(task).__name__)))
+            raise TypeError(
+                ("task must be Task object, not {0}".format(type(task).__name__))
+            )
         self._tq[index] = task
 
     def __len__(self):
@@ -541,8 +536,8 @@ class TaskQueue(QObject):
     def __iter__(self) -> Iterator:
         return iter(self._tq)
 
-    def __contains__(self, task: 'Task') -> bool:
-        return task in self._tq 
+    def __contains__(self, task: "Task") -> bool:
+        return task in self._tq
 
     def clearHistory(self):
         """
@@ -557,11 +552,10 @@ class TaskQueue(QObject):
         self._tq = []
 
 
-
 class Task(QObject):
     """
     应当顺次执行的独立任务。
-    
+
     内部包含一个或多个可并发执行的子任务，可以使用 for 循环遍历地取到这些子任务。
 
     在该任务执行前，主线程会调用 prepare()，做一些任务的初始化工作；在该任务执行后，
@@ -587,12 +581,12 @@ class Task(QObject):
         Excepted                在执行时因为异常而终止
     其中 Aborted 状态目前无法达到。
 
-    An independent task that should execute in order. 
-    
+    An independent task that should execute in order.
+
     In a task there is one or several concurrent subtasks, and we can use for
     loop to get all of these subtasks.
 
-    Before the task is executed, prepare() is called in the main thread, which 
+    Before the task is executed, prepare() is called in the main thread, which
     is used to do some preparation work. After all of the subtasks return, the
     main thread will call follow() and do some following work.
 
@@ -623,22 +617,22 @@ class Task(QObject):
 
     attributes:
         name: (str) name of this task
-        
+
         state: (TaskState) the state of the task
 
         comment: (str) comment of this task
     """
 
-    task_completed = Signal()   # emits when this task is completed.
-    task_progress = Signal()    # emits when progress is updated
+    task_completed = Signal()  # emits when this task is completed.
+    task_progress = Signal()  # emits when progress is updated
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self._name = 'untitled'
+        self._name = "untitled"
         self._subtasks = []
         self._follows = [self._doNothing]
         self._prepares = [self._doNothing]
-        self._comment = ''
+        self._comment = ""
         self._progress = 0
         self._state = TaskState.Initialized
         self._has_progress = False
@@ -650,8 +644,7 @@ class Task(QObject):
     @name.setter
     def name(self, _name: str):
         if not isinstance(_name, str):
-            raise TypeError('name must be a str, not '
-                '{0}'.format(type(_name).__name__))
+            raise TypeError("name must be a str, not {0}".format(type(_name).__name__))
         self._name = _name
 
     @property
@@ -677,8 +670,9 @@ class Task(QObject):
             _tstate: (TaskState)
         """
         if not isinstance(_tstate, TaskState):
-            raise TypeError('state must be one of TaskState, not'
-                '{0}'.format(type(_tstate).__name__))
+            raise TypeError(
+                "state must be one of TaskState, not{0}".format(type(_tstate).__name__)
+            )
         self._state = _tstate
 
     def __iter__(self):
@@ -687,7 +681,7 @@ class Task(QObject):
     def __len__(self):
         return len(self._subtasks)
 
-    def __contains__(self, subtask: 'Subtask') -> bool:
+    def __contains__(self, subtask: "Subtask") -> bool:
         return subtask in self._subtasks
 
     def __getitem__(self, index: int):
@@ -704,8 +698,8 @@ class Task(QObject):
     def setFollow(self, func: Callable, *arg, **kw):
         """
         Set the following function.
-        
-        The function will be called after the task is completed. We can set 
+
+        The function will be called after the task is completed. We can set
         following function multiple times, and those functions will be called
         according to the order they were added.
 
@@ -717,8 +711,9 @@ class Task(QObject):
             **kw: those key word arguments of the function
         """
         if not isinstance(func, Callable):
-            raise TypeError(('func must be a Callable, not '
-                '{0}'.format(type(func).__name__)))
+            raise TypeError(
+                ("func must be a Callable, not {0}".format(type(func).__name__))
+            )
         self._follows.append(_packing(func, *arg, **kw))
 
     def setPrepare(self, func: Callable, *arg, **kw):
@@ -726,7 +721,7 @@ class Task(QObject):
         Set the preparing function.
 
         The function will be called before the task is submitted. We can set
-        prepare function multiple times, and those functions will be called 
+        prepare function multiple times, and those functions will be called
         according to the order they were added.
 
         arguments:
@@ -737,8 +732,9 @@ class Task(QObject):
             **kw: those key word arguments of the function
         """
         if not isinstance(func, Callable):
-            raise TypeError(('func must be a Callable, not '
-                '{0}'.format(type(func).__name__)))
+            raise TypeError(
+                ("func must be a Callable, not {0}".format(type(func).__name__))
+            )
         self._prepares.append(_packing(func, *arg, **kw))
 
     def follow(self):
@@ -768,19 +764,20 @@ class Task(QObject):
     @comment.setter
     def comment(self, _comm: str):
         """
-        Set the comment of this task. 
-        
+        Set the comment of this task.
+
         Describing what the task to do and how.
 
         arguments:
             _comm: (str)
         """
         if not isinstance(_comm, str):
-            raise TypeError(('comment must be a str, not '
-                '{0}'.format(type(_comm).__name__)))
+            raise TypeError(
+                ("comment must be a str, not {0}".format(type(_comm).__name__))
+            )
         self._comment = _comm
-        
-    def addSubtask(self, subtask: 'Subtask') -> 'Subtask':
+
+    def addSubtask(self, subtask: "Subtask") -> "Subtask":
         """
         Add a subtask to this task.
 
@@ -791,15 +788,16 @@ class Task(QObject):
             subtask: (Subtask) the subtask to be added.
         """
         if not isinstance(subtask, Subtask):
-            raise TypeError('subtask must be Subtask object, not '
-                '{0}'.format(type(subtask).__name__))
+            raise TypeError(
+                "subtask must be Subtask object, not {0}".format(type(subtask).__name__)
+            )
         subtask.setParent(self)
         subtask.subtask_excepted.connect(self.setExcepted)
         subtask.subtask_completed.connect(self.checkCompleted)
         self._subtasks.append(subtask)
         return subtask
 
-    def addSubtaskWithProgress(self, subtask: 'Subtask') -> 'Subtask':
+    def addSubtaskWithProgress(self, subtask: "Subtask") -> "Subtask":
         """
         Add a subtask with progress to this task by a function.
 
@@ -810,7 +808,7 @@ class Task(QObject):
         arguments:
             name: (str)
 
-            func: (Callable) this function must accept the first argument as 
+            func: (Callable) this function must accept the first argument as
                 the progress signal, while the other arguments are accepted as
                 usual. Inside the function, the progress signal needs to emit
                 periodically (which is controlled by the function).
@@ -820,13 +818,15 @@ class Task(QObject):
             **kw: other keyword arguments
         """
         if not isinstance(subtask, Subtask):
-            raise TypeError('subtask must be Subtask object, not '
-                '{0}'.format(type(subtask).__name__))
+            raise TypeError(
+                "subtask must be Subtask object, not {0}".format(type(subtask).__name__)
+            )
 
         if self._has_progress:
-            raise RuntimeError('Only one subtask with progress can be added. ' 
-                'Use addSubtask() instead.')
-            
+            raise RuntimeError(
+                "Only one subtask with progress can be added. Use addSubtask() instead."
+            )
+
         self.progress = 0
         subtask.setParent(self)
         subtask.subtask_progress.connect(self.setProgress)
@@ -836,7 +836,7 @@ class Task(QObject):
         self._has_progress = True
         return subtask
 
-    def addSubtaskFunc(self, name: str, func: Callable, *arg, **kw) -> 'Subtask':
+    def addSubtaskFunc(self, name: str, func: Callable, *arg, **kw) -> "Subtask":
         """
         Add a subtask to this task by a function.
 
@@ -858,17 +858,13 @@ class Task(QObject):
         subtask.name = name
         subtask.subtask_excepted.connect(self.setExcepted)
         subtask.subtask_completed.connect(self.checkCompleted)
-        
+
         self._subtasks.append(subtask)
         return subtask
 
-
-
-    def addSubtaskFuncWithProgress(self, 
-            name: str, 
-            func: Callable, 
-            *arg, 
-            **kw) -> 'SubtaskWithProgress':
+    def addSubtaskFuncWithProgress(
+        self, name: str, func: Callable, *arg, **kw
+    ) -> "SubtaskWithProgress":
         """
         Add a subtask with progress to this task by a function.
 
@@ -879,7 +875,7 @@ class Task(QObject):
         arguments:
             name: (str)
 
-            func: (Callable) this function must accept the first argument as 
+            func: (Callable) this function must accept the first argument as
                 the progress signal, while the other arguments are accepted as
                 usual. Inside the function, the progress signal needs to emit
                 periodically (which is controlled by the function).
@@ -889,13 +885,16 @@ class Task(QObject):
             **kw: other keyword arguments
         """
         if self._has_progress:
-            raise RuntimeError('Only one subtask with progress can be added. ' 
-                'Use addSubtaskFunc() instead.')
-            
+            raise RuntimeError(
+                "Only one subtask with progress can be added. "
+                "Use addSubtaskFunc() instead."
+            )
+
         self.progress = 0
         subtask = SubtaskWithProgress(self)
-        packed_func = _packing(func, 
-            progress_signal = subtask.subtask_progress, *arg, **kw)
+        packed_func = _packing(
+            func, progress_signal=subtask.subtask_progress, *arg, **kw
+        )
         subtask.setFunction(packed_func)
         subtask.name = name
         subtask.subtask_progress.connect(self.setProgress)
@@ -903,10 +902,10 @@ class Task(QObject):
         subtask.subtask_completed.connect(self.checkCompleted)
         self._subtasks.append(subtask)
         self._has_progress = True
-        return subtask 
+        return subtask
 
     @property
-    def progress(self) -> int|None:
+    def progress(self) -> int | None:
         """
         The progress of the task.
 
@@ -929,13 +928,11 @@ class Task(QObject):
         """
         if not isinstance(_pg, int):
             # self._progress = 0
-            raise TypeError('progress must be int, not '
-                '{0}'.format(type(_pg).__name__))
+            raise TypeError("progress must be int, not {0}".format(type(_pg).__name__))
         if _pg < 0 or _pg > 100:
             # self._progress = 0
-            raise ValueError('progress must larger than 0 '
-                'and smaller than 100')
-        self._progress = _pg 
+            raise ValueError("progress must larger than 0 and smaller than 100")
+        self._progress = _pg
 
     def checkCompleted(self) -> bool:
         """
@@ -945,7 +942,7 @@ class Task(QObject):
         """
         if self.state == TaskState.Completed:
             return True
-            
+
         elif self.state == TaskState.Submitted:
             for subtask in self:
                 if not subtask.completed:
@@ -962,12 +959,12 @@ class Task(QObject):
             return True
         else:
             return False
-        
+
     def setProgress(self, progress: int):
         """
         Set the progress of the task.
-        
-        This acts like a slot. Use a signal from a subtask to set progress. 
+
+        This acts like a slot. Use a signal from a subtask to set progress.
         Progress must be a integer between 0 and 100
 
         arguments:
@@ -975,7 +972,7 @@ class Task(QObject):
         """
         self.progress = progress
         self.task_progress.emit()
-    
+
     def hasProgress(self) -> bool:
         """
         Returns whether this task has progress.
@@ -990,7 +987,7 @@ class Task(QObject):
         Set the state of the task to TaskState.Excepted.
 
         When this function is called, this task or some of its subtask raised
-        an exception. The exception will be recorded in log, and may open a 
+        an exception. The exception will be recorded in log, and may open a
         dialog to note the user.
         """
         self.state = TaskState.Excepted
@@ -999,15 +996,15 @@ class Task(QObject):
 class Subtask(QObject):
     """
     并发执行的子任务。
-    
+
     通常由一个函数组成，在一个子线程中运行。多个子任务会组成一个任务 Task。子任务对应
     的函数返回后，在子线程中会调用 complete() 方法作为回调函数，从而发射信号表示该子
     任务已经完成。
 
     The Subtask that executes concurrently in a thread.
-    
-    A subtask consists one function. Usually there are several Subtask objects 
-    in one Task object. After the function returns, the complete() method will 
+
+    A subtask consists one function. Usually there are several Subtask objects
+    in one Task object. After the function returns, the complete() method will
     be called as the callback function, and emit a signal showing the subtask
     has been completed.
 
@@ -1020,7 +1017,7 @@ class Subtask(QObject):
         name: (str) the name of this subtask
 
         future: (futures.Future) the future object of the function. After the
-            function returns, we can call future.result() method to get the 
+            function returns, we can call future.result() method to get the
             return values. However, if the function is still being executed,
             calling future.result() will block the main thread.
 
@@ -1034,21 +1031,22 @@ class Subtask(QObject):
 
         rec_exc: (None or str) traceback information if there is an exception
     """
-    subtask_completed = Signal()    # emits when the subtask is completed
-    subtask_excepted = Signal()     # emits when there is an exception raised
+
+    subtask_completed = Signal()  # emits when the subtask is completed
+    subtask_excepted = Signal()  # emits when there is an exception raised
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
 
         self._func = None
-        self._name = 'anonymous'
+        self._name = "anonymous"
         self._future = None
         self._result = None
         self._exception = None  # exception, if an exception occured
-        self._rec_exc = None    # trace back exc when an exception occured
-    
+        self._rec_exc = None  # trace back exc when an exception occured
+
     def __str__(self):
-        return '<Subtask> name: {0}'.format(self.name)
+        return "<Subtask> name: {0}".format(self.name)
 
     def __repr__(self):
         return self.__str__()
@@ -1075,8 +1073,9 @@ class Subtask(QObject):
     @future.setter
     def future(self, _ft: futures.Future):
         if not isinstance(_ft, futures.Future):
-            raise TypeError('future must be Future object, not '
-                '{0}'.format(type(_ft).__name__))
+            raise TypeError(
+                "future must be Future object, not {0}".format(type(_ft).__name__)
+            )
         self._future = _ft
 
     @property
@@ -1086,16 +1085,15 @@ class Subtask(QObject):
     @name.setter
     def name(self, _name: str):
         if not isinstance(_name, str):
-            raise TypeError('name must be str, not '
-                '{0}'.format(type(_name).__name__))
+            raise TypeError("name must be str, not {0}".format(type(_name).__name__))
         self._name = _name
 
     @property
     def result(self):
         """
-        If the subtask is not completed, returns None. 
-        
-        Otherwise, when the subtask is completed, self.complete() method is 
+        If the subtask is not completed, returns None.
+
+        Otherwise, when the subtask is completed, self.complete() method is
         called, and then the result can be gotten by this property.
         """
         return self._result
@@ -1123,7 +1121,7 @@ class Subtask(QObject):
         """
         Will emits a completed signal, and save the result.
 
-        This function will act as a callback function, as an argument by 
+        This function will act as a callback function, as an argument by
         futures.Future.add_call_back() function.
 
         argument:
@@ -1131,8 +1129,8 @@ class Subtask(QObject):
         """
         try:
             self._result = future.result()
-        except BaseException:   # set the task to TaskState.Excepted, 
-                                # so there will be some exception handle work.
+        except BaseException:  # set the task to TaskState.Excepted,
+            # so there will be some exception handle work.
             self._exception = future.exception()
             self._rec_exc = traceback.format_exc()
             self.subtask_excepted.emit()
@@ -1144,14 +1142,15 @@ class Subtask(QObject):
         Set the function to be executed in the threading pool.
 
         To use this method, we must first packing all the arguments into the
-        callable (by lambda or other means). 
+        callable (by lambda or other means).
 
         If we use addSubtask() method from the Task object, it will help us to
-        pack these arguments. 
+        pack these arguments.
         """
         if not isinstance(func, Callable):
-            raise TypeError('func must be Callable, not '
-                '{0}'.format(type(func).__name__))
+            raise TypeError(
+                "func must be Callable, not {0}".format(type(func).__name__)
+            )
         self._func = func
 
     # def getResult(self):
@@ -1168,16 +1167,17 @@ class Subtask(QObject):
     #     else:
     #         return self.future.result()
 
+
 class SubtaskWithProgress(Subtask):
     """
     带有 Progress 的子任务。
-        
+
     该子任务需要将信号作为参数传递到函数中，并且在函数中定期发射信号说明进度。
     因此，所对应的函数也需要特殊定制，一般是在第一个参数设置为信号对象。
 
-    This is a subtask with progress. 
-        
-    This subtask need to transfer a progress signal as an argument to the 
+    This is a subtask with progress.
+
+    This subtask need to transfer a progress signal as an argument to the
     function, and emit the signal periodically. So, the function need to be
     custom-made: the function must accept the signal as the first argument.
     """
@@ -1186,7 +1186,6 @@ class SubtaskWithProgress(Subtask):
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        
 
 
 class TaskQueueModel(QAbstractListModel):
@@ -1216,6 +1215,7 @@ class TaskQueueModel(QAbstractListModel):
         - data(self, index: QModelIndex, role: int)
             Return the internal data according to the role
     """
+
     def __init__(self, task_manager: TaskManager):
         """
         arguments
@@ -1262,9 +1262,7 @@ class TaskQueueModel(QAbstractListModel):
             return _task.name
         elif role == Qt.ToolTipRole:
             _task = self.task_queue[index.row()]
-            return '<Task>: {0}, state: {1}'.format(
-                _task.name, _task.state
-            )
+            return "<Task>: {0}, state: {1}".format(_task.name, _task.state)
         else:
             return None
 
@@ -1275,14 +1273,10 @@ class TaskQueueModel(QAbstractListModel):
         arguments:
             task: (Task)
         """
-        self.beginInsertRows(
-            QModelIndex(), 
-            self.rowCount(), 
-            self.rowCount()
-        )
+        self.beginInsertRows(QModelIndex(), self.rowCount(), self.rowCount())
         self.task_queue.addTask(task)
         self.endInsertRows()
-        
+
     def popTask(self) -> Task:
         """
         Get a task from the task queue to submit.
@@ -1300,10 +1294,10 @@ class TaskQueueModel(QAbstractListModel):
         Remove a task from the task queue.
 
         arguments:
-            index: (QModelIndex) 
+            index: (QModelIndex)
         """
         if not index.isValid():
-            raise ValueError('Cannot cancel task: invalid index')
+            raise ValueError("Cannot cancel task: invalid index")
         self.beginRemoveRows(
             QModelIndex(),
             index.row(),
@@ -1348,7 +1342,7 @@ class SubtaskListModel(QAbstractListModel):
 
     @property
     def task(self) -> Task:
-        return self._task 
+        return self._task
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
         """
@@ -1378,15 +1372,15 @@ class SubtaskListModel(QAbstractListModel):
 
         if role == Qt.DisplayRole:
             if subtask.completed:
-                return '{0} (completed)'.format(name)
+                return "{0} (completed)".format(name)
             else:
-                return '{0}'.format(name)
+                return "{0}".format(name)
 
         elif role == Qt.ToolTipRole:
             if subtask.completed:
-                return '<Subtask>: {0} (completed)'.format(name)
+                return "<Subtask>: {0} (completed)".format(name)
             else:
-                return '<Subtask>: {0}'.format(name)
+                return "<Subtask>: {0}".format(name)
 
 
 class HistoryTaskModel(QAbstractListModel):
@@ -1455,10 +1449,4 @@ class HistoryTaskModel(QAbstractListModel):
         if role == Qt.DisplayRole:
             return task.name
         elif role == Qt.ToolTipRole:
-            return '<Task>: {0}, state: {1}'.format(
-                task.name, task.state
-            )
-
-
-        
-
+            return "<Task>: {0}, state: {1}".format(task.name, task.state)

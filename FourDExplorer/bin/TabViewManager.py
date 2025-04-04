@@ -31,8 +31,8 @@ from logging import Logger
 from typing import List
 
 from PySide6.QtWidgets import (
-    QTabWidget, 
-    QWidget, 
+    QTabWidget,
+    QWidget,
     QScrollArea,
     QVBoxLayout,
 )
@@ -40,27 +40,26 @@ from PySide6.QtCore import QObject, Qt, Signal
 
 from bin.Widgets.PageHome import PageHome
 
+
 class TabViewManager(QObject):
     """
     标签页的管理器。
 
     Managers of tabs.
     """
+
     signal_tab_opened = Signal(str)
     signal_tab_closed = Signal(str)
 
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self._tabWidget_view = None
-        self._page_home = PageHome(self.parent())   # parent is MainWindow
-        
-        # DEPRECATED: keep tab widget objects in list will cause memory leak
-        self._tab_history = []      
-        self._tab_history_max = 0
-        self.hdf_handler.file_about_to_close.connect(
-            self.pageWaitForFileClose
-        )
+        self._page_home = PageHome(self.parent())  # parent is MainWindow
 
+        # DEPRECATED: keep tab widget objects in list will cause memory leak
+        self._tab_history = []
+        self._tab_history_max = 0
+        self.hdf_handler.file_about_to_close.connect(self.pageWaitForFileClose)
 
     @property
     def tabWidget_view(self) -> QTabWidget:
@@ -69,8 +68,9 @@ class TabViewManager(QObject):
     @tabWidget_view.setter
     def tabWidget_view(self, tabview: QTabWidget):
         if not isinstance(tabview, QTabWidget):
-            raise TypeError('tabview must be QTabWidget, not '
-                '{0}'.format(type(tabview).__name__))
+            raise TypeError(
+                "tabview must be QTabWidget, not {0}".format(type(tabview).__name__)
+            )
         self._tabWidget_view = tabview
 
     @property
@@ -78,7 +78,7 @@ class TabViewManager(QObject):
         return self._page_home
 
     @property
-    def tab_history(self) -> List[QWidget]: # DEPRECATED
+    def tab_history(self) -> List[QWidget]:  # DEPRECATED
         return self._tab_history
 
     @property
@@ -86,9 +86,9 @@ class TabViewManager(QObject):
         global qApp
         return qApp.logger
 
-    @property 
+    @property
     def hdf_handler(self):
-        global qApp 
+        global qApp
         return qApp.hdf_handler
 
     def setTabWidget(self, tabview: QTabWidget):
@@ -107,7 +107,7 @@ class TabViewManager(QObject):
         self.openTab(self.page_home)
         self.tabWidget_view.setTabsClosable(True)
         self.tabWidget_view.tabCloseRequested.connect(self.closeTab)
-        
+
     def closeTab(self, tab_index: int):
         """
         Slots when the user requests to close a tab.
@@ -118,20 +118,19 @@ class TabViewManager(QObject):
         self.tabWidget_view.removeTab(tab_index)
         tab.close()
         self.signal_tab_closed.emit(tab.windowTitle())
-        
+
         if tab is not self._page_home:
             tab.deleteLater()
-            
+
         # If there is no tab opened, open home page automatically
         if self.tabWidget_view.count() == 0:
             self.openTab(self.page_home)
-        
 
     def getTab(self, index: int):
         """
         Returns the tab page according to the index.
 
-        NOTE: tabWidget.widget() will return a QScrollArea, rather than 
+        NOTE: tabWidget.widget() will return a QScrollArea, rather than
         the page itself, which is what we want.
 
         arguments:
@@ -142,7 +141,6 @@ class TabViewManager(QObject):
         """
         scroll_area = self.tabWidget_view.widget(index)
         return scroll_area.page
-        
 
     def openTab(self, page: QWidget):
         """
@@ -151,14 +149,14 @@ class TabViewManager(QObject):
         Usually the tab should be a Page, but other widgets are not forbidden.
 
         Will automatically add put the page in a scroll area.
-        
+
         arguments:
             page: (QWidget) the tab to be opened.
         """
         for ii in range(self.tabWidget_view.count()):
             if page is self.getTab(ii):
-                raise RuntimeError('Tab has been opened.')
-        
+                raise RuntimeError("Tab has been opened.")
+
         # if not page is self._page_home:
         #     if len(self._tab_history) > self._tab_history_max:
         #         self._tab_history.pop(0)
@@ -171,11 +169,10 @@ class TabViewManager(QObject):
             page.windowIcon(),
             page.windowTitle(),
         )
-        
+
         self.tabWidget_view.setCurrentIndex(new_tab_index)
         self.signal_tab_opened.emit(page.windowTitle())
-        self.logger.debug('Open a new page: {0}'.format(page.windowTitle()))
-
+        self.logger.debug("Open a new page: {0}".format(page.windowTitle()))
 
     def _encapsulatePageToScrollArea(self, page: QWidget) -> QScrollArea:
         """
@@ -193,11 +190,9 @@ class TabViewManager(QObject):
         scroll_area.setWidgetResizable(True)
         scroll_area.scrollAreaWidgetContents = QWidget(scroll_area)
         scroll_area.setWidget(scroll_area.scrollAreaWidgetContents)
-        scroll_area.verticalLayout = QVBoxLayout(
-            scroll_area.scrollAreaWidgetContents
-        )
+        scroll_area.verticalLayout = QVBoxLayout(scroll_area.scrollAreaWidgetContents)
         scroll_area.verticalLayout.addWidget(page)
-        scroll_area.page = page 
+        scroll_area.page = page
         page.setParent(scroll_area.scrollAreaWidgetContents)
         return scroll_area
 
@@ -205,8 +200,4 @@ class TabViewManager(QObject):
         """
         Ask user to close the pages before closing the file.
         """
-        pass 
-        
-
-
-    
+        pass

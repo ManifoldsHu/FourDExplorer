@@ -45,6 +45,7 @@ class WidgetTask(QWidget):
 
     The path of the ui file: ROOT_PATH/ui/uiWidgetTask.ui
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiWidgetTask.Ui_Form()
@@ -55,4 +56,3 @@ class WidgetTask(QWidget):
 
         global qApp
         self._task_manager = qApp.task_manager
-

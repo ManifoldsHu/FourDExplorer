@@ -14,12 +14,13 @@ date:           Jun 23, 2022
 *-------------------------- SplashScreenStart.py -----------------------------*
 """
 
-import os 
+import os
 
 from PySide6.QtWidgets import QSplashScreen
-from PySide6.QtGui import QPixmap 
+from PySide6.QtGui import QPixmap
 
 from Constants import ROOT_PATH
+
 
 class SplashScreenStart(QSplashScreen):
     """
@@ -27,18 +28,12 @@ class SplashScreenStart(QSplashScreen):
 
     The screen showing when starting the software.
     """
+
     def __init__(self):
         super().__init__()
         _image_path = os.path.join(
-            ROOT_PATH, 
-            'ui', 
-            'resources', 
-            'images', 
-            'start_image_full.png'
+            ROOT_PATH, "ui", "resources", "images", "start_image_full.png"
         )
         _pic = QPixmap(_image_path)
-        _pic.setDevicePixelRatio(3.125) # 800x640
+        _pic.setDevicePixelRatio(3.125)  # 800x640
         self.setPixmap(_pic)
-        
-
-

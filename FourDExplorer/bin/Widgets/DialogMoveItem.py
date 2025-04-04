@@ -14,10 +14,11 @@ date:               Mar 2, 2022
 *---------------------------- DialogMoveItem.py ------------------------------*
 """
 
-from PySide6.QtWidgets import QDialog, QWidget 
+from PySide6.QtWidgets import QDialog, QWidget
 
 from ui import uiDialogHDFMoveItem
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
+
 
 class DialogHDFMove(QDialog):
     """
@@ -25,18 +26,18 @@ class DialogHDFMove(QDialog):
 
     Dialog to choose group or data.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogHDFMoveItem.Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('Move Item')
-        self.ui.lineEdit_item_path.setText('/')
-        self.ui.lineEdit_dest_path.setText('/')
+        self.setWindowTitle("Move Item")
+        self.ui.lineEdit_item_path.setText("/")
+        self.ui.lineEdit_dest_path.setText("/")
         self.ui.pushButton_browse_item.clicked.connect(self.browseItem)
         self.ui.pushButton_browse_dest.clicked.connect(self.browseDest)
         self.ui.pushButton_cancel.clicked.connect(self.reject)
         self.ui.pushButton_ok.clicked.connect(self.accept)
-
 
     def setItemPath(self, hdf_path: str):
         """
@@ -63,7 +64,7 @@ class DialogHDFMove(QDialog):
         returns:
             (bool)
         """
-        dialog_browse = DialogHDFChoose(self, only_group = False)
+        dialog_browse = DialogHDFChoose(self, only_group=False)
 
         treeview_HDF = dialog_browse.ui.widget_viewer.ui.treeView_HDF
         model = treeview_HDF.model()
@@ -87,7 +88,7 @@ class DialogHDFMove(QDialog):
         returns:
             (bool)
         """
-        dialog_browse = DialogHDFChoose(self, only_group = True)
+        dialog_browse = DialogHDFChoose(self, only_group=True)
         dialog_code = dialog_browse.exec()
         if dialog_code == dialog_browse.Accepted:
             current_path = dialog_browse.getCurrentPath()
@@ -95,7 +96,7 @@ class DialogHDFMove(QDialog):
             return True
         else:
             return False
-        
+
     # def _OK(self):
     #     """
     #     When OK button is clicked, check whether the state is valid.

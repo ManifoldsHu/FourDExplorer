@@ -14,10 +14,11 @@ date:               Mar 11, 2022
 *---------------------------- DialogMoveItem.py ------------------------------*
 """
 
-from PySide6.QtWidgets import QDialog, QWidget 
+from PySide6.QtWidgets import QDialog, QWidget
 
 from ui import uiDialogHDFCopyItem
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
+
 
 class DialogHDFCopy(QDialog):
     """
@@ -25,13 +26,14 @@ class DialogHDFCopy(QDialog):
 
     Dialog to choose group or data.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogHDFCopyItem.Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('Move Item')
-        self.ui.lineEdit_item_path.setText('/')
-        self.ui.lineEdit_dest_path.setText('/')
+        self.setWindowTitle("Move Item")
+        self.ui.lineEdit_item_path.setText("/")
+        self.ui.lineEdit_dest_path.setText("/")
         self.ui.pushButton_browse_item.clicked.connect(self.browseItem)
         self.ui.pushButton_browse_dest.clicked.connect(self.browseDest)
         self.ui.pushButton_cancel.clicked.connect(self.reject)
@@ -62,7 +64,7 @@ class DialogHDFCopy(QDialog):
         returns:
             (bool)
         """
-        dialog_browse = DialogHDFChoose(self, only_group = False)
+        dialog_browse = DialogHDFChoose(self, only_group=False)
 
         treeview_HDF = dialog_browse.ui.widget_viewer.ui.treeView_HDF
         model = treeview_HDF.model()
@@ -86,7 +88,7 @@ class DialogHDFCopy(QDialog):
         returns:
             (bool)
         """
-        dialog_browse = DialogHDFChoose(self, only_group = True)
+        dialog_browse = DialogHDFChoose(self, only_group=True)
         dialog_code = dialog_browse.exec()
         if dialog_code == dialog_browse.Accepted:
             current_path = dialog_browse.getCurrentPath()
@@ -94,7 +96,7 @@ class DialogHDFCopy(QDialog):
             return True
         else:
             return False
-        
+
     # def _OK(self):
     #     """
     #     When OK button is clicked, check whether the state is valid.

@@ -13,15 +13,15 @@
 作者:           胡一鸣
 创建日期:       2021年8月3日
 
-This is 4D-Explorer Main Application. 4D-Explorer is a software to load, 
-calibrate, calculate and anaylize Four-dimensional scanning transmission electron 
-microscopy (4D-STEM) dataset with an easy-to-use graphic user interface. 
+This is 4D-Explorer Main Application. 4D-Explorer is a software to load,
+calibrate, calculate and anaylize Four-dimensional scanning transmission electron
+microscopy (4D-STEM) dataset with an easy-to-use graphic user interface.
 
-4D-STEM is a novel technique. It typically uses a convergent electron beam to scan 
-the sample and records the electron beam diffraction imaging corresponding to each 
-scan position using an electron camera. Therefore, the 4D-STEM dataset is usually 
-represented as a four-dimensional array in the computer, where the first two 
-indices correspond to the scan coordinates, and the latter two indices correspond 
+4D-STEM is a novel technique. It typically uses a convergent electron beam to scan
+the sample and records the electron beam diffraction imaging corresponding to each
+scan position using an electron camera. Therefore, the 4D-STEM dataset is usually
+represented as a four-dimensional array in the computer, where the first two
+indices correspond to the scan coordinates, and the latter two indices correspond
 to each diffraction image.
 
 
@@ -34,46 +34,47 @@ All rights reserved.
 """
 
 import sys
-import os 
+import os
+
 ROOT_PATH = os.path.dirname(__file__)
 if not ROOT_PATH in sys.path:
     sys.path.append(ROOT_PATH)
 
 import matplotlib.style as mplstyle
-mplstyle.use('fast')
+
+mplstyle.use("fast")
 
 from bin.Widgets.SplashScreenStart import SplashScreenStart
 
-from bin.app import App 
+from bin.app import App
+
 
 def run():
-
-
-    ''' start app '''
+    """start app"""
     app = App(sys.argv)
 
-    ''' start loading screen '''
+    """ start loading screen """
     loading_screen = SplashScreenStart()
     loading_screen.show()
     app.processEvents()
 
-    ''' start backend managers '''
+    """ start backend managers """
     app.startBackEnds()
     logger = app.logger
-    app.theme_handler.initTheme() 
+    app.theme_handler.initTheme()
 
-    ''' start main window '''
+    """ start main window """
     from bin.Widgets.MainWindow import MainWindow
+
     main_window = MainWindow()
     app.main_window = main_window
     main_window.show()
     loading_screen.finish(main_window)
-    
+
     quit = app.exec()
-    logger.info('4D-Explorer exits.')
+    logger.info("4D-Explorer exits.")
     sys.exit(quit)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()
-

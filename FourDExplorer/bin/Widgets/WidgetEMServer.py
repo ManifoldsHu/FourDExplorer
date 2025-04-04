@@ -24,8 +24,8 @@ date:           Jun 13, 2022
 
 from PySide6.QtWidgets import QWidget
 
+
 class WidgetEMServer(QWidget):
     # TODO
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-

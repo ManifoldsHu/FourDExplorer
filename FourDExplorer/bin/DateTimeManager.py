@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 """
 *--------------------------- DateTimeManager.py ------------------------------*
@@ -27,8 +27,9 @@ author:         Hu Yiming
 date:           Jan 9, 2024
 """
 
-import datetime 
-from PySide6.QtCore import QObject 
+import datetime
+from PySide6.QtCore import QObject
+
 
 class DateTimeManager(QObject):
     """
@@ -36,6 +37,7 @@ class DateTimeManager(QObject):
 
     Gives current date, time and timezone.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
 
@@ -49,7 +51,7 @@ class DateTimeManager(QObject):
         """
         now = datetime.datetime.now()
         return now.strftime("%H:%M:%S")
-    
+
     @property
     def current_date(self) -> str:
         """
@@ -60,7 +62,7 @@ class DateTimeManager(QObject):
         """
         now = datetime.datetime.now()
         return now.strftime("%Y-%m-%d")
-    
+
     @property
     def current_timezone(self) -> str:
         """

@@ -16,7 +16,7 @@ The dialog to import 4D-STEM dataset.
 
 Contents:
     - WidgetImportEMPAD, to import 4D-STEM dataset produced by EMPAD
-    - WidgetImportEMPAD_NJU, to import 4D-STEM dataset produced by EMPAD with 
+    - WidgetImportEMPAD_NJU, to import 4D-STEM dataset produced by EMPAD with
         software version v0.51 that installed in Nanjing University.
     - WidgetImportRaw, to import 4D-STEM dataset stored in binary file.
 
@@ -31,7 +31,7 @@ from PySide6.QtWidgets import QDialog, QWidget
 from PySide6.QtGui import QRegularExpressionValidator
 
 from bin.HDFManager import reValidHDFName, HDFHandler, HDFGroupNode
-from bin.Widgets.DialogChooseItem import DialogHDFChoose  
+from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from ui import uiDialogImportFourDSTEM
 
 
@@ -43,6 +43,7 @@ class DialogImportFourDSTEM(QDialog):
 
     Ui 文件地址: ROOTPATH/ui/uiDialogImportFourDSTEM
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogImportFourDSTEM.Ui_Dialog()
@@ -50,7 +51,7 @@ class DialogImportFourDSTEM(QDialog):
 
         self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.comboBox_mode.currentIndexChanged.connect(self._changeMode)
-        
+
         self.ui.stackedWidget.setCurrentIndex(0)
 
         self.ui.pushButton_browse_parent.clicked.connect(self.browseParent)
@@ -59,10 +60,10 @@ class DialogImportFourDSTEM(QDialog):
         self.ui.pushButton_ok.clicked.connect(self.accept)
         self.ui.pushButton_cancel.clicked.connect(self.reject)
 
-        self.ui.lineEdit_name.setText('Untitled')
+        self.ui.lineEdit_name.setText("Untitled")
         self._validateNewName()
-        
-        self._hideOptions()     # some importer is not completed yet TODO
+
+        self._hideOptions()  # some importer is not completed yet TODO
 
     @property
     def hdf_handler(self) -> HDFHandler:
@@ -72,7 +73,7 @@ class DialogImportFourDSTEM(QDialog):
     def _changeMode(self, index: int):
         """
         Slots when import mode is changed.
-        
+
         NOTE: 4 and 5 is not completed yet, and hence they are removed
 
         arguments:
@@ -87,22 +88,22 @@ class DialogImportFourDSTEM(QDialog):
                             8   'MATLAB Matrix Sequence'
         """
         self.ui.stackedWidget.setCurrentIndex(index)
-    
+
     def _hideOptions(self):
         """
         Hide options for incomplete importers.
 
-        This method removes the options for MATLAB 4D Matrix (.mat) and MATLAB 
-        Matrix Sequence from the combo box and the corresponding widgets from 
+        This method removes the options for MATLAB 4D Matrix (.mat) and MATLAB
+        Matrix Sequence from the combo box and the corresponding widgets from
         the stacked widget.
-        
+
         TODO
         """
         self.ui.comboBox_mode.removeItem(8)
         self.ui.comboBox_mode.removeItem(7)
         self.ui.stackedWidget.removeWidget(self.ui.stackedWidget.widget(8))
         self.ui.stackedWidget.removeWidget(self.ui.stackedWidget.widget(7))
-    
+
     def browseParent(self) -> bool:
         """
         Open a dialog to browse a group to be parent.
@@ -110,26 +111,27 @@ class DialogImportFourDSTEM(QDialog):
         returns:
             (bool) whether a new path is set.
         """
-        dialog_browse = DialogHDFChoose(self, only_group = True)
+        dialog_browse = DialogHDFChoose(self, only_group=True)
         dialog_code = dialog_browse.exec()
         if dialog_code == dialog_browse.Accepted:
             current_path = dialog_browse.getCurrentPath()
             self.ui.lineEdit_parent_path.setText(current_path)
-            return True 
+            return True
         else:
-            return False 
+            return False
 
     def setParentPath(self, item_path: str):
         """
         Set the parent group's path where imported dataset will locate.
 
         arguments:
-            item_path: (str) 
+            item_path: (str)
         """
         if not isinstance(item_path, str):
-            raise TypeError('item_path must be a str, not '
-                '{0}'.format(type(item_path).__name__))
-        
+            raise TypeError(
+                "item_path must be a str, not {0}".format(type(item_path).__name__)
+            )
+
         node = self.hdf_handler.getNode(item_path)
         if not isinstance(node, HDFGroupNode):
             self.ui.lineEdit_parent_path.setText(node.parent.path)
@@ -169,10 +171,10 @@ class DialogImportFourDSTEM(QDialog):
         Will add '.4dstem' automatically as the extension.
         """
         name = self.ui.lineEdit_name.text()
-        if '.' in name:
-            if name.split('.')[-1] == '4dstem':
-                return name 
-        return name + '.4dstem'
+        if "." in name:
+            if name.split(".")[-1] == "4dstem":
+                return name
+        return name + ".4dstem"
 
     def _validateNewName(self):
         """
@@ -187,5 +189,3 @@ class DialogImportFourDSTEM(QDialog):
         Returns the page according to the selected import mode.
         """
         return self.ui.stackedWidget.widget(index)
-
-
