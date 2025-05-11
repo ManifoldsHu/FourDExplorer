@@ -31,21 +31,28 @@ from bin.BlitManager import BlitManager
 from bin.UIManager import ThemeHandler
 from bin.Widgets.DialogScaleBar import DialogScaleBar
 
+
 class WidgetPlotBase(QWidget):
     """
     使用 matplotlib 进行绘制的部件基类。
 
     Base widget to plot items by matplotlib.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self._figure = Figure()
         self._canvas = FigureCanvas(self._figure)
         self._blit_manager = BlitManager(self._canvas)
-        self._blit_manager.addArtist('_figure_patch', self._figure.patch)
-        
+        self._blit_manager.addArtist("_figure_patch", self._figure.patch)
+
         self.vertical_layout = QVBoxLayout()
-        self.vertical_layout.setContentsMargins(0,0,0,0,)
+        self.vertical_layout.setContentsMargins(
+            0,
+            0,
+            0,
+            0,
+        )
         self._navigation_actions = {}
         self._initActions()
         self._navigation_toolbar = self._buildNavigationToolBar()
@@ -74,14 +81,14 @@ class WidgetPlotBase(QWidget):
 
     @property
     def navigation_actions(self) -> dict:
-        return self._navigation_actions 
+        return self._navigation_actions
 
     def setToolbarVisible(self, visible: bool = True):
         """
         Set whether the navigation tool bar of matplotlib to hide.
 
         If this method is never called, the default state of the tool bar will
-        be visible. 
+        be visible.
 
         arguments:
             visible: (bool)
@@ -89,14 +96,14 @@ class WidgetPlotBase(QWidget):
         self._navigation_toolbar.setVisible(visible)
 
     _mpl_action_icons = {
-        'home': 'home',
-        'back': 'backward',
-        'forward': 'forward',
-        'pan': 'move',
-        'zoom': 'search',
-        'configure_subplots': 'layout',
-        'edit_parameters': 'adjust',
-        'save_figure': 'save',
+        "home": "home",
+        "back": "backward",
+        "forward": "forward",
+        "pan": "move",
+        "zoom": "search",
+        "configure_subplots": "layout",
+        "edit_parameters": "adjust",
+        "save_figure": "save",
     }
 
     def _initActions(self):
@@ -109,22 +116,20 @@ class WidgetPlotBase(QWidget):
         for key, action in self.navigation_actions.items():
             self._initActionIcon(action, self._mpl_action_icons[key])
 
-    _action_icon_rc = ':/Navigation/resources/icons/'
+    _action_icon_rc = ":/Navigation/resources/icons/"
 
     def _initActionIcon(self, action: QAction, rc_name: str):
         """
         Initialize icons for actions.
         """
-        _path = self._action_icon_rc + rc_name 
+        _path = self._action_icon_rc + rc_name
         icon = self.theme_handler.iconProvider(_path)
         action.setIcon(icon)
         self.theme_handler.theme_changed.connect(
-            lambda: action.setIcon(
-                self.theme_handler.iconProvider(_path)
-            )
+            lambda: action.setIcon(self.theme_handler.iconProvider(_path))
         )
 
-    def _buildNavigationToolBar(self) -> 'NavigationToolBar':
+    def _buildNavigationToolBar(self) -> "NavigationToolBar":
         """
         Build the navigation toolbar according to the actions.
         """
@@ -134,7 +139,7 @@ class WidgetPlotBase(QWidget):
         self.loc_label = self._mpl_toolbar.locLabel
         self._action_loc_label = tool_bar.addWidget(self.loc_label)
         self._action_loc_label.setVisible(True)
-        return tool_bar 
+        return tool_bar
 
     def addCustomizedAction(self, action: QAction, key: str = None):
         """
@@ -149,7 +154,7 @@ class WidgetPlotBase(QWidget):
             key: (str) in default it will be the text of the action.
         """
         if key is not None:
-            self.navigation_actions[key] = action 
+            self.navigation_actions[key] = action
         else:
             self.navigation_actions[action.text()] = action
         self._navigation_toolbar.insertAction(self._action_loc_label, action)
@@ -158,7 +163,7 @@ class WidgetPlotBase(QWidget):
         """
         Add the customized tool button.
 
-        The tool button must take the responsibility for update the button's 
+        The tool button must take the responsibility for update the button's
         icon whenever the theme is changed.
 
         arguments:
@@ -166,18 +171,17 @@ class WidgetPlotBase(QWidget):
         """
         self._navigation_toolbar.insertWidget(self._action_loc_label, button)
 
-
     _theme_mode_to_color = {
-        UIThemeMode.Classical: 'white',
-        UIThemeMode.Dark: 'black',
-        UIThemeMode.Light: 'white',
+        UIThemeMode.Classical: "white",
+        UIThemeMode.Dark: "black",
+        UIThemeMode.Light: "white",
     }
 
     def _updateFigurePatch(self):
         """
         Update the figure patch's color when the current theme changed.
 
-        NOTE: I connot find a simple way to update all of the artists with current 
+        NOTE: I connot find a simple way to update all of the artists with current
         rcParams in the figure. So this function is deprecated.
         """
         # self.figure.patch.set_color(
@@ -186,13 +190,14 @@ class WidgetPlotBase(QWidget):
         #     ]
         # )
         # self.blit_manager.update()
-        pass 
+        pass
 
 
 class NavigationToolBar(QToolBar):
     """
     Customize navigation tool bar, based on matplotlib.
     """
+
     def __init__(self, parent: QWidget):
         """
         arguments:
@@ -215,6 +220,5 @@ class NavigationToolBar(QToolBar):
 
     @property
     def theme_handler(self) -> ThemeHandler:
-        global qApp 
+        global qApp
         return qApp.theme_handler
-

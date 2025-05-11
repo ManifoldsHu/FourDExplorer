@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 """
 *----------------------------- PagePlotCTF.py --------------------------------*
@@ -14,7 +14,7 @@
     - WidgetPlotLine 用于使用 matplotlib 画线
 
 提升部件
-    - 提升类名 PagePlotCTF 
+    - 提升类名 PagePlotCTF
     - 头文件 bin.Widgets.PagePlotCTF
 
 作者:           胡一鸣
@@ -30,31 +30,30 @@ Promoted Widget:
     - name of widget class: PagePlotCTF
     - header file: bin.Widgets.PagePlotCTF
 
-author:         Hu Yiming 
+author:         Hu Yiming
 date:           Jun 11, 2023
 *----------------------------- PagePlotCTF.py --------------------------------*
 """
 
-from logging import Logger 
-from PySide6.QtWidgets import QWidget 
-from PySide6.QtWidgets import QMessageBox 
-from PySide6.QtWidgets import QInputDialog 
-from PySide6.QtWidgets import QDialog 
+from logging import Logger
+from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QMessageBox
+from PySide6.QtWidgets import QInputDialog
+from PySide6.QtWidgets import QDialog
 
-from matplotlib.backends.backend_qtagg import (
-    FigureCanvasQTAgg as FigureCanvas)
-from matplotlib.figure import Figure 
-from matplotlib.axes import Axes 
-from matplotlib.image import AxesImage 
-from matplotlib.patches import Circle 
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from matplotlib.image import AxesImage
+from matplotlib.patches import Circle
 from matplotlib.patches import Annulus
 from matplotlib.lines import Line2D
-from matplotlib.colorbar import Colorbar, make_axes 
+from matplotlib.colorbar import Colorbar, make_axes
 
-import h5py 
-import numpy as np 
-from bin.BlitManager import BlitManager 
-from bin.HDFManager import HDFDataNode, HDFHandler 
+import h5py
+import numpy as np
+from bin.BlitManager import BlitManager
+from bin.HDFManager import HDFDataNode, HDFHandler
 from bin.TaskManager import TaskManager
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.Widgets.DialogCreateItem import DialogHDFCreate
@@ -63,6 +62,7 @@ from ui import uiPagePlotCTF
 
 from lib.Probe import OpticalSTEM
 from lib.Probe import CTFCalculator
+
 
 class PagePlotCTF(QWidget):
     """
@@ -74,226 +74,234 @@ class PagePlotCTF(QWidget):
 
     The path of the ui file: ROOT_PATH/ui/uiPagePlotCTF.ui
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiPagePlotCTF.Ui_Form()
         self.ui.setupUi(self)
 
-        self._config_path = ''
-        self._ronchigram_ax = None 
-        self._ronchigram_colorbar_ax = None 
-        self._ronchigram_object = None 
-        self._ronchigram_colorbar_object = None 
+        self._config_path = ""
+        self._ronchigram_ax = None
+        self._ronchigram_colorbar_ax = None
+        self._ronchigram_object = None
+        self._ronchigram_colorbar_object = None
         self._probe_abs_ax = None
         self._probe_abs_colorbar_ax = None
-        self._probe_abs_object = None  
-        self._probe_abs_colorbar_object = None 
-        self._probe_angle_ax = None  
-        self._probe_angle_colorbar_ax = None 
-        self._probe_angle_object = None 
-        self._probe_angle_colorbar_object = None 
-        self._ctf_image_ax = None 
-        self._ctf_image_colorbar_ax = None 
-        self._ctf_image_object = None 
-        self._ctf_image_colorbar_object = None 
+        self._probe_abs_object = None
+        self._probe_abs_colorbar_object = None
+        self._probe_angle_ax = None
+        self._probe_angle_colorbar_ax = None
+        self._probe_angle_object = None
+        self._probe_angle_colorbar_object = None
+        self._ctf_image_ax = None
+        self._ctf_image_colorbar_ax = None
+        self._ctf_image_object = None
+        self._ctf_image_colorbar_object = None
 
-        self._ctf_line_ax = None 
-        self._ctf_line_object = None 
-        
-        self._random_sample = None 
+        self._ctf_line_ax = None
+        self._ctf_line_object = None
+
+        self._random_sample = None
 
         self.ui.lineEdit_config_path.setReadOnly(True)
-        
-        
 
         self._initUi()
 
-    @property 
+    @property
     def hdf_handler(self) -> HDFHandler:
-        global qApp 
-        return qApp.hdf_handler 
-    
+        global qApp
+        return qApp.hdf_handler
+
     @property
     def config_object(self) -> h5py.Dataset:
         return self.hdf_handler.file[self._config_path]
-    
+
     @property
     def config_path(self) -> str:
-        return self._config_path 
-    
+        return self._config_path
+
     @property
     def logger(self) -> Logger:
-        global qApp 
-        return qApp.logger 
-    
+        global qApp
+        return qApp.logger
+
     @property
     def ronchigram_canvas(self) -> FigureCanvas:
-        return self.ui.widget_plot_ronchigram.canvas 
-    
+        return self.ui.widget_plot_ronchigram.canvas
+
     @property
     def ronchigram_figure(self) -> Figure:
-        return self.ui.widget_plot_ronchigram.figure 
-    
+        return self.ui.widget_plot_ronchigram.figure
+
     @property
     def ronchigram_ax(self) -> Axes:
         return self._ronchigram_ax
-    
+
     @property
     def ronchigram_object(self) -> AxesImage:
         return self._ronchigram_object
-    
+
     @property
     def ronchigram_colorbar_ax(self) -> Axes:
-        return self._ronchigram_colorbar_ax 
-    
+        return self._ronchigram_colorbar_ax
+
     @property
     def ronchigram_colorbar_object(self) -> Colorbar:
         return self._ronchigram_colorbar_object
-    
+
     @property
     def ronchigram_blit_manager(self) -> BlitManager:
         return self.ui.widget_plot_ronchigram.blit_manager
 
     @property
     def probe_abs_canvas(self) -> FigureCanvas:
-        return self.ui.widget_plot_probe_abs.canvas 
-    
+        return self.ui.widget_plot_probe_abs.canvas
+
     @property
     def probe_abs_figure(self) -> Figure:
-        return self.ui.widget_plot_probe_abs.figure 
-    
+        return self.ui.widget_plot_probe_abs.figure
+
     @property
     def probe_abs_ax(self) -> Axes:
         return self._probe_abs_ax
-    
+
     @property
     def probe_abs_object(self) -> AxesImage:
         return self._probe_abs_object
 
     @property
     def probe_abs_colorbar_ax(self) -> Axes:
-        return self._probe_abs_colorbar_ax 
-    
+        return self._probe_abs_colorbar_ax
+
     @property
     def probe_abs_colorbar_object(self) -> Colorbar:
         return self._probe_abs_colorbar_object
-    
+
     @property
     def probe_abs_blit_manager(self) -> BlitManager:
         return self.ui.widget_plot_probe_abs.blit_manager
 
     @property
     def probe_angle_canvas(self) -> FigureCanvas:
-        return self.ui.widget_plot_probe_angle.canvas 
-    
+        return self.ui.widget_plot_probe_angle.canvas
+
     @property
     def probe_angle_figure(self) -> Figure:
-        return self.ui.widget_plot_probe_angle.figure 
-    
+        return self.ui.widget_plot_probe_angle.figure
+
     @property
     def probe_angle_ax(self) -> Axes:
         return self._probe_angle_ax
-    
+
     @property
     def probe_angle_object(self) -> AxesImage:
         return self._probe_angle_object
-    
+
     @property
     def probe_angle_colorbar_ax(self) -> Axes:
         return self._probe_angle_colorbar_ax
-    
+
     @property
     def probe_angle_colorbar_object(self) -> Colorbar:
         return self._probe_angle_colorbar_object
-    
+
     @property
     def probe_angle_blit_manager(self) -> BlitManager:
         return self.ui.widget_plot_probe_angle.blit_manager
 
     @property
     def ctf_image_canvas(self) -> FigureCanvas:
-        return self.ui.widget_plot_ctf_image.canvas 
-    
+        return self.ui.widget_plot_ctf_image.canvas
+
     @property
     def ctf_image_figure(self) -> Figure:
-        return self.ui.widget_plot_ctf_image.figure 
-    
+        return self.ui.widget_plot_ctf_image.figure
+
     @property
     def ctf_image_ax(self) -> Axes:
         return self._ctf_image_ax
-    
+
     @property
     def ctf_image_object(self) -> AxesImage:
-        return self._ctf_image_object 
+        return self._ctf_image_object
 
-    @property 
+    @property
     def ctf_image_colorbar_ax(self) -> Axes:
-        return self._ctf_image_colorbar_ax 
-    
+        return self._ctf_image_colorbar_ax
+
     @property
     def ctf_image_colorbar_object(self) -> Colorbar:
         return self._ctf_image_colorbar_object
-    
+
     @property
     def ctf_image_blit_manager(self) -> BlitManager:
         return self.ui.widget_plot_ctf_image.blit_manager
 
     @property
     def ctf_line_canvas(self) -> FigureCanvas:
-        return self.ui.widget_plot_ctf_curve.canvas 
-    
+        return self.ui.widget_plot_ctf_curve.canvas
+
     @property
     def ctf_line_figure(self) -> Figure:
-        return self.ui.widget_plot_ctf_curve.figure 
-    
+        return self.ui.widget_plot_ctf_curve.figure
+
     @property
     def ctf_line_ax(self) -> Axes:
         return self._ctf_line_ax
-    
+
     @property
     def ctf_line_blit_manager(self) -> BlitManager:
         return self.ui.widget_plot_ctf_curve.blit_manager
-    
+
     @property
     def ctf_line_object(self) -> Line2D:
         return self._ctf_line_object
-    
+
     @property
     def task_manager(self) -> TaskManager:
-        global qApp 
+        global qApp
         return qApp.task_manager
 
     @property
     def ronchigram_data_object(self) -> h5py.Dataset:
-        dummy = np.zeros((256,256))
+        dummy = np.zeros((256, 256))
         radius = 96
         for i in range(256):
             for j in range(256):
-                if (i-128)**2 + (j-128)**2 < radius**2:
-                    dummy[i,j] = 1         
+                if (i - 128) ** 2 + (j - 128) ** 2 < radius**2:
+                    dummy[i, j] = 1
         dummy = dummy / np.sum(dummy)
-        return dummy#self.hdf_handler.file[self._ronchigram_data_path]
-    
+        return dummy  # self.hdf_handler.file[self._ronchigram_data_path]
+
     @property
     def probe_data_object(self) -> h5py.Dataset:
         optics = self._setOpticalSTEM()
-        return optics.getProbe()#self.hdf_handler.file[self._probe_abs_data_path]
-    
+        return optics.getProbe()  # self.hdf_handler.file[self._probe_abs_data_path]
+
     @property
     def ctf_image_data_object(self) -> h5py.Dataset:
-        return np.ones((1,1))#self.hdf_handler.file[self._ctf_image_data_path]
-    
+        return np.ones((1, 1))  # self.hdf_handler.file[self._ctf_image_data_path]
+
     def _updateConfigObject(self):
         """
         Update the config object based on the inputs.
         """
         config_object = self.config_object
 
-        config_object.attrs["accelerate_voltage"] = self.ui.doubleSpinBox_voltage.value() * 1e3
+        config_object.attrs["accelerate_voltage"] = (
+            self.ui.doubleSpinBox_voltage.value() * 1e3
+        )
         config_object.attrs["alpha"] = self.ui.doubleSpinBox_alpha.value() * 1e-3
-        config_object.attrs["camera_length"] = self.ui.doubleSpinBox_camera_length.value() * 1e-3
-        config_object.attrs["scan_step_size"] = self.ui.doubleSpinBox_scanning_step_size.value() * 1e-9
-        config_object.attrs["detector_shape"] = [int(self.ui.comboBox_pixel_number.currentText()), int(self.ui.comboBox_pixel_number.currentText())]
+        config_object.attrs["camera_length"] = (
+            self.ui.doubleSpinBox_camera_length.value() * 1e-3
+        )
+        config_object.attrs["scan_step_size"] = (
+            self.ui.doubleSpinBox_scanning_step_size.value() * 1e-9
+        )
+        config_object.attrs["detector_shape"] = [
+            int(self.ui.comboBox_pixel_number.currentText()),
+            int(self.ui.comboBox_pixel_number.currentText()),
+        ]
         # estimate the real space pixel size from small angle approximation: dx = CL * full_detector_size / N
         # config_object.attrs["detector_pixel_size"] = self.config_object.attrs["camera_length"] * self.ui.doubleSpinBox_full_detector_size.value() * 1e-3 / int(self.ui.comboBox_pixel_number.currentText())   # TODO
 
@@ -302,18 +310,28 @@ class PagePlotCTF(QWidget):
 
     def _setOpticalSTEM(self):
         optics = OpticalSTEM(
-            accelerate_voltage=self.config_object.attrs.get("/Acquisition/Microscope/accelerate_voltage", 60e3),
-            alpha=self.config_object.attrs.get("/Acquisition/Microscope/convergence_angle", 22.5e-3),
-            camera_length=self.config_object.attrs.get("/Acquisition/Microscope/camera_length", 576e-3),
-            scan_step_size=self.config_object.attrs.get("/Calibration/Space/scan_dr_i", 5e-9),
+            accelerate_voltage=self.config_object.attrs.get(
+                "/Acquisition/Microscope/accelerate_voltage", 60e3
+            ),
+            alpha=self.config_object.attrs.get(
+                "/Acquisition/Microscope/convergence_angle", 22.5e-3
+            ),
+            camera_length=self.config_object.attrs.get(
+                "/Acquisition/Microscope/camera_length", 576e-3
+            ),
+            scan_step_size=self.config_object.attrs.get(
+                "/Calibration/Space/scan_dr_i", 5e-9
+            ),
             detector_shape=self.config_object.shape[2:4],
-            detector_pixel_size=self.config_object.attrs.get("/Acquisition/Camera/pixel_size_i", 150e-6),
+            detector_pixel_size=self.config_object.attrs.get(
+                "/Acquisition/Camera/pixel_size_i", 150e-6
+            ),
             defocus=self.config_object.attrs.get("/Aberration/C1", 10e-9),
             Cs=self.config_object.attrs.get("/Aberration/C3", 1e-6),
         )
 
         return optics
-    
+
     def _initUi(self):
         """
         Initialise UI.
@@ -334,7 +352,7 @@ class PagePlotCTF(QWidget):
 
         self.ui.doubleSpinBox_defocus.setValue(100.0)
         self.ui.doubleSpinBox_Cs.setValue(1.0)
-        
+
         # Opens a new dialog to set higher order aberrations.
         self.ui.pushButton_set_aberrations
 
@@ -343,11 +361,11 @@ class PagePlotCTF(QWidget):
         self.ui.doubleSpinBox_abf_inner_radius.setValue(10.0)
 
         self.ui.pushButton_save_config_path.clicked.connect(self._saveConfigPath)
-        
+
         self.ui.pushButton_start_calculation.clicked.connect(self._updateProbe)
 
         # self._updateConfigObject()
-    
+
     def setFourDSTEM(self, data_path: str):
         """
         Set the config path in HDF5 file, and load the appropriate optical configurations.
@@ -359,24 +377,25 @@ class PagePlotCTF(QWidget):
             TypeError, KeyError, ValueError
         """
         if not isinstance(data_path, str):
-            raise TypeError('data_path must be a str, not '
-                '{0}'.format(type(data_path).__name__))
+            raise TypeError(
+                "data_path must be a str, not {0}".format(type(data_path).__name__)
+            )
 
         data_node = self.hdf_handler.getNode(data_path)
         # May raise KeyError is the path does not exist
         if not isinstance(data_node, HDFDataNode):
-            raise ValueError('Item {0} must be a Dataset'.format(data_path))
-        
+            raise ValueError("Item {0} must be a Dataset".format(data_path))
+
         data_obj = self.hdf_handler.file[data_path]
         if not len(data_obj.shape) == 4:
-            raise ValueError('Data must be a 4D matrix (4D-STEM dataset)')
-        
+            raise ValueError("Data must be a 4D matrix (4D-STEM dataset)")
+
         self._config_path = data_path
         self.ui.lineEdit_config_path.setText(self._config_path)
 
         optics = self._setOpticalSTEM()
-        
-        scan_i, scan_j, dp_i, dp_j = self.hdf_handler.file[data_path].shape 
+
+        scan_i, scan_j, dp_i, dp_j = self.hdf_handler.file[data_path].shape
         if dp_i in [128, 256, 512, 1024, 2048, 4096]:
             self.ui.comboBox_pixel_number.setCurrentIndex(int(np.log2(dp_i) - 7))
         else:
@@ -385,23 +404,23 @@ class PagePlotCTF(QWidget):
         self.ui.comboBox_image_modes.setCurrentIndex(0)
         self.ui.doubleSpinBox_alpha.setValue(optics.alpha * 1e3)
         self.ui.doubleSpinBox_camera_length.setValue(optics.camera_length * 1e3)
-        
+
         self.ui.doubleSpinBox_voltage.setValue(optics.accelerate_voltage * 1e-3)
         self.ui.doubleSpinBox_scanning_step_size.setValue(optics.scan_step_size * 1e9)
         # self.ui.doubleSpinBox_full_detector_size.setValue(optics.alpha / optics.bright_field_disk_radius * optics.dp_N)
-        self.ui.doubleSpinBox_bright_field_disk_radius.setValue(optics.bright_field_disk_radius)
-        
+        self.ui.doubleSpinBox_bright_field_disk_radius.setValue(
+            optics.bright_field_disk_radius
+        )
+
         self.ui.doubleSpinBox_defocus.setValue(optics.defocus * 1e9)
         self.ui.doubleSpinBox_Cs.setValue(optics.Cs * 1e6)
-        
+
         self.ui.doubleSpinBox_abf_inner_radius.setValue(25)
         self.ui.doubleSpinBox_abf_outer_radius.setValue(50)
-        
-        
+
         self._createAxes()
         self._createImages()
         self._createColorbar()
-
 
     def _createAxes(self):
         """
@@ -410,60 +429,61 @@ class PagePlotCTF(QWidget):
 
         if self._ronchigram_ax == None:
             self._ronchigram_ax = self.ronchigram_figure.add_subplot()
-            self.ronchigram_blit_manager.addArtist('image_axes', self._ronchigram_ax)
+            self.ronchigram_blit_manager.addArtist("image_axes", self._ronchigram_ax)
         if self._ronchigram_colorbar_ax == None:
             self._ronchigram_colorbar_ax, _kw = make_axes(
                 self.ronchigram_ax,
-                location='right',
-                orientation='vertical',
+                location="right",
+                orientation="vertical",
             )
             self._ronchigram_colorbar_ax.xaxis.set_visible(False)
             self._ronchigram_colorbar_ax.yaxis.tick_right()
-            self.ronchigram_blit_manager['colorbar_axes'] = self._ronchigram_colorbar_ax
-            
+            self.ronchigram_blit_manager["colorbar_axes"] = self._ronchigram_colorbar_ax
 
         if self._probe_abs_ax == None:
             self._probe_abs_ax = self.probe_abs_figure.add_subplot()
-            self.probe_abs_blit_manager.addArtist('image_axes', self._probe_abs_ax)
+            self.probe_abs_blit_manager.addArtist("image_axes", self._probe_abs_ax)
         if self._probe_abs_colorbar_ax == None:
             self._probe_abs_colorbar_ax, _kw = make_axes(
                 self.probe_abs_ax,
-                location='right',
-                orientation='vertical',
+                location="right",
+                orientation="vertical",
             )
             self._probe_abs_colorbar_ax.xaxis.set_visible(False)
             self._probe_abs_colorbar_ax.yaxis.tick_right()
-            self.probe_abs_blit_manager['colorbar_axes'] = self._probe_abs_colorbar_ax
+            self.probe_abs_blit_manager["colorbar_axes"] = self._probe_abs_colorbar_ax
 
         if self._probe_angle_ax == None:
             self._probe_angle_ax = self.probe_angle_figure.add_subplot()
-            self.probe_angle_blit_manager.addArtist('image_axes', self._probe_angle_ax)
+            self.probe_angle_blit_manager.addArtist("image_axes", self._probe_angle_ax)
         if self._probe_angle_colorbar_ax == None:
             self._probe_angle_colorbar_ax, _kw = make_axes(
                 self.probe_angle_ax,
-                location = 'right',
-                orientation='vertical',
+                location="right",
+                orientation="vertical",
             )
             self._probe_angle_colorbar_ax.xaxis.set_visible(False)
             self._probe_angle_colorbar_ax.yaxis.tick_right()
-            self.probe_angle_blit_manager['colorbar_axes'] = self._probe_angle_colorbar_ax
+            self.probe_angle_blit_manager["colorbar_axes"] = (
+                self._probe_angle_colorbar_ax
+            )
 
         if self._ctf_image_ax == None:
             self._ctf_image_ax = self.ctf_image_figure.add_subplot()
-            self.ctf_image_blit_manager.addArtist('image_axes', self._ctf_image_ax) 
+            self.ctf_image_blit_manager.addArtist("image_axes", self._ctf_image_ax)
         if self._ctf_image_colorbar_ax == None:
             self._ctf_image_colorbar_ax, _kw = make_axes(
                 self.ctf_image_ax,
-                location = 'right',
-                orientation = 'vertical',
+                location="right",
+                orientation="vertical",
             )
             self._ctf_image_colorbar_ax.xaxis.set_visible(False)
             self._ctf_image_colorbar_ax.yaxis.tick_right()
-            self.ctf_image_blit_manager['colorbar_axes'] = self._ctf_image_colorbar_ax
+            self.ctf_image_blit_manager["colorbar_axes"] = self._ctf_image_colorbar_ax
 
         if self._ctf_line_ax == None:
             self._ctf_line_ax = self.ctf_line_figure.add_subplot()
-            self.ctf_line_blit_manager.addArtist('line_axes', self._ctf_line_ax)
+            self.ctf_line_blit_manager.addArtist("line_axes", self._ctf_line_ax)
 
     def _createImages(self):
         """
@@ -479,7 +499,7 @@ class PagePlotCTF(QWidget):
             vmin=ronchigram_min,
             vmax=ronchigram_max,
         )
-        self.ronchigram_blit_manager['image'] = self._ronchigram_object
+        self.ronchigram_blit_manager["image"] = self._ronchigram_object
 
         if self._probe_abs_object in self.probe_abs_ax.images:
             self._probe_abs_object.remove()
@@ -492,7 +512,7 @@ class PagePlotCTF(QWidget):
             vmin=probe_abs_min,
             vmax=probe_abs_max,
         )
-        self.probe_abs_blit_manager['image'] = self._probe_abs_object
+        self.probe_abs_blit_manager["image"] = self._probe_abs_object
 
         if self._probe_angle_object in self.probe_angle_ax.images:
             self._probe_angle_object.remove()
@@ -505,7 +525,7 @@ class PagePlotCTF(QWidget):
             vmin=probe_angle_min,
             vmax=probe_angle_max,
         )
-        self.probe_angle_blit_manager['image'] = self._probe_angle_object
+        self.probe_angle_blit_manager["image"] = self._probe_angle_object
 
         if self._ctf_image_object in self.ctf_image_ax.images:
             self._ctf_image_object.remove()
@@ -517,15 +537,15 @@ class PagePlotCTF(QWidget):
             vmin=ctf_image_min,
             vmax=ctf_image_max,
         )
-        self.ctf_image_blit_manager['image'] = self._ctf_image_object
-        
+        self.ctf_image_blit_manager["image"] = self._ctf_image_object
+
         if self._ctf_line_object in self.ctf_line_ax.lines:
             self._ctf_line_object.remove()
-        
-        self._ctf_line_object, = self.ctf_line_ax.plot(
+
+        (self._ctf_line_object,) = self.ctf_line_ax.plot(
             np.arange(0, 256, 1),
             np.ones((256,)),
-            color='black',
+            color="black",
             linewidth=2,
         )
 
@@ -578,17 +598,21 @@ class PagePlotCTF(QWidget):
         if dialog_code == dialog.accepted:
             current_path = dialog.getCurrentPath()
         else:
-            return 
+            return
 
         try:
             self._config_path = current_path
-        except (KeyError, ValueError, TypeError,) as e:
-            self.logger.error('{0}'.format(e), exc_info=True)
-            msg = QMessageBox(parent = self)
-            msg.setWindowTitle('Warning')
+        except (
+            KeyError,
+            ValueError,
+            TypeError,
+        ) as e:
+            self.logger.error("{0}".format(e), exc_info=True)
+            msg = QMessageBox(parent=self)
+            msg.setWindowTitle("Warning")
             msg.setIcon(QMessageBox.Warning)
             msg.setStandardButtons(QMessageBox.Ok)
-            msg.setText('Cannot open this configuration: {0}'.format(e))
+            msg.setText("Cannot open this configuration: {0}".format(e))
             msg.exec()
 
     def _saveConfigPath(self):
@@ -599,7 +623,7 @@ class PagePlotCTF(QWidget):
         dialog_create.initNames()
         dialog_code = dialog_create.exec()
         if not dialog_code == dialog_create.accepted:
-            return 
+            return
         item_type = dialog_create.getItemType()
         parent_path = dialog_create.getParentPath()
         name = dialog_create.getName()
@@ -608,21 +632,21 @@ class PagePlotCTF(QWidget):
         # TO DO: Need to specialise to the config storage format.
         try:
             if item_type == HDFType.Group:
-                model.insertGroup(parent_index, name) 
+                model.insertGroup(parent_index, name)
             elif item_type == HDFType.Data:
                 shape = dialog_create.getShape()
                 dtype = dialog_create.getDType()
                 model.insertData(
-                    parent = parent_index, 
-                    name = name,
-                    shape = shape,
-                    dtype = dtype,
-                ) 
+                    parent=parent_index,
+                    name=name,
+                    shape=shape,
+                    dtype=dtype,
+                )
         except (ValueError, KeyError) as e:
             msg = QMessageBox()
-            msg.setWindowTitle('Warning')
+            msg.setWindowTitle("Warning")
             msg.setIcon(QMessageBox.Warning)
-            msg.setText('Fail to create: {0}'.format(e))
+            msg.setText("Fail to create: {0}".format(e))
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec()
             return False
@@ -631,7 +655,7 @@ class PagePlotCTF(QWidget):
     #     """
     #     Set the config path in HDF5 file, to show the CTF.
 
-    #     Will set the config_path attribute. 
+    #     Will set the config_path attribute.
 
     #     arguments:
     #         config_path: (str) the path of the optical config data.
@@ -642,82 +666,90 @@ class PagePlotCTF(QWidget):
     #     if not isinstance(config_path, str):
     #         raise TypeError("config_path must be a str, not"
     #             "{0}".format(type(config_path).__name__))
-        
+
     #     config_node = self.hdf_handler.getNode(config_path)
     #     # May raise KeyError if the path does not exist
     #     if not isinstance(config_node, HDFDataNode):
     #         raise ValueError("Item {0} must be a Dataset".format(config_path))
-        
+
     #     config_obj = self.hdf_handler.file[config_path]
-        
-    #     self._config_path = config_path 
+
+    #     self._config_path = config_path
     #     self.ui.lineEdit_config_path.setText(self.config_path)
     #     self.setWindowTitle("{0} - CTF".format(config_node.name))
 
-        #TODO read the 4D-STEM optical configuration and render the images
+    # TODO read the 4D-STEM optical configuration and render the images
 
-    # def 
+    # def
     ########################
     # 进一步的代码编写需要先完善以下工作：
     #   - 调整、完善关于 4D-STEM 的实验参数的记录
     #   - 添加对于 .ctf 类型数据的支持 (于 HDFManager 中)
     #   - 构建 Calculator 类以及 OpticalConfig 类，用于得到 CTF 数据
-    
+
     def _updateProbe(self):
         accelerate_voltage = self.ui.doubleSpinBox_voltage.value() * 1e3
         dp_N = int(self.ui.comboBox_pixel_number.currentText())
-        scan_N = 128 
+        scan_N = 128
         alpha = self.ui.doubleSpinBox_alpha.value() * 1e-3
         scan_step_size = self.ui.doubleSpinBox_scanning_step_size.value() * 1e-9
         # bright_field_disk_radius = alpha * dp_N / self.ui.doubleSpinBox_full_detector_size.value()
-        bright_field_disk_radius = self.ui.doubleSpinBox_bright_field_disk_radius.value()
-        camera_length = self.ui.doubleSpinBox_camera_length.value() * 1e-3 
-        defocus = self.ui.doubleSpinBox_defocus.value() * 1e-9 
-        Cs = self.ui.doubleSpinBox_Cs.value() * 1e-6 
+        bright_field_disk_radius = (
+            self.ui.doubleSpinBox_bright_field_disk_radius.value()
+        )
+        camera_length = self.ui.doubleSpinBox_camera_length.value() * 1e-3
+        defocus = self.ui.doubleSpinBox_defocus.value() * 1e-9
+        Cs = self.ui.doubleSpinBox_Cs.value() * 1e-6
 
         optics = OpticalSTEM(
             accelerate_voltage=accelerate_voltage,
-            detector_shape = (dp_N, dp_N),
-            scan_shape = (scan_N, scan_N),
-            alpha = alpha,
+            detector_shape=(dp_N, dp_N),
+            scan_shape=(scan_N, scan_N),
+            alpha=alpha,
             scan_step_size=scan_step_size,
             bright_field_disk_radius=bright_field_disk_radius,
-            camera_length = camera_length,
-            defocus = defocus,
-            Cs = Cs,
+            camera_length=camera_length,
+            defocus=defocus,
+            Cs=Cs,
         )
-        
+
         probe = optics.generateProbe()
         self.probe_abs_object.set_data(np.abs(probe))
         self.probe_angle_object.set_data(np.angle(probe))
         object_phase = np.random.random_sample((optics.dp_N, optics.dp_N)) * 0.2
         exit_wave = probe * np.exp(1j * object_phase)
         diffraction_wave = optics.fft2(exit_wave, optics.dx)
-        diffraction_intensity = np.abs(diffraction_wave)**2 
+        diffraction_intensity = np.abs(diffraction_wave) ** 2
         diffraction_intensity = diffraction_intensity / np.sum(diffraction_intensity)
         self.ronchigram_object.set_data(diffraction_intensity)
-        
+
         ctf_image_modes = self.ui.comboBox_image_modes.currentIndex()
         beta_in = self.ui.doubleSpinBox_abf_inner_radius.value()
         beta_out = self.ui.doubleSpinBox_abf_outer_radius.value()
         ctf_calculator = CTFCalculator(optics)
-        
+
         radial_locate, radial_distance = ctf_calculator.generateRadialPreimage(
-            matrix_shape = optics.detector_shape, 
-            target = None, 
-            pixel_size = optics.du,
+            matrix_shape=optics.detector_shape,
+            target=None,
+            pixel_size=optics.du,
         )
         if ctf_image_modes == 0:
-            # BF, ABF 
-            ctf_image = ctf_calculator.calcCTFofVirtualImageFirstOrder(beta_in, beta_out)
+            # BF, ABF
+            ctf_image = ctf_calculator.calcCTFofVirtualImageFirstOrder(
+                beta_in, beta_out
+            )
         elif ctf_image_modes == 1:
-            # ADF 
-            ctf_image = ctf_calculator.calcCTFofVirtualImageSecondOrder(beta_in, beta_out)
+            # ADF
+            ctf_image = ctf_calculator.calcCTFofVirtualImageSecondOrder(
+                beta_in, beta_out
+            )
         elif ctf_image_modes == 2:
-            # Full BF 
-            ctf_image = ctf_calculator.calcCTFofVirtualImageSecondOrder(0, bright_field_disk_radius)
+            # Full BF
+            ctf_image = ctf_calculator.calcCTFofVirtualImageSecondOrder(
+                0, bright_field_disk_radius
+            )
         elif ctf_image_modes == 3:
-            # Axial BF 
+            # Axial BF
             ctf_image = ctf_calculator.calcCTFofAxialBF()
         elif ctf_image_modes == 4:
             # DCoM
@@ -728,29 +760,32 @@ class PagePlotCTF(QWidget):
         ctf_image = ctf_image / np.max(ctf_image)
         print("max ", np.max(ctf_image))
         print("min ", np.min(ctf_image))
-            
+
         self.ctf_image_object.set_data(ctf_image)
-        
+
         # locate, distance = ctf_calculator.generateRadialPreimage(dp_N, None, optics.du)
-        
-        _, ctf_curve_y = ctf_calculator.generateRotationalAverage(ctf_image, target=None, pixel_size = optics.du, preimage_locate=radial_locate, preimage_distance=radial_distance)
-        
-        self.ctf_line_object.set_xdata(radial_distance*1e-9)
+
+        _, ctf_curve_y = ctf_calculator.generateRotationalAverage(
+            ctf_image,
+            target=None,
+            pixel_size=optics.du,
+            preimage_locate=radial_locate,
+            preimage_distance=radial_distance,
+        )
+
+        self.ctf_line_object.set_xdata(radial_distance * 1e-9)
         self.ctf_line_object.set_ydata(ctf_curve_y)
-        
-        
+
         self.probe_abs_blit_manager.update()
         self.ronchigram_blit_manager.update()
         self.probe_angle_blit_manager.update()
         self.ctf_image_blit_manager.update()
         self.ctf_line_blit_manager.update()
-        
+
     # def _updateCTF(self):
     #     optics = self._setOpticalSTEM()
     #     ctf_calculator = CTFCalculator(optics)
-        
-    
-    
+
 
 # import sys
 # from bin.app import App
@@ -760,6 +795,3 @@ class PagePlotCTF(QWidget):
 #     ex = PagePlotCTF()
 #     ex.show()
 #     sys.exit(app.exec())
-
-
-

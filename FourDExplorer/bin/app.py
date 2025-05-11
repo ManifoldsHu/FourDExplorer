@@ -34,28 +34,29 @@ date:           Feb 26, 2022
 from logging import Logger
 from PySide6.QtWidgets import QApplication
 
+
 class App(QApplication):
     """
     包含各种后台工作的对象，作为 QApplication 的子类。
 
     整个程序中只能有一个 App 对象，使用
-    global qApp 
+    global qApp
     来得到这个全局变量。
 
     Backend Instance, as subclass of QApplication.
 
-    This is a singleton instance. Use 
-    global qApp 
+    This is a singleton instance. Use
+    global qApp
     to get its global pointer.
 
     attributes:
         hdf_handler: (HDFHandler) read only property. Use hdf_handler to manage
             HDF files. This is a singleton.
 
-        theme_handler: (ThemeHandler) read only property. Use theme_handler to 
+        theme_handler: (ThemeHandler) read only property. Use theme_handler to
             manage themes, colors of interfaces. This is a singleton.
 
-        task_manager: (TaskManager) read only property. Use task_manager to 
+        task_manager: (TaskManager) read only property. Use task_manager to
             submit tasks. This is a singleton.
 
         logger: (logging.Logger) read only property. Use logger to print logs.
@@ -63,16 +64,17 @@ class App(QApplication):
 
         log_util: (LogUtil) read only property. Use log_util to manage loggers.
 
-        main_window: (MainWindow) read only property. Get the instance of the 
+        main_window: (MainWindow) read only property. Get the instance of the
             MainWindow object.
 
-        tabWidget_view: (QTabWidget) read only property. Get the instance of 
+        tabWidget_view: (QTabWidget) read only property. Get the instance of
             the tabWidget_view, to add new pages (for viewing images).
 
     signals:
-        aboutToQuit: emits when the application is about to quit. Will call 
+        aboutToQuit: emits when the application is about to quit. Will call
             cleanResources() method.
     """
+
     def __init__(self, argv):
         """
         arguments:
@@ -80,7 +82,6 @@ class App(QApplication):
         """
         super().__init__(argv)
         self._main_window = None
-        
 
     def startBackEnds(self):
         """
@@ -103,9 +104,7 @@ class App(QApplication):
         self._unit_manager = UnitManager(self)
         self._datetime_manager = DateTimeManager(self)
         self._meta_managers = {}
-        
 
- 
     @property
     def hdf_handler(self):
         return self._hdf_handler
@@ -129,21 +128,21 @@ class App(QApplication):
     @property
     def main_window(self):
         return self._main_window
-    
+
     @property
     def unit_manager(self):
         return self._unit_manager
-    
+
     @property
     def datetime_manager(self):
         return self._datetime_manager
-    
+
     @main_window.setter
     def main_window(self, _main_window):
         if self._main_window is None:
             self._main_window = _main_window
         else:
-            raise ValueError('There have been one main window!')
+            raise ValueError("There have been one main window!")
 
     # @property
     # def tabWidget_view(self) -> QTabWidget:
@@ -164,13 +163,13 @@ class App(QApplication):
         """
         Require meta manager according to the item path in HDF5 file.
 
-        If there is no HDF5 file opened, it will raise RuntimeError. And if 
+        If there is no HDF5 file opened, it will raise RuntimeError. And if
         there is no item in the HDF5 file found, it will raise KeyError.
 
         The App instance keeps a dict that stores meta managers that has been
-        opened. Use this method to get the meta manager corresponding to the 
+        opened. Use this method to get the meta manager corresponding to the
         item, like this:
-            global qApp 
+            global qApp
             meta_manager = qApp.requireMetaManager(item_path)
         where item_path is the dataset's path in the HDF5 file.
 
@@ -178,9 +177,10 @@ class App(QApplication):
             item_path: (str) the path of the dataset or group in the HDF5 file.
 
         returns:
-            (MetaManager) 
+            (MetaManager)
         """
         from bin.MetaManager import MetaManager
+
         if not self.hdf_handler.isFileOpened():
             # keep the dict empty if file is not opened.
             self._meta_managers = {}
@@ -190,17 +190,17 @@ class App(QApplication):
                 f"item_path should be a str, not {type(item_path).__name__}"
             )
         elif item_path not in self.hdf_handler.file:
-            if item_path in self._meta_managers:    
+            if item_path in self._meta_managers:
                 # keep the dict the same as the file.
                 del self._meta_managers[item_path]
             raise KeyError(f"{item_path} does not exist in the HDF5 file.")
-        
+
         if item_path not in self._meta_managers:
             self._meta_managers[item_path] = MetaManager(self)
             meta_manager: MetaManager = self._meta_managers[item_path]
             meta_manager.setItemPath(item_path)
         return self._meta_managers[item_path]
-        
+
     def clearMetaManagerDict(self):
         """
         Clear all of the meta managers stored in the self._meta_managers

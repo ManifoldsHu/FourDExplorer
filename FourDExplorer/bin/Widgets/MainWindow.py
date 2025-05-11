@@ -18,10 +18,10 @@ date:               Feb 24, 2022
 import sys
 import os
 
-from PySide6.QtWidgets import QMainWindow 
+from PySide6.QtWidgets import QMainWindow
 from PySide6.QtWidgets import QToolBar
-from PySide6.QtWidgets import QWidget 
-from PySide6.QtWidgets import QToolButton 
+from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QToolButton
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtWidgets import QProgressBar
 from PySide6.QtWidgets import QLabel
@@ -40,7 +40,7 @@ from bin.Actions.ControlActions import ControlActionGroup
 
 from bin.Actions.DataActions import ActionOpenDataAs
 from bin.Actions.DataActions import ActionOpenLine
-from bin.Actions.DataActions import ActionOpenImage 
+from bin.Actions.DataActions import ActionOpenImage
 from bin.Actions.DataActions import ActionOpenVectorField
 from bin.Actions.DataActions import ActionOpenFourDSTEM
 
@@ -76,7 +76,7 @@ from bin.Actions.VectorFieldActions import ActionSubtractMeanVector
 from bin.Actions.VectorFieldActions import ActionSubtractReferenceVector
 
 from bin.Actions.HelpActions import ActionAbout
-# from PySide6.QtGui import 
+# from PySide6.QtGui import
 
 from bin.TabViewManager import TabViewManager
 from bin.UIManager import ThemeHandler
@@ -97,6 +97,7 @@ class MainWindow(QMainWindow):
 
     The path of Ui file: ROOT_PATH/ui/uiMainWindow.ui
     """
+
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
@@ -105,21 +106,21 @@ class MainWindow(QMainWindow):
         global qApp
         self._app = qApp
 
-        self.setWindowTitle('4D-Explorer')
+        self.setWindowTitle("4D-Explorer")
         icon = QIcon()
-        icon_path = os.path.join(ROOT_PATH, 'ui', 'resources', 'icons', '4D.ico')
+        icon_path = os.path.join(ROOT_PATH, "ui", "resources", "icons", "4D.ico")
         icon.addFile(icon_path)
         self.setWindowIcon(icon)
-        
+
         # self.showMaximized()
         # self.showFullScreen()
         # self.showNormal()
 
         self._initControlPanel()
-        
+
         self._initFile()
         self._initEdit()
-        
+
         self._initTask()
         self._initDataset()
         # self._initCalibration()
@@ -133,21 +134,21 @@ class MainWindow(QMainWindow):
         self.tabview_manager.signal_tab_opened.connect(self.ui.tab_pages.initModel)
         self._status_bar = self.statusBar()
         self._initStatusBar()
-    
+
     @property
     def tabview_manager(self) -> TabViewManager:
         return self._tabview_manager
 
     @property
     def theme_handler(self) -> ThemeHandler:
-        global qApp 
+        global qApp
         return qApp.theme_handler
-    
+
     @property
     def task_manager(self) -> TaskManager:
-        global qApp 
+        global qApp
         return qApp.task_manager
-        
+
     def _initControlPanel(self):
         """
         Initialize the control panel on the left of the MainWindow.
@@ -155,9 +156,7 @@ class MainWindow(QMainWindow):
         self.control_tool_bar = ControlToolBar(self)
         self.control_tool_bar.initActions(self)
         self.addToolBar(Qt.LeftToolBarArea, self.control_tool_bar)
-        self.ui.menuView_V.addActions(
-            self.control_tool_bar.action_group.actions()
-        )
+        self.ui.menuView_V.addActions(self.control_tool_bar.action_group.actions())
 
     def _initFile(self):
         """
@@ -166,15 +165,15 @@ class MainWindow(QMainWindow):
         self._action_new_file = ActionNewFile(self)
         self._action_open_file = ActionOpenFile(self)
         self._action_close_file = ActionCloseFile(self)
-        
+
         self._action_quit = ActionQuit(self)
         self.ui.menuFile_F.addAction(self._action_new_file)
         self.ui.menuFile_F.addAction(self._action_open_file)
         self.ui.menuFile_F.addAction(self._action_close_file)
         self.ui.menuFile_F.addSeparator()
-        
+
         self.ui.menuFile_F.addAction(self._action_quit)
-        
+
     def _initEdit(self):
         """
         Initialize the edit menu.
@@ -189,17 +188,19 @@ class MainWindow(QMainWindow):
         self._action_attributes = ActionAttributes(self)
         self._action_change = ActionChangeHDFType(self)
 
-        self.ui.menuEdit_E.addActions([
-            self._action_new,
-            self._action_change,
-            self._action_import_fourdstem,
-            self._action_import_image,
-            self._action_move,
-            self._action_copy,
-            self._action_delete,
-            self._action_rename,
-            self._action_attributes,
-        ])
+        self.ui.menuEdit_E.addActions(
+            [
+                self._action_new,
+                self._action_change,
+                self._action_import_fourdstem,
+                self._action_import_image,
+                self._action_move,
+                self._action_copy,
+                self._action_delete,
+                self._action_rename,
+                self._action_attributes,
+            ]
+        )
         self.ui.menuEdit_E.insertSeparator(self._action_change)
         self.ui.menuEdit_E.insertSeparator(self._action_move)
         self.ui.menuEdit_E.insertSeparator(self._action_attributes)
@@ -223,10 +224,10 @@ class MainWindow(QMainWindow):
         self.ui.menuDataset_D.addAction(self._action_change)
         self.ui.menuDataset_D.addSeparator()
 
-        self._menu_line = self.ui.menuDataset_D.addMenu('Line')
-        self._menu_image = self.ui.menuDataset_D.addMenu('Image')
-        self._menu_vector_field = self.ui.menuDataset_D.addMenu('Vector Field')
-        self._menu_fourdstem = self.ui.menuDataset_D.addMenu('4D-STEM')
+        self._menu_line = self.ui.menuDataset_D.addMenu("Line")
+        self._menu_image = self.ui.menuDataset_D.addMenu("Image")
+        self._menu_vector_field = self.ui.menuDataset_D.addMenu("Vector Field")
+        self._menu_fourdstem = self.ui.menuDataset_D.addMenu("4D-STEM")
 
         self._action_open_line = ActionOpenLine(self)
         self._menu_line.addAction(self._action_open_line)
@@ -277,10 +278,8 @@ class MainWindow(QMainWindow):
         self._menu_fourdstem.addSeparator()
         self._menu_fourdstem.addAction(self._action_plot_ctf)
 
-
     def _initCalibration(self):
         pass
-
 
     def _initImage(self):
         pass
@@ -300,62 +299,59 @@ class MainWindow(QMainWindow):
         self._tabview_manager.setTabWidget(self.ui.tabWidget_view)
         self._tabview_manager.initializeTabView()
 
-        
     def _initStatusBar(self):
         """
-        Initialize the status bar to show the current progress of task (from 
+        Initialize the status bar to show the current progress of task (from
         TaskManager) and system information.
         """
         self._status_label = QLabel("Ready")
         self._status_bar.addWidget(self._status_label)
-        
+
         self._task_progress_bar = QProgressBar()
         self._task_progress_bar.setMaximumWidth(200)
         self._task_progress_bar.setMaximumHeight(10)
         self._task_progress_bar.setVisible(False)
         self._status_bar.addWidget(self._task_progress_bar)
-        
+
         self.task_manager.task_info_refresh.connect(self._updateTaskStatus)
         self.task_manager.progress_updated.connect(self._updateTaskStatus)
         self.task_manager.task_exception.connect(self._updateTaskStatus)
-        
+
         # Add system information widget
         self._system_info_label = QLabel("CPU: 0%  Memory: 0%  Disk: 0%")
         self._status_bar.addPermanentWidget(self._system_info_label)
-        
+
         disk_io = psutil.disk_io_counters()
-        if hasattr(disk_io, 'read_bytes') and hasattr(disk_io, 'write_bytes'):
+        if hasattr(disk_io, "read_bytes") and hasattr(disk_io, "write_bytes"):
             self._last_read_bytes = disk_io.read_bytes
             self._last_write_bytes = disk_io.write_bytes
         else:
             self._last_read_bytes = 0
             self._last_write_bytes = 0
-        
+
         # Set up a timer to update system information periodically
         self._system_info_timer = QTimer(self)
         self._system_info_timer.timeout.connect(self._updateSystemInfo)
         self._system_info_timer.start(1000)  # Update every 1000 ms (1 second)
-        
-        
-        
+
     def _updateSystemInfo(self):
         """
         Update the system information labels in the status bar.
         """
         # Update CPU usage
         cpu_percent = psutil.cpu_percent()
-        
+
         # Update memory usage
         memory = psutil.virtual_memory()
         memory_percent = memory.percent
-        
+
         # Update disk usage
         disk_usage = psutil.disk_usage(os.getcwd())
         disk_percent = disk_usage.percent
-        
+
         # Update IO rate
         disk_io = psutil.disk_io_counters()
-        if hasattr(disk_io, 'read_bytes') and hasattr(disk_io, 'write_bytes'):
+        if hasattr(disk_io, "read_bytes") and hasattr(disk_io, "write_bytes"):
             read_rate = (disk_io.read_bytes - self._last_read_bytes) / 2**20
             write_rate = (disk_io.write_bytes - self._last_write_bytes) / 2**20
             io_rate = read_rate + write_rate
@@ -364,9 +360,10 @@ class MainWindow(QMainWindow):
             io_info = f"  IO: {io_rate:.1f} MiB/s"
         else:
             io_info = ""
-        
-        self._system_info_label.setText(f"CPU: {cpu_percent:.0f}%  Memory: {memory_percent:.0f}%  Disk: {disk_percent:.0f}%{io_info}")
-        
+
+        self._system_info_label.setText(
+            f"CPU: {cpu_percent:.0f}%  Memory: {memory_percent:.0f}%  Disk: {disk_percent:.0f}%{io_info}"
+        )
 
     def _updateTaskStatus(self):
         """
@@ -384,14 +381,10 @@ class MainWindow(QMainWindow):
                 self._task_progress_bar.setRange(0, 100)  # Percentage of step
             else:
                 self._task_progress_bar.setRange(0, 0)  # Busy indicator
-        
-        
-
 
     def close(self) -> bool:
         self._app.cleanResources()
         super(MainWindow, self).close()
-
 
 
 class ControlToolBar(QToolBar):
@@ -400,16 +393,17 @@ class ControlToolBar(QToolBar):
 
     A toolbar that do not show the border line.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        
+
         self._action_group = ControlActionGroup(self)
         self._action_settings = ActionSettings(self)
         self.setMovable(False)
-        self.setContentsMargins(0,0,0,0)
-        self.layout().setContentsMargins(0,0,0,0)
+        self.setContentsMargins(0, 0, 0, 0)
+        self.layout().setContentsMargins(0, 0, 0, 0)
         self.setOrientation(Qt.Vertical)
-        
+
         self.setContextMenuPolicy(Qt.ActionsContextMenu)
         self._updateStyle()
         self.theme_handler.theme_changed.connect(self._updateStyle)
@@ -422,9 +416,9 @@ class ControlToolBar(QToolBar):
     def action_settings(self) -> ActionSettings:
         return self._action_settings
 
-    @property 
+    @property
     def theme_handler(self) -> ThemeHandler:
-        global qApp 
+        global qApp
         return qApp.theme_handler
 
     def initActions(self, main_window: MainWindow):
@@ -447,17 +441,15 @@ class ControlToolBar(QToolBar):
         self._setting_button.clicked.connect(self._action_settings.trigger)
         self._vertical_spacer = QWidget(self)
         self._vertical_spacer.setSizePolicy(
-            QSizePolicy.Preferred, 
+            QSizePolicy.Preferred,
             QSizePolicy.Expanding,
         )
         self.addWidget(self._vertical_spacer)
         self.addWidget(self._setting_button)
         self.theme_handler.theme_changed.connect(
-            lambda: self._setting_button.setIcon(
-                self._action_settings.icon()
-            )
+            lambda: self._setting_button.setIcon(self._action_settings.icon())
         )
-        
+
     density_to_button_width = {
         UIThemeDensity.VeryHuge: 48,
         UIThemeDensity.Huge: 45,
@@ -476,11 +468,9 @@ class ControlToolBar(QToolBar):
         """
         Update the style according to the current theme.
         """
-        _width = self.density_to_button_width[
-            self.theme_handler.theme_density
-        ]
+        _width = self.density_to_button_width[self.theme_handler.theme_density]
         _height = _width + 20
-        
+
         self.setStyleSheet(
             "ControlToolBar{{border: none; padding: 0px;}}"
             "ControlToolBar::separator{{width: 0px;}}"
@@ -489,5 +479,3 @@ class ControlToolBar(QToolBar):
             "".format(_height, _width)
         )
         self.setIconSize(QSize(_width - 5, _width - 5))
-
-

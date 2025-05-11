@@ -14,15 +14,15 @@ date:           Jun 15, 2022
 *---------------------------- DataActions.py ---------------------------------*
 """
 
-from logging import Logger 
+from logging import Logger
 
 from PySide6.QtCore import QObject, QModelIndex
 from PySide6.QtWidgets import QMessageBox, QInputDialog, QTreeView, QWidget
-from PySide6.QtGui import QAction 
-from Constants import ItemDataRoles, HDFType 
+from PySide6.QtGui import QAction
+from Constants import ItemDataRoles, HDFType
 
 from bin.Actions.EditActions import ActionEditBase, failLogging
-from bin.HDFManager import HDFDataNode, HDFHandler 
+from bin.HDFManager import HDFDataNode, HDFHandler
 from bin.UIManager import ThemeHandler
 from bin.Widgets.DialogChangeDataType import DialogChangeDataType
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
@@ -38,12 +38,13 @@ class ActionDataManipulateBase(ActionEditBase):
 
     The base class of actions for manipulating Dataset.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
 
     @property
     def tabview_manager(self):
-        global qApp 
+        global qApp
         return qApp.tabview_manager
 
     def initIconResources(self, icon_name: str):
@@ -53,9 +54,9 @@ class ActionDataManipulateBase(ActionEditBase):
         arguments:
             icon_name: (str) the name of icon.
         """
-        _path = ':/HDFItem/resources/icons/' + icon_name
+        _path = ":/HDFItem/resources/icons/" + icon_name
         icon = self.theme_handler.iconProvider(_path)
-        self._icon_name = icon_name 
+        self._icon_name = icon_name
         self.setIcon(icon)
 
 
@@ -65,31 +66,32 @@ class ActionOpenData(ActionDataManipulateBase):
 
     Action to open (show) dataset.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Open')
+        self.setText("Open")
         self.triggered.connect(lambda: self.openData(self))
 
-    @failLogging 
+    @failLogging
     def openData(self):
         """
         Try to open the data.
         """
         if self._treeview is not None:
             self.setItemPathFromIndex(self._treeview.currentIndex())
-        if self.item_path == '':
+        if self.item_path == "":
             dialog_browse = DialogHDFChoose()
-            dialog_browse.setWindowTitle('Choose a dataset to show')
+            dialog_browse.setWindowTitle("Choose a dataset to show")
             dialog_code = dialog_browse.exec()
             if dialog_code == dialog_browse.Accepted:
                 item_path = dialog_browse.getCurrentPath()
                 self.setItemPath(item_path)
             else:
-                return 
-        
+                return
+
         hdf_type = self.getOpenAsType()
         if hdf_type is None:
-            return 
+            return
         page = self.openAs(hdf_type)
         self.tabview_manager.openTab(page)
 
@@ -102,16 +104,16 @@ class ActionOpenData(ActionDataManipulateBase):
         """
         node = self.hdf_handler.getNode(self.item_path)
         if not isinstance(node, HDFDataNode):
-            raise TypeError('Only Dataset object can be showed.')
+            raise TypeError("Only Dataset object can be showed.")
         elif node.hdf_type == HDFType.Data:
             dialog_open_as = DialogChangeDataType()
-            dialog_open_as.setWindowTitle('Open As...')
+            dialog_open_as.setWindowTitle("Open As...")
             dialog_open_code = dialog_open_as.exec()
             if dialog_open_code != dialog_open_as.Accepted:
                 return None
             hdf_type = dialog_open_as.getTargetType()
             if hdf_type == HDFType.Data:
-                raise RuntimeError('Must appoint a method to show Dataset.')
+                raise RuntimeError("Must appoint a method to show Dataset.")
         else:
             hdf_type = node.hdf_type
         return hdf_type
@@ -134,36 +136,37 @@ class ActionOpenData(ActionDataManipulateBase):
             page.setVectorField(self.item_path)
         elif hdf_type == HDFType.Line:
             page = PageViewLine()
-            page.addLine(self.item_path, update_title = True)
+            page.addLine(self.item_path, update_title=True)
         else:
-            raise TypeError('Unknown Dataset type.')
-        return page 
-        
+            raise TypeError("Unknown Dataset type.")
+        return page
+
 
 class ActionOpenDataAs(ActionOpenData):
     """
     Open a dialog to choose method to show the Dataset.
-    """    
+    """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Open As...')
-        
+        self.setText("Open As...")
+
     def getOpenAsType(self) -> HDFType:
         """
         Force to open a dialog to choose which method to open.
         """
         node = self.hdf_handler.getNode(self.item_path)
         if not isinstance(node, HDFDataNode):
-            raise TypeError('Only Dataset object can be showed.')
+            raise TypeError("Only Dataset object can be showed.")
         dialog_open_as = DialogChangeDataType()
-        dialog_open_as.setWindowTitle('Open As...')
+        dialog_open_as.setWindowTitle("Open As...")
         dialog_open_code = dialog_open_as.exec()
         if dialog_open_code != dialog_open_as.Accepted:
             return None
         hdf_type = dialog_open_as.getTargetType()
         if hdf_type == HDFType.Data:
-            raise RuntimeError('Must appoint a method to show Dataset.')
-        return hdf_type 
+            raise RuntimeError("Must appoint a method to show Dataset.")
+        return hdf_type
 
 
 class ActionOpenLine(ActionOpenData):
@@ -172,10 +175,11 @@ class ActionOpenLine(ActionOpenData):
 
     Try opening a line data.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Open Line')
-        self.initIconResources('line')
+        self.setText("Open Line")
+        self.initIconResources("line")
 
     def openAs(self, hdf_type: HDFType = None) -> PageViewLine:
         """
@@ -185,7 +189,7 @@ class ActionOpenLine(ActionOpenData):
             hdf_type: (HDFType) (does not work)
         """
         page = PageViewLine()
-        if self.item_path not in ('', '/'):
+        if self.item_path not in ("", "/"):
             page.addLine(self.item_path)
         return page
 
@@ -196,10 +200,11 @@ class ActionOpenImage(ActionOpenData):
 
     Try opening an image.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Open Image')
-        self.initIconResources('picture')
+        self.setText("Open Image")
+        self.initIconResources("picture")
 
     def openAs(self, hdf_type: HDFType = None) -> PageViewImage:
         """
@@ -209,9 +214,9 @@ class ActionOpenImage(ActionOpenData):
             hdf_type: (HDFType) (does not work)
         """
         page = PageViewImage()
-        if self.item_path not in ('', '/'):
+        if self.item_path not in ("", "/"):
             page.setImage(self.item_path)
-        return page 
+        return page
 
 
 class ActionOpenVectorField(ActionOpenData):
@@ -220,10 +225,11 @@ class ActionOpenVectorField(ActionOpenData):
 
     Try opening a vector field.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Open Vector Field')
-        self.initIconResources('particle_tracking')
+        self.setText("Open Vector Field")
+        self.initIconResources("particle_tracking")
 
     def openAs(self, hdf_type: HDFType = None) -> PageViewVectorField:
         """
@@ -233,9 +239,9 @@ class ActionOpenVectorField(ActionOpenData):
             hdf_type: (HDFType) (does not work)
         """
         page = PageViewVectorField()
-        if self.item_path not in ('', '/'):
+        if self.item_path not in ("", "/"):
             page.setVectorField(self.item_path)
-        return page 
+        return page
 
 
 class ActionOpenFourDSTEM(ActionOpenData):
@@ -244,10 +250,11 @@ class ActionOpenFourDSTEM(ActionOpenData):
 
     Try opening a 4D-STEM dataset.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Open 4D-STEM')
-        self.initIconResources('cube')
+        self.setText("Open 4D-STEM")
+        self.initIconResources("cube")
 
     def openAs(self, hdf_type: HDFType = None) -> PageViewFourDSTEM:
         """
@@ -257,6 +264,6 @@ class ActionOpenFourDSTEM(ActionOpenData):
             hdf_type: (HDFType) (does not work)
         """
         page = PageViewFourDSTEM()
-        if self.item_path not in ('', '/'):
+        if self.item_path not in ("", "/"):
             page.setFourDSTEM(self.item_path)
-        return page 
+        return page

@@ -22,10 +22,12 @@ from PySide6.QtWidgets import QDialog, QWidget, QHeaderView
 from ui import uiDialogAttrViewer
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 from bin.HDFManager import HDFAttrModel
+
 # from bin.MetaManager import MetaManager, ValueTree, ValueTreeModel
 from bin.MetaManager import MetaManager
-from bin.MetaManager import MetaTree 
+from bin.MetaManager import MetaTree
 from bin.MetaManager import MetaTreeModel
+
 
 class DialogAttrViewer(QDialog):
     """
@@ -33,11 +35,12 @@ class DialogAttrViewer(QDialog):
 
     Dialog to view the attributions (keys and values).
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogAttrViewer.Ui_Dialog()
         self.ui.setupUi(self)
-        self.setWindowTitle('Attributions')
+        self.setWindowTitle("Attributions")
 
         # self._item_path = '/'
         # self.ui.lineEdit_item_path.setText('/')
@@ -45,11 +48,9 @@ class DialogAttrViewer(QDialog):
 
         # self.ui.tableView_attr.setModel(HDFAttrModel(self))
 
-
         # horizontal_header.setEnabled(True)
         # horizontal_header.setHidden(False)
-        
-        
+
     @property
     def item_path(self) -> str:
         return self._item_path
@@ -64,10 +65,10 @@ class DialogAttrViewer(QDialog):
     #         raise TypeError('path must be a str, not'
     #             '{0}'.format(type(path)))
     #     self._item_path = path
-        
+
     @property
     def meta_manager(self) -> MetaManager:
-        global qApp 
+        global qApp
         return qApp.requireMetaManager(self.item_path)
 
     def setItemPath(self, path: str):
@@ -75,8 +76,7 @@ class DialogAttrViewer(QDialog):
         Set the item path (of the attributions).
         """
         if not isinstance(path, str):
-            raise TypeError('path must be a str, not'
-                '{0}'.format(type(path)))
+            raise TypeError("path must be a str, not{0}".format(type(path)))
         self._item_path = path
         self.ui.lineEdit_item_path.setText(path)
         model = HDFAttrModel(self)
@@ -91,20 +91,17 @@ class DialogAttrViewer(QDialog):
         self.setMetaTree()
         self.setupWidgetMetaViewer()
 
-
     def setMetaTree(self):
         # Experimental
         # self._meta_manager = MetaManager(self)
         # self._meta_manager.setItemPath(self.item_path)
-        hdf_type = self.meta_manager.hdf_type 
+        hdf_type = self.meta_manager.hdf_type
         self.meta_manager.initializeSchema(hdf_type)
         self.ui.treeView.setModel(self.meta_manager.meta_tree_model)
 
     def setupWidgetMetaViewer(self):
-        # Experimental 
+        # Experimental
         # self._meta_manager_2 = MetaManager(self)
-        self.widget_meta_viewer = self.ui.widget 
+        self.widget_meta_viewer = self.ui.widget
         # self.widget_meta_viewer.initMetaViewer(self.item_path)
         self.widget_meta_viewer.setItemPath(self.item_path)
-        
-        

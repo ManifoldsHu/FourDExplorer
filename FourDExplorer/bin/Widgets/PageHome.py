@@ -21,13 +21,13 @@ from PySide6.QtCore import QUrl
 from bin.TaskManager import TaskManager
 from bin.HDFManager import HDFHandler
 
-from bin.Actions.EditActions import ActionImportFourDSTEM 
+from bin.Actions.EditActions import ActionImportFourDSTEM
 from bin.Actions.EditActions import ActionImportImage
-from bin.Actions.FileActions import ActionNewFile 
-from bin.Actions.FileActions import ActionOpenFile 
+from bin.Actions.FileActions import ActionNewFile
+from bin.Actions.FileActions import ActionOpenFile
 from bin.Actions.DataActions import ActionOpenFourDSTEM
 from bin.Actions.FourDSTEMActions import ActionAlign
-from bin.Actions.FourDSTEMActions import ActionRotate 
+from bin.Actions.FourDSTEMActions import ActionRotate
 from bin.Actions.FourDSTEMActions import ActionBackground
 
 from ui import uiPageHome
@@ -43,40 +43,31 @@ class PageHome(QWidget):
 
     The path of the ui file: ROOT_PATH/ui.uiPageHome.ui
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiPageHome.Ui_Form()
         self.ui.setupUi(self)
 
-        self.setWindowTitle('Home')
+        self.setWindowTitle("Home")
 
-        self.ui.pushButton_import_fourDSTEM.clicked.connect(
-            self._importFourDSTEM
-        )
-        self.ui.pushButton_new_file.clicked.connect(
-            self._newFile
-        )
-        self.ui.pushButton_open_file.clicked.connect(
-            self._openFile
-        )
-        self.ui.pushButton_import_image.clicked.connect(
-            self._importImage
-        )
+        self.ui.pushButton_import_fourDSTEM.clicked.connect(self._importFourDSTEM)
+        self.ui.pushButton_new_file.clicked.connect(self._newFile)
+        self.ui.pushButton_open_file.clicked.connect(self._openFile)
+        self.ui.pushButton_import_image.clicked.connect(self._importImage)
         self.ui.pushButton_diffraction_alignment.clicked.connect(
             self._diffractionAlignment
         )
         self.ui.pushButton_rotational_correction.clicked.connect(
             self._rotationalCorrection
         )
-        self.ui.pushButton_open_fourDSTEM.clicked.connect(
-            self._openFourDSTEM
-        )
-        
+        self.ui.pushButton_open_fourDSTEM.clicked.connect(self._openFourDSTEM)
+
         self.ui.pushButton_import_image.setVisible(False)
         self.ui.pushButton_background_subtraction.setVisible(False)
         self.ui.commandLinkButton_tutorials.setVisible(True)
         self.ui.commandLinkButton_tutorials.clicked.connect(self._openTutorialsWebsite)
-        self.ui.commandLinkButton_work.setVisible(False)    # TODO
+        self.ui.commandLinkButton_work.setVisible(False)  # TODO
 
         # Connect signals to update button states
         self.hdf_handler.file_opened.connect(self._onFileOpened)
@@ -127,7 +118,7 @@ class PageHome(QWidget):
     def _importFourDSTEM(self):
         self.import_action = ActionImportFourDSTEM(self)
         self.import_action.trigger()
-        
+
     def _backgroundSubtraction(self):
         self.background_subtraction_action = ActionBackground(self)
         self.background_subtraction_action.trigger()
@@ -143,6 +134,8 @@ class PageHome(QWidget):
     def _rotationalCorrection(self):
         self.rotational_correction_action = ActionRotate(self)
         self.rotational_correction_action.trigger()
-    
+
     def _openTutorialsWebsite(self):
-        QDesktopServices.openUrl(QUrl("https://fourdexplorer.readthedocs.io/en/latest/"))
+        QDesktopServices.openUrl(
+            QUrl("https://fourdexplorer.readthedocs.io/en/latest/")
+        )

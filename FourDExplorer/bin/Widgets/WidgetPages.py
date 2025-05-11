@@ -23,10 +23,11 @@ date:           Jun 13, 2022
 """
 
 from PySide6.QtCore import QAbstractListModel, QObject, QModelIndex, Qt
-from PySide6.QtWidgets import QWidget 
+from PySide6.QtWidgets import QWidget
 from bin.TabViewManager import TabViewManager
 
 from ui import uiWidgetPages
+
 
 class WidgetPages(QWidget):
     # TODO
@@ -34,31 +35,29 @@ class WidgetPages(QWidget):
         super().__init__(parent)
         self.ui = uiWidgetPages.Ui_Form()
         self.ui.setupUi(self)
-        
 
-    # @property 
+    # @property
     # def tabview_manager(self) -> TabViewManager:
-    #     global qApp 
-    #     return qApp.tabview_manager 
+    #     global qApp
+    #     return qApp.tabview_manager
 
     def initModel(self):
         self.model = ModelTabs(self)
         self.ui.listView_pages.setModel(self.model)
-
-    
 
 
 class ModelTabs(QAbstractListModel):
     """
     Displaying opened pages.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
 
-    @property 
+    @property
     def tabview_manager(self) -> TabViewManager:
-        global qApp 
-        return qApp.tabview_manager 
+        global qApp
+        return qApp.tabview_manager
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
         return self.tabview_manager.tabWidget_view.count()
@@ -69,7 +68,12 @@ class ModelTabs(QAbstractListModel):
             if role == Qt.DisplayRole:
                 return self.tabview_manager.getTab(row).windowTitle()
 
-    def headerData(self, section: int = 0, orientation: Qt.Orientation = Qt.Horizontal, role: int = Qt.DisplayRole):
+    def headerData(
+        self,
+        section: int = 0,
+        orientation: Qt.Orientation = Qt.Horizontal,
+        role: int = Qt.DisplayRole,
+    ):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             if section == 0:
-                return 'Pages'
+                return "Pages"

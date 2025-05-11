@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 """
 *---------------------------- MetadataFields.py ----------------------------*
@@ -14,20 +14,22 @@ date:           Oct 31, 2023
 *---------------------------- MetadataFields.py ----------------------------*
 """
 
-from logging import Logger 
-from PySide6.QtCore import QObject 
-import pint 
+from logging import Logger
+from PySide6.QtCore import QObject
+import pint
+
 
 class UnitManager(QObject):
     """
     管理元数据的单位，包括换算关系、显示。
 
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
         self._ureg = pint.UnitRegistry()
         # self._ureg.define('pix')
-        # self._registerStandardUnits() 
+        # self._registerStandardUnits()
 
     # def _registerStandardUnits(self):
     #     """
@@ -76,19 +78,19 @@ class UnitManager(QObject):
         Register new unit and its convert relationship between existing units.
 
         arguments:
-            definition: (str) the definition of the new unit. 
+            definition: (str) the definition of the new unit.
                 e.g. "new_unit = 1000 * base_unit"
 
         exceptions:
-            pint.errors.DefinitionSyntaxError: invalid unit 
+            pint.errors.DefinitionSyntaxError: invalid unit
 
             pint.errors.RedefinitionError: attempt to redefine an existing unit
         """
         self._ureg.define(definition)
 
-    @property 
+    @property
     def logger(self) -> Logger:
-        global qApp 
+        global qApp
         return qApp.logger
 
     def convert(self, value: float, from_unit: str, to_unit: str) -> float:
@@ -111,19 +113,19 @@ class UnitManager(QObject):
         if to_unit not in self._ureg:
             raise ValueError("Unit is not recognized: {0}".format(to_unit))
         quantity = self._ureg.Quantity(value, from_unit)
-        return quantity.to(to_unit).magnitude 
-    
-    def formatUnit(self, unit_str: str, value: float = None, context = "general") -> str:
+        return quantity.to(to_unit).magnitude
+
+    def formatUnit(self, unit_str: str, value: float = None, context="general") -> str:
         """
         Return a specific format of the unit.
 
         There are 3 kind of format: general, unicode, and TeX. The general form-
-        atting is registered in pint, but may not be displayed to the user. The 
+        atting is registered in pint, but may not be displayed to the user. The
         unicode will be displayed in QLable, while TeX will be displayed in mat-
         plotlib widgets.
 
         arguments:
-            unit_str: (str) the unit name 
+            unit_str: (str) the unit name
 
             value: (float) the physical value
 
@@ -135,7 +137,7 @@ class UnitManager(QObject):
         try:
             unit = self._ureg.parse_units(unit_str)
 
-            if context in ("general", None, ''):
+            if context in ("general", None, ""):
                 return self._formatUnitGeneral(unit, value)
             elif context in ("tex", "TeX", "TEX", "LaTeX", "LATEX", "latex"):
                 return self._formatUnitTex(unit, value)
@@ -161,12 +163,12 @@ class UnitManager(QObject):
         if value:
             return f"{value * unit:P}"
         return f"{unit:P}"
-    
+
     def _formatUnitTex(self, unit: pint.Unit, value: float = None) -> str:
         """
         Format unit to TeX, for displaying in matplotlib widgets.
 
-        NOTE: Here We deliberately leave a space in front of the unit to meet 
+        NOTE: Here We deliberately leave a space in front of the unit to meet
         scientific literature requirements, except degree "°".
 
         arguments:
@@ -180,7 +182,7 @@ class UnitManager(QObject):
         if value:
             return f"{value * unit:~L}"
         return f"{unit:~L}"
-    
+
     def _formatUnitUnicode(self, unit: pint.Unit, value: float = None) -> str:
         """
         Format unit to Unicode, for displaying in plain text.
@@ -196,7 +198,7 @@ class UnitManager(QObject):
         if value:
             return f"{value * unit:~P}"
         return f"{unit:~P}"
-    
+
     def isUnitLength(self, unit_str: str) -> bool:
         """
         Determines whether the dimension of a unit is a length.
@@ -211,11 +213,10 @@ class UnitManager(QObject):
             unit = self._ureg.parse_units(unit_str)
             dim = unit.dimensionality
             length_dim = self._ureg.meter.dimensionality
-            return dim == length_dim 
+            return dim == length_dim
         except pint.errors.UndefinedUnitError as e:
-            return False 
-        
-    
+            return False
+
     def isUnitSpaceFrequency(self, unit_str: str) -> bool:
         """
         Determins whether the dimension of a unit is a space frequency.
@@ -226,12 +227,12 @@ class UnitManager(QObject):
         returns:
             (bool) True is the unit is a space frequency, False otherwise.
         """
-        if '^' in unit_str:
-            unit_str = unit_str.replace('^', '**')
+        if "^" in unit_str:
+            unit_str = unit_str.replace("^", "**")
         try:
             unit = self._ureg.parse_units(unit_str)
-            dim = unit.dimensionality 
+            dim = unit.dimensionality
             space_frequency_dim = (1 / self._ureg.meter).dimensionality
             return dim == space_frequency_dim
         except pint.errors.UndefinedUnitError as e:
-            return False 
+            return False

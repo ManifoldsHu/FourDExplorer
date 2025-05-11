@@ -14,6 +14,9 @@ build
 release
 .qt_for_python
 
+#ruff:
+.ruff_cache
+
 #Log:
 logs
 *.log

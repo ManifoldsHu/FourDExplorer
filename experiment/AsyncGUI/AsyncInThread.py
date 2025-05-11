@@ -6,19 +6,28 @@
 在这个文件中，使用的方法是: 另起一个线程，并在其中跑事件循环。
 """
 
-import sys 
-import asyncio 
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget 
-from PySide6.QtCore import QObject, Signal, QThread 
+import sys
+import asyncio
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QPushButton,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
+from PySide6.QtCore import QObject, Signal, QThread
+
 
 class AsyncLoopRunner(QObject):
     def __init__(self, loop):
         super().__init__()
-        self.loop = loop 
+        self.loop = loop
 
     def run(self):
         asyncio.set_event_loop(self.loop)
         self.loop.run_forever()
+
 
 global_thread = QThread()
 global_loop = asyncio.new_event_loop()
@@ -29,20 +38,25 @@ loop_runner.moveToThread(global_thread)
 global_thread.started.connect(loop_runner.run)
 global_thread.start()
 
-def run_async(func, *args, **kwargs):
-    task = asyncio.ensure_future(func(*args, **kwargs), loop = global_loop)
-    return task 
 
-# 异步执行装饰器 
+def run_async(func, *args, **kwargs):
+    task = asyncio.ensure_future(func(*args, **kwargs), loop=global_loop)
+    return task
+
+
+# 异步执行装饰器
 def async_execute(callback_signal_name: str):
     def decorator(func):
         def wrapper(self, *args, **kwargs):
             async def async_func():
                 result = await func(self, *args, **kwargs)
                 getattr(self, callback_signal_name).emit(result)
+
             asyncio.run_coroutine_threadsafe(async_func(), global_loop)
+
         return wrapper
-    return decorator 
+
+    return decorator
 
 
 class MainWindow(QMainWindow):
@@ -80,7 +94,8 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.show()

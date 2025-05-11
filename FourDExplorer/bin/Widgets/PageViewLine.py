@@ -27,15 +27,15 @@ date:           Mar 25, 2022
 """
 
 from logging import Logger
-from typing import List 
+from typing import List
 
 from PySide6.QtWidgets import QWidget, QListView
 from PySide6.QtCore import QAbstractListModel, QObject
-from matplotlib.backends.backend_qtagg import (
-    FigureCanvasQTAgg as FigureCanvas)
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
+
 # from matplotlib.rcsetup import cycler
 # from matplotlib import rcParams
 import numpy as np
@@ -57,9 +57,10 @@ class PageViewLine(QWidget):
     The path of the ui file: ROOT_PATH/ui/uiPageViewLine.ui
 
     attributes:
-        hdf_handler: (HDFHandler) Manager to handle the HDF file. This is a 
+        hdf_handler: (HDFHandler) Manager to handle the HDF file. This is a
             global singleton.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiPageViewLine.Ui_Form()
@@ -67,9 +68,9 @@ class PageViewLine(QWidget):
 
         self._data_paths = []
         self._line_ax = None
-        self._line_objects = [] # TODO: changed to be a dict
+        self._line_objects = []  # TODO: changed to be a dict
         self._model = None
-        self._count = 0     # TODO: use label rather than index 
+        self._count = 0  # TODO: use label rather than index
         # self._cycler = cycler(
         #     color=['#1f77b4', 'green', 'blue', 'black'],
         #     linestyle = ['']
@@ -119,17 +120,17 @@ class PageViewLine(QWidget):
         """
         Set the data_path of the line, to show the curve.
 
-        Will set the data_path attribute. The line must be a 2D array with 
+        Will set the data_path attribute. The line must be a 2D array with
         shape (2, n), or an 1D array with shape (n,).
 
-        NOTE: This function is to add a new line. So other lines saved in the 
+        NOTE: This function is to add a new line. So other lines saved in the
         self._data_paths and self._line_objects will not be cleared. If it is
         the first time this function is called, axes will be initialized.
 
         arguments:
             data_path: (str) the data's path in the HDF5 file.
 
-            update_title: (bool) whether to update the window title and the 
+            update_title: (bool) whether to update the window title and the
                 path lineEdit. If this is the first line, it is recommended to
                 be True.
 
@@ -137,26 +138,27 @@ class PageViewLine(QWidget):
             TypeError, KeyError, ValueError
         """
         if not isinstance(data_path, str):
-            raise TypeError('data_path must be a str, not '
-                '{0}'.format(type(data_path).__name__))
+            raise TypeError(
+                "data_path must be a str, not {0}".format(type(data_path).__name__)
+            )
 
-        line_node = self.hdf_handler.getNode(data_path)  
+        line_node = self.hdf_handler.getNode(data_path)
         # May raise KeyError if the path does not exist
         if not isinstance(line_node, HDFDataNode):
-            raise ValueError('Item {0} must be a Dataset'.format(data_path))
+            raise ValueError("Item {0} must be a Dataset".format(data_path))
 
         data_object = self.hdf_handler.file[data_path]
         dim = len(data_object.shape)
         if not (dim == 1 or dim == 2):
-            raise ValueError('Data must be an 1D array or 2D matrix')
+            raise ValueError("Data must be an 1D array or 2D matrix")
         if dim == 2 and data_object.shape[0] != 2:
-            raise ValueError('Data must be with shape (n,) or (2, n)')
-        
+            raise ValueError("Data must be with shape (n,) or (2, n)")
+
         self._data_paths.append(data_path)
 
         if update_title:
             self.ui.lineEdit_line_path.setText(data_path)
-            self.setWindowTitle('{0} - Line'.format(line_node.name))
+            self.setWindowTitle("{0} - Line".format(line_node.name))
 
         self._createAxes()
         self._createLine(data_object)
@@ -167,7 +169,7 @@ class PageViewLine(QWidget):
         """
         if self._line_ax is None:
             self._line_ax = self.line_figure.add_subplot()
-    
+
     def _createLine(self, data_object: h5py.Dataset):
         """
         Read the line and its attributes, and show it.
@@ -184,17 +186,18 @@ class PageViewLine(QWidget):
             X_data = data_object[0, :]
             Y_data = data_object[1, :]
         else:
-            raise ValueError('Invalid data shape to draw line.')
-        
+            raise ValueError("Invalid data shape to draw line.")
+
         plot_lines = self._line_ax.plot(X_data, Y_data)
-        for line in plot_lines:     # Axes.plot() returns List[Line2D]
+        for line in plot_lines:  # Axes.plot() returns List[Line2D]
             self._line_objects.append(line)
-            self.line_blit_manager.addArtist(str(self._count),line)
+            self.line_blit_manager.addArtist(str(self._count), line)
         self.line_canvas.draw()
         self.line_canvas.flush_events()
 
         # line = self._line_ax.plot()
         # self._line_objects.append()
+
 
 class LinesModel(QAbstractListModel):
     """
@@ -212,7 +215,7 @@ class LinesModel(QAbstractListModel):
 
     This is a model for viewing lines.
 
-    This is a part of Model/View architecture of Qt. If we want to display 
+    This is a part of Model/View architecture of Qt. If we want to display
     these lines, we can instantiate QListView, and call its setModel() method.
 
     In order to realize a read-only and data-display decoupled architecture, we
@@ -223,10 +226,10 @@ class LinesModel(QAbstractListModel):
         - data(self, index: QModelIndex, role: int)
             Return the internal data according to the role
     """
+
     def __init__(self, parent: QObject):
         """
         arguments:
             parent: (QObject)
         """
         super().__init__(parent)
-        

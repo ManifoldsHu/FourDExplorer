@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 """
 *--------------------------- DialogMetaViewer.py -----------------------------*
@@ -18,23 +18,25 @@ date:               Mar 24, 2024
 *--------------------------- DialogMetaViewer.py -----------------------------*
 """
 
-from PySide6.QtWidgets import QDialog 
-from PySide6.QtWidgets import QWidget 
+from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QWidget
 
 from bin.MetaManager import MetaManager
 from bin.Widgets.WidgetMetaViewer import WidgetMetaViewer
 
 from ui import uiDialogMetaViewer
 
+
 class DialogMetaViewer(QDialog):
     """
     用于查看属性值的对话框。
-    
-    提升部件: 
-    self.ui.widget: WidgetMetaViewer 
+
+    提升部件:
+    self.ui.widget: WidgetMetaViewer
 
     Dialog to view the metadata (keys and values).
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogMetaViewer.Ui_Dialog()
@@ -42,15 +44,15 @@ class DialogMetaViewer(QDialog):
         self.setWindowTitle("Metadata")
         self.ui.lineEdit_item_path.setReadOnly(True)
         self.ui.pushButton_browse_item_path.setVisible(False)
-        self._item_path = ''
+        self._item_path = ""
 
     @property
     def item_path(self) -> str:
         return self._item_path
-    
+
     @property
     def meta_manager(self) -> MetaManager:
-        global qApp 
+        global qApp
         return qApp.requireMetaManager(self.item_path)
 
     def setItemPath(self, item_path: str):
@@ -61,11 +63,9 @@ class DialogMetaViewer(QDialog):
             item_path: (str) The path of the item (Dataset or Group)
         """
         if not isinstance(item_path, str):
-            raise TypeError(f'path must be a str, not {type(item_path).__name__}')
-        self._item_path = item_path 
+            raise TypeError(f"path must be a str, not {type(item_path).__name__}")
+        self._item_path = item_path
         self.ui.lineEdit_item_path.setText(item_path)
         self.ui.widget.setItemPath(item_path)
         # self.ui.widget.ui.widget_meta_viewer.setItemPath(item_path)
         # self.ui.widget.ui.widget_meta_viewer_not_pathlike.setItemPath(item_path)
-
-    

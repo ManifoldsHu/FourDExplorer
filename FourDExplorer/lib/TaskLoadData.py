@@ -18,11 +18,11 @@ from logging import Logger
 import os
 from typing import Iterable
 from typing import Mapping
-from typing import Tuple  
+from typing import Tuple
 from PIL import Image
 
 from PySide6.QtCore import QObject
-from PySide6.QtCore import Signal 
+from PySide6.QtCore import Signal
 import h5py
 import numpy as np
 
@@ -37,6 +37,7 @@ from lib.ReadBinary import readFourDSTEMFromNpz
 from lib.ReadBinary import readFourDSTEMFromDM4
 from lib.ReadBinary import readDataFromHDF5
 
+
 class TaskBaseLoadData(Task):
     """
     从外部文件中加载数据的 Task 的基类。
@@ -47,7 +48,9 @@ class TaskBaseLoadData(Task):
 
     Will create an object in the HDF5 file automatically.
     """
-    def __init__(self, 
+
+    def __init__(
+        self,
         shape: Tuple,
         file_path: str,
         item_parent_path: str,
@@ -59,7 +62,7 @@ class TaskBaseLoadData(Task):
         arguments:
             file_path: (str) The absolute path of the ouside raw file.
 
-            item_parent_path: (str) The path of the parent group of the Dataset 
+            item_parent_path: (str) The path of the parent group of the Dataset
                 item in the HDF file.
 
             item_name: (str) The name of the new Dataset item in the HDF file.
@@ -70,30 +73,30 @@ class TaskBaseLoadData(Task):
                 in the attrs of HDF5 object.
         """
         super().__init__(parent)
-        self._shape = shape 
-        self._file_path = file_path    # The ouside file path where data from
-        self._item_parent_path = item_parent_path    # The parent group path inside HDF5 file.
-        self._item_name = item_name 
-        self._meta = meta 
-        self.name = 'Load Data'
+        self._shape = shape
+        self._file_path = file_path  # The ouside file path where data from
+        self._item_parent_path = (
+            item_parent_path  # The parent group path inside HDF5 file.
+        )
+        self._item_name = item_name
+        self._meta = meta
+        self.name = "Load Data"
         self.comment = (
-            'Load data\n'
-            'Data File path: {0}\n'
-            'To Dataset Object: {1}\n'.format(
-                self._file_path, self._item_name 
+            "Load data\nData File path: {0}\nTo Dataset Object: {1}\n".format(
+                self._file_path, self._item_name
             )
         )
-     
+
     @property
     def item_path(self) -> str:
         """
-        The new dataset's path. It must be a non-exist object before the 
+        The new dataset's path. It must be a non-exist object before the
         dataset is created.
         """
-        if self._item_parent_path == '/':
+        if self._item_parent_path == "/":
             return self._item_parent_path + self._item_name
         else:
-            return self._item_parent_path + '/' + self._item_name
+            return self._item_parent_path + "/" + self._item_name
 
     @property
     def logger(self) -> Logger:
@@ -102,18 +105,19 @@ class TaskBaseLoadData(Task):
 
     @property
     def hdf_handler(self) -> HDFHandler:
-        global qApp 
+        global qApp
         return qApp.hdf_handler
-        
+
     def setShape(self, shape: tuple[int]):
         """
         arguments:
             shape: (Tuple)
         """
         if not isinstance(shape, Iterable):
-            raise TypeError('shape must be a tuple, not '
-                '{0}'.format(type(shape).__name__))
-        self._shape = shape 
+            raise TypeError(
+                "shape must be a tuple, not {0}".format(type(shape).__name__)
+            )
+        self._shape = shape
 
     def setFilePath(self, path: str):
         """
@@ -121,13 +125,12 @@ class TaskBaseLoadData(Task):
             path: (str) The absolute path of the ouside file.
         """
         if not isinstance(path, str):
-            raise TypeError('path must be a str, not '
-                '{0}'.format(type(path).__name__))
-        
-        if not os.path.isfile(path):
-            raise OSError('path is not a file: {0}'.format(path))
+            raise TypeError("path must be a str, not {0}".format(type(path).__name__))
 
-        self._file_path = path 
+        if not os.path.isfile(path):
+            raise OSError("path is not a file: {0}".format(path))
+
+        self._file_path = path
 
     def setItemParentPath(self, path: str):
         """
@@ -136,10 +139,9 @@ class TaskBaseLoadData(Task):
                 HDF file.
         """
         if not isinstance(path, str):
-            raise TypeError('path must be a str, not '
-                '{0}'.format(type(path).__name__))
+            raise TypeError("path must be a str, not {0}".format(type(path).__name__))
 
-        self._item_parent_path = path 
+        self._item_parent_path = path
 
     def setItemName(self, name: str):
         """
@@ -147,10 +149,9 @@ class TaskBaseLoadData(Task):
             name: (str) The name of the new Dataset item in the HDF file.
         """
         if not isinstance(name, str):
-            raise TypeError('name must be a str, not '
-                '{0}'.format(type(name).__name__))
+            raise TypeError("name must be a str, not {0}".format(type(name).__name__))
 
-        self._item_name = name 
+        self._item_name = name
 
     def updateMeta(self, **meta):
         """
@@ -158,7 +159,8 @@ class TaskBaseLoadData(Task):
         """
         for key in meta:
             self._meta[key] = meta[key]
-    
+
+
 class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
     """
     从外部文件加载 4D-STEM 数据的 Task。
@@ -169,20 +171,21 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
 
     Will create an object in the HDF5 file automatically.
     """
+
     def __init__(
-        self, 
+        self,
         shape: Tuple,
         file_path: str,
         item_parent_path: str,
         item_name: str,
         offset_to_first_image: int = 0,
         gap_between_images: int = 0,
-        scalar_type: str = 'float',
+        scalar_type: str = "float",
         scalar_size: int = 4,
         little_endian: bool = True,
-        is_flipped = False,
+        is_flipped=False,
         rotate90: int = 0,
-        parent: QObject = None, 
+        parent: QObject = None,
         **meta,
     ):
         """
@@ -194,7 +197,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
 
             file_path: (str) The absolute path of the ouside raw file.
 
-            item_parent_path: (str) The path of the parent group of the Dataset 
+            item_parent_path: (str) The path of the parent group of the Dataset
                 item in the HDF file.
 
             item_name: (str) The name of the new Dataset item in the HDF file.
@@ -205,19 +208,19 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
 
             scalar_type: (str) Must be one of these: ('float', 'int', 'uint',)
 
-            scalar_size: (int) How many bytes of one scalar number. Must be one 
+            scalar_size: (int) How many bytes of one scalar number. Must be one
                 of these: (1, 2, 4,)
 
-            little_endian: (bool) Is the raw data little-endian or big-endian? 
+            little_endian: (bool) Is the raw data little-endian or big-endian?
                 Default is True.
 
-            is_flipped: (bool) Whether the data should be transposed when 
+            is_flipped: (bool) Whether the data should be transposed when
                 reading. Default is False.
 
             rotate90: (int) How many times should the data be rotated 90 degree
-                counter-clockwise. Default is 0. In some cases, the coordinate 
-                of the source data is xy, but in 4D-Explorer we use ij, so we 
-                must rotate every diffraction pattern 90° when loading the 
+                counter-clockwise. Default is 0. In some cases, the coordinate
+                of the source data is xy, but in 4D-Explorer we use ij, so we
+                must rotate every diffraction pattern 90° when loading the
                 4D-STEM dataset.
 
             **meta: (key word arguments) other meta data that should be stored
@@ -225,10 +228,10 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         """
         super().__init__(
             shape,
-            file_path, 
-            item_parent_path, 
-            item_name, 
-            parent, 
+            file_path,
+            item_parent_path,
+            item_name,
+            parent,
             **meta,
         )
 
@@ -238,28 +241,22 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         self._offset_to_first_image = offset_to_first_image
         self._gap_between_images = gap_between_images
         self._is_flipped = is_flipped
-        self._rotate90 = rotate90 
+        self._rotate90 = rotate90
 
-        self.name = 'Load 4D-STEM data'
+        self.name = "Load 4D-STEM data"
         self.comment = (
-            'Load 4D-STEM data\n'
-            'Data File path: {0}\n'
-            'To Dataset Object: {1}\n'.format(
-                self._file_path, self._item_name 
+            "Load 4D-STEM data\nData File path: {0}\nTo Dataset Object: {1}\n".format(
+                self._file_path, self._item_name
             )
         )
 
         self.setPrepare(self._createDataset)
 
         self._bindSubtask()
-        
-    @property 
+
+    @property
     def dtype(self) -> str:
-        return getDType(
-            self._scalar_type, 
-            self._scalar_size, 
-            self._little_endian
-        )
+        return getDType(self._scalar_type, self._scalar_size, self._little_endian)
 
     # def setHeaderPath(self, path: str):
     #     """
@@ -267,16 +264,16 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
     #         path: (str) The absolute path of the header file of 4D-STEM data.
     #             This attribute can be the same as the file_path, although this
     #             usually indicates a header file that descripte experimental
-    #             parameters of the 4D-STEM dataset. 
+    #             parameters of the 4D-STEM dataset.
     #     """
     #     if not isinstance(path, str):
     #         raise TypeError('path must be a str, not '
     #             '{0}'.format(type(path).__name__))
-        
+
     #     if not os.path.isfile(path):
     #         raise OSError('path is not a file: {0}'.format(path))
-        
-    #     self._header_path = path 
+
+    #     self._header_path = path
 
     def setShape(self, shape: tuple[int]):
         """
@@ -293,8 +290,8 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
     #     if not isinstance(meta, Mapping):
     #         raise TypeError('meta must be a dict, not '
     #             '{0}'.format(type(meta).__name__))
-    #     self._meta = meta 
-       
+    #     self._meta = meta
+
     def _createDataset(self):
         """
         Will create a dataset in HDF5 file according to the item_path.
@@ -302,7 +299,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         This function works as the preparing function that will be called
         just before the task is submitted.
         """
-        
+
         self.hdf_handler.addNewData(
             self._item_parent_path,
             self._item_name,
@@ -311,7 +308,7 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         )
 
         for key, value in self._meta.items():
-            self.hdf_handler.file[self.item_path].attrs[key] = value 
+            self.hdf_handler.file[self.item_path].attrs[key] = value
 
     def _bindSubtask(self):
         """
@@ -319,21 +316,21 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         """
         scan_i, scan_j, dp_i, dp_j = self._shape
         self.addSubtaskFuncWithProgress(
-            'Copy Data', 
+            "Copy Data",
             readFourDSTEMFromRaw,
-            raw_path = self._file_path,
-            item_path = self.item_path,
-            dp_i = dp_i,
-            dp_j = dp_j,
-            scan_i = scan_i,
-            scan_j = scan_j,
-            scalar_type = self._scalar_type,
-            scalar_size = self._scalar_size,
-            offset_to_first_image = self._offset_to_first_image,
-            gap_between_images = self._gap_between_images,
-            little_endian = self._little_endian,
-            is_flipped = self._is_flipped,
-            rotate90 = self._rotate90,
+            raw_path=self._file_path,
+            item_path=self.item_path,
+            dp_i=dp_i,
+            dp_j=dp_j,
+            scan_i=scan_i,
+            scan_j=scan_j,
+            scalar_type=self._scalar_type,
+            scalar_size=self._scalar_size,
+            offset_to_first_image=self._offset_to_first_image,
+            gap_between_images=self._gap_between_images,
+            little_endian=self._little_endian,
+            is_flipped=self._is_flipped,
+            rotate90=self._rotate90,
         )
 
     def _showFourDSTEM(self):
@@ -343,9 +340,10 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
         This function works as the following function that will be called
         just after the task is completed.
         """
-        self.logger.debug('Task {0} completed.'.format(self.name))
+        self.logger.debug("Task {0} completed.".format(self.name))
         # action = ActionShowFourDSTEM(item_path = self.item_path)
         # action.trigger()
+
 
 # class SubtaskLoadFourDSTEMFromRaw(SubtaskWithProgress):
 #     """
@@ -353,9 +351,9 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
 #     """
 #     def __init__(self, parent = None,):
 #         super().__init__(parent)
-    
+
 #     def setArgs(
-#         self, 
+#         self,
 
 #     )
 
@@ -363,10 +361,12 @@ class TaskLoadFourDSTEMFromRaw(TaskBaseLoadData):
 class TaskLoadNumpy(TaskBaseLoadData):
     """
     把外部 Numpy 文件中加载进 HDF5 文件中的任务。
-    
+
     Task to load numpy file into the HDF5 file.
     """
-    def __init__(self,
+
+    def __init__(
+        self,
         shape,
         file_path: str,
         item_parent_path: str,
@@ -379,32 +379,23 @@ class TaskLoadNumpy(TaskBaseLoadData):
         """
         arguments:
             file_path: (str) The absolute path of the ouside raw file.
-            
-            
+
+
         """
         self._file_path = file_path
         self._npz_data_name = npz_data_name
-        super().__init__(
-            shape,
-            file_path, 
-            item_parent_path, 
-            item_name, 
-            parent, 
-            **meta
-        )
-        self._dtype = dtype 
-        self.name = 'Load 4D-STEM data'
+        super().__init__(shape, file_path, item_parent_path, item_name, parent, **meta)
+        self._dtype = dtype
+        self.name = "Load 4D-STEM data"
         self.comment = (
-            'Load 4D-STEM data\n'
-            'Data File path: {0}\n'
-            'To Dataset Object: {1}\n'.format(
-                self._file_path, self._item_name 
+            "Load 4D-STEM data\nData File path: {0}\nTo Dataset Object: {1}\n".format(
+                self._file_path, self._item_name
             )
         )
-        
+
         self.setPrepare(self._createDataset)
         self._bindSubtask()
-        
+
     def _createDataset(self):
         self.hdf_handler.addNewData(
             self._item_parent_path,
@@ -412,34 +403,34 @@ class TaskLoadNumpy(TaskBaseLoadData):
             self._shape,
             self._dtype,
         )
-        
+
     def _bindSubtask(self):
-        if self._file_path.endswith('.npz'):
+        if self._file_path.endswith(".npz"):
             self.addSubtaskFuncWithProgress(
-                'Load Data from .npz', 
+                "Load Data from .npz",
                 readFourDSTEMFromNpz,
-                file_path = self._file_path,
-                item_path = self.item_path,
-                npz_data_name = self._npz_data_name,
+                file_path=self._file_path,
+                item_path=self.item_path,
+                npz_data_name=self._npz_data_name,
             )
-        elif self._file_path.endswith('.npy'):
+        elif self._file_path.endswith(".npy"):
             self.addSubtaskFuncWithProgress(
-                'Load Data from .npy', 
+                "Load Data from .npy",
                 readFourDSTEMFromNpy,
-                file_path = self._file_path,
-                item_path = self.item_path,
+                file_path=self._file_path,
+                item_path=self.item_path,
             )
 
 
-
-    
 class TaskLoadTiff(TaskBaseLoadData):
     """
     把外部 Tiff 图片中加载进 HDF5 文件中的任务。
 
     Task to load tiff image into the HDF5 file.
     """
-    def __init__(self,
+
+    def __init__(
+        self,
         file_path: str,
         item_parent_path: str,
         item_name: str,
@@ -450,7 +441,7 @@ class TaskLoadTiff(TaskBaseLoadData):
         arguments:
             file_path: (str) The absolute path of the ouside raw file.
 
-            item_parent_path: (str) The path of the parent group of the Dataset 
+            item_parent_path: (str) The path of the parent group of the Dataset
                 item in the HDF file.
 
             item_name: (str) The name of the new Dataset item in the HDF file.
@@ -460,28 +451,19 @@ class TaskLoadTiff(TaskBaseLoadData):
             **meta: (key word arguments) other meta data that should be stored
                 in the attrs of HDF5 object.
         """
-        super().__init__(
-            (1,), 
-            file_path, 
-            item_parent_path, 
-            item_name, 
-            parent, 
-            **meta
-        )
-        self.name = 'Load TIFF data'
+        super().__init__((1,), file_path, item_parent_path, item_name, parent, **meta)
+        self.name = "Load TIFF data"
         self.comment = (
-            'Load TIFF data\n'
-            'Data File path: {0}\n'
-            'To Dataset Object: {1}\n'.format(
-                self._file_path, self._item_name 
+            "Load TIFF data\nData File path: {0}\nTo Dataset Object: {1}\n".format(
+                self._file_path, self._item_name
             )
         )
         self.setPrepare(self._createDataset)
         self.addSubtaskFunc(
-            'Copy Data',
+            "Copy Data",
             self.copyFromTiff,
-            file_path = self._file_path,
-            item_path = self.item_path,
+            file_path=self._file_path,
+            item_path=self.item_path,
         )
 
     def _createDataset(self):
@@ -501,7 +483,7 @@ class TaskLoadTiff(TaskBaseLoadData):
         )
 
         for key, value in self._meta.items():
-            self.hdf_handler.file[self.item_path].attrs[key] = value 
+            self.hdf_handler.file[self.item_path].attrs[key] = value
 
     def copyFromTiff(self, file_path: str, item_path: str):
         """
@@ -514,7 +496,7 @@ class TaskLoadTiff(TaskBaseLoadData):
         """
         with Image.open(file_path) as im:
             dataset = self.hdf_handler.file[item_path]
-            dataset[:] = np.asarray(im) 
+            dataset[:] = np.asarray(im)
 
     def _showImage(self):
         """
@@ -523,21 +505,22 @@ class TaskLoadTiff(TaskBaseLoadData):
         This function works as the following function that will be called
         just after the task is completed.
         """
-        self.logger.debug('Task {0} completed.'.format(self.name))
+        self.logger.debug("Task {0} completed.".format(self.name))
 
 
 class TaskLoadFourDSTEMFromDM4(TaskBaseLoadData):
     """
     从 DM4 文件中加载 4D-STEM 数据的 Task
-    
+
     将自动在 HDF5 文件中创建一个 Object 并导入数据。
-    
+
     Load 4D-STEM data from DM4 file.
-    
+
     Will create a Dataset in HDF5 file according to the item_path.
     """
+
     def __init__(
-        self, 
+        self,
         shape: tuple[int],
         file_path: str,
         item_parent_path: str,
@@ -546,66 +529,59 @@ class TaskLoadFourDSTEMFromDM4(TaskBaseLoadData):
         scalar_type: str,
         scalar_size: int,
         little_endian: bool,
-        is_flipped = False,
+        is_flipped=False,
         rotate90: int = 0,
         parent: QObject = None,
         **meta,
     ):
         """
         arguments:
-            shape: (tuple[int]) The shape of the dataset: 
+            shape: (tuple[int]) The shape of the dataset:
                 (scan_i, scan_j, dp_i, dp_j)
-            
+
             file_path: (str) The absolute path of the ouside raw file.
-            
-            item_parent_path: (str) The path of the parent group of the Dataset 
+
+            item_parent_path: (str) The path of the parent group of the Dataset
                 item in the HDF file.
-            
+
             item_name: (str) The name of the new Dataset item in the HDF file.
-            
+
             offset_to_first_image: (int) The offset bytes of the first image
-            
+
             gap_between_images: (int) The gap between every two images
-            
+
             dtype: (str) the scalar type
-            
-            meta: (dict) other meta data that should be stored in the attrs of 
+
+            meta: (dict) other meta data that should be stored in the attrs of
                 HDF5 object.
-            
+
             little_endian: (bool) Is data in the file little-endian?
-            
+
             is_flipped: (bool) Is chirality of 2D x 2D the same?    # TODO
-            
+
             rotate90: (int) Times every image should be rotated.    # TODO
-            
+
             parent: (QObject)
         """
-        super().__init__(
-            shape,
-            file_path, 
-            item_parent_path, 
-            item_name, 
-            parent, 
-            **meta
-        )
-        
+        super().__init__(shape, file_path, item_parent_path, item_name, parent, **meta)
+
         self._offset_to_first_image = offset_to_first_image
         self._gap_between_images = 0
         self._scalar_type = scalar_type
-        self._scalar_size = scalar_size 
+        self._scalar_size = scalar_size
         self._little_endian = little_endian
         self._is_flipped = is_flipped
         self._rotate90 = rotate90
-        self.name = 'Load DM4 4D-STEM data'
+        self.name = "Load DM4 4D-STEM data"
         self.comment = (
-            'Load DM4 4D-STEM data\n'
-            f'Data File path: {file_path}\n'
-            f'To Dataset Object: {item_name}\n'
+            "Load DM4 4D-STEM data\n"
+            f"Data File path: {file_path}\n"
+            f"To Dataset Object: {item_name}\n"
         )
-        
+
         self.setPrepare(self._createDataset)
         self._bindSubtask()
-        
+
     @property
     def dtype(self) -> str:
         return getDType(
@@ -613,91 +589,97 @@ class TaskLoadFourDSTEMFromDM4(TaskBaseLoadData):
             self._scalar_size,
             self._little_endian,
         )
-        
+
     def _createDataset(self):
         """
         Will create a dataset in HDF5 file according to the item_path.
 
-        
+
         This function works as the preparing function that will be called
         just before the task is submitted.
         """
         self.hdf_handler.addNewData(
-            self._item_parent_path,
-            self._item_name,
-            self._shape,
-            self.dtype
+            self._item_parent_path, self._item_name, self._shape, self.dtype
         )
-        
+
         for key, value in self._meta.items():
             try:
                 self.hdf_handler.file[self.item_path].attrs[key] = value
             except Exception as e:
-                self.logger.error(f'Failed to set attribute {key}: {e}')
-            
+                self.logger.error(f"Failed to set attribute {key}: {e}")
+
     def _bindSubtask(self):
         """
         Add subtask, which is the practical worker
         """
-        scan_i, scan_j, dp_i, dp_j = self._shape 
+        scan_i, scan_j, dp_i, dp_j = self._shape
         self.addSubtaskFuncWithProgress(
-            'Copy Data',
+            "Copy Data",
             readFourDSTEMFromDM4,
-            file_path = self._file_path,
-            item_path = self.item_path,
-            dp_i = dp_i,
-            dp_j = dp_j,
-            scan_i = scan_i,
-            scan_j = scan_j,
-            scalar_type = self._scalar_type,
-            scalar_size = self._scalar_size,
-            offset_to_first_image = self._offset_to_first_image,
-            little_endian = self._little_endian,
+            file_path=self._file_path,
+            item_path=self.item_path,
+            dp_i=dp_i,
+            dp_j=dp_j,
+            scan_i=scan_i,
+            scan_j=scan_j,
+            scalar_type=self._scalar_type,
+            scalar_size=self._scalar_size,
+            offset_to_first_image=self._offset_to_first_image,
+            little_endian=self._little_endian,
         )
-        
+
     def _showFourDSTEM(self):
         """
-        TODO 
+        TODO
         Will open the 4D-STEM dataset in the HDF5 object.
-        
+
         This function works as the following function that will be called
         just after the task is completed.
         """
-        self.logger.debug(f'Task {self.name} completed.')
-        
+        self.logger.debug(f"Task {self.name} completed.")
+
 
 class TaskLoadDataFromHDF5(TaskBaseLoadData):
     """
     从 HDF5 文件中加载数据. 支持加载任意形状的数据集
-    
+
     Load data from HDF5 file.
     """
-    
-    def __init__(self, file_path: str, dataset_path: str, item_parent_path: str, item_name: str, parent: QObject = None, **meta):
-        with h5py.File(file_path, 'r') as hdf_file:
+
+    def __init__(
+        self,
+        file_path: str,
+        dataset_path: str,
+        item_parent_path: str,
+        item_name: str,
+        parent: QObject = None,
+        **meta,
+    ):
+        with h5py.File(file_path, "r") as hdf_file:
             dataset = hdf_file[dataset_path]
             self._shape = dataset.shape
             self._dtype = dataset.dtype
 
-        super().__init__(self._shape, file_path, item_parent_path, item_name, parent, **meta)
+        super().__init__(
+            self._shape, file_path, item_parent_path, item_name, parent, **meta
+        )
         self._file_path = file_path
         self._dataset_path = dataset_path
-        
+
         print(f"item_parent_path: {item_parent_path}, item_name: {item_name}")
-        self.name = 'Load Data from HDF5'
+        self.name = "Load Data from HDF5"
         self.comment = (
-            'Load data from HDF5 file\n'
-            'Source File path: {0}\n'
-            'Dataset Path: {1}\n'
-            'To Dataset Object: {2}\n'.format(
+            "Load data from HDF5 file\n"
+            "Source File path: {0}\n"
+            "Dataset Path: {1}\n"
+            "To Dataset Object: {2}\n".format(
                 self._file_path, self._dataset_path, self._item_name
             )
         )
-        
+
         self.setPrepare(self._createDataset)
         self._bindSubtask()
 
-        
     def _createDataset(self):
         """
         Will create a dataset in HDF5 file according to the item_path.
@@ -706,35 +688,32 @@ class TaskLoadDataFromHDF5(TaskBaseLoadData):
         just before the task is submitted.
         """
         self.hdf_handler.addNewData(
-            self._item_parent_path,
-            self._item_name,
-            self._shape,
-            self._dtype
+            self._item_parent_path, self._item_name, self._shape, self._dtype
         )
-        
+
         for key, value in self._meta.items():
             try:
                 self.hdf_handler.file[self.item_path].attrs[key] = value
             except Exception as e:
-                self.logger.error(f'Failed to set attribute {key}: {e}')
-            
+                self.logger.error(f"Failed to set attribute {key}: {e}")
+
     def _bindSubtask(self):
         """
         Add subtask, which is the practical worker
         """
         self.addSubtaskFuncWithProgress(
-            'Copy Data',
+            "Copy Data",
             readDataFromHDF5,
-            file_path = self._file_path,
-            dataset_path = self._dataset_path,
-            item_path = self.item_path
+            file_path=self._file_path,
+            dataset_path=self._dataset_path,
+            item_path=self.item_path,
         )
-        
+
     def _showFourDSTEM(self):
         """
         Will open the 4D-STEM dataset in the HDF5 object.
-        
+
         This function works as the following function that will be called
         just after the task is completed.
         """
-        self.logger.debug(f'Task {self.name} completed.')
+        self.logger.debug(f"Task {self.name} completed.")

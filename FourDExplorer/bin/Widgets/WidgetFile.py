@@ -21,7 +21,7 @@ The GUI Widget to manage HDF5 file.
 Contents:
     - WidgetBaseHDFViewer, to view and edit HDF5 file heirarchical structure
     - Buttons to open/new file, import data and export data
-    - View current working directory. 
+    - View current working directory.
 
 Promoted Widget:
     - name of widget class: WidgetFile
@@ -32,13 +32,15 @@ date:               Feb 24, 2022
 *------------------------------ WidgetFile.py --------------------------------*
 """
 
-import os 
-import sys 
+import os
+import sys
 import traceback
-# from PySide6.QtCore import QDir 
+
+# from PySide6.QtCore import QDir
 from PySide6.QtWidgets import QWidget, QFileSystemModel, QFileDialog
-from ui import uiWidgetFile 
+from ui import uiWidgetFile
 # from bin.Log import LogUtil
+
 
 class WidgetFile(QWidget):
     """
@@ -50,6 +52,7 @@ class WidgetFile(QWidget):
 
     The path of Ui file: ROOT_PATH/ui/uiWidgetFile.ui
     """
+
     def __init__(self, parent: QWidget = None):
         """
         arguments:
@@ -60,15 +63,15 @@ class WidgetFile(QWidget):
         self.ui.setupUi(self)
 
         # self._log_util = LogUtil(__name__)
-        # self.logger = self._log_util.logger 
-        
+        # self.logger = self._log_util.logger
+
         global qApp
         self._hdf_handler = qApp.hdf_handler
         self._hdf_model = None
 
         self._initCWD()
         self._initHDF()
-    
+
     def _initCWD(self):
         """
         Initialize Current Work Directory Views
@@ -86,14 +89,13 @@ class WidgetFile(QWidget):
         )
         self._hdf_handler.file_closed.connect(self.changeStateByFileState)
         self._hdf_handler.file_opened.connect(self.changeStateByFileState)
-        
 
     def _initHDF(self):
         """
         Initialize HDF file views.
         """
         # self._hdf_handler.file_state_changed.connect(
-            # self.changeStateByFileState)
+        # self.changeStateByFileState)
         # self.ui.pushButton_new_file.clicked.connect(self.newFile)
         # self.ui.pushButton_close_file.clicked.connect(self.closeFile)
         # self.changeStateByFileState()
@@ -103,13 +105,14 @@ class WidgetFile(QWidget):
         """
         Open a dialog, choose a path and name, and create a new file.
         """
-        save_return = QFileDialog.getSaveFileName(self, 
-            caption='Create an HDF5 File', 
-            dir = os.path.join(os.getcwd(), 'untitled'),
-            filter = 'HDF File (*.h5 *.hdf5 *.H5 *.HDF5);;All Files (*.*)',
-            selectedFilter = 'HDF File (*.h5 *.hdf5 *.H5 *.HDF5)',
+        save_return = QFileDialog.getSaveFileName(
+            self,
+            caption="Create an HDF5 File",
+            dir=os.path.join(os.getcwd(), "untitled"),
+            filter="HDF File (*.h5 *.hdf5 *.H5 *.HDF5);;All Files (*.*)",
+            selectedFilter="HDF File (*.h5 *.hdf5 *.H5 *.HDF5)",
         )
-        if save_return[0] == '':
+        if save_return[0] == "":
             return False
 
         file_path = os.path.abspath(save_return[0])
@@ -128,31 +131,28 @@ class WidgetFile(QWidget):
 
     def changeStateByFileState(self):
         """
-        Reactions (Slot) of file widgets if the file state is changed 
-        (opened or close). 
+        Reactions (Slot) of file widgets if the file state is changed
+        (opened or close).
         """
-        self.ui.lineEdit_working_directory.setText(
-            os.getcwd()
-        )
+        self.ui.lineEdit_working_directory.setText(os.getcwd())
         self.ui.listView_working_directory.setRootIndex(
             self._file_model.index(os.getcwd())
         )
-
 
     def openFile(self):
         """
         Open a dialog, choose a file and open it.
         """
         open_return = QFileDialog.getOpenFileName(
-            parent = self,
-            caption = 'Open an HDF5 file',
-            dir = os.getcwd(),
-            filter = 'HDF File (*.h5 *.hdf5 *.H5 *.HDF5);;All Files (*.*)',
-            selectedFilter = 'HDF File (*.h5 *.hdf5 *.H5 *.HDF5)',
+            parent=self,
+            caption="Open an HDF5 file",
+            dir=os.getcwd(),
+            filter="HDF File (*.h5 *.hdf5 *.H5 *.HDF5);;All Files (*.*)",
+            selectedFilter="HDF File (*.h5 *.hdf5 *.H5 *.HDF5)",
         )
-        if open_return[0] == '':
+        if open_return[0] == "":
             return False
-        
+
         file_path = os.path.abspath(open_return[0])
         self._openFile(file_path)
 
@@ -165,10 +165,9 @@ class WidgetFile(QWidget):
         """
         self._hdf_handler.file_path = file_path
         self._hdf_handler.openFile()
-    
+
     def closeFile(self):
         """
         Close the current HDF5 file.
         """
         self._hdf_handler.closeFile()
-

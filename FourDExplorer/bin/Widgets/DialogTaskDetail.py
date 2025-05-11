@@ -17,8 +17,10 @@ date:           Mar 10, 2022
 
 from PySide6.QtWidgets import QDialog, QWidget
 from bin.TaskManager import TaskManager, Task, Subtask, SubtaskListModel
-# from bin.Log import LogUtil 
+
+# from bin.Log import LogUtil
 from ui import uiDialogTaskDetail
+
 
 class DialogTaskDetail(QDialog):
     """
@@ -31,6 +33,7 @@ class DialogTaskDetail(QDialog):
     It includes a QListView to show subtasks, and a QPlainTextEdit to show the
     comments of the task.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogTaskDetail.Ui_Dialog()
@@ -39,15 +42,13 @@ class DialogTaskDetail(QDialog):
         global qApp
         self._task_manager = qApp.task_manager
         self._task = None
-        
+
         self.ui.pushButton_refresh.clicked.connect(self.refresh)
         self.ui.pushButton_OK.clicked.connect(self.accept)
 
         self.ui.plainTextEdit_comment.setReadOnly(True)
 
-        self.setWindowTitle('Task Details')
-        
-        
+        self.setWindowTitle("Task Details")
 
     @property
     def task_manager(self) -> TaskManager:
@@ -60,17 +61,14 @@ class DialogTaskDetail(QDialog):
     def setCurrentTask(self, task: Task):
         self._task = task
         self.refresh()
-        
+
     def refresh(self):
         """
         Update the information of the current task.
         """
         self.ui.label_task_name.setText(self.task.name)
-        state_string = str(self.task.state).split('.')[1]
+        state_string = str(self.task.state).split(".")[1]
         self.ui.label_task_state.setText(state_string)
         self.ui.plainTextEdit_comment.setPlainText(self.task.comment)
         model = SubtaskListModel(self.task)
         self.ui.listView_subtask.setModel(model)
-        
-        
-

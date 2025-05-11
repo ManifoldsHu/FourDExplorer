@@ -18,8 +18,10 @@ from PySide6.QtCore import Qt, QPoint, QModelIndex
 
 from bin.TaskManager import TaskManager, HistoryTaskModel, Task
 from bin.Widgets.DialogTaskDetail import DialogTaskDetail
+
 # from bin.Log import LogUtil
 from ui import uiDialogHistoryTasks
+
 
 class DialogHistoryTasks(QDialog):
     """
@@ -31,6 +33,7 @@ class DialogHistoryTasks(QDialog):
 
     It includes a QListView to show the list of tasks.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogHistoryTasks.Ui_Dialog()
@@ -45,14 +48,12 @@ class DialogHistoryTasks(QDialog):
         self.ui.pushButton_OK.clicked.connect(self.accept)
         self.ui.pushButton_OK.setVisible(False)
 
-        self.ui.listView_history_task.setContextMenuPolicy(
-            Qt.CustomContextMenu
-        )
+        self.ui.listView_history_task.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.listView_history_task.customContextMenuRequested.connect(
             self.showContextMenu
         )
-    
-        self.setWindowTitle('History Tasks')
+
+        self.setWindowTitle("History Tasks")
 
     @property
     def task_manager(self) -> TaskManager:
@@ -70,7 +71,7 @@ class DialogHistoryTasks(QDialog):
         Clear all of the history tasks.
         """
         self.task_manager.clearHistory()
-        
+
     def showContextMenu(self, pos: QPoint):
         """
         Show context menu of the list view.
@@ -83,10 +84,8 @@ class DialogHistoryTasks(QDialog):
         if not index.isValid():
             return False
         task = self.task_manager.task_queue.history_list[index.row()]
-        action_detail = menu.addAction('Detail')
-        action_detail.triggered.connect(
-            lambda: self.openDetail(task)
-        )
+        action_detail = menu.addAction("Detail")
+        action_detail.triggered.connect(lambda: self.openDetail(task))
         menu.exec(self.mapToGlobal(pos))
 
     def openDetail(self, task: Task):

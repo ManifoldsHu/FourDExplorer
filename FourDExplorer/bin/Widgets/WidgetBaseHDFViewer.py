@@ -26,19 +26,30 @@ date:           Mar 2, 2022
 
 from logging import Logger
 
-from PySide6.QtWidgets import QWidget, QMessageBox, QToolBar, QLineEdit, QTreeView, QWidgetAction, QToolButton
+from PySide6.QtWidgets import (
+    QWidget,
+    QMessageBox,
+    QToolBar,
+    QLineEdit,
+    QTreeView,
+    QWidgetAction,
+    QToolButton,
+)
 from PySide6.QtGui import QAction
 from PySide6.QtCore import QObject, QModelIndex, QSize, Qt
+
 # from bin.Actions.EditActions import ActionAttributes, ActionChangeHDFType, ActionCopy, ActionDelete, ActionMove, ActionNew, ActionOpenWith, ActionRefreshModel, ActionSearch
 # from bin.Actions.EditActions import ActionSearch, ActionRefreshModel
 from bin.HDFManager import HDFHandler, ItemDataRoles
 from bin.UIManager import ThemeHandler
 from ui import uiWidgetBaseHDFViewer
 
+
 class WidgetBaseHDFViewer(QWidget):
     """
     查看 HDF5 文件内部结构的基类。
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiWidgetBaseHDFViewer.Ui_Form()
@@ -49,11 +60,9 @@ class WidgetBaseHDFViewer(QWidget):
         self._initRefresh()
         self.ui.treeView_HDF.setModel(self.hdf_handler.model)
         self.ui.treeView_HDF.setHeaderHidden(True)
-        self.hdf_handler.model_created.connect(
-            self._updateModel
-        )
+        self.hdf_handler.model_created.connect(self._updateModel)
 
-    @property 
+    @property
     def hdf_handler(self) -> HDFHandler:
         global qApp
         return qApp.hdf_handler
@@ -62,14 +71,11 @@ class WidgetBaseHDFViewer(QWidget):
         """
         Initialize search lineEdit and action.
         """
-        self._lineEdit_search = QLineEdit('', parent = self)
+        self._lineEdit_search = QLineEdit("", parent=self)
         self._action_search = ActionSearch(self.search_toolbar)
         self._action_search.setLinkedLineEdit(self._lineEdit_search)
         self._action_search.setLinkedTreeView(self.ui.treeView_HDF)
-        self._lineEdit_search.addAction(
-            self._action_search, 
-            QLineEdit.LeadingPosition
-        )
+        self._lineEdit_search.addAction(self._action_search, QLineEdit.LeadingPosition)
         self._lineEdit_search.editingFinished.connect(self._action_search.trigger)
         self.search_toolbar.addWidget(self._lineEdit_search)
 
@@ -88,10 +94,12 @@ class WidgetBaseHDFViewer(QWidget):
         self.ui.treeView_HDF.setModel(self.hdf_handler.model)
         self.ui.treeView_HDF.expandToDepth(0)
 
+
 class HDFToolBar(QToolBar):
     """
     The toolbar to search items in HDF tree.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setMovable(False)
@@ -129,7 +137,6 @@ class HDFToolBar(QToolBar):
         #     "   width: 15px;                "
         #     "}                              "
         # )
-        
 
 
 class ActionViewItemBase(QAction):
@@ -138,39 +145,34 @@ class ActionViewItemBase(QAction):
 
     The base action for viewing items in HDF file.
     """
+
     def __init__(self, parent: QObject):
         super().__init__(parent)
-        self._item_path = ''
-        self._icon_name = ''
-        self.theme_handler.theme_changed.connect(
-            self._updateIcon
-        )
-        self.hdf_handler.file_opened.connect(
-            lambda: self.setEnabled(True)
-        )
-        self.hdf_handler.file_closed.connect(
-            lambda: self.setEnabled(False)
-        )
-        self._treeview = None 
+        self._item_path = ""
+        self._icon_name = ""
+        self.theme_handler.theme_changed.connect(self._updateIcon)
+        self.hdf_handler.file_opened.connect(lambda: self.setEnabled(True))
+        self.hdf_handler.file_closed.connect(lambda: self.setEnabled(False))
+        self._treeview = None
 
     @property
     def hdf_handler(self) -> HDFHandler:
-        global qApp 
-        return qApp.hdf_handler 
+        global qApp
+        return qApp.hdf_handler
 
     @property
     def theme_handler(self) -> ThemeHandler:
         global qApp
-        return qApp.theme_handler 
+        return qApp.theme_handler
 
     @property
     def logger(self) -> Logger:
-        global qApp 
+        global qApp
         return qApp.logger
 
     @property
     def item_path(self) -> str:
-        return self._item_path 
+        return self._item_path
 
     @property
     def item_index(self) -> QModelIndex:
@@ -183,11 +185,10 @@ class ActionViewItemBase(QAction):
         arguments:
             icon_name: (str) the name of icon.
         """
-        _path = ':/HDFEdit/resources/icons/' + icon_name
+        _path = ":/HDFEdit/resources/icons/" + icon_name
         icon = self.theme_handler.iconProvider(_path)
-        self._icon_name = icon_name 
+        self._icon_name = icon_name
         self.setIcon(icon)
-        
 
     def setItemPath(self, path: str):
         """
@@ -197,8 +198,7 @@ class ActionViewItemBase(QAction):
             path: (str)
         """
         if not isinstance(path, str):
-            raise TypeError('path must be a str, not '
-                '{0}'.format(type(path).__name__))
+            raise TypeError("path must be a str, not {0}".format(type(path).__name__))
         self._item_path = path
 
     def setItemPathFromIndex(self, index: QModelIndex):
@@ -209,20 +209,21 @@ class ActionViewItemBase(QAction):
             index: (QModelIndex)
         """
         if not isinstance(index, QModelIndex):
-            raise TypeError('index must be a QModelIndex, not '
-                '{0}'.format(type(index).__name__))
+            raise TypeError(
+                "index must be a QModelIndex, not {0}".format(type(index).__name__)
+            )
         _path = index.data(ItemDataRoles.PathRole)
         if _path is not None:
             self._item_path = _path
         else:
-            self._item_path = ''
+            self._item_path = ""
 
     def _updateIcon(self):
         """
         Will update the icon when the theme mode changes.
         """
         if self._icon_name:
-            _path = ':/HDFEdit/resources/icons/' + self._icon_name
+            _path = ":/HDFEdit/resources/icons/" + self._icon_name
             icon = self.theme_handler.iconProvider(_path)
             self.setIcon(icon)
 
@@ -231,9 +232,10 @@ class ActionViewItemBase(QAction):
         Set the linked treeview, so that it can show the result.
         """
         if not isinstance(treeview, QTreeView):
-            raise TypeError('treeview must be a QTreeView, not '
-                '{0}'.format(type(treeview).__name__))
-        self._treeview = treeview 
+            raise TypeError(
+                "treeview must be a QTreeView, not {0}".format(type(treeview).__name__)
+            )
+        self._treeview = treeview
 
 
 def failLogging(func):
@@ -242,18 +244,19 @@ def failLogging(func):
 
     This is a decorator, used for these actions on-triggered functions.
     """
+
     def wrapper(self: ActionViewItemBase, *args, **kw):
         try:
             func(*args, **kw)
         except Exception as e:
             msg = QMessageBox()
-            msg.setWindowTitle('Error')
+            msg.setWindowTitle("Error")
             msg.setIcon(QMessageBox.Warning)
-            msg.setText('An exception happened in '
-                '{0}: {1}'.format(self.text(), e))
+            msg.setText("An exception happened in {0}: {1}".format(self.text(), e))
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec()
-    return wrapper 
+
+    return wrapper
 
 
 class ActionRefreshModel(ActionViewItemBase):
@@ -262,10 +265,11 @@ class ActionRefreshModel(ActionViewItemBase):
 
     Action to refresh HDF items.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Refresh')
-        self.initIconResources('refresh.png')
+        self.setText("Refresh")
+        self.initIconResources("refresh.png")
         self.triggered.connect(lambda: self.refreshModel(self))
 
     @failLogging
@@ -281,25 +285,27 @@ class ActionRefreshModel(ActionViewItemBase):
             _index = self.hdf_handler.model.indexFromPath(self.item_path)
             self._treeview.setCurrentIndex(_index)
 
+
 class ActionSearch(ActionViewItemBase):
     """
     用于查找下一个匹配的 HDF 对象的 Action。
 
     Action to search HDF items.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Search')
-        self.initIconResources('search.png')
+        self.setText("Search")
+        self.initIconResources("search.png")
         self.triggered.connect(self.searchItem)
-        self._last_kw = ''
+        self._last_kw = ""
         self._result_generator = None
 
     def setLinkedTreeView(self, treeview: QTreeView):
         """
         Set the linked treeview, so that it can show the result.
         """
-        self._treeview = treeview 
+        self._treeview = treeview
 
     def setLinkedLineEdit(self, line_edit: QLineEdit):
         """
@@ -312,28 +318,26 @@ class ActionSearch(ActionViewItemBase):
         Find the next search result and show it in the treeview.
         """
         kw = self._line_edit.text()
-        if kw == '':
-            return False 
+        if kw == "":
+            return False
         if kw != self._last_kw:
-            # When the user changes the key word, we need to rebuild the 
+            # When the user changes the key word, we need to rebuild the
             # generator and search from the beginning of the tree.
-            self._last_kw = kw 
+            self._last_kw = kw
             model = self._treeview.model()
             self._result_generator = model.matchIndexGenerator(kw)
         if self._result_generator is None:
-            return False 
+            return False
         try:
             index = next(self._result_generator)
             self._treeview.setCurrentIndex(index)
-            return True 
+            return True
         except StopIteration:
             msg = QMessageBox()
-            msg.setWindowTitle('Search')
+            msg.setWindowTitle("Search")
             msg.setIcon(QMessageBox.Information)
-            msg.setText('No more results.')
+            msg.setText("No more results.")
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec()
-            self._last_kw = ''
-            return False 
-
-
+            self._last_kw = ""
+            return False

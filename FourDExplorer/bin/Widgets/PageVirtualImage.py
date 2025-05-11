@@ -50,8 +50,7 @@ from logging import Logger
 from PySide6.QtWidgets import QWidget, QMessageBox, QDialog
 from PySide6.QtGui import QRegularExpressionValidator
 
-from matplotlib.backends.backend_qtagg import (
-    FigureCanvasQTAgg as FigureCanvas)
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.colorbar import Colorbar, make_axes
 from matplotlib.colors import Normalize, SymLogNorm
 from matplotlib.figure import Figure
@@ -60,10 +59,10 @@ from matplotlib.image import AxesImage
 from matplotlib.axis import Axis
 from matplotlib.lines import Line2D
 from matplotlib.patches import (
-    Circle, 
-    Rectangle, 
-    Wedge, 
-    Annulus, 
+    Circle,
+    Rectangle,
+    Wedge,
+    Annulus,
     Ellipse,
     RegularPolygon,
 )
@@ -98,6 +97,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         hdf_handler: (HDFHandler) The handler to manage the hdf file and the
             objects inside it.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiPageVirtualImage.Ui_Form()
@@ -105,9 +105,9 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self._initBaseUi()
         self._initUi()
-        
-        self._max_segment_num = 10      # The maximum number of segmented ring.
-        self._mask_widgets = []         # Must be the same order as the mode.
+
+        self._max_segment_num = 10  # The maximum number of segmented ring.
+        self._mask_widgets = []  # Must be the same order as the mode.
 
         self._patch_circle = None
         self._patch_ring = None
@@ -118,7 +118,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         self._patch_segments = []
 
         self._createAxes()
-        
+
     @property
     def mask_index(self) -> int:
         """
@@ -142,13 +142,13 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         Initialize Uis.
         """
-        self.setWindowTitle('Virtual Image')
+        self.setWindowTitle("Virtual Image")
 
         self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.stackedWidget_masks.setCurrentIndex(self.mask_index)
         self.ui.comboBox_mode.currentIndexChanged.connect(self._changeMode)
 
-        self.ui.pushButton_start.setProperty('class', 'danger')
+        self.ui.pushButton_start.setProperty("class", "danger")
         # self.ui.pushButton_start.clicked.connect(self.startCalculationTest)
         self.ui.pushButton_start.clicked.connect(self.startCalculation)
 
@@ -167,7 +167,6 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self.dp_canvas.draw()
         self.dp_canvas.flush_events()
-        
 
     def _createCircle(self):
         """
@@ -178,16 +177,16 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self._patch_circle = Circle(
             (0, 0),
-            radius = 25,
-            edgecolor = 'white',
-            facecolor = 'black',
-            alpha = 0.4,
-            fill = True,
-            visible = True,
+            radius=25,
+            edgecolor="white",
+            facecolor="black",
+            alpha=0.4,
+            fill=True,
+            visible=True,
         )
-        
+
         self.dp_ax.add_patch(self._patch_circle)
-        self.dp_blit_manager['circle_patch'] = self._patch_circle
+        self.dp_blit_manager["circle_patch"] = self._patch_circle
         self.ui.page_circle.setBlitManager(self.dp_blit_manager)
         self.ui.page_circle.setPatch(self._patch_circle)
         self._mask_widgets.append(self.ui.page_circle)
@@ -201,17 +200,17 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self._patch_ring = Annulus(
             (0, 0),
-            r = 25,
-            width = 15,
-            edgecolor = 'white',
-            facecolor = 'black',
-            alpha = 0.4,
-            fill = True,
-            visible = False,
+            r=25,
+            width=15,
+            edgecolor="white",
+            facecolor="black",
+            alpha=0.4,
+            fill=True,
+            visible=False,
         )
 
         self.dp_ax.add_patch(self._patch_ring)
-        self.dp_blit_manager['ring_patch'] = self._patch_ring
+        self.dp_blit_manager["ring_patch"] = self._patch_ring
         self.ui.page_ring.setBlitManager(self.dp_blit_manager)
         self.ui.page_ring.setPatch(self._patch_ring)
         self._mask_widgets.append(self.ui.page_ring)
@@ -225,19 +224,19 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self._patch_wedge = Wedge(
             (0, 0),
-            r = 25,
-            theta1 = 0,
-            theta2 = 120,
-            width = 15,
-            edgecolor = 'white',
-            facecolor = 'black',
-            alpha = 0.4,
-            fill = True,
-            visible = False,
+            r=25,
+            theta1=0,
+            theta2=120,
+            width=15,
+            edgecolor="white",
+            facecolor="black",
+            alpha=0.4,
+            fill=True,
+            visible=False,
         )
 
         self.dp_ax.add_patch(self._patch_wedge)
-        self.dp_blit_manager['wedge_patch'] = self._patch_wedge
+        self.dp_blit_manager["wedge_patch"] = self._patch_wedge
         self.ui.page_wedge.setBlitManager(self.dp_blit_manager)
         self.ui.page_wedge.setPatch(self._patch_wedge)
         self._mask_widgets.append(self.ui.page_wedge)
@@ -251,18 +250,18 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self._patch_rectangle = Rectangle(
             (0, 0),
-            width = 25,
-            height = 15,
-            angle = 0,
-            edgecolor = 'white',
-            facecolor = 'black',
-            alpha = 0.4,
-            fill = True,
-            visible = False,
+            width=25,
+            height=15,
+            angle=0,
+            edgecolor="white",
+            facecolor="black",
+            alpha=0.4,
+            fill=True,
+            visible=False,
         )
 
         self.dp_ax.add_patch(self._patch_rectangle)
-        self.dp_blit_manager['rectangle_patch'] = self._patch_rectangle
+        self.dp_blit_manager["rectangle_patch"] = self._patch_rectangle
         self.ui.page_rectangle.setBlitManager(self.dp_blit_manager)
         self.ui.page_rectangle.setPatch(self._patch_rectangle)
         self._mask_widgets.append(self.ui.page_rectangle)
@@ -276,18 +275,18 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         self._patch_ellipse = Ellipse(
             (0, 0),
-            width = 25,
-            height = 15,
-            angle = 0,
-            edgecolor = 'white',
-            facecolor = 'black',
-            alpha = 0.4,
-            fill = True,
-            visible = False,
+            width=25,
+            height=15,
+            angle=0,
+            edgecolor="white",
+            facecolor="black",
+            alpha=0.4,
+            fill=True,
+            visible=False,
         )
 
         self.dp_ax.add_patch(self._patch_ellipse)
-        self.dp_blit_manager['ellipse_patch'] = self._patch_ellipse
+        self.dp_blit_manager["ellipse_patch"] = self._patch_ellipse
         self.ui.page_ellipse.setBlitManager(self.dp_blit_manager)
         self.ui.page_ellipse.setPatch(self._patch_ellipse)
         self._mask_widgets.append(self.ui.page_ellipse)
@@ -296,7 +295,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         Initialize the regular polygon patch and its managers.
 
-        The number of polygon patches is decided by _max_vertices. A polygon 
+        The number of polygon patches is decided by _max_vertices. A polygon
         has at least 3 vertices.
         """
         for _polygon in self._patch_polygons:
@@ -308,29 +307,28 @@ class PageVirtualImage(PageBaseFourDSTEM):
         for ii in range(3, _max_vertices + 1):
             _polygon = RegularPolygon(
                 (0, 0),
-                numVertices = ii,
-                radius = 25,
-                orientation = 0,
-                edgecolor = 'white',
-                facecolor = 'black',
-                alpha = 0.4,
-                fill = True,
-                visible = False,
+                numVertices=ii,
+                radius=25,
+                orientation=0,
+                edgecolor="white",
+                facecolor="black",
+                alpha=0.4,
+                fill=True,
+                visible=False,
             )
             self._patch_polygons.append(_polygon)
             self.dp_ax.add_patch(_polygon)
-            self.dp_blit_manager['polygon_patch_{0}'.format(ii)] = _polygon
-        
+            self.dp_blit_manager["polygon_patch_{0}".format(ii)] = _polygon
+
         self.ui.page_polygon.setBlitManager(self.dp_blit_manager)
         self.ui.page_polygon.setPatch(self._patch_polygons)
         self._mask_widgets.append(self.ui.page_polygon)
-        
 
     def _createSegments(self):
         """
         Initialize the segmented patches and their managers.
 
-        There are at most _max_segments (number) segments. 
+        There are at most _max_segments (number) segments.
         """
         for _wedge in self._patch_segments:
             if _wedge in self.dp_ax.patches:
@@ -341,24 +339,23 @@ class PageVirtualImage(PageBaseFourDSTEM):
         for ii in range(_max_segments):
             _wedge = Wedge(
                 (0, 0),
-                r = 25,
-                theta1 = 0,
-                theta2 = 120,
-                width = 15,
-                edgecolor = 'white',
-                facecolor = 'black',
-                alpha = 0.4,
-                fill = True,
-                visible = False,
+                r=25,
+                theta1=0,
+                theta2=120,
+                width=15,
+                edgecolor="white",
+                facecolor="black",
+                alpha=0.4,
+                fill=True,
+                visible=False,
             )
             self._patch_segments.append(_wedge)
             self.dp_ax.add_patch(_wedge)
-            self.dp_blit_manager['segment_patch_{0}'.format(ii)] = _wedge
+            self.dp_blit_manager["segment_patch_{0}".format(ii)] = _wedge
 
         self.ui.page_segment_ring.setBlitManager(self.dp_blit_manager)
         self.ui.page_segment_ring.setPatch(self._patch_segments)
         self._mask_widgets.append(self.ui.page_segment_ring)
-
 
     def setFourDSTEM(self, data_path: str):
         """
@@ -377,16 +374,13 @@ class PageVirtualImage(PageBaseFourDSTEM):
 
         scan_i, scan_j, dp_i, dp_j = self.hdf_handler.file[data_path].shape
         for widget in self._mask_widgets:
-            widget.setCenter(
-                ((dp_i - 1)/2, (dp_j - 1)/2)
-            )
-        
+            widget.setCenter(((dp_i - 1) / 2, (dp_j - 1) / 2))
 
     def _changeMode(self):
         """
         Change mask patch's mode according to mask index.
 
-        The activated patch is set to be visible, while others are set to be 
+        The activated patch is set to be visible, while others are set to be
         invisible.
         """
         self.ui.stackedWidget_masks.setCurrentIndex(self.mask_index)
@@ -401,17 +395,17 @@ class PageVirtualImage(PageBaseFourDSTEM):
         Calculate integration region of the virtual image.
 
         This function returns a matrix whose shape is the same as the diffract-
-        ion patterns' size of the 4D-STEM dataset. Elements within the region 
+        ion patterns' size of the 4D-STEM dataset. Elements within the region
         will be 1, while otherwise will be 0.
 
         returns:
-            (np.ndarray) 
+            (np.ndarray)
         """
         scan_i, scan_j, dp_i, dp_j = self.data_object.shape
         index = np.arange(dp_i * dp_j)
-        x = np.floor_divide(index, dp_j).reshape((dp_i*dp_j, 1))
+        x = np.floor_divide(index, dp_j).reshape((dp_i * dp_j, 1))
         y = np.mod(index, dp_j).reshape((dp_i * dp_j, 1))
-        coords = np.concatenate((y, x), axis = 1)
+        coords = np.concatenate((y, x), axis=1)
         widget = self._mask_widgets[self.mask_index]
         _is_contained = widget.isContained(coords)
         mask = _is_contained.reshape((dp_i, dp_j))
@@ -427,14 +421,14 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         Start to calculate virtual image of 4D-STEM.
 
-        When the button 'Start Calculation' is clicked, this function will be 
-        called. 
+        When the button 'Start Calculation' is clicked, this function will be
+        called.
         """
         dialog_save = DialogSaveImage(self)
         dialog_save.setParentPath(self.data_path)
         dialog_code = dialog_save.exec()
         if not dialog_code == dialog_save.Accepted:
-            return 
+            return
         image_name = dialog_save.getNewName()
         image_parent_path = dialog_save.getParentPath()
 
@@ -453,43 +447,46 @@ class PageVirtualImage(PageBaseFourDSTEM):
         """
         Generate the meta data saved in the reconstructed image.
         """
-        
+
         meta = {
-            '/General/title': '', 
-            '/General/original_name': self.data_path.split('/')[-1], 
-            '/General/original_path': self.data_path,
-            '/General/authors': '', 
-            '/General/notes': 'Virtual Image',
-            '/General/time': self.datetime_manager.current_time,
-            '/General/date': self.datetime_manager.current_date,
-            '/General/time_zone': self.datetime_manager.current_timezone,
-            '/General/doi': '',
-            '/General/foud_explorer_version': '.'.join([str(i) for i in APP_VERSION]),
+            "/General/title": "",
+            "/General/original_name": self.data_path.split("/")[-1],
+            "/General/original_path": self.data_path,
+            "/General/authors": "",
+            "/General/notes": "Virtual Image",
+            "/General/time": self.datetime_manager.current_time,
+            "/General/date": self.datetime_manager.current_date,
+            "/General/time_zone": self.datetime_manager.current_timezone,
+            "/General/doi": "",
+            "/General/foud_explorer_version": ".".join([str(i) for i in APP_VERSION]),
             # '/Calibration/Space/pixel_size_i': self.data_object.attrs['']
         }
-        
+
         # if '/Calibration/Space/scan_dr_i' in self.data_object.attrs:
-        meta['/Calibration/Space/pixel_size_i'] = self.data_object.attrs.get('/Calibration/Space/scan_dr_i')
-        meta['/Calibration/Space/pixel_size_j'] = self.data_object.attrs.get('/Calibration/Space/scan_dr_j')
-        meta['/Calibration/Space/pixel_size_unit'] = 'm'
-        meta['/Calibration/Space/pixel_size_unit_display'] = 'nm'
-        meta['/Calibration/Space/display_unit_magnify'] = 1e9,
-        
+        meta["/Calibration/Space/pixel_size_i"] = self.data_object.attrs.get(
+            "/Calibration/Space/scan_dr_i"
+        )
+        meta["/Calibration/Space/pixel_size_j"] = self.data_object.attrs.get(
+            "/Calibration/Space/scan_dr_j"
+        )
+        meta["/Calibration/Space/pixel_size_unit"] = "m"
+        meta["/Calibration/Space/pixel_size_unit_display"] = "nm"
+        meta["/Calibration/Space/display_unit_magnify"] = (1e9,)
+
         widget = self._mask_widgets[self.mask_index]
         mask_meta = widget.generateMeta()
         for key in mask_meta:
-            meta['/VirtualDetector/' + key] = mask_meta[key] 
-            
+            meta["/VirtualDetector/" + key] = mask_meta[key]
+
         for key in self.data_object.attrs:
-            if key[0] == '/':
-                new_key = '/FourDSTEM' + key 
+            if key[0] == "/":
+                new_key = "/FourDSTEM" + key
             else:
-                new_key = '/FourDSTEM/' + key 
+                new_key = "/FourDSTEM/" + key
             meta[new_key] = self.data_object.attrs[key]
-        
-        return meta 
-        
-        
+
+        return meta
+
         # meta = {
         #     'image_mode': 'Virtual Image',
         #     'image_width': self.data_object.shape[1],
@@ -500,7 +497,7 @@ class PageVirtualImage(PageBaseFourDSTEM):
         #     new_key = 'stem_' + key
         #     meta[new_key] = self.data_object.attrs[key]
         #     # meta.update(new_key = self.data_object.attrs[key])
-        
+
         # meta['pixel_unit'] = 'm'
 
         # if 'scan_step_size' in self.data_object.attrs:
@@ -509,28 +506,25 @@ class PageVirtualImage(PageBaseFourDSTEM):
         # if 'scan_step_size_i' in self.data_object.attrs:
         #     meta['pixel_size_i'] = self.data_object.attrs['scan_step_size_i']
         # if 'scan_step_size_j' in self.data_object.attrs:
-        #     meta['pixel_size_j'] = self.data_object.attrs['scan_step_size_j'] 
+        #     meta['pixel_size_j'] = self.data_object.attrs['scan_step_size_j']
 
         # widget = self._mask_widgets[self.mask_index]
         # mask_meta = widget.generateMeta()
         # meta.update(**mask_meta)
-        
-        
 
-        # return meta 
+        # return meta
 
     # def _generateMask(self) -> np.ndarray:
     #     """
     #     Generate the integrate region.
     #     """
-    #     scan_i, scan_j, dp_i, dp_j = self.data_object.shape 
+    #     scan_i, scan_j, dp_i, dp_j = self.data_object.shape
     #     mask = np.zeros((dp_i, dp_j), dtype = self.data_object.dtype)
     #     for ii in range(dp_i):
     #         for jj in range(dp_j):
     #             widget = self._mask_widgets[self.mask_index]
     #             mask[ii, jj] = widget.isContained((ii, jj))
     #     return mask
-        
 
     def startCalculationTest(self):
         """
@@ -548,13 +542,3 @@ class DialogTestPlot(QDialog):
         self.ui.setupUi(self)
         self.ax = self.ui.widget.figure.add_subplot(111)
         self.ax.imshow(image)
-        
-    
-
-
-        
-        
-
-
-
-

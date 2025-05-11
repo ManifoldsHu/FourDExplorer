@@ -14,10 +14,10 @@ date:           Jun 24, 2022
 *------------------------- VectorFieldActions.py -----------------------------*
 """
 
-from PySide6.QtCore import QObject 
+from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QWidget, QInputDialog
 
-from bin.Actions.EditActions import ActionEditBase 
+from bin.Actions.EditActions import ActionEditBase
 from bin.Actions.EditActions import failLogging
 from bin.HDFManager import HDFType
 from bin.TaskManager import TaskManager
@@ -39,6 +39,7 @@ class ActionVectorFieldProcessingBase(ActionEditBase):
     """
     用于对 VectorField 进行计算的 Action 的基类。
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
 
@@ -64,19 +65,17 @@ class ActionVectorFieldProcessingBase(ActionEditBase):
         elif result_type == HDFType.Image:
             dialog_save = DialogSaveImage()
         else:
-            raise TypeError('The result_type must be HDFType.Image or '
-                'HDFType.VectorField, not {0}'.format(
-                    type(result_type).__name__
-            ))
+            raise TypeError(
+                "The result_type must be HDFType.Image or "
+                "HDFType.VectorField, not {0}".format(type(result_type).__name__)
+            )
         dialog_save.setParentPath(self.item_path)
         dialog_code = dialog_save.exec()
         if not dialog_code == dialog_save.Accepted:
-            return 
+            return
         image_name = dialog_save.getNewName()
         image_parent_path = dialog_save.getParentPath()
-        return image_parent_path, image_name 
-        
-
+        return image_parent_path, image_name
 
 
 class ActionRotateVector(ActionVectorFieldProcessingBase):
@@ -93,26 +92,26 @@ class ActionRotateVector(ActionVectorFieldProcessingBase):
 
     Action to rotate every vector's orientation in the field.
 
-    Each vector in a vector field is defined on the tangent space of a 
-    2-manifold (real space). However, when generating the vector field, it is 
-    possible to generate rotation between the tangent space coordinate system 
-    and the 2-manifold coordinate system. For example, a deflection of the 
-    scanning direction of the electron beam in STEM relative to where the 
-    camera is placed can cause this phenomenon. If this rotational offset is 
-    not corrected, the recovered electrostatic field distribution will not meet 
+    Each vector in a vector field is defined on the tangent space of a
+    2-manifold (real space). However, when generating the vector field, it is
+    possible to generate rotation between the tangent space coordinate system
+    and the 2-manifold coordinate system. For example, a deflection of the
+    scanning direction of the electron beam in STEM relative to where the
+    camera is placed can cause this phenomenon. If this rotational offset is
+    not corrected, the recovered electrostatic field distribution will not meet
     the characteristics of conservative field, so it is physically illegal.
 
-    Here we offer a simple way to correct for this rotation bias: rotate each 
-    vector by an Angle so that it becomes a conservative field again (or, in 
+    Here we offer a simple way to correct for this rotation bias: rotate each
+    vector by an Angle so that it becomes a conservative field again (or, in
     the case of magnetic field, a solenoidal field).
     """
-    
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Rotate Vector Angle')
+        self.setText("Rotate Vector Angle")
         self.triggered.connect(lambda: self.rotateVectors(self))
 
-    @failLogging 
+    @failLogging
     def rotateVectors(self):
         """
         Open a dialog to rotate an angle for every vector.
@@ -122,29 +121,27 @@ class ActionRotateVector(ActionVectorFieldProcessingBase):
 
         angle, is_accpeted = QInputDialog.getDouble(
             None,
-            'Input rotation angle',
-            'Here input a rotation angle for every vector. Unit: deg',
+            "Input rotation angle",
+            "Here input a rotation angle for every vector. Unit: deg",
             0,
-            minValue = -360,
-            maxValue = 360,
-            decimals = 1,
-            step = 1,
+            minValue=-360,
+            maxValue=360,
+            decimals=1,
+            step=1,
         )
 
         if not is_accpeted:
-            return 
+            return
 
-        image_parent_path, image_name = self.getResultPath(
-            HDFType.VectorField
-        )
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        image_parent_path, image_name = self.getResultPath(HDFType.VectorField)
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskRotateVectorAngle(
             self.item_path,
             image_parent_path,
             image_name,
-            angle = angle,
-            parent = self,
-            **meta
+            angle=angle,
+            parent=self,
+            **meta,
         )
         self.task_manager.addTask(self.task)
 
@@ -155,14 +152,15 @@ class ActionSubtractMeanVector(ActionVectorFieldProcessingBase):
 
     Subtract every vector by their mean vector.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Subtract Mean Vector')
+        self.setText("Subtract Mean Vector")
         self.triggered.connect(lambda: self.subtractMean(self))
 
     @property
     def task_manager(self) -> TaskManager:
-        global qApp 
+        global qApp
         return qApp.task_manager
 
     @failLogging
@@ -174,12 +172,12 @@ class ActionSubtractMeanVector(ActionVectorFieldProcessingBase):
             self.setItemPathFromIndex(self._treeview.currentIndex())
 
         image_parent_path, image_name = self.getResultPath(HDFType.VectorField)
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskSubtractVectorOffset(
             self.item_path,
             image_parent_path,
             image_name,
-            parent = self,
+            parent=self,
             **meta,
         )
         self.task_manager.addTask(self.task)
@@ -204,12 +202,12 @@ class ActionFlipComponents(ActionVectorFieldProcessingBase):
 
     很明显这两种坐标系都是右手系。但有时也会碰到左手系：
 
-        ┌------------> x       
-        |                       
-        |                      
-        |                       
-        |                       
-        v                       
+        ┌------------> x
+        |
+        |
+        |
+        |
+        v
         y
 
     在 4D-Explorer 中我们使用 i-j 坐标系，这是一种右手系。这样计算、展示的图像结果就
@@ -220,14 +218,14 @@ class ActionFlipComponents(ActionVectorFieldProcessingBase):
 
     For each vector in the vector field we swap its I and j components.
 
-    Each vector in a vector field is defined on the tangent space of a 
-    2-manifold (real space). However, when generating the vector field, it is 
-    possible to produce a chiral inversion between the tangent space coordinate 
-    system and the 2-manifold coordinate system. For example, a reversal of the 
-    scanning direction of the electron beam in STEM relative to the orientation 
-    of the camera can cause this phenomenon. In addition, the coordinate system 
-    conventions in different hardwares or softwares can also be different. In 
-    dealing with matrix, image and cartesian coordinate system, commonly used 
+    Each vector in a vector field is defined on the tangent space of a
+    2-manifold (real space). However, when generating the vector field, it is
+    possible to produce a chiral inversion between the tangent space coordinate
+    system and the 2-manifold coordinate system. For example, a reversal of the
+    scanning direction of the electron beam in STEM relative to the orientation
+    of the camera can cause this phenomenon. In addition, the coordinate system
+    conventions in different hardwares or softwares can also be different. In
+    dealing with matrix, image and cartesian coordinate system, commonly used
     coordinate conventions are:
 
         ┌------------> j        ^ y
@@ -238,29 +236,30 @@ class ActionFlipComponents(ActionVectorFieldProcessingBase):
         v                       |
         i                       └----------------> x
 
-    It's clear that both of these coordinate systems are right-handed.But you 
+    It's clear that both of these coordinate systems are right-handed.But you
     can sometimes meet into left-handed systems:
 
-        ┌------------> x       
-        |                       
-        |                      
-        |                       
-        |                       
-        v                       
+        ┌------------> x
+        |
+        |
+        |
+        |
+        v
         y
 
-    In 4D-Explorer we use the i-J coordinate system, which is a right-handed 
-    system.In this way, the results of the calculation and display of the image 
-    are different from the program using the left hand system convention. Only 
+    In 4D-Explorer we use the i-J coordinate system, which is a right-handed
+    system.In this way, the results of the calculation and display of the image
+    are different from the program using the left hand system convention. Only
     one of the two cases of a vector field is physically valid.
 
-    We provide a simple way to fix this problem: transpose the I and j 
-    components of each vector, thereby turning its chirality into a physically 
+    We provide a simple way to fix this problem: transpose the I and j
+    components of each vector, thereby turning its chirality into a physically
     legal state.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Flip Vector Components')
+        self.setText("Flip Vector Components")
         self.triggered.connect(lambda: self.flipComponents(self))
 
     @failLogging
@@ -272,12 +271,12 @@ class ActionFlipComponents(ActionVectorFieldProcessingBase):
             self.setItemPathFromIndex(self._treeview.currentIndex())
 
         image_parent_path, image_name = self.getResultPath(HDFType.VectorField)
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskFlipVectorField(
             self.item_path,
             image_parent_path,
             image_name,
-            parent = self,
+            parent=self,
             **meta,
         )
         self.task_manager.addTask(self.task)
@@ -289,12 +288,13 @@ class ActionSubtractReferenceVector(ActionVectorFieldProcessingBase):
 
     Subtract a reference/background vector field.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Subtract Reference')
+        self.setText("Subtract Reference")
         self.triggered.connect(lambda: self.subtractReference(self))
 
-    @failLogging 
+    @failLogging
     def subtractReference(self):
         """
         Open a dialog to subtract the reference.
@@ -307,16 +307,17 @@ class ActionSubtractReferenceVector(ActionVectorFieldProcessingBase):
         if dialog_code == dialog.Accepted:
             reference_path = dialog.getCurrentPath()
         image_parent_path, image_name = self.getResultPath(HDFType.VectorField)
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskSubtractVectorField(
             self.item_path,
             reference_path,
             image_parent_path,
             image_name,
-            parent = self,
+            parent=self,
             **meta,
         )
         self.task_manager.addTask(self.task)
+
 
 class ActionPotential(ActionVectorFieldProcessingBase):
     """
@@ -326,12 +327,13 @@ class ActionPotential(ActionVectorFieldProcessingBase):
 
     Calculate the potential of the vector fields.
 
-    The vector field should be a non-curl field, otherwise the result is 
+    The vector field should be a non-curl field, otherwise the result is
     invalid in physics.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Calculate Potential')
+        self.setText("Calculate Potential")
         self.triggered.connect(lambda: self.calculatePotential(self))
 
     @failLogging
@@ -343,12 +345,12 @@ class ActionPotential(ActionVectorFieldProcessingBase):
             self.setItemPathFromIndex(self._treeview.currentIndex())
 
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskPotential(
             self.item_path,
             image_parent_path,
             image_name,
-            parent = self,
+            parent=self,
             **meta,
         )
         self.task_manager.addTask(self.task)
@@ -360,11 +362,12 @@ class ActionDivergence(ActionVectorFieldProcessingBase):
 
     Calculate the divergence of the vector fields.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Calculate Divergence')
+        self.setText("Calculate Divergence")
         self.triggered.connect(lambda: self.calculateDivergence(self))
-    
+
     @failLogging
     def calculateDivergence(self):
         """
@@ -374,26 +377,27 @@ class ActionDivergence(ActionVectorFieldProcessingBase):
             self.setItemPathFromIndex(self._treeview.currentIndex())
 
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskDivergence(
             self.item_path,
             image_parent_path,
             image_name,
-            parent = self,
+            parent=self,
             **meta,
         )
         self.task_manager.addTask(self.task)
 
-    
+
 class ActionCurl(ActionVectorFieldProcessingBase):
     """
     计算矢量场的旋度。
 
     Calculate the curl of the vector field.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Calculate Curl')
+        self.setText("Calculate Curl")
         self.triggered.connect(lambda: self.calculateCurl(self))
 
     @failLogging
@@ -405,12 +409,12 @@ class ActionCurl(ActionVectorFieldProcessingBase):
             self.setItemPathFromIndex(self._treeview.currentIndex())
 
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskCurl(
             self.item_path,
             image_parent_path,
             image_name,
-            parent = self,
+            parent=self,
             **meta,
         )
         self.task_manager.addTask(self.task)
@@ -422,9 +426,10 @@ class ActionSliceI(ActionVectorFieldProcessingBase):
 
     Slice i-component for the vector field.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Slice i-Components')
+        self.setText("Slice i-Components")
         self.triggered.connect(lambda: self.sliceIComponent(self))
 
     @failLogging
@@ -436,12 +441,12 @@ class ActionSliceI(ActionVectorFieldProcessingBase):
             self.setItemPathFromIndex(self._treeview.currentIndex())
 
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskSliceI(
             self.item_path,
             image_parent_path,
             image_name,
-            parent = self,
+            parent=self,
             **meta,
         )
         self.task_manager.addTask(self.task)
@@ -453,9 +458,10 @@ class ActionSliceJ(ActionVectorFieldProcessingBase):
 
     Slice j-component for the vector field.
     """
+
     def __init__(self, parent: QObject = None):
         super().__init__(parent)
-        self.setText('Slice j-Components')
+        self.setText("Slice j-Components")
         self.triggered.connect(lambda: self.sliceJComponent(self))
 
     @failLogging
@@ -467,18 +473,12 @@ class ActionSliceJ(ActionVectorFieldProcessingBase):
             self.setItemPathFromIndex(self._treeview.currentIndex())
 
         image_parent_path, image_name = self.getResultPath(HDFType.Image)
-        meta = self.hdf_handler.file[self.item_path].attrs 
+        meta = self.hdf_handler.file[self.item_path].attrs
         self.task = TaskSliceJ(
             self.item_path,
             image_parent_path,
             image_name,
-            parent = self,
+            parent=self,
             **meta,
         )
         self.task_manager.addTask(self.task)
-
-
-
-
-
-

@@ -1,15 +1,23 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 """
 这个小项目用来试验，如何将 Asynchronous 无痛地融合进 PySide6 软件中，
 把现有的拿到文件的函数该如何做到。
 """
 
-import sys 
-import asyncio 
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget 
+import sys
+import asyncio
+from PySide6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QPushButton,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
 from qasync import QEventLoop, asyncSlot
 from PySide6.QtCore import Signal
+
 
 class MainWindow(QMainWindow):
     async_worker_completed = Signal(object)
@@ -43,15 +51,16 @@ class MainWindow(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
-    
+
     app_close_event = asyncio.Event()
     app.aboutToQuit.connect(app_close_event.set)
     mainWindow = MainWindow()
     mainWindow.show()
-    
+
     loop.run_until_complete(app_close_event.wait())
     loop.close()

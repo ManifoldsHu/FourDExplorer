@@ -14,17 +14,18 @@ date:           May 21, 2022
 *----------------------- TaskVectorFieldProcess.py ---------------------------*
 """
 
-from logging import Logger 
+from logging import Logger
 
 from PySide6.QtCore import QObject, Signal
 
-import h5py 
+import h5py
 import numpy as np
 
-from bin.TaskManager import Task 
+from bin.TaskManager import Task
 from bin.HDFManager import HDFHandler
 from lib.TaskReconstruction import TaskBaseReconstruct
 from lib.VectorFieldOperators import Divergence2D, Curl2D, Potential2D
+
 
 class TaskBaseVectorToVector(TaskBaseReconstruct):
     """
@@ -32,6 +33,7 @@ class TaskBaseVectorToVector(TaskBaseReconstruct):
 
     Base task of producing an vector field from a vector field.
     """
+
     def __init__(
         self,
         item_path: str,
@@ -48,25 +50,23 @@ class TaskBaseVectorToVector(TaskBaseReconstruct):
             **meta,
         )
         self.comment = (
-            '{0}.\n'
-            'Vector Field dataset path: {1}\n'
-            'Result is saved in: {2}\n'.format(
+            "{0}.\nVector Field dataset path: {1}\nResult is saved in: {2}\n".format(
                 self.name, self._item_path, self._image_name
             )
         )
         self.setPrepare(self._createVectorField)
         self.setFollow(self._showVectorField)
- 
+
     @property
     def stem_path(self) -> None:
         """
         Will raise an Attribute Error. Use source_path instead.
         """
-        raise AttributeError('There is no 4D-STEM path in this task.')
+        raise AttributeError("There is no 4D-STEM path in this task.")
 
     @property
     def source_path(self) -> str:
-        return self._item_path 
+        return self._item_path
 
     def _createVectorField(self):
         """
@@ -76,19 +76,21 @@ class TaskBaseVectorToVector(TaskBaseReconstruct):
         just before the task is submitted.
         """
         data_object = self.hdf_handler.file[self.source_path]
-        _, height, width = data_object.shape 
+        _, height, width = data_object.shape
         self.hdf_handler.addNewData(
             self._image_parent_path,
             self._image_name,
             (2, height, width),
-            'float64',
+            "float64",
         )
 
         for key, value in self._meta.items():
             try:
                 self.hdf_handler.file[self.image_path].attrs[key] = value
             except Exception as e:
-                self.logger.error(f"Failed to set attribute {key} for dataset {self.image_path}: {e}")
+                self.logger.error(
+                    f"Failed to set attribute {key} for dataset {self.image_path}: {e}"
+                )
 
     def _showVectorField(self):
         """
@@ -97,7 +99,7 @@ class TaskBaseVectorToVector(TaskBaseReconstruct):
         This function works as the following function that will be called
         just after the task is completed.
         """
-        self.logger.debug('Task {0} completed.'.format(self.name))
+        self.logger.debug("Task {0} completed.".format(self.name))
 
 
 class TaskRotateVectorAngle(TaskBaseVectorToVector):
@@ -106,6 +108,7 @@ class TaskRotateVectorAngle(TaskBaseVectorToVector):
 
     The task to rotate every vector's angle.
     """
+
     def __init__(
         self,
         item_path: str,
@@ -131,26 +134,18 @@ class TaskRotateVectorAngle(TaskBaseVectorToVector):
             **meta: (key word arguments) other meta data that should be stored
                 in the attrs of reconstructed HDF5 object
         """
-        super().__init__(
-            item_path, 
-            image_parent_path, 
-            image_name, 
-            parent, 
-            **meta
-        )
+        super().__init__(item_path, image_parent_path, image_name, parent, **meta)
 
-        self.name = 'Rotate Vector Field Angle'
+        self.name = "Rotate Vector Field Angle"
         self.comment = (
-            'Rotate every vector\'s angle.\n'
-            'Source vector field dataset path: {0}\n'
-            'Result is saved in: {1}\n'.format(
-                self._item_path, self._image_name
-            )
+            "Rotate every vector's angle.\n"
+            "Source vector field dataset path: {0}\n"
+            "Result is saved in: {1}\n".format(self._item_path, self._image_name)
         )
-        self._angle = angle 
+        self._angle = angle
 
         self.addSubtaskFunc(
-            'Calculating Rotation',
+            "Calculating Rotation",
             self._calculateRotation,
         )
 
@@ -167,10 +162,10 @@ class TaskRotateVectorAngle(TaskBaseVectorToVector):
         new_vec_j = vec_i * np.sin(angle_rad) + vec_j * np.cos(angle_rad)
 
         new_image = self.hdf_handler.file[self.image_path]
-        new_image[0, :, :] = new_vec_i 
+        new_image[0, :, :] = new_vec_i
         new_image[1, :, :] = new_vec_j
         return new_image
-        
+
 
 class TaskSubtractVectorOffset(TaskBaseVectorToVector):
     """
@@ -178,6 +173,7 @@ class TaskSubtractVectorOffset(TaskBaseVectorToVector):
 
     Subtract every vector by a mean vector.
     """
+
     def __init__(
         self,
         item_path: str,
@@ -202,26 +198,17 @@ class TaskSubtractVectorOffset(TaskBaseVectorToVector):
             **meta: (key word arguments) other meta data that should be stored
                 in the attrs of reconstructed HDF5 object
         """
-        super().__init__(
-            item_path, 
-            image_parent_path, 
-            image_name, 
-            parent, 
-            **meta
-        )
+        super().__init__(item_path, image_parent_path, image_name, parent, **meta)
 
-        self.name = 'Subtract Vector Field Offset'
+        self.name = "Subtract Vector Field Offset"
         self.comment = (
-            'Subtract every vector\'s offset.\n'
-            'Source vector field dataset path: {0}\n'
-            'Result is saved in: {1}\n'.format(
-                self._item_path, self._image_name
-            )
+            "Subtract every vector's offset.\n"
+            "Source vector field dataset path: {0}\n"
+            "Result is saved in: {1}\n".format(self._item_path, self._image_name)
         )
-        
 
         self.addSubtaskFunc(
-            'Calculating Subtraction',
+            "Calculating Subtraction",
             self._calculateSubtraction,
         )
 
@@ -238,7 +225,7 @@ class TaskSubtractVectorOffset(TaskBaseVectorToVector):
         new_vec_j = vec_j - np.mean(vec_j)
 
         new_image = self.hdf_handler.file[self.image_path]
-        new_image[0, :, :] = new_vec_i 
+        new_image[0, :, :] = new_vec_i
         new_image[1, :, :] = new_vec_j
         return new_image
 
@@ -249,13 +236,14 @@ class TaskSubtractVectorField(TaskBaseVectorToVector):
 
     Subtract a vector field with another vector field.
     """
+
     def __init__(
         self,
         item_path,
         subtrahend_path,
-        image_parent_path, 
+        image_parent_path,
         image_name,
-        parent, 
+        parent,
         **meta,
     ):
         """
@@ -276,29 +264,25 @@ class TaskSubtractVectorField(TaskBaseVectorToVector):
             **meta: (key word arguments) other meta data that should be stored
                 in the attrs of reconstructed HDF5 object
         """
-        super().__init__(
-            item_path, 
-            image_parent_path, 
-            image_name, 
-            parent, 
-            **meta
-        )
-        self.name = 'Subtract Vector Field'
+        super().__init__(item_path, image_parent_path, image_name, parent, **meta)
+        self.name = "Subtract Vector Field"
         self._subtrahend_path = subtrahend_path
         self.comment = (
-            'Difference between two vector field.\n'
-            'Minuend vector field path: {0}\n'
-            'Subtrahend vector field path: {1}\n'
-            'Result is saved in {2}\n'.format(
-                self._item_path, self._subtrahend_path, self._image_name,
+            "Difference between two vector field.\n"
+            "Minuend vector field path: {0}\n"
+            "Subtrahend vector field path: {1}\n"
+            "Result is saved in {2}\n".format(
+                self._item_path,
+                self._subtrahend_path,
+                self._image_name,
             )
         )
 
         self.addSubtaskFunc(
-            'Calculating Subtraction',
+            "Calculating Subtraction",
             self._calculateSubtraction,
         )
-        
+
     def _calculateSubtraction(self):
         """
         returns:
@@ -315,10 +299,9 @@ class TaskSubtractVectorField(TaskBaseVectorToVector):
         new_vec_i = vec_i - subtraend_vec_i
         new_vec_j = vec_j - subtraend_vec_j
         new_image = self.hdf_handler.file[self.image_path]
-        new_image[0, :, :] = new_vec_i 
+        new_image[0, :, :] = new_vec_i
         new_image[1, :, :] = new_vec_j
         return new_image
-
 
 
 class TaskFlipVectorField(TaskBaseVectorToVector):
@@ -327,6 +310,7 @@ class TaskFlipVectorField(TaskBaseVectorToVector):
 
     Exchange the i, j components of the vector fields.
     """
+
     def __init__(
         self,
         item_path: str,
@@ -351,25 +335,17 @@ class TaskFlipVectorField(TaskBaseVectorToVector):
             **meta: (key word arguments) other meta data that should be stored
                 in the attrs of reconstructed HDF5 object
         """
-        super().__init__(
-            item_path, 
-            image_parent_path, 
-            image_name, 
-            parent, 
-            **meta
-        )
+        super().__init__(item_path, image_parent_path, image_name, parent, **meta)
 
-        self.name = 'Flip Vector Field'
+        self.name = "Flip Vector Field"
         self.comment = (
-            'Exchange i,j Components of Vector Field.\n'
-            'Source vector field dataset path: {0}\n'
-            'Result is saved in: {1}\n'.format(
-                self._item_path, self._image_name
-            )
+            "Exchange i,j Components of Vector Field.\n"
+            "Source vector field dataset path: {0}\n"
+            "Result is saved in: {1}\n".format(self._item_path, self._image_name)
         )
 
         self.addSubtaskFunc(
-            'Exchange Components',
+            "Exchange Components",
             self._exchangeComponent,
         )
 
@@ -382,9 +358,9 @@ class TaskFlipVectorField(TaskBaseVectorToVector):
         vec_i = data_object[0, :, :]
         vec_j = data_object[1, :, :]
         new_image = self.hdf_handler.file[self.image_path]
-        new_image[0, :, :] = vec_j 
+        new_image[0, :, :] = vec_j
         new_image[1, :, :] = vec_i
-        return new_image 
+        return new_image
 
 
 class TaskBaseVectorToImage(TaskBaseReconstruct):
@@ -393,12 +369,13 @@ class TaskBaseVectorToImage(TaskBaseReconstruct):
 
     Base task of producing an image from a vector field.
     """
+
     def __init__(
-        self, 
-        item_path: str, 
-        image_parent_path: str, 
-        image_name: str, 
-        parent: QObject = None, 
+        self,
+        item_path: str,
+        image_parent_path: str,
+        image_name: str,
+        parent: QObject = None,
         **meta,
     ):
         super().__init__(
@@ -411,9 +388,7 @@ class TaskBaseVectorToImage(TaskBaseReconstruct):
         self.setPrepare(self._createImage)
         self.setFollow(self._showImage)
         self.comment = (
-            '{0}.\n'
-            'Vector Field dataset path: {1}\n'
-            'Result is saved in: {2}\n'.format(
+            "{0}.\nVector Field dataset path: {1}\nResult is saved in: {2}\n".format(
                 self.name, self._item_path, self._image_name
             )
         )
@@ -423,11 +398,11 @@ class TaskBaseVectorToImage(TaskBaseReconstruct):
         """
         Will raise an Attribute Error. Use source_path instead.
         """
-        raise AttributeError('There is no 4D-STEM path in this task.')
+        raise AttributeError("There is no 4D-STEM path in this task.")
 
     @property
     def source_path(self) -> str:
-        return self._item_path 
+        return self._item_path
 
     def _createImage(self):
         """
@@ -437,19 +412,19 @@ class TaskBaseVectorToImage(TaskBaseReconstruct):
         just before the task is submitted.
         """
         data_object = self.hdf_handler.file[self.source_path]
-        _, height, width = data_object.shape 
+        _, height, width = data_object.shape
         self.hdf_handler.addNewData(
             self._image_parent_path,
             self._image_name,
             (height, width),
-            'float64',
+            "float64",
         )
 
         for key, value in self._meta.items():
             try:
                 self.hdf_handler.file[self.image_path].attrs[key] = value
             except Exception as e:
-                self.logger.error(f'Failed to set attribute {key}: {e}')
+                self.logger.error(f"Failed to set attribute {key}: {e}")
 
     def _showImage(self):
         """
@@ -458,7 +433,7 @@ class TaskBaseVectorToImage(TaskBaseReconstruct):
         This function works as the following function that will be called
         just after the task is completed.
         """
-        self.logger.debug('Task {0} completed.'.format(self.name))
+        self.logger.debug("Task {0} completed.".format(self.name))
 
 
 class TaskPotential(TaskBaseVectorToImage):
@@ -467,12 +442,13 @@ class TaskPotential(TaskBaseVectorToImage):
 
     Task to calculate potential of vector field.
     """
+
     def __init__(
-        self, 
-        item_path: str, 
-        image_parent_path: str, 
-        image_name: str, 
-        parent: QObject = None, 
+        self,
+        item_path: str,
+        image_parent_path: str,
+        image_name: str,
+        parent: QObject = None,
         **meta,
     ):
         super().__init__(
@@ -483,10 +459,10 @@ class TaskPotential(TaskBaseVectorToImage):
             **meta,
         )
 
-        self.name = 'Calcuate Potential'
-        
+        self.name = "Calcuate Potential"
+
         self.addSubtaskFunc(
-            'Calculating Potential',
+            "Calculating Potential",
             self._calculatePotential,
         )
 
@@ -506,19 +482,19 @@ class TaskPotential(TaskBaseVectorToImage):
         return new_image
 
 
-
 class TaskDivergence(TaskBaseVectorToImage):
     """
     计算矢量场的散度的 Task。
 
     Task to calculate divergence of vector field.
     """
+
     def __init__(
-        self, 
-        item_path: str, 
-        image_parent_path: str, 
-        image_name: str, 
-        parent: QObject = None, 
+        self,
+        item_path: str,
+        image_parent_path: str,
+        image_name: str,
+        parent: QObject = None,
         **meta,
     ):
         super().__init__(
@@ -529,10 +505,10 @@ class TaskDivergence(TaskBaseVectorToImage):
             **meta,
         )
 
-        self.name = 'Calculate Divergence'
+        self.name = "Calculate Divergence"
 
         self.addSubtaskFunc(
-            'Calculating Divergence',
+            "Calculating Divergence",
             self._calculateDivergence,
         )
 
@@ -548,7 +524,7 @@ class TaskDivergence(TaskBaseVectorToImage):
         divergence = Divergence2D(vec_i, vec_j)
 
         new_image = self.hdf_handler.file[self.image_path]
-        new_image[:] = divergence 
+        new_image[:] = divergence
         return new_image
 
 
@@ -558,12 +534,13 @@ class TaskCurl(TaskBaseVectorToImage):
 
     Task to calculate curl of vector field.
     """
+
     def __init__(
-        self, 
-        item_path: str, 
-        image_parent_path: str, 
-        image_name: str, 
-        parent: QObject = None, 
+        self,
+        item_path: str,
+        image_parent_path: str,
+        image_name: str,
+        parent: QObject = None,
         **meta,
     ):
         super().__init__(
@@ -574,10 +551,10 @@ class TaskCurl(TaskBaseVectorToImage):
             **meta,
         )
 
-        self.name = 'Calculate Curl'
+        self.name = "Calculate Curl"
 
         self.addSubtaskFunc(
-            'Calculating Curl',
+            "Calculating Curl",
             self._calculateCurl,
         )
 
@@ -593,7 +570,7 @@ class TaskCurl(TaskBaseVectorToImage):
         divergence = Curl2D(vec_i, vec_j)
 
         new_image = self.hdf_handler.file[self.image_path]
-        new_image[:] = divergence 
+        new_image[:] = divergence
         return new_image
 
 
@@ -603,12 +580,13 @@ class TaskSliceI(TaskBaseVectorToImage):
 
     Task to slice i-component of the vector field.
     """
+
     def __init__(
-        self, 
-        item_path: str, 
-        image_parent_path: str, 
-        image_name: str, 
-        parent: QObject = None, 
+        self,
+        item_path: str,
+        image_parent_path: str,
+        image_name: str,
+        parent: QObject = None,
         **meta,
     ):
         super().__init__(
@@ -619,10 +597,10 @@ class TaskSliceI(TaskBaseVectorToImage):
             **meta,
         )
 
-        self.name = 'Slice Vector Field (i-component)'
+        self.name = "Slice Vector Field (i-component)"
 
         self.addSubtaskFunc(
-            'Slicing',
+            "Slicing",
             self._slicing_i,
         )
 
@@ -634,8 +612,8 @@ class TaskSliceI(TaskBaseVectorToImage):
         data_object = self.hdf_handler.file[self.source_path]
         vec_i = data_object[0, :, :]
         new_image = self.hdf_handler.file[self.image_path]
-        new_image[:] = vec_i 
-        return new_image 
+        new_image[:] = vec_i
+        return new_image
 
 
 class TaskSliceJ(TaskBaseVectorToImage):
@@ -644,12 +622,13 @@ class TaskSliceJ(TaskBaseVectorToImage):
 
     Task to slice j-component of the vector field.
     """
+
     def __init__(
-        self, 
-        item_path: str, 
-        image_parent_path: str, 
-        image_name: str, 
-        parent: QObject = None, 
+        self,
+        item_path: str,
+        image_parent_path: str,
+        image_name: str,
+        parent: QObject = None,
         **meta,
     ):
         super().__init__(
@@ -660,10 +639,10 @@ class TaskSliceJ(TaskBaseVectorToImage):
             **meta,
         )
 
-        self.name = 'Slice Vector Field (j-component)'
+        self.name = "Slice Vector Field (j-component)"
 
         self.addSubtaskFunc(
-            'Slicing',
+            "Slicing",
             self._slicing_j,
         )
 
@@ -675,6 +654,5 @@ class TaskSliceJ(TaskBaseVectorToImage):
         data_object = self.hdf_handler.file[self.source_path]
         vec_j = data_object[1, :, :]
         new_image = self.hdf_handler.file[self.image_path]
-        new_image[:] = vec_j 
-        return new_image 
-
+        new_image[:] = vec_j
+        return new_image

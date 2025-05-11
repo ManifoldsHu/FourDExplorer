@@ -14,11 +14,12 @@ date:           May 5, 2022
 *--------------------------- WidgetImportRaw.py ------------------------------*
 """
 
-import os 
+import os
 
 from PySide6.QtWidgets import QWidget, QFileDialog
 
 from ui import uiWidgetImportRaw
+
 
 class WidgetImportRaw(QWidget):
     """
@@ -26,6 +27,7 @@ class WidgetImportRaw(QWidget):
 
     Widget to import binary 4D-STEM data.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiWidgetImportRaw.Ui_Form()
@@ -37,20 +39,19 @@ class WidgetImportRaw(QWidget):
         self.ui.spinBox_rotate90.setValue(0)
         self.ui.spinBox_rotate90.setRange(0, 3)
         self.ui.checkBox_is_flip.setChecked(False)
-        
 
     def _chooseRawFile(self):
         """
         Open a dialog to choose raw file.
         """
         raw_path, _ = QFileDialog.getOpenFileName(
-            self, 
-            'Open Binary Raw File', 
-            './', 
-            'All Files(*)',
+            self,
+            "Open Binary Raw File",
+            "./",
+            "All Files(*)",
         )
-        if raw_path == '':
-            return 
+        if raw_path == "":
+            return
         raw_path = os.path.abspath(raw_path)
         self.ui.lineEdit_raw_path.setText(raw_path)
 
@@ -59,17 +60,17 @@ class WidgetImportRaw(QWidget):
 
     def getScalarType(self) -> str:
         _map = {
-            'integer': 'int',
-            'unsigned integer': 'uint',
-            'float': 'float',
+            "integer": "int",
+            "unsigned integer": "uint",
+            "float": "float",
         }
         return _map[self.ui.comboBox_scalar_type.currentText()]
 
     def getScalarSize(self) -> int:
         _map = {
-            '8 bit': 1,
-            '16 bit': 2,
-            '32 bit': 4,
+            "8 bit": 1,
+            "16 bit": 2,
+            "32 bit": 4,
         }
         return _map[self.ui.comboBox_scalar_size.currentText()]
 
@@ -93,9 +94,9 @@ class WidgetImportRaw(QWidget):
 
     def getLittleEndian(self) -> bool:
         return self.ui.checkBox_little_endian.isChecked()
-    
+
     def getRotate90(self) -> int:
         return self.ui.spinBox_rotate90.value()
-    
+
     def getIsFlip(self) -> bool:
         return self.ui.checkBox_is_flip.isChecked()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 *---------------------------------- Log.py -----------------------------------*
 
 具有可以打印日志的LogUtil类。
@@ -32,7 +32,7 @@ except BaseException as e:      # Or any other exception
 
 
 *---------------------------------- Log.py -----------------------------------*
-'''
+"""
 
 import logging
 import os
@@ -41,6 +41,7 @@ import time
 from configparser import ConfigParser
 from PySide6.QtCore import QObject, Signal
 from Constants import ROOT_PATH, CONFIG_PATH, LogLevel
+
 
 class LogUtil(QObject):
     """
@@ -58,7 +59,7 @@ class LogUtil(QObject):
         - file_handler      output to files
         - console_handler   output to stdio
         - widget_handler    output to the log widget in the MainWindow.
-    Among them, widget_handler will not print traceback if an exception 
+    Among them, widget_handler will not print traceback if an exception
     occured.
 
     attributes:
@@ -77,27 +78,27 @@ class LogUtil(QObject):
         stream: (LogStream) the log stream corresponding to the widget handler
     """
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         """
         arguments:
             parent: (QObject)
         """
         super().__init__(parent)
-        self._logger = logging.getLogger('4D-Explorer')
+        self._logger = logging.getLogger("4D-Explorer")
         self._logger.setLevel(logging.DEBUG)
-        self._name = '4D-Explorer'
+        self._name = "4D-Explorer"
 
         self._formatter = logging.Formatter(
-            '%(asctime)s - %(filename)s -> %(funcName)s[line:%(lineno)d] - '
-            '%(levelname)s: %(message)s'
-        )   # whole format, used in stdio and the file
+            "%(asctime)s - %(filename)s -> %(funcName)s[line:%(lineno)d] - "
+            "%(levelname)s: %(message)s"
+        )  # whole format, used in stdio and the file
 
         self._widget_formatter = WidgetFormatter(
-            '%(asctime)s - %(levelname)s: %(message)s'
-        )   # simplyfied format, used in the MainWindow
+            "%(asctime)s - %(levelname)s: %(message)s"
+        )  # simplyfied format, used in the MainWindow
 
         self._config = ConfigParser()
-        self._config_modified = True    # whether to read the config file
+        self._config_modified = True  # whether to read the config file
 
         self._initFileHandler()
         self._initConsoleHandler()
@@ -109,17 +110,16 @@ class LogUtil(QObject):
         The log directory path
         """
         if self._config_modified:
-            self._config.read(CONFIG_PATH, encoding = 'utf-8')
+            self._config.read(CONFIG_PATH, encoding="utf-8")
             self._config_modified = False
         try:
-            _path = self._config['Log']['path']
+            _path = self._config["Log"]["path"]
         except KeyError:
             self._useDefaultPath()
-            self._config.read(CONFIG_PATH, encoding = 'utf-8')
-            _path = self._config['Log']['path']
+            self._config.read(CONFIG_PATH, encoding="utf-8")
+            _path = self._config["Log"]["path"]
         finally:
             return _path
-
 
     @log_dir_path.setter
     def log_dir_path(self, _path: str):
@@ -132,14 +132,13 @@ class LogUtil(QObject):
             _path: (str) must be a path of a directory.
         """
         if not isinstance(_path, str):
-            raise TypeError('path must be a str, not '
-                '{0}'.format(type(_path).__name__))
+            raise TypeError("path must be a str, not {0}".format(type(_path).__name__))
 
-        self._config.read(CONFIG_PATH, encoding = 'utf-8')
-        if not 'Log' in self._config:
-            self._config.add_section('Log')
-        self._config['Log']['path'] = _path
-        with open(CONFIG_PATH, 'w', encoding = 'utf-8') as f:
+        self._config.read(CONFIG_PATH, encoding="utf-8")
+        if not "Log" in self._config:
+            self._config.add_section("Log")
+        self._config["Log"]["path"] = _path
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             self._config.write(f)
         self._config_modified = True
 
@@ -150,16 +149,15 @@ class LogUtil(QObject):
 
         The file name is the date of today.
         """
-        date = time.strftime('%Y%m%d', time.localtime(time.time()))
-        return os.path.join(self.log_dir_path, date + '.log')
+        date = time.strftime("%Y%m%d", time.localtime(time.time()))
+        return os.path.join(self.log_dir_path, date + ".log")
 
     @property
     def cLevel(self) -> LogLevel:
         """
         The console level of logging.
         """
-        return self._getLevel('cLevel')
-
+        return self._getLevel("cLevel")
 
     @cLevel.setter
     def cLevel(self, _cLevel: LogLevel):
@@ -168,7 +166,7 @@ class LogUtil(QObject):
 
         Will also modify the cLevel in the configuration file.
         """
-        self._setLevel('cLevel', _cLevel)
+        self._setLevel("cLevel", _cLevel)
         self._console_handler.setLevel(_cLevel)
 
     @property
@@ -176,7 +174,7 @@ class LogUtil(QObject):
         """
         The file level of logging.
         """
-        return self._getLevel('fLevel')
+        return self._getLevel("fLevel")
 
     @fLevel.setter
     def fLevel(self, _fLevel: LogLevel):
@@ -185,7 +183,7 @@ class LogUtil(QObject):
 
         Will also modify the fLevel in the configuration file.
         """
-        self._setLevel('fLevel', _fLevel)
+        self._setLevel("fLevel", _fLevel)
         self._file_handler.setLevel(_fLevel)
 
     @property
@@ -193,7 +191,7 @@ class LogUtil(QObject):
         """
         The widget level of logging, shown in the MainWindow.
         """
-        return self._getLevel('wLevel')
+        return self._getLevel("wLevel")
 
     @wLevel.setter
     def wLevel(self, _wLevel: LogLevel):
@@ -202,7 +200,7 @@ class LogUtil(QObject):
 
         Will also modify the wLevel in the configuration file.
         """
-        self._setLevel('wLevel', _wLevel)
+        self._setLevel("wLevel", _wLevel)
         self._widget_handler.setLevel(_wLevel)
 
     def _getLevel(self, handler_level_name: str) -> LogLevel:
@@ -214,28 +212,32 @@ class LogUtil(QObject):
         arguments:
             handler_level_name: (str) must be one of these
                 'fLevel', 'cLevel' or 'wLevel'
-        
+
         returns:
             (LogLevel)
         """
         if not isinstance(handler_level_name, str):
-            raise TypeError('handler_level_name must be a str, not '
-                '{0}'.format(type(handler_level_name).__name__))
+            raise TypeError(
+                "handler_level_name must be a str, not {0}".format(
+                    type(handler_level_name).__name__
+                )
+            )
 
-        if not handler_level_name in ('fLevel', 'cLevel', 'wLevel'):
-            raise ValueError('handler_level_name must be one of these: '
-                'fLevel, cLevel or wLevel')
-        
+        if not handler_level_name in ("fLevel", "cLevel", "wLevel"):
+            raise ValueError(
+                "handler_level_name must be one of these: fLevel, cLevel or wLevel"
+            )
+
         if self._config_modified:
-            self._config.read(CONFIG_PATH, encoding = 'utf-8')
+            self._config.read(CONFIG_PATH, encoding="utf-8")
             self._config_modified = False
 
         try:
-            _level = self._config['Log'][handler_level_name]
+            _level = self._config["Log"][handler_level_name]
         except KeyError:
             self._useDefaultLevel(handler_level_name)
-            self._config.read(CONFIG_PATH, encoding = 'utf-8')
-            _level = self._config['Log'][handler_level_name]
+            self._config.read(CONFIG_PATH, encoding="utf-8")
+            _level = self._config["Log"][handler_level_name]
         finally:
             return LogLevel[_level]
 
@@ -250,37 +252,41 @@ class LogUtil(QObject):
                 'fLevel'
                 'cLevel'
                 'wLevel'
-            
+
             level: (LogLevel)
         """
         if not isinstance(handler_level_name, str):
-            raise TypeError('handler_level_name must be a str, not '
-                '{0}'.format(type(handler_level_name).__name__))
+            raise TypeError(
+                "handler_level_name must be a str, not {0}".format(
+                    type(handler_level_name).__name__
+                )
+            )
 
-        if not handler_level_name in ('fLevel', 'cLevel', 'wLevel'):
-            raise ValueError('handler_level_name must be one of these: '
-                'fLevel, cLevel or wLevel')
-        
+        if not handler_level_name in ("fLevel", "cLevel", "wLevel"):
+            raise ValueError(
+                "handler_level_name must be one of these: fLevel, cLevel or wLevel"
+            )
+
         if not isinstance(level, int):
-            raise TypeError('level must be LogLevel, or int. Not '
-                '{0}'.format(type(level).__name__))
-        
-        self._config.read(CONFIG_PATH, encoding = 'utf-8')
-        if not 'Log' in self._config:
-            self._config.add_section('Log')
+            raise TypeError(
+                "level must be LogLevel, or int. Not {0}".format(type(level).__name__)
+            )
+
+        self._config.read(CONFIG_PATH, encoding="utf-8")
+        if not "Log" in self._config:
+            self._config.add_section("Log")
         if isinstance(level, LogLevel):
-            self._config['Log'][handler_level_name] = level.name
+            self._config["Log"][handler_level_name] = level.name
         else:
-            self._config['Log'][handler_level_name] = LogLevel(level).name
-        
-        with open(CONFIG_PATH, 'w', encoding = 'utf-8') as f:
+            self._config["Log"][handler_level_name] = LogLevel(level).name
+
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             self._config.write(f)
         self._config_modified = True
-    
+
     @property
     def logger(self) -> logging.Logger:
         return self._logger
-
 
     def _initFileHandler(self):
         """
@@ -301,17 +307,17 @@ class LogUtil(QObject):
         try:
             self._file_handler = logging.FileHandler(
                 self.path,
-                'a+',
-                encoding = 'utf-8',
+                "a+",
+                encoding="utf-8",
             )
         except FileNotFoundError:
             self._useDefaultPath()
             self._file_handler = logging.FileHandler(
                 self.path,
-                'a+',
-                encoding = 'utf-8',
+                "a+",
+                encoding="utf-8",
             )
-        
+
         self._file_handler.setLevel(self.fLevel)
         self._file_handler.setFormatter(self._formatter)
         self._logger.addHandler(self._file_handler)
@@ -341,7 +347,7 @@ class LogUtil(QObject):
         """
         Initialize the widget handler.
 
-        The widget handler will output the logging into the textBrowser in the 
+        The widget handler will output the logging into the textBrowser in the
         MainWindow. So the information will show to users.
 
         Logs in the widget have the simplified information including:
@@ -359,7 +365,7 @@ class LogUtil(QObject):
         """
         Use the default log path if no path availabe.
         """
-        default_path = os.path.join(ROOT_PATH, 'logs')
+        default_path = os.path.join(ROOT_PATH, "logs")
         if not os.path.exists(default_path):
             os.mkdir(default_path)
         self.log_dir_path = default_path
@@ -368,20 +374,19 @@ class LogUtil(QObject):
         """
         Use the default log level if no level available.
         """
-        if handler_level_name == 'cLevel':
+        if handler_level_name == "cLevel":
             level = LogLevel.DEBUG
-        elif handler_level_name == 'fLevel':
+        elif handler_level_name == "fLevel":
             level = LogLevel.DEBUG
-        elif handler_level_name == 'wLevel':
+        elif handler_level_name == "wLevel":
             level = LogLevel.INFO
         else:
             level = LogLevel.INFO
         self._setLevel(handler_level_name, level)
 
     @property
-    def stream(self) -> 'LogStream':
+    def stream(self) -> "LogStream":
         return self._widget_handler.stream
-
 
 
 class LogStream(QObject):
@@ -391,18 +396,19 @@ class LogStream(QObject):
     A stream of logging. Used to print logs in the MainWindow.
 
     signals:
-        print_signal: emits whenever the logger need to log a message to the 
+        print_signal: emits whenever the logger need to log a message to the
             widget handler.
     """
+
     print_signal = Signal(str)
+
     def __init__(self, parent: QObject = None):
         """
         arguments:
             parent: (QObject)
         """
         super().__init__(parent)
-        
-    
+
     def write(self, strings: str):
         """
         arguments:
@@ -424,8 +430,8 @@ class WidgetFormatter(logging.Formatter):
     """
 
     def format(self, record):
-        record.exc_text = ''
+        record.exc_text = ""
         return super().format(record)
 
     def formatException(self, exc_info):
-        return ''
+        return ""

@@ -22,6 +22,7 @@ from PySide6.QtWidgets import QWidget, QFileDialog
 
 from ui import uiWidgetImportEMPAD
 
+
 class WidgetImportEMPAD(QWidget):
     """
     用于导入 EMPAD 数据的部件。
@@ -30,9 +31,10 @@ class WidgetImportEMPAD(QWidget):
 
     Widget to import EMPAD dataset.
 
-    This includes a dialog to choose the xml header file. It gets raw file 
-    automatically according to the xml file. 
+    This includes a dialog to choose the xml header file. It gets raw file
+    automatically according to the xml file.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiWidgetImportEMPAD.Ui_Form()
@@ -40,27 +42,26 @@ class WidgetImportEMPAD(QWidget):
 
         self.ui.lineEdit_xml_path.setReadOnly(True)
         self.ui.lineEdit_raw_path.setReadOnly(True)
-        
+
         self.ui.pushButton_browse.clicked.connect(self._chooseXML)
-        
 
     @property
     def logger(self) -> Logger:
         global qApp
-        return qApp.logger 
+        return qApp.logger
 
     def _chooseXML(self):
         """
         Open a dialog to choose xml file.
         """
         xml_path, _ = QFileDialog.getOpenFileName(
-            self, 
-            'Open EMPAD XML File', 
-            './', 
-            'EMPAD XML Files (*.xml);;All Files(*)',
+            self,
+            "Open EMPAD XML File",
+            "./",
+            "EMPAD XML Files (*.xml);;All Files(*)",
         )
-        if xml_path == '':
-            return 
+        if xml_path == "":
+            return
 
         xml_path = os.path.abspath(xml_path)
         self.ui.lineEdit_xml_path.setText(xml_path)
@@ -70,14 +71,14 @@ class WidgetImportEMPAD(QWidget):
             dir_path = os.path.dirname(xml_path)
             dom_tree = parse(xml_path)
             root = dom_tree.documentElement
-            rf = root.getElementsByTagName('raw_file')[0]
-            raw_name = rf.getAttribute('filename')
+            rf = root.getElementsByTagName("raw_file")[0]
+            raw_name = rf.getAttribute("filename")
             raw_path = os.path.join(dir_path, raw_name)
             self.ui.lineEdit_raw_path.setText(raw_path)
         except BaseException as e:
-            self.logger.error('Cannot find parse location of raw file:\n'
-                '{0}'.format(e), exc_info = True)
-            
+            self.logger.error(
+                "Cannot find parse location of raw file:\n{0}".format(e), exc_info=True
+            )
 
     def getHeaderPath(self) -> str:
         return self.ui.lineEdit_xml_path.text()
@@ -85,9 +86,6 @@ class WidgetImportEMPAD(QWidget):
     def getRawPath(self) -> str:
         return self.ui.lineEdit_raw_path.text()
 
-        
-
-    
 
 class WidgetImportEMPAD_NJU(WidgetImportEMPAD):
     """
@@ -98,9 +96,10 @@ class WidgetImportEMPAD_NJU(WidgetImportEMPAD):
 
     Widget to import EMPAD dataset.
 
-    This includes a dialog to choose the xml header file. It gets raw file 
+    This includes a dialog to choose the xml header file. It gets raw file
     automatically according to the xml file. This widget is used to choose
     the file produced by EMPAD software with version 0.51, and is provided
     for Nanjing University only.
     """
-    pass 
+
+    pass

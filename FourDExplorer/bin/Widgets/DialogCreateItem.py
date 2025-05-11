@@ -21,8 +21,9 @@ from PySide6.QtGui import QRegularExpressionValidator
 from bin.Widgets.DialogChooseItem import DialogHDFChoose
 
 from ui import uiDialogHDFCreateItem
-from Constants import HDFType 
+from Constants import HDFType
 from bin.HDFManager import reValidHDFName
+
 
 class DialogHDFCreate(QDialog):
     """
@@ -30,22 +31,22 @@ class DialogHDFCreate(QDialog):
 
     Dialog to create a new group or data.
     """
+
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.ui = uiDialogHDFCreateItem.Ui_Dialog()
         self.ui.setupUi(self)
 
-        global qApp 
+        global qApp
         self._hdf_handler = qApp.hdf_handler
 
-        self.setWindowTitle('Create Item')
-        
+        self.setWindowTitle("Create Item")
+
         self.ui.lineEdit_parent_path.setReadOnly(True)
 
-        self.ui.comboBox_type.currentIndexChanged.connect(
-            self._setCreateItemType)
+        self.ui.comboBox_type.currentIndexChanged.connect(self._setCreateItemType)
         self._validateNewName()
-    
+
         self.initNames()
 
         self._list_spinboxes = [
@@ -60,10 +61,11 @@ class DialogHDFCreate(QDialog):
         self.ui.pushButton_cancel.clicked.connect(self.reject)
         self.ui.pushButton_ok.clicked.connect(self._OK)
 
-    def initNames(self,
+    def initNames(
+        self,
         hdf_type: HDFType = HDFType.Group,
-        new_name: str = 'untitled',
-        parent_path: str = '/', 
+        new_name: str = "untitled",
+        parent_path: str = "/",
     ):
         """
         Initialize the name, type and parent_path shown in the dialog.
@@ -132,7 +134,7 @@ class DialogHDFCreate(QDialog):
         returns:
             (bool) whether a new path is set.
         """
-        dialog_browse = DialogHDFChoose(self, only_group = True)
+        dialog_browse = DialogHDFChoose(self, only_group=True)
         dialog_code = dialog_browse.exec()
         if dialog_code == dialog_browse.Accepted:
             current_path = dialog_browse.getCurrentPath()
@@ -140,7 +142,6 @@ class DialogHDFCreate(QDialog):
             return True
         else:
             return False
-
 
     def getParentPath(self) -> str:
         """
@@ -155,7 +156,7 @@ class DialogHDFCreate(QDialog):
             (HDFType) the HDFType of the item to be created.
         """
         type_index = self.ui.comboBox_type.currentIndex()
-        if type_index == 0:   # Group
+        if type_index == 0:  # Group
             return HDFType.Group
         elif type_index == 1:
             return HDFType.Data
@@ -172,7 +173,7 @@ class DialogHDFCreate(QDialog):
     def getDimensions(self) -> int:
         """
         returns:
-            (int) the dimensions of the item to be created. 
+            (int) the dimensions of the item to be created.
                 It should be used only when a data is created.
         """
         return int(self.ui.comboBox_dimensions.currentText())
@@ -196,7 +197,7 @@ class DialogHDFCreate(QDialog):
         """
         dtype_index = self.ui.comboBox_dtype.currentIndex()
         if dtype_index == 0:
-            return 'float32'
+            return "float32"
 
     def _OK(self):
         """
@@ -206,12 +207,12 @@ class DialogHDFCreate(QDialog):
             (bool) whether the dialog is accepted.
         """
         name = self.ui.lineEdit_name.text()
-        if name == '':
-            msg = QMessageBox(text = 'Empty name')
+        if name == "":
+            msg = QMessageBox(text="Empty name")
             msg.exec()
             return False
         elif reValidHDFName.fullmatch(name) is None:
-            msg = QMessageBox(text = 'Invalid name')
+            msg = QMessageBox(text="Invalid name")
             msg.exec()
             return False
         else:

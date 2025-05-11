@@ -15,7 +15,7 @@
 This script can be used to produce icons for dark-theme.
 
 The icons are RGBA-png images, so we choose those points whose alpha is non-
-zero, and set their color to be white. Then the icons can be used in the dark 
+zero, and set their color to be white. Then the icons can be used in the dark
 themes.
 
 This script can only used to transform png RGBA images.
@@ -30,22 +30,24 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+
 def convertColor(image_rgba: np.ndarray) -> np.ndarray:
     """
     This function will convert icons to dark-mode.
 
-    The icons are RGBA-png images, so we choose those points whose alpha is 
-    non-zero, and set their color to be white. Then, those icons can be used 
+    The icons are RGBA-png images, so we choose those points whose alpha is
+    non-zero, and set their color to be white. Then, those icons can be used
     in the dark themes.
 
     arguments:
         (np.ndarray) must be 2D image with 4 channels (RGBA).
-    
+
     returns:
         (np.ndarray)
     """
-    image_rgba[image_rgba[:,:,3] > 1e-6] = 240/256
+    image_rgba[image_rgba[:, :, 3] > 1e-6] = 240 / 256
     return image_rgba
+
 
 def imageProvider(dir_path: str):
     """
@@ -58,15 +60,15 @@ def imageProvider(dir_path: str):
         path = os.path.join(dir_path, name)
         if os.path.isfile(path):
             _path, ext = os.path.splitext(path)
-            if ext == '.png' and not _path.endswith('_light'):
+            if ext == ".png" and not _path.endswith("_light"):
                 yield name, plt.imread(path)
 
-if __name__ == '__main__':
-    dir_path = './ui/resources/icons/'
+
+if __name__ == "__main__":
+    dir_path = "./ui/resources/icons/"
     for name, image in imageProvider(dir_path):
         print(name)
         image_light = convertColor(image)
-        name_light = os.path.splitext(name)[0] + '_light.png'
+        name_light = os.path.splitext(name)[0] + "_light.png"
         path_light = os.path.join(dir_path, name_light)
         plt.imsave(path_light, image_light)
-
