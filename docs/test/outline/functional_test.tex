@@ -1890,6 +1890,49 @@ light & gray & large & 浅色主题，灰色配色，大密度 \\
 
 \section{查看矢量场}
 
+\subsection{正常功能测试}
+
+\begin{enumerate}
+    \item 打开矢量场文件：
+    \begin{itemize}
+        \item 通过右键菜单选择"Open"，或"Open As..."选择Vector Field类型
+        \item 检查矢量场是否正确显示
+        \item 检查矢量场路径是否正确显示在路径栏
+        \item 检查右侧是否正确显示背景图 (若未指定背景图则为空)
+        \item 点击右侧 Browse Background 按钮，选取一个尺寸匹配的 .img 背景图，查看右侧是否切换为该背景图
+        \item 勾选右侧下方 Background Image Visible 查看背景图是否出现在左侧图中。
+        \item 点击 BROWSE 按钮，选择另一个 .vec 矢量场，查看图像是否能正确切换至该矢量场，且右侧的的背景图跟随切换。
+    \end{itemize}
+
+    \item 调整矢量场的显示参数 
+    \begin{itemize}
+        \item 点击 Adjust Quiver Effects 按钮 
+        \item 查看是否弹出调整参数的窗口 
+        \item 在窗口中，调整 Arrow Length Scale 参数，点击 OK 后查看是否能正确修改箭头长度 (Arrow Length Scale 越大，箭头越短)
+        \item 调整其他参数 (Arrow Width 和 Arrow Color) 查看能否正确调整箭头显示样式  
+    \end{itemize}
+\end{enumerate}
+
+\subsection{异常情况测试} 
+
+\begin{enumerate}
+    \item 测试无效矢量场文件：
+    \begin{itemize}
+        \item 尝试打开非 2 x i x j 形状的数据 (2 维图像、4 维数组)
+        \item 检查是否显示错误提示
+        \item 在一个已经打开了的矢量场页面，点击 BROWSE 按钮，同样打开形状不匹配的数据，查看是否显示错误提示，并且维持当前显示的矢量场不变
+    \end{itemize}
+
+    \item 测试空路径：
+    \begin{itemize}
+        \item 尝试点击 BROWSE 打开空路径
+        \item 检查是否显示错误提示
+        \item 检查当前图像是否保持不变
+    \end{itemize}
+\end{enumerate}
+
+
+
 \chapter{校正功能测试}
 
 校正是另一类重要的功能。使用带有 DNA 的纳米金颗粒数据集进行测试。
@@ -2388,29 +2431,277 @@ light & gray & large & 浅色主题，灰色配色，大密度 \\
 
 \chapter{实验参数管理功能测试}
 
-\section{添加参数}
+\section{参数的增删查改}
 
-\section{修改参数}
+本小节测试实验参数管理中的增删查改功能，包括正常操作流程和异常操作情况下的软件稳定性测试。
 
-\section{删除参数}
+\subsection{参数查看功能测试}
+\begin{itemize}
+    \item 正常操作流程：
+    \begin{itemize}
+        \item 点击"Attributes"按钮 (从菜单栏 Edit -> Attributes 或者右键点击左侧的数据，找到Attributes) 打开参数查看窗口
+        \item 验证参数列表是否正确显示所有参数
+        \item 使用顶部搜索框输入关键词，验证搜索功能
+        \item 切换"Path-like"和"Non-path-like"标签页，验证分类显示
+    \end{itemize}
+    
+    \item 异常操作测试：
+    \begin{itemize}
+        \item 在搜索框输入特殊字符（如@\#\$\%等）测试搜索功能
+        \item 快速连续切换标签页测试界面响应
+        \item 在加载大量参数时测试界面流畅度
+    \end{itemize}
+\end{itemize}
+
+\subsection{参数添加功能测试}
+\begin{itemize}
+    \item 正常操作流程：
+    \begin{itemize}
+        \item 右键点击参数列表选择"Add"选项
+        \item 在弹出窗口中填写参数名称
+        \item 选择参数类型（整数/浮点数/字符串）
+        \item 输入参数值后点击"OK"保存
+        \item 验证新参数是否出现在列表中，特别是以斜杠开头的参数及非斜杠开头的参数各自处于正确的位置。
+    \end{itemize}
+    
+    \item 异常操作测试：
+    \begin{itemize}
+        \item 不填写参数名称直接点击"OK"
+        \item 输入已存在的参数名称测试重复添加
+        \item 在数值字段输入非数字字符（对数值型参数）
+        \item 输入超长字符串（超过1000字符）测试处理能力
+        \item 在浮点数指数部分输入极大值（如1e999）
+    \end{itemize}
+\end{itemize}
+
+\subsection{参数编辑功能测试}
+\begin{itemize}
+    \item 正常操作流程：
+    \begin{itemize}
+        \item 右键点击参数选择"Edit"选项
+        \item 修改参数值后点击"OK"保存
+        \item 验证参数值是否更新
+        \item 使用"Change Type"按钮切换参数类型
+    \end{itemize}
+    
+    \item 异常操作测试：
+    \begin{itemize}
+        \item 将数值型参数改为非数字字符串
+        \item 在编辑过程中关闭窗口测试中断处理
+        \item 对只读参数尝试编辑（如系统预设参数）
+        \item 在科学计数法输入中设置无效组合（如尾数0且指数非0）
+    \end{itemize}
+\end{itemize}
+
+\subsection{参数删除功能测试}
+\begin{itemize}
+    \item 正常操作流程：
+    \begin{itemize}
+        \item 右键点击参数选择"Delete"选项
+        \item 在确认对话框点击"OK"
+        \item 验证参数是否从列表中消失
+    \end{itemize}
+    
+    \item 异常操作测试：
+    \begin{itemize}
+        \item 删除正在被其他模块使用的参数
+        \item 快速连续删除多个参数测试响应
+        \item 在删除确认对话框出现时强制关闭窗口
+        \item 尝试删除不存在的参数
+    \end{itemize}
+\end{itemize}
+
+\subsection{综合稳定性测试}
+\begin{enumerate}
+    \item 高强度操作测试：
+    \begin{itemize}
+        \item 连续添加-编辑-删除多个参数
+        \item 在参数加载过程中频繁切换视图
+        \item 同时打开多个参数编辑窗口
+    \end{itemize}
+    
+    \item 边界值测试：
+    \begin{itemize}
+        \item 添加参数名称为空格的参数
+        \item 设置整型参数为最大值/最小值
+        \item 测试浮点数精度极限情况
+    \end{itemize}
+    
+    \item 异常恢复测试：
+    \begin{itemize}
+        \item 在操作过程中强制关闭软件
+        \item 测试重新打开后参数状态是否一致
+        \item 模拟文件读写权限不足的情况
+    \end{itemize}
+\end{enumerate}
+
 
 \section{系统初始化 4D-STEM 参数}
 
-\chapter{图像渲染功能测试}
+本小节测试4D-STEM实验参数的分步编辑功能，包括正常操作流程和异常情况处理。
 
-\section{拖动图像}
+\subsection{基本功能测试}
+\begin{enumerate}
+    \item 对话框启动测试：
+    \begin{itemize}
+        \item 在菜单栏中找到 Dataset -> 4D-STEM -> Edit 4D-STEM Parameters， 验证对话框能否正常打开。
+        \item 也测试从左侧目录中找到 .4dstem 数据集，右键，找到 Calibration -> Edit 4D-STEM Parameters，查看是否能打开对话框。
+        \item 检查初始状态下"Next"按钮是否可用
+        \item 检查初始状态下"Back"按钮是否禁用
+    \end{itemize}
+    
+    \item 数据集选择测试：
+    \begin{itemize}
+        \item 点击"Browse"按钮选择4D-STEM数据集
+        \item 尝试选择非4D数据集，验证错误提示
+        \item 验证选中的数据集路径是否正确显示
+    \end{itemize}
+    
+    \item 分页导航测试：
+    \begin{itemize}
+        \item 逐步点击"Next"按钮，验证页面切换顺序
+        \item 在各页面间使用"Back"按钮返回
+        \item 验证导航标签的当前页高亮显示
+    \end{itemize}
+\end{enumerate}
 
-\section{缩放图像}
+\subsection{参数编辑测试}
+\begin{enumerate}
+    \item 通用参数编辑测试：
+    \begin{itemize}
+        \item 在"General"页点击各参数的"Edit"按钮
+        \item 验证编辑对话框能否正常打开
+        \item 修改参数值后验证显示是否更新 (通过在对应的 4D-STEM 数据集中打开 Attributes 对话框查看)
+    \end{itemize}
+    
+    \item 显微镜参数测试：
+    \begin{itemize}
+        \item 测试加速电压(accelerate voltage)的单位转换
+        \item 测试负值输入处理(如束流beam current)
+    \end{itemize}
+    
+    \item 相机参数测试：
+    \begin{itemize}
+        \item 测试像素数量(pixel number)的整数验证
+        \item 测试像素尺寸(pixel size)的小数输入
+        \item 测试只读参数的不可编辑性
+    \end{itemize}
+    
+    \item 像差参数测试：
+    \begin{itemize}
+        \item 测试高阶像差参数的科学计数法输入
+        \item 测试角度参数的取值范围(0-360度)
+    \end{itemize}
+\end{enumerate}
 
-\section{调整亮度}
+\subsection{异常操作测试}
+\begin{enumerate}
+    \item 边界值测试：
+    \begin{itemize}
+        \item 输入极大/极小数值测试处理能力
+        \item 测试空值/非法字符输入
+        \item 测试单位换算的溢出情况
+    \end{itemize}
+    
+    \item 操作中断测试：
+    \begin{itemize}
+        \item 在编辑过程中强制关闭窗口
+        \item 快速连续点击编辑按钮
+    \end{itemize}
+\end{enumerate}
 
-\section{调整对比度}
+\section{比例尺显示与调整}
 
-\section{使用对数尺度}
+本小节测试图像比例尺的显示与调整功能，包括基本设置、样式调整和异常情况处理。
 
-\section{显示矢量场}
+\subsection{基本功能测试}
+\begin{itemize}
+    \item 对话框启动测试：
+    \begin{itemize}
+        \item 对于 4D-STEM 展示页面、图像展示页面、矢量场展示页面、Virtual Image 页面、Center of Mass 页面、Background Subtraction 页面、Diffraction Alignment 页面以及 Diffraction Rotation 页面，分别点击图像上方的一排按钮中最右边的尺子按钮，验证比例尺设置对话框能否正常打开
+        \item 检查默认状态下比例尺是否可见
+        \item 验证初始比例尺长度是否合理
+    \end{itemize}
+    
+    \item 比例尺显示控制：
+    \begin{itemize}
+        \item 测试"显示比例尺"复选框的开关功能
+        \item 验证比例尺在图像上的实时显示/隐藏
+        \item 测试比例尺随图像缩放的自适应调整
+    \end{itemize}
+    
+    \item 比例尺基本设置：
+    \begin{itemize}
+        \item 测试长度值输入框的有效范围验证
+        \item 验证单位下拉菜单的选项完整性
+        \item 测试"自定义比例"复选框的功能
+    \end{itemize}
+\end{itemize}
 
-\section{调整比例尺}
+\subsection{样式调整测试}
+\begin{itemize}
+    \item 比例尺外观测试：
+    \begin{itemize}
+        \item 调整宽度滑块，验证比例尺粗细变化
+        \item 测试旋转角度输入的有效性(0-360度)
+        \item 验证颜色选择器的功能
+        \item 测试透明度调整效果
+    \end{itemize}
+    
+    \item 位置设置测试：
+    \begin{itemize}
+        \item 测试预设位置选项(左上、右上等)功能
+        \item 验证自定义坐标输入功能
+        \item 测试比例尺超出画布边界时的处理
+    \end{itemize}
+    
+    \item 文字标注测试：
+    \begin{itemize}
+        \item 测试文字可见性开关
+        \item 验证"跟随比例尺"选项的功能
+        \item 测试字体、大小、样式调整
+        \item 验证文字颜色和透明度设置
+        \item 测试文字背景框的各项设置
+    \end{itemize}
 
+    \item 正常流程测试：
+    \begin{itemize}
+        \item 设置合理的比例尺长度和单位
+        \item 调整位置和样式参数
+        \item 验证参数保存和恢复功能 (关闭当前展示页面，重新打开，查看比例尺属性修改是否被重置)
+    \end{itemize}
+    
+    \item 单位换算测试：
+    \begin{itemize}
+        \item 测试不同单位间的自动换算(nm/μm/mm等)
+        \item 验证自定义单位的处理
+        \item 测试单位与数值的合理匹配
+    \end{itemize}
+    
+\end{itemize}
+
+\subsection{异常操作测试}
+\begin{itemize}
+    \item 数据异常测试：
+    \begin{itemize}
+        \item 测试无元数据时的默认处理
+        \item 验证无效单位输入时的处理
+        \item 测试极大/极小数值输入
+    \end{itemize}
+    
+    \item 操作中断测试：
+    \begin{itemize}
+        \item 在比例尺渲染过程中关闭对话框
+        \item 快速连续调整多个参数
+        \item 测试无图像关联时的错误提示
+    \end{itemize}
+    
+    \item 边界值测试：
+    \begin{itemize}
+        \item 测试零长度比例尺
+        \item 验证负值输入处理
+        \item 测试极端旋转角度(如359度)
+    \end{itemize}
+\end{itemize}
 
 \end{document}
