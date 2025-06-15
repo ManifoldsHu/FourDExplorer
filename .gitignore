@@ -69,3 +69,11 @@ Venv
 *.thm
 *.synctex(?:\.gz)?
 *.xdv
+
+# Non-script files
+*.docx
+*.doc
+*.xls
+*.xlsx
+*.ppt
+*.pptx

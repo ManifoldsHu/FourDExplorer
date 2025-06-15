@@ -1,7 +1,7 @@
 h5py>=3.8
 matplotlib>=3.8,<3.9
 numpy>=1.21,<2.0
-onnxruntime>=1.18
+onnxruntime>=1.18,<1.19
 Pillow>=10.0
 Pint>=0.22
 psutil>=5.9.0
