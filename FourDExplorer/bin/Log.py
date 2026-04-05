@@ -318,6 +318,45 @@ class LogUtil(QObject):
     def logger(self) -> logging.Logger:
         return self._logger
 
+    def clearLogFiles(self) -> int:
+        """
+        Delete all .log files in the current log directory.
+        """
+        log_dir_path = self.log_dir_path
+        os.makedirs(log_dir_path, exist_ok=True)
+        self._logger.removeHandler(self._file_handler)
+        self._file_handler.close()
+
+        deleted_count = 0
+        try:
+            for file_name in os.listdir(log_dir_path):
+                file_path = os.path.join(log_dir_path, file_name)
+                if os.path.isfile(file_path) and file_name.lower().endswith(".log"):
+                    os.remove(file_path)
+                    deleted_count += 1
+        finally:
+            self._replaceFileHandler(self._createFileHandler(log_dir_path))
+        return deleted_count
+
+    def _writeInfoToWidget(self, message: str):
+        """
+        Write an info message only to the log widget.
+
+        This method is used for UI-only feedback after clearing log files.
+        It avoids sending the success message to the file handler, which would
+        recreate and write the current .log file immediately after deletion.
+        """
+        record = self._logger.makeRecord(
+            name=self._logger.name,
+            level=LogLevel.INFO,
+            fn="",
+            lno=0,
+            msg=message,
+            args=(),
+            exc_info=None,
+        )
+        self._widget_handler.handle(record)
+
     def _writeLogDirPath(self, log_dir_path: str):
         self._config.read(CONFIG_PATH, encoding="utf-8")
         if not "Log" in self._config:
@@ -332,7 +371,11 @@ class LogUtil(QObject):
             self._getLogFilePath(log_dir_path),
             "a+",
             encoding="utf-8",
+            delay=True,
         )
+        # Delay opening the file until the first real emit, so after clearing
+        # logs on Windows the recreated handler does not immediately hold the
+        # new .log file open again.
         file_handler.setLevel(self.fLevel)
         file_handler.setFormatter(self._formatter)
         return file_handler

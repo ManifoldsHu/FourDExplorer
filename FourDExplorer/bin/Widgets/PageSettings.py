@@ -196,7 +196,32 @@ class PageSettings(QWidget):
         """
         Delete all of the logs in the log folder.
         """
-        pass
+        msgbox = QMessageBox(parent=self)
+        msgbox.setWindowTitle("Confirm")
+        msgbox.setIcon(QMessageBox.Question)
+        msgbox.setText("Are you sure to delete all .log files in the log folder?")
+        msgbox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        msgbox.setDefaultButton(QMessageBox.No)
+        result = msgbox.exec()
+        if result != QMessageBox.Yes:
+            return
+
+        try:
+            deleted_count = self.log_util.clearLogFiles()
+        except OSError as e:
+            self.logger.error("{0}".format(e), exc_info=True)
+            msg = QMessageBox(parent=self)
+            msg.setWindowTitle("Warning")
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText("Cannot clear log files: {0}".format(e))
+            msg.exec()
+        else:
+            self.log_util._writeInfoToWidget(
+                "Clear log files successfully. Deleted {0} .log file(s).".format(
+                    deleted_count
+                )
+            )
 
     def _openLogFolder(self):
         """
