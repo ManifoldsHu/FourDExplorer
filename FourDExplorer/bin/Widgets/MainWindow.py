@@ -25,11 +25,13 @@ from PySide6.QtWidgets import QToolButton
 from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtWidgets import QProgressBar
 from PySide6.QtWidgets import QLabel
+from PySide6.QtCore import QByteArray
 from PySide6.QtCore import Qt
 from PySide6.QtCore import QSize
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon
 
+from Constants import CONFIG_PATH
 from Constants import ROOT_PATH
 from Constants import UIThemeDensity
 
@@ -134,6 +136,7 @@ class MainWindow(QMainWindow):
         self.tabview_manager.signal_tab_opened.connect(self.ui.tab_pages.initModel)
         self._status_bar = self.statusBar()
         self._initStatusBar()
+        self._restoreWindowSettings()
 
     @property
     def tabview_manager(self) -> TabViewManager:
@@ -148,6 +151,108 @@ class MainWindow(QMainWindow):
     def task_manager(self) -> TaskManager:
         global qApp
         return qApp.task_manager
+
+    @property
+    def config_manager(self):
+        global qApp
+        return qApp.config_manager
+
+    def _getWindowConfig(self):
+        """
+        Get the configuration section for the main window.
+
+        If the Window section or required keys do not exist, they will be
+        created automatically.
+
+        returns:
+            (SectionProxy) the Window section in the configuration file.
+        """
+        config = self.config_manager.config
+        if not config.has_section("Window"):
+            config.add_section("Window")
+        default_values = {
+            "geometry": "",
+            "window_state": "",
+            "splitter_state": "",
+            "splitter_2_state": "",
+        }
+        is_updated = False
+        for key, value in default_values.items():
+            if key not in config["Window"]:
+                config["Window"][key] = value
+                is_updated = True
+        if is_updated:
+            with open(CONFIG_PATH, "w", encoding="UTF-8") as f:
+                config.write(f)
+        return config["Window"]
+
+    def _setInitialWindowGeometry(self):
+        """
+        Set the initial size and position of the main window.
+
+        The window size is calculated from the available geometry of the
+        current screen and then moved to the center.
+        """
+        screen = self._app.primaryScreen()
+        if screen is None:
+            self.resize(1280, 800)
+            return
+        rect = screen.availableGeometry()
+        width = min(max(int(rect.width() * 0.8), 960), rect.width())
+        height = min(max(int(rect.height() * 0.8), 720), rect.height())
+        self.resize(width, height)
+        self.move(
+            rect.x() + (rect.width() - width) // 2,
+            rect.y() + (rect.height() - height) // 2,
+        )
+
+    def _restoreWindowSettings(self):
+        """
+        Restore the display state of the main window from the configuration.
+
+        This includes the window geometry, the main window state, and the
+        states of the splitters.
+        """
+        window_config = self._getWindowConfig()
+        geometry = window_config.get("geometry", "")
+        if geometry and self.restoreGeometry(
+            QByteArray.fromBase64(geometry.encode("ASCII"))
+        ):
+            pass
+        else:
+            self._setInitialWindowGeometry()
+        window_state = window_config.get("window_state", "")
+        if window_state:
+            self.restoreState(QByteArray.fromBase64(window_state.encode("ASCII")))
+        splitter_2_state = window_config.get("splitter_2_state", "")
+        if splitter_2_state:
+            self.ui.splitter_2.restoreState(
+                QByteArray.fromBase64(splitter_2_state.encode("ASCII"))
+            )
+        splitter_state = window_config.get("splitter_state", "")
+        if splitter_state:
+            self.ui.splitter.restoreState(
+                QByteArray.fromBase64(splitter_state.encode("ASCII"))
+            )
+
+    def _saveWindowSettings(self):
+        """
+        Save the display state of the main window to the configuration.
+
+        The window geometry, the main window state, and the splitter states
+        will be saved for the next launch.
+        """
+        window_config = self._getWindowConfig()
+        window_config["geometry"] = bytes(self.saveGeometry().toBase64()).decode("ASCII")
+        window_config["window_state"] = bytes(self.saveState().toBase64()).decode("ASCII")
+        window_config["splitter_2_state"] = bytes(
+            self.ui.splitter_2.saveState().toBase64()
+        ).decode("ASCII")
+        window_config["splitter_state"] = bytes(
+            self.ui.splitter.saveState().toBase64()
+        ).decode("ASCII")
+        with open(CONFIG_PATH, "w", encoding="UTF-8") as f:
+            self.config_manager.config.write(f)
 
     def _initControlPanel(self):
         """
@@ -382,9 +487,10 @@ class MainWindow(QMainWindow):
             else:
                 self._task_progress_bar.setRange(0, 0)  # Busy indicator
 
-    def close(self) -> bool:
+    def closeEvent(self, event):
+        self._saveWindowSettings()
         self._app.cleanResources()
-        super(MainWindow, self).close()
+        super(MainWindow, self).closeEvent(event)
 
 
 class ControlToolBar(QToolBar):

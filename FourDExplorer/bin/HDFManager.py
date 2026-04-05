@@ -2305,6 +2305,8 @@ class HDFAttrModel(QAbstractTableModel):
     注意，实践证明，不能使用 HDF5 本身的对象作为 ptr，原因不明，可能与 HDF5 采用的锁
     机制有关；所以，唯一方案便是自己创建一个 meta 副本，而只在修改时访问 HDF5 文件。
 
+    已弃用
+
     This is a model for viewing attributions of HDF5 objects.
 
     Attributions of HDF5 objects are like Mapping (dict in python), So we use
@@ -2326,6 +2328,8 @@ class HDFAttrModel(QAbstractTableModel):
     itself as the ptr, and I don't know why. So here we create a replica: meta
     as a dict, which will always conserves the same as the attrs. Only when we
     need to modify the attribution, we use attrs.
+
+    DEPRECATED
 
     attributes:
         hdf_handler: (HDFHandler)

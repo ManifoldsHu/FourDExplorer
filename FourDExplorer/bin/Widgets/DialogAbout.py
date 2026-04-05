@@ -56,30 +56,44 @@ class DialogAbout(QDialog):
         self.ui.label_version.setText(version)
         self.ui.label_version_en.setText(version)
 
-        for label in self._link_labels():
-            label.setOpenExternalLinks(False)
-            label.setTextInteractionFlags(
-                Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard
-            )
-            label.linkActivated.connect(self._showLinkDialog)
-
-    def _link_labels(self):
-        return (
+        link_labels = [
             self.ui.label_website_cn,
             self.ui.label_repo_cn,
             self.ui.label_doc_cn,
             self.ui.label_website,
             self.ui.label_repo,
             self.ui.label_doc,
-        )
+        ]
+        for label in link_labels:
+            label.setOpenExternalLinks(False)
+            label.setTextInteractionFlags(
+                Qt.LinksAccessibleByMouse | Qt.LinksAccessibleByKeyboard
+            )
+            label.linkActivated.connect(self._showLinkDialog)
 
     def _showLinkDialog(self, url: str):
+        """
+        Show the dialog used to confirm opening an external link.
+
+        arguments:
+            url: (str) the external link to be opened.
+        """
         dialog = DialogOpenLink(url, self)
         dialog.exec()
 
 
 class DialogOpenLink(QDialog):
+    """
+    Dialog to confirm whether an external link should be opened.
+    """
+
     def __init__(self, url: str, parent: QWidget = None):
+        """
+        arguments:
+            url: (str) the external link to be displayed.
+
+            parent: (QWidget) the parent widget.
+        """
         super().__init__(parent)
         self._url = url
 
@@ -105,6 +119,9 @@ class DialogOpenLink(QDialog):
         self._layout.addWidget(self._button_box)
 
     def _openLink(self):
+        """
+        Open the current link with the default external browser.
+        """
         if QDesktopServices.openUrl(QUrl(self._url)):
             self.accept()
             return

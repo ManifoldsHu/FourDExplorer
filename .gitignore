@@ -80,3 +80,6 @@ Venv
 
 # IDE
 .trae/
+
+# test docx tmp files 
+*.tmp

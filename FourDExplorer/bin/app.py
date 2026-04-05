@@ -106,6 +106,10 @@ class App(QApplication):
         self._meta_managers = {}
 
     @property
+    def config_manager(self):
+        return self._config_manager
+
+    @property
     def hdf_handler(self):
         return self._hdf_handler
 
