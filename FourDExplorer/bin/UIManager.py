@@ -80,6 +80,12 @@ class ThemeHandler(QObject):
         return qApp.config_manager
 
     def _getUiConfig(self):
+        """
+        Get the UI configuration section.
+
+        returns:
+            (SectionProxy)
+        """
         return self.config_manager.getSection(
             "UI",
             {

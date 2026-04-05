@@ -26,6 +26,10 @@ from Constants import ROOT_PATH, LogLevel
 
 class ConfigManager(QObject):
     def __init__(self, parent: QObject = None):
+        """
+        arguments:
+            parent: (QObject)
+        """
         super().__init__(parent)
         self._config = ConfigParser()
         self._config_path = self.userConfigPath()
@@ -34,10 +38,22 @@ class ConfigManager(QObject):
 
     @staticmethod
     def defaultConfigPath() -> str:
+        """
+        Get the default configuration template path in the project directory.
+
+        returns:
+            (str)
+        """
         return os.path.join(ROOT_PATH, "config.ini")
 
     @staticmethod
     def userConfigDirPath() -> str:
+        """
+        Get the user configuration directory path for the current platform.
+
+        returns:
+            (str)
+        """
         home_path = os.path.expanduser("~")
         if sys.platform.startswith("win"):
             base_path = os.environ.get("APPDATA")
@@ -58,9 +74,18 @@ class ConfigManager(QObject):
 
     @classmethod
     def userConfigPath(cls) -> str:
+        """
+        Get the runtime user configuration file path.
+
+        returns:
+            (str)
+        """
         return os.path.join(cls.userConfigDirPath(), "config.ini")
 
     def initConfig(self):
+        """
+        Initialize the runtime configuration file.
+        """
         os.makedirs(self.userConfigDirPath(), exist_ok=True)
         if not os.path.exists(self._config_path):
             self.restoreDefaults()
@@ -70,6 +95,9 @@ class ConfigManager(QObject):
         self.save()
 
     def restoreDefaults(self):
+        """
+        Restore the runtime configuration from the default template.
+        """
         if os.path.exists(self._default_config_path):
             shutil.copyfile(self._default_config_path, self._config_path)
         else:
@@ -82,14 +110,30 @@ class ConfigManager(QObject):
         self.save()
 
     def reload(self):
+        """
+        Reload the runtime configuration from disk.
+        """
         self._config = ConfigParser()
         self._config.read(self._config_path, encoding="UTF-8")
 
     def save(self):
+        """
+        Save the current runtime configuration to disk.
+        """
         with open(self._config_path, "w", encoding="UTF-8") as f:
             self._config.write(f)
 
     def getSection(self, section_name: str, defaults: dict[str, str] = None):
+        """
+        Get a configuration section and fill missing keys with defaults.
+
+        arguments:
+            section_name: (str)
+            defaults: (dict[str, str])
+
+        returns:
+            (SectionProxy)
+        """
         is_updated = False
         if not self._config.has_section(section_name):
             self._config.add_section(section_name)
@@ -107,6 +151,9 @@ class ConfigManager(QObject):
         return self._config[section_name]
 
     def _repairConfig(self):
+        """
+        Repair missing or invalid configuration entries.
+        """
         self.getSection(
             "UI",
             {
@@ -134,8 +181,17 @@ class ConfigManager(QObject):
 
     @property
     def config(self):
+        """
+        Get the in-memory configuration object.
+        """
         return self._config
 
     @property
     def configPath(self) -> str:
+        """
+        Get the runtime user configuration file path.
+
+        returns:
+            (str)
+        """
         return self._config_path

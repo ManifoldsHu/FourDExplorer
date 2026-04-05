@@ -80,9 +80,25 @@ class WidgetSystemInfo(QWidget):
         self._timer.timeout.connect(self._updateDiskIO)
 
     def _clampPercentage(self, percentage: float) -> int:
+        """
+        Clamp a percentage value to the range [0, 100].
+
+        arguments:
+            percentage: (float)
+
+        returns:
+            (int)
+        """
         return max(0, min(100, int(round(percentage))))
 
     def _getProcessIOCounters(self):
+        """
+        Get process-level disk IO counters when the platform supports it.
+
+        returns:
+            psutil._common.pio: process IO counters. Returns None when the
+                current platform does not support this feature.
+        """
         try:
             return self._process.io_counters()
         except (AttributeError, NotImplementedError, psutil.Error):

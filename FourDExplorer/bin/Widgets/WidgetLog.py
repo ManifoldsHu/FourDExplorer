@@ -56,7 +56,7 @@ class WidgetLog(QWidget):
         Initialize the logger, set the stream.
         """
         # stream = self.log_util.widget_handler.stream
-        stream = self.log_util.stream
+        stream = self.log_util.widget_stream
         stream.print_signal.connect(self.printLog)
 
     def printLog(self, string: str):

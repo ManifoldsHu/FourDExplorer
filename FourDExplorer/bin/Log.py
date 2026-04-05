@@ -125,6 +125,12 @@ class LogUtil(QObject):
         return qApp.config_manager
 
     def _getLogConfig(self):
+        """
+        Get the log configuration section.
+
+        returns:
+            (SectionProxy)
+        """
         return self.config_manager.getSection(
             "Log",
             {
@@ -185,6 +191,15 @@ class LogUtil(QObject):
         return self._getLogFilePath(self.log_dir_path)
 
     def _getLogFilePath(self, log_dir_path: str) -> str:
+        """
+        Build the log file path from the log directory and current date.
+
+        arguments:
+            log_dir_path: (str)
+
+        returns:
+            (str)
+        """
         date = time.strftime("%Y%m%d", time.localtime(time.time()))
         return os.path.join(log_dir_path, date + ".log")
 
@@ -352,11 +367,26 @@ class LogUtil(QObject):
         self._widget_handler.handle(record)
 
     def _writeLogDirPath(self, log_dir_path: str):
+        """
+        Write the log directory path into the configuration.
+
+        arguments:
+            log_dir_path: (str)
+        """
         log_config = self._getLogConfig()
         log_config["path"] = log_dir_path
         self.config_manager.save()
 
     def _createFileHandler(self, log_dir_path: str) -> logging.FileHandler:
+        """
+        Create the file handler for the target log directory.
+
+        arguments:
+            log_dir_path: (str)
+
+        returns:
+            (logging.FileHandler)
+        """
         file_handler = logging.FileHandler(
             self._getLogFilePath(log_dir_path),
             "a+",
@@ -371,6 +401,12 @@ class LogUtil(QObject):
         return file_handler
 
     def _replaceFileHandler(self, file_handler: logging.FileHandler):
+        """
+        Replace the current file handler with a new one.
+
+        arguments:
+            file_handler: (logging.FileHandler)
+        """
         if hasattr(self, "_file_handler"):
             self._logger.removeHandler(self._file_handler)
             self._file_handler.close()
@@ -466,7 +502,7 @@ class LogUtil(QObject):
         self._setLevel(handler_level_name, level)
 
     @property
-    def stream(self) -> "LogStream":
+    def widget_stream(self) -> "LogStream":
         return self._widget_handler.stream
 
 
