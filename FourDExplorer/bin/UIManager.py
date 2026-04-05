@@ -14,7 +14,6 @@ date:           Feb 19, 2022
 *----------------------------- UIManager.py ----------------------------------*
 """
 
-from configparser import ConfigParser
 from logging import Logger
 import os
 
@@ -25,7 +24,6 @@ from qt_material import apply_stylesheet
 from matplotlib.style import use as useMatplotlibStyle
 
 # from bin.Log import LogUtil
-from Constants import CONFIG_PATH
 from Constants import ROOT_PATH
 from Constants import UIThemeColor
 from Constants import UIThemeMode
@@ -77,15 +75,24 @@ class ThemeHandler(QObject):
         return os.path.join(ROOT_PATH, "ui", "resources", "themes", "dark")
 
     @property
-    def config(self) -> ConfigParser:
-        _config = ConfigParser()
-        _config.read(CONFIG_PATH, encoding="utf-8")
-        return _config
+    def config_manager(self):
+        global qApp
+        return qApp.config_manager
+
+    def _getUiConfig(self):
+        return self.config_manager.getSection(
+            "UI",
+            {
+                "ThemeColor": UIThemeColor.default.name,
+                "ThemeMode": UIThemeMode.default.name,
+                "ThemeDensity": UIThemeDensity.default.name,
+            },
+        )
 
     @property
     def theme_color(self) -> UIThemeColor:
         try:
-            color = self.config["UI"]["ThemeColor"]
+            color = self._getUiConfig()["ThemeColor"]
             return UIThemeColor[color]
         except Exception:
             return UIThemeColor["default"]
@@ -93,7 +100,7 @@ class ThemeHandler(QObject):
     @property
     def theme_mode(self) -> UIThemeMode:
         try:
-            mode = self.config["UI"]["ThemeMode"]
+            mode = self._getUiConfig()["ThemeMode"]
             return UIThemeMode[mode]
         except Exception:
             return UIThemeMode["default"]
@@ -101,7 +108,7 @@ class ThemeHandler(QObject):
     @property
     def theme_density(self) -> UIThemeDensity:
         try:
-            density = self.config["UI"]["ThemeDensity"]
+            density = self._getUiConfig()["ThemeDensity"]
             return UIThemeDensity[density]
         except Exception:
             return UIThemeDensity["default"]
@@ -128,10 +135,9 @@ class ThemeHandler(QObject):
 
         self._applyTheme(self.theme_mode, theme_color, self.theme_density)
 
-        config = self.config
-        with open(CONFIG_PATH, "w", encoding="UTF-8") as f:
-            config["UI"]["ThemeColor"] = theme_color.name
-            config.write(f)
+        ui_config = self._getUiConfig()
+        ui_config["ThemeColor"] = theme_color.name
+        self.config_manager.save()
 
         self.theme_changed.emit()
 
@@ -152,10 +158,9 @@ class ThemeHandler(QObject):
 
         self._applyTheme(theme_mode, self.theme_color, self.theme_density)
 
-        config = self.config
-        with open(CONFIG_PATH, "w", encoding="UTF-8") as f:
-            config["UI"]["ThemeMode"] = theme_mode.name
-            config.write(f)
+        ui_config = self._getUiConfig()
+        ui_config["ThemeMode"] = theme_mode.name
+        self.config_manager.save()
 
         self.theme_changed.emit()
 
@@ -185,10 +190,9 @@ class ThemeHandler(QObject):
 
         self._applyTheme(self.theme_mode, self.theme_color, theme_density)
 
-        config = self.config
-        with open(CONFIG_PATH, "w", encoding="UTF-8") as f:
-            config["UI"]["ThemeDensity"] = theme_density.name
-            config.write(f)
+        ui_config = self._getUiConfig()
+        ui_config["ThemeDensity"] = theme_density.name
+        self.config_manager.save()
 
         self.theme_changed.emit()
 
@@ -236,22 +240,7 @@ class ThemeHandler(QObject):
         """
         Initialize theme from the configure file.
         """
-        # Check whether config file is valid.
-        config = self.config
-        if not "UI" in self.config:
-            config.add_section("UI")
-
-        if not "ThemeColor" in config["UI"]:
-            config["UI"]["ThemeColor"] = UIThemeColor.default.name
-
-        if not "ThemeMode" in config["UI"]:
-            config["UI"]["ThemeMode"] = UIThemeMode.default.name
-
-        if not "ThemeDensity" in config["UI"]:
-            config["UI"]["ThemeDensity"] = UIThemeDensity.default.name
-
-        with open(CONFIG_PATH, "w", encoding="UTF-8") as f:
-            config.write(f)
+        self._getUiConfig()
 
         try:
             self._applyTheme(

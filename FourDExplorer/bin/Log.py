@@ -39,9 +39,8 @@ import os
 import sys
 import time
 
-from configparser import ConfigParser
 from PySide6.QtCore import QObject, Signal
-from Constants import ROOT_PATH, CONFIG_PATH, LogLevel
+from Constants import LogLevel
 
 
 def getDefaultLogDirPath() -> str:
@@ -116,29 +115,36 @@ class LogUtil(QObject):
             "%(asctime)s - %(levelname)s: %(message)s"
         )  # simplyfied format, used in the MainWindow
 
-        self._config = ConfigParser()
-        self._config_modified = True  # whether to read the config file
-
         self._initFileHandler()
         self._initConsoleHandler()
         self._initWidgetHandler()
+
+    @property
+    def config_manager(self):
+        global qApp
+        return qApp.config_manager
+
+    def _getLogConfig(self):
+        return self.config_manager.getSection(
+            "Log",
+            {
+                "path": "",
+                "fLevel": LogLevel.DEBUG.name,
+                "cLevel": LogLevel.DEBUG.name,
+                "wLevel": LogLevel.INFO.name,
+            },
+        )
 
     @property
     def log_dir_path(self) -> str:
         """
         The log directory path
         """
-        if self._config_modified:
-            self._config.read(CONFIG_PATH, encoding="utf-8")
-            self._config_modified = False
-        try:
-            _path = self._config["Log"]["path"]
-        except KeyError:
+        _path = self._getLogConfig().get("path", "").strip()
+        if not _path:
             self._useDefaultPath()
-            self._config.read(CONFIG_PATH, encoding="utf-8")
-            _path = self._config["Log"]["path"]
-        finally:
-            return _path
+            _path = self._getLogConfig()["path"]
+        return _path
 
     @log_dir_path.setter
     def log_dir_path(self, _path: str):
@@ -153,7 +159,7 @@ class LogUtil(QObject):
         if not isinstance(_path, str):
             raise TypeError("path must be a str, not {0}".format(type(_path).__name__))
 
-        old_path = self.log_dir_path
+        old_path = self._getLogConfig().get("path", "").strip()
         _path = os.path.abspath(_path)
         try:
             os.makedirs(_path, exist_ok=True)
@@ -258,18 +264,11 @@ class LogUtil(QObject):
                 "handler_level_name must be one of these: fLevel, cLevel or wLevel"
             )
 
-        if self._config_modified:
-            self._config.read(CONFIG_PATH, encoding="utf-8")
-            self._config_modified = False
-
-        try:
-            _level = self._config["Log"][handler_level_name]
-        except KeyError:
+        _level = self._getLogConfig().get(handler_level_name, "")
+        if _level not in LogLevel.__members__:
             self._useDefaultLevel(handler_level_name)
-            self._config.read(CONFIG_PATH, encoding="utf-8")
-            _level = self._config["Log"][handler_level_name]
-        finally:
-            return LogLevel[_level]
+            _level = self._getLogConfig()[handler_level_name]
+        return LogLevel[_level]
 
     def _setLevel(self, handler_level_name: str, level: LogLevel):
         """
@@ -302,17 +301,12 @@ class LogUtil(QObject):
                 "level must be LogLevel, or int. Not {0}".format(type(level).__name__)
             )
 
-        self._config.read(CONFIG_PATH, encoding="utf-8")
-        if not "Log" in self._config:
-            self._config.add_section("Log")
+        log_config = self._getLogConfig()
         if isinstance(level, LogLevel):
-            self._config["Log"][handler_level_name] = level.name
+            log_config[handler_level_name] = level.name
         else:
-            self._config["Log"][handler_level_name] = LogLevel(level).name
-
-        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-            self._config.write(f)
-        self._config_modified = True
+            log_config[handler_level_name] = LogLevel(level).name
+        self.config_manager.save()
 
     @property
     def logger(self) -> logging.Logger:
@@ -358,13 +352,9 @@ class LogUtil(QObject):
         self._widget_handler.handle(record)
 
     def _writeLogDirPath(self, log_dir_path: str):
-        self._config.read(CONFIG_PATH, encoding="utf-8")
-        if not "Log" in self._config:
-            self._config.add_section("Log")
-        self._config["Log"]["path"] = log_dir_path
-        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-            self._config.write(f)
-        self._config_modified = True
+        log_config = self._getLogConfig()
+        log_config["path"] = log_dir_path
+        self.config_manager.save()
 
     def _createFileHandler(self, log_dir_path: str) -> logging.FileHandler:
         file_handler = logging.FileHandler(
@@ -411,7 +401,7 @@ class LogUtil(QObject):
         """
         try:
             self._resetFileHandler()
-        except FileNotFoundError:
+        except OSError:
             self._useDefaultPath()
 
     def _initConsoleHandler(self):

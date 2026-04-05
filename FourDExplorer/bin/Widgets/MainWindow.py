@@ -31,7 +31,6 @@ from PySide6.QtCore import QSize
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QIcon
 
-from Constants import CONFIG_PATH
 from Constants import ROOT_PATH
 from Constants import UIThemeDensity
 
@@ -167,24 +166,15 @@ class MainWindow(QMainWindow):
         returns:
             (SectionProxy) the Window section in the configuration file.
         """
-        config = self.config_manager.config
-        if not config.has_section("Window"):
-            config.add_section("Window")
-        default_values = {
-            "geometry": "",
-            "window_state": "",
-            "splitter_state": "",
-            "splitter_2_state": "",
-        }
-        is_updated = False
-        for key, value in default_values.items():
-            if key not in config["Window"]:
-                config["Window"][key] = value
-                is_updated = True
-        if is_updated:
-            with open(CONFIG_PATH, "w", encoding="UTF-8") as f:
-                config.write(f)
-        return config["Window"]
+        return self.config_manager.getSection(
+            "Window",
+            {
+                "geometry": "",
+                "window_state": "",
+                "splitter_state": "",
+                "splitter_2_state": "",
+            },
+        )
 
     def _setInitialWindowGeometry(self):
         """
@@ -251,8 +241,7 @@ class MainWindow(QMainWindow):
         window_config["splitter_state"] = bytes(
             self.ui.splitter.saveState().toBase64()
         ).decode("ASCII")
-        with open(CONFIG_PATH, "w", encoding="UTF-8") as f:
-            self.config_manager.config.write(f)
+        self.config_manager.save()
 
     def _initControlPanel(self):
         """

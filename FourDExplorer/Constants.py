@@ -20,17 +20,12 @@ APP_VERSION = (0, 6, 6)
 
 import logging
 import os
-import sys
 from enum import Enum, IntEnum
 from PySide6.QtCore import Qt
 
 # Absolutely path of FourDExplorer directory
 global ROOT_PATH
 ROOT_PATH = os.path.dirname(__file__)
-
-# The absolute path of the configuration file
-global CONFIG_PATH
-CONFIG_PATH = os.path.join(ROOT_PATH, "config.ini")
 
 
 class HDFType(IntEnum):
