@@ -36,11 +36,30 @@ except BaseException as e:      # Or any other exception
 
 import logging
 import os
+import sys
 import time
 
 from configparser import ConfigParser
 from PySide6.QtCore import QObject, Signal
 from Constants import ROOT_PATH, CONFIG_PATH, LogLevel
+
+
+def getDefaultLogDirPath() -> str:
+    """
+    Get the default log directory path according to the platform.
+    """
+    home_path = os.path.expanduser("~")
+    if sys.platform.startswith("win"):
+        base_path = os.environ.get("LOCALAPPDATA")
+        if not base_path:
+            base_path = os.path.join(home_path, "AppData", "Local")
+        return os.path.join(base_path, "FourDExplorer", "Logs")
+    if sys.platform == "darwin":
+        return os.path.join(home_path, "Library", "Logs", "FourDExplorer")
+    base_path = os.environ.get("XDG_STATE_HOME")
+    if not base_path:
+        base_path = os.path.join(home_path, ".local", "state")
+    return os.path.join(base_path, "FourDExplorer", "logs")
 
 
 class LogUtil(QObject):
@@ -134,13 +153,21 @@ class LogUtil(QObject):
         if not isinstance(_path, str):
             raise TypeError("path must be a str, not {0}".format(type(_path).__name__))
 
-        self._config.read(CONFIG_PATH, encoding="utf-8")
-        if not "Log" in self._config:
-            self._config.add_section("Log")
-        self._config["Log"]["path"] = _path
-        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
-            self._config.write(f)
-        self._config_modified = True
+        old_path = self.log_dir_path
+        _path = os.path.abspath(_path)
+        try:
+            os.makedirs(_path, exist_ok=True)
+            file_handler = self._createFileHandler(_path)
+            self._writeLogDirPath(_path)
+            self._replaceFileHandler(file_handler)
+        except OSError as e:
+            raise OSError("Cannot use log directory: {0}".format(_path)) from e
+        except Exception:
+            if 'file_handler' in locals():
+                file_handler.close()
+            if old_path != _path:
+                self._writeLogDirPath(old_path)
+            raise
 
     @property
     def path(self) -> str:
@@ -149,8 +176,11 @@ class LogUtil(QObject):
 
         The file name is the date of today.
         """
+        return self._getLogFilePath(self.log_dir_path)
+
+    def _getLogFilePath(self, log_dir_path: str) -> str:
         date = time.strftime("%Y%m%d", time.localtime(time.time()))
-        return os.path.join(self.log_dir_path, date + ".log")
+        return os.path.join(log_dir_path, date + ".log")
 
     @property
     def cLevel(self) -> LogLevel:
@@ -288,6 +318,38 @@ class LogUtil(QObject):
     def logger(self) -> logging.Logger:
         return self._logger
 
+    def _writeLogDirPath(self, log_dir_path: str):
+        self._config.read(CONFIG_PATH, encoding="utf-8")
+        if not "Log" in self._config:
+            self._config.add_section("Log")
+        self._config["Log"]["path"] = log_dir_path
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            self._config.write(f)
+        self._config_modified = True
+
+    def _createFileHandler(self, log_dir_path: str) -> logging.FileHandler:
+        file_handler = logging.FileHandler(
+            self._getLogFilePath(log_dir_path),
+            "a+",
+            encoding="utf-8",
+        )
+        file_handler.setLevel(self.fLevel)
+        file_handler.setFormatter(self._formatter)
+        return file_handler
+
+    def _replaceFileHandler(self, file_handler: logging.FileHandler):
+        if hasattr(self, "_file_handler"):
+            self._logger.removeHandler(self._file_handler)
+            self._file_handler.close()
+        self._file_handler = file_handler
+        self._logger.addHandler(self._file_handler)
+
+    def _resetFileHandler(self):
+        """
+        Reset the file handler with current log path configuration.
+        """
+        self._replaceFileHandler(self._createFileHandler(self.log_dir_path))
+
     def _initFileHandler(self):
         """
         Initialize the file handler.
@@ -305,22 +367,9 @@ class LogUtil(QObject):
             - traceback (if there is an exception)
         """
         try:
-            self._file_handler = logging.FileHandler(
-                self.path,
-                "a+",
-                encoding="utf-8",
-            )
+            self._resetFileHandler()
         except FileNotFoundError:
             self._useDefaultPath()
-            self._file_handler = logging.FileHandler(
-                self.path,
-                "a+",
-                encoding="utf-8",
-            )
-
-        self._file_handler.setLevel(self.fLevel)
-        self._file_handler.setFormatter(self._formatter)
-        self._logger.addHandler(self._file_handler)
 
     def _initConsoleHandler(self):
         """
@@ -365,9 +414,8 @@ class LogUtil(QObject):
         """
         Use the default log path if no path availabe.
         """
-        default_path = os.path.join(ROOT_PATH, "logs")
-        if not os.path.exists(default_path):
-            os.mkdir(default_path)
+        default_path = getDefaultLogDirPath()
+        os.makedirs(default_path, exist_ok=True)
         self.log_dir_path = default_path
 
     def _useDefaultLevel(self, handler_level_name: str):

@@ -488,6 +488,12 @@ class MainWindow(QMainWindow):
                 self._task_progress_bar.setRange(0, 0)  # Busy indicator
 
     def closeEvent(self, event):
+        """
+        Save window settings and clean resources before closing.
+
+        arguments:
+            event: (QCloseEvent) the close event of the main window.
+        """
         self._saveWindowSettings()
         self._app.cleanResources()
         super(MainWindow, self).closeEvent(event)
@@ -503,6 +509,7 @@ class ControlToolBar(QToolBar):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
+        self.setObjectName("control_tool_bar")
         self._action_group = ControlActionGroup(self)
         self._action_settings = ActionSettings(self)
         self.setMovable(False)

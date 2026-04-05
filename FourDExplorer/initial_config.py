@@ -5,9 +5,8 @@ This script is used to create a default configuration file.
 """
 
 from configparser import ConfigParser
-from Constants import CONFIG_PATH, ROOT_PATH, UITheme, LogLevel
-import os
-from bin.UIManager import ThemeHandler
+from Constants import CONFIG_PATH, LogLevel
+from bin.Log import getDefaultLogDirPath
 
 
 if __name__ == "__main__":
@@ -21,7 +20,7 @@ if __name__ == "__main__":
 
     if not "Log" in config:
         config.add_section("Log")
-    config["Log"]["path"] = os.path.join(ROOT_PATH, "logs")
+    config["Log"]["path"] = getDefaultLogDirPath()
     config["Log"]["cLevel"] = LogLevel.DEBUG.name
     config["Log"]["fLevel"] = LogLevel.DEBUG.name
     config["Log"]["wLevel"] = LogLevel.INFO.name

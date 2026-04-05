@@ -17,11 +17,11 @@ date:           Jun 9, 2022
 import os
 from logging import Logger
 
-from PySide6.QtWidgets import QWidget, QFileDialog
+from PySide6.QtWidgets import QWidget, QFileDialog, QMessageBox
 
 from bin.UIManager import ThemeHandler
-from bin.Log import LogUtil
-from Constants import ROOT_PATH, LogLevel
+from bin.Log import LogUtil, getDefaultLogDirPath
+from Constants import LogLevel
 from ui import uiPageSettings
 
 
@@ -37,6 +37,10 @@ class PageSettings(QWidget):
     """
 
     def __init__(self, parent: QWidget = None):
+        """
+        arguments:
+            parent: (QWidget)
+        """
         super().__init__(parent)
         self.ui = uiPageSettings.Ui_Form()
         self.ui.setupUi(self)
@@ -153,6 +157,28 @@ class PageSettings(QWidget):
         self.log_util.wLevel = LogLevel[wlevel]
         self.log_util.fLevel = LogLevel[flevel]
 
+    def _setLogPath(self, _path: str):
+        """
+        Set the log directory and handle exceptions.
+
+        arguments:
+            _path: (str) the target log directory path.
+        """
+        old_path = self.log_util.log_dir_path
+        try:
+            self.log_util.log_dir_path = _path
+        except (OSError, ValueError, TypeError) as e:
+            self.logger.error("{0}".format(e), exc_info=True)
+            self.ui.lineEdit_log_file_folder.setText(old_path)
+            msg = QMessageBox(parent=self)
+            msg.setWindowTitle("Warning")
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.setText("Cannot use this log directory: {0}".format(e))
+            msg.exec()
+        else:
+            self.ui.lineEdit_log_file_folder.setText(self.log_util.log_dir_path)
+
     def _browseLogPath(self):
         """
         Open a dialog to browse which folder to save log files.
@@ -160,12 +186,11 @@ class PageSettings(QWidget):
         _path = QFileDialog.getExistingDirectory(
             self,
             "Open Directory",
-            "./",
+            self.log_util.log_dir_path,
             QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks,
         )
         if _path:
-            self.ui.lineEdit_log_file_folder.setText(_path)
-            self.log_util.log_dir_path = _path
+            self._setLogPath(_path)
 
     def _clearLogFile(self):
         """
@@ -181,8 +206,7 @@ class PageSettings(QWidget):
 
     def _useDefaultLogPath(self):
         """
-        Use the default log path: ROOT_PATH/logs
+        Use the default log path according to the current platform.
         """
-        _path = os.path.join(ROOT_PATH, "logs")
-        self.ui.lineEdit_log_file_folder.setText(_path)
-        self.log_util.log_dir_path = _path
+        _path = getDefaultLogDirPath()
+        self._setLogPath(_path)
