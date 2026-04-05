@@ -22,6 +22,7 @@ date:           Mar 10, 2022
 
 from logging import Logger
 import os
+import time
 import psutil
 # import sys
 
@@ -49,10 +50,18 @@ class WidgetSystemInfo(QWidget):
         self.ui = uiWidgetSystemInfo.Ui_Form()
         self.ui.setupUi(self)
         self._process = psutil.Process()
+        self._cpu_count = max(psutil.cpu_count() or 1, 1)
         self._interval = 1000  # msec
-        self._setupTimer()
+        self._last_disk_io_timestamp = time.monotonic()
         self._last_app_read_bytes = 0
         self._last_app_write_bytes = 0
+        psutil.cpu_percent(None)
+        self._process.cpu_percent()
+        process_io = self._getProcessIOCounters()
+        if process_io is not None:
+            self._last_app_read_bytes = getattr(process_io, "read_bytes", 0)
+            self._last_app_write_bytes = getattr(process_io, "write_bytes", 0)
+        self._setupTimer()
 
     @property
     def logger(self) -> Logger:
@@ -70,20 +79,30 @@ class WidgetSystemInfo(QWidget):
         self._timer.timeout.connect(self._updateMemory)
         self._timer.timeout.connect(self._updateDiskIO)
 
+    def _clampPercentage(self, percentage: float) -> int:
+        return max(0, min(100, int(round(percentage))))
+
+    def _getProcessIOCounters(self):
+        try:
+            return self._process.io_counters()
+        except (AttributeError, NotImplementedError, psutil.Error):
+            return None
+
     def _updateCPU(self):
         """
         Update CPU information.
         """
-        # _process = psutil.Process()
-
-        cpu_percent = psutil.cpu_percent()
-        self.ui.label_cpu_percent.setText(str(cpu_percent) + "%")
-        cpu_count = psutil.cpu_count()
-        self.ui.label_cpu_count.setText(str(cpu_count))
-        app_cpu_percent = self._process.cpu_percent()
-        self.ui.label_app_cpu_percent.setText(str(app_cpu_percent) + "%")
-        self.ui.progressBar_cpu_percent.setValue(cpu_percent)
-        # self.logger.info('_updateCPU() is called')
+        cpu_percent = psutil.cpu_percent(None)
+        self.ui.label_cpu_percent.setText("{0:.1f}%".format(cpu_percent))
+        self.ui.label_cpu_count.setText(str(self._cpu_count))
+        app_cpu_percent = self._process.cpu_percent() / self._cpu_count
+        app_cpu_percent = max(0.0, min(100.0, app_cpu_percent))
+        self.ui.label_app_cpu_percent.setText(
+            "{0:.1f}%".format(app_cpu_percent)
+        )
+        self.ui.progressBar_cpu_percent.setValue(
+            self._clampPercentage(cpu_percent)
+        )
 
     def _updateMemory(self):
         """
@@ -97,12 +116,14 @@ class WidgetSystemInfo(QWidget):
             "{0:.2f}".format(memory.total / 2**20) + " MiB"
         )
         self.ui.label_memory_available.setText(
-            "{0:.2f}".format(memory.free / 2**20) + " MiB"
+            "{0:.2f}".format(memory.available / 2**20) + " MiB"
         )
-        self.ui.progressBar_memory_percent.setValue(memory.used / memory.total * 100)
+        self.ui.progressBar_memory_percent.setValue(
+            self._clampPercentage(memory.percent)
+        )
         app_memory = self._process.memory_info()
         self.ui.label_app_memory.setText(
-            "{0:.2f}".format(app_memory.rss / 2**20) + "MiB"
+            "{0:.2f}".format(app_memory.rss / 2**20) + " MiB"
         )
 
     def _updateDiskIO(self):
@@ -116,23 +137,38 @@ class WidgetSystemInfo(QWidget):
         self.ui.label_disk_available.setText(
             "{0:.2f}".format(disk_usage.free / 2**30) + " GiB"
         )
-        self.ui.progressBar_disk_percent.setValue(disk_usage.percent)
-        app_disk_io = psutil.disk_io_counters()
-        app_read_rate = (
-            (app_disk_io.read_bytes - self._last_app_read_bytes)
-            / self._interval
-            * 1000
-            / 2**20
+        self.ui.progressBar_disk_percent.setValue(
+            self._clampPercentage(disk_usage.percent)
         )
-        app_write_rate = (
-            (app_disk_io.write_bytes - self._last_app_write_bytes)
-            / self._interval
-            * 1000
-            / 2**20
+
+        current_timestamp = time.monotonic()
+        elapsed_seconds = max(
+            current_timestamp - self._last_disk_io_timestamp,
+            1e-6,
         )
-        self.ui.label_app_disk_read.setText("{0:.2f}".format(app_read_rate) + " MiB/s")
+        process_io = self._getProcessIOCounters()
+        if process_io is None:
+            self.ui.label_app_disk_read.setText("N/A")
+            self.ui.label_app_disk_write.setText("N/A")
+            self._last_disk_io_timestamp = current_timestamp
+            return
+
+        current_read_bytes = getattr(process_io, "read_bytes", 0)
+        current_write_bytes = getattr(process_io, "write_bytes", 0)
+        app_read_rate = max(
+            current_read_bytes - self._last_app_read_bytes,
+            0,
+        ) / elapsed_seconds / 2**20
+        app_write_rate = max(
+            current_write_bytes - self._last_app_write_bytes,
+            0,
+        ) / elapsed_seconds / 2**20
+        self.ui.label_app_disk_read.setText(
+            "{0:.2f}".format(app_read_rate) + " MiB/s"
+        )
         self.ui.label_app_disk_write.setText(
             "{0:.2f}".format(app_write_rate) + " MiB/s"
         )
-        self._last_app_read_bytes = app_disk_io.read_bytes
-        self._last_app_write_bytes = app_disk_io.write_bytes
+        self._last_app_read_bytes = current_read_bytes
+        self._last_app_write_bytes = current_write_bytes
+        self._last_disk_io_timestamp = current_timestamp
